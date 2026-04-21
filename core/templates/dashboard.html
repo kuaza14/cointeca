@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex">
+
+    <!-- Sidebar -->
+    <div class="w-64 h-screen bg-gray-900 text-white p-5">
+        <h2 class="text-2xl font-bold mb-6">Cointeca</h2>
+
+        <ul>
+            <li class="mb-3">
+                <a href="/dashboard/" class="block p-2 rounded hover:bg-gray-700">🏠 Inicio</a>
+            </li>
+            <li class="mb-3">
+                <a href="/caja-menor/" class="block p-2 rounded hover:bg-gray-700">💰 Contabilidad</a>
+            </li>
+            <li class="mb-3">
+                <span class="block p-2 text-gray-400">👥 RRHH</span>
+            </li>
+            <li class="mb-3">
+                <span class="block p-2 text-gray-400">🚚 Logística</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Contenido -->
+    <div class="flex-1 p-10 bg-gray-100 min-h-screen">
+
+        <h1 class="text-3xl font-bold mb-6">Panel principal</h1>
+
+        <div class="grid grid-cols-3 gap-6">
+
+            <div class="bg-white p-6 rounded shadow hover:shadow-lg">
+                <h2 class="text-xl font-bold mb-2">Contabilidad</h2>
+                <p class="text-gray-600">Gestión de caja menor</p>
+
+                <a href="/caja-menor/" 
+                   class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                   Entrar
+                </a>
+            </div>
+
+            <div class="bg-white p-6 rounded shadow opacity-60">
+                <h2 class="text-xl font-bold mb-2">RRHH</h2>
+                <p class="text-gray-600">Próximamente</p>
+            </div>
+
+            <div class="bg-white p-6 rounded shadow opacity-60">
+                <h2 class="text-xl font-bold mb-2">Logística</h2>
+                <p class="text-gray-600">Próximamente</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

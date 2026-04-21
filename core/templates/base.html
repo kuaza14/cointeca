@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cointeca S.A.S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<nav class="bg-gray-900 text-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+
+        <!-- Logo -->
+        <a href="/dashboard/" class="text-xl font-bold tracking-wide hover:text-gray-300 transition">
+            Cointeca S.A.S
+        </a>
+
+        <!-- Botones -->
+        <div class="flex items-center gap-3">
+
+            <a href="/admin/logout/" 
+               class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold">
+               Cerrar sesión
+            </a>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 py-6">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+
+    <h1 class="text-2xl font-bold mb-4">
+        ✏️ Editar gasto
+    </h1>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-semibold">Fecha</label>
+            <input type="date" name="fecha" value="{{ m.fecha|date:'Y-m-d' }}"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold">Número de factura</label>
+            <input type="text" name="numero_factura" value="{{ m.numero_factura }}"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold">NIT</label>
+            <input type="text" name="nit" value="{{ m.nit }}"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold">Pagado a</label>
+            <input type="text" name="pagado_a" value="{{ m.pagado_a }}"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold">Concepto</label>
+            <textarea name="concepto"
+                class="w-full border rounded px-3 py-2">{{ m.concepto }}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold">Valor</label>
+            <input type="text" id="valor" name="valor" required
+                placeholder="Ej: 50,000"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <script>
+        document.getElementById('valor').addEventListener('input', function(e) {
+            let valor = e.target.value.replace(/\D/g, '');
+            e.target.value = new Intl.NumberFormat('es-CO').format(valor);
+        });
+        </script>
+
+        <div class="flex gap-3 mt-4">
+            <button type="submit"
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Guardar cambios
+            </button>
+
+            <a href="/caja-menor/{{ m.caja.id }}/"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

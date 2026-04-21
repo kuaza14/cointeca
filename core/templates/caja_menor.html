@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Caja Menor</h1>
+
+<div class="bg-white shadow rounded-lg overflow-hidden">
+
+    <table class="min-w-full text-sm text-left">
+
+        <!-- Encabezado -->
+        <thead class="bg-gray-800 text-white">
+            <tr>
+                <th class="px-6 py-3">Fecha</th>
+                <th class="px-6 py-3">Valor Inicial</th>
+                <th class="px-6 py-3">Total Gastado</th>
+                <th class="px-6 py-3">Restante</th>
+            </tr>
+        </thead>
+
+        <!-- Datos -->
+        <tbody class="divide-y">
+
+            {% for caja in cajas %}
+            <tr class="hover:bg-gray-100 transition">
+
+                <td class="px-6 py-3 font-medium text-blue-600">
+                    <a href="/caja-menor/{{ caja.id }}/" class="hover:underline">
+                        {{ caja.fecha_tramite }}
+                    </a>
+                </td>
+
+                <td class="px-6 py-3">
+                    ${{ caja.valor_inicial }}
+                </td>
+
+                <td class="px-6 py-3 text-red-500 font-semibold">
+                    ${{ caja.total_gastado }}
+                </td>
+
+                <td class="px-6 py-3 text-green-600 font-semibold">
+                    ${{ caja.valor_restante }}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- Botón volver -->
+<div class="mt-6">
+    <a href="/dashboard/" 
+       class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+       ← Volver
+    </a>
+</div>
+
+{% endblock %}

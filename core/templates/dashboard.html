@@ -21,6 +21,12 @@
             <li class="mb-3">
                 <span class="block p-2 text-gray-400">🚚 Logística</span>
             </li>
+            <a href="/actas/" class="block p-2 rounded hover:bg-gray-700">
+                    📄 Actas de Junta
+            </a>
+            <a href="/indicadores/" class="block p-2 rounded hover:bg-gray-700">
+                📊 Indicadores
+            </a>
         </ul>
     </div>
 
@@ -29,7 +35,17 @@
 
         <h1 class="text-3xl font-bold mb-6">Panel principal</h1>
 
-        <div class="grid grid-cols-3 gap-6">
+        <div class="grid grid-cols-4 gap-6">
+
+            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
+                <h2 class="text-xl font-bold mb-2">Gerencia</h2>
+                <p class="text-gray-600">Actas de junta directiva</p>
+
+                <a href="/actas/" 
+                class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Entrar
+                </a>
+            </div>
 
             <div class="bg-white p-6 rounded shadow hover:shadow-lg">
                 <h2 class="text-xl font-bold mb-2">Contabilidad</h2>
@@ -38,6 +54,15 @@
                 <a href="/caja-menor/" 
                    class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                    Entrar
+                </a>
+            </div>
+
+            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
+                <h2 class="text-xl font-bold mb-2">📊 Indicadores</h2>
+                <p class="text-gray-600">Tablero estratégico de KPIs</p>
+                <a href="/indicadores/" 
+                class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Entrar
                 </a>
             </div>
 

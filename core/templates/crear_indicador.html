@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+
+    <h1 class="text-2xl font-bold mb-6">📊 Crear Indicador Estratégico</h1>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Perspectiva</label>
+            <select name="perspectiva" class="w-full border rounded px-3 py-2">
+                <option value="financiera">Financiera</option>
+                <option value="comercial">Comercial</option>
+                <option value="operativa">Operativa</option>
+                <option value="cliente">Cliente</option>
+                <option value="aprendizaje">Aprendizaje</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Nombre del Indicador (KPI)</label>
+            <input type="text" name="nombre" required
+                placeholder="Ej: Margen por Proyecto"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Definición Técnica</label>
+            <textarea name="definicion" required rows="3"
+                placeholder="Ej: (Utilidad Bruta / Valor Contrato) * 100"
+                class="w-full border rounded px-3 py-2"></textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Meta Anual</label>
+            <input type="text" name="meta_anual" required
+                placeholder="Ej: > 25%"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Frecuencia de Medición</label>
+            <select name="frecuencia" class="w-full border rounded px-3 py-2">
+                <option value="mensual">Mensual</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="semestral">Semestral</option>
+                <option value="anual">Anual</option>
+                <option value="por_proyecto">Por Proyecto</option>
+            </select>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Guardar
+            </button>
+            <a href="/indicadores/"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

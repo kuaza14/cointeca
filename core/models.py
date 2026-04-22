@@ -42,3 +42,72 @@ class MovimientoCajaMenor(models.Model):
 
     def __str__(self):
         return f"{self.numero_factura} - {self.valor}"
+
+class ActaJuntaDirectiva(models.Model):
+
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('aprobada', 'Aprobada'),
+        ('anulada', 'Anulada'),
+    ]
+
+    numero_acta = models.CharField(max_length=20, unique=True)
+    nombre_entidad = models.CharField(max_length=200)
+    nit = models.CharField(max_length=20)
+
+    fecha = models.DateField()
+    hora_inicio = models.TimeField()
+    lugar = models.CharField(max_length=200)
+
+    presidente = models.CharField(max_length=150)
+    secretario = models.CharField(max_length=150)
+
+    orden_del_dia = models.TextField()
+    desarrollo = models.TextField()
+    proposiciones = models.TextField(blank=True, null=True)
+
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Acta {self.numero_acta} - {self.fecha}"
+
+class IndicadorEstrategico(models.Model):
+
+    PERSPECTIVA_CHOICES = [
+        ('financiera', 'Financiera'),
+        ('comercial', 'Comercial'),
+        ('operativa', 'Operativa'),
+        ('cliente', 'Cliente'),
+        ('aprendizaje', 'Aprendizaje'),
+    ]
+
+    FRECUENCIA_CHOICES = [
+        ('mensual', 'Mensual'),
+        ('trimestral', 'Trimestral'),
+        ('semestral', 'Semestral'),
+        ('anual', 'Anual'),
+        ('por_proyecto', 'Por Proyecto'),
+    ]
+
+    perspectiva = models.CharField(max_length=20, choices=PERSPECTIVA_CHOICES)
+    nombre = models.CharField(max_length=200)
+    definicion = models.TextField()
+    meta_anual = models.CharField(max_length=100)
+    frecuencia = models.CharField(max_length=20, choices=FRECUENCIA_CHOICES)
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.perspectiva} - {self.nombre}"
+
+
+class SeguimientoIndicador(models.Model):
+    indicador = models.ForeignKey(IndicadorEstrategico, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    valor_obtenido = models.CharField(max_length=100)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.indicador.nombre} - {self.fecha}"

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">📊 Indicadores Estratégicos</h1>
+    <div class="flex gap-3">
+        <a href="/indicadores/crear/" 
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            + Crear Indicador
+        </a>
+        <a href="/dashboard/" 
+           class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+            Volver
+        </a>
+    </div>
+</div>
+
+{% for perspectiva, label in indicadores.model.PERSPECTIVA_CHOICES %}
+{% with items=indicadores|dictsort:"perspectiva" %}
+
+{% endwith %}
+{% endfor %}
+
+<!-- Financiera -->
+{% regroup indicadores by perspectiva as grupos %}
+{% for grupo in grupos %}
+
+<div class="mb-6">
+    <h2 class="text-lg font-bold uppercase text-white px-4 py-2 rounded mb-2
+        {% if grupo.grouper == 'financiera' %}bg-blue-700
+        {% elif grupo.grouper == 'comercial' %}bg-green-700
+        {% elif grupo.grouper == 'operativa' %}bg-yellow-600
+        {% elif grupo.grouper == 'cliente' %}bg-purple-700
+        {% else %}bg-gray-700{% endif %}">
+        {{ grupo.grouper }}
+    </h2>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                    <th class="px-4 py-3">Indicador (KPI)</th>
+                    <th class="px-4 py-3">Definición</th>
+                    <th class="px-4 py-3">Meta Anual</th>
+                    <th class="px-4 py-3">Frecuencia</th>
+                    <th class="px-4 py-3">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                {% for ind in grupo.list %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-semibold text-blue-600">
+                        <a href="/indicadores/{{ ind.id }}/" class="hover:underline">
+                            {{ ind.nombre }}
+                        </a>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">{{ ind.definicion }}</td>
+                    <td class="px-4 py-3 font-semibold text-green-600">{{ ind.meta_anual }}</td>
+                    <td class="px-4 py-3">{{ ind.get_frecuencia_display }}</td>
+                    <td class="px-4 py-3">
+                        <a href="/indicadores/{{ ind.id }}/eliminar/"
+                           onclick="return confirm('¿Eliminar este indicador?')"
+                           class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+                            🗑
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+
+{% if not indicadores %}
+<div class="bg-white rounded shadow p-8 text-center text-gray-400">
+    No hay indicadores registrados aún. ¡Crea el primero!
+</div>
+{% endif %}
+
+{% endblock %}

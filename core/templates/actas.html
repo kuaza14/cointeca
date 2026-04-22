@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">📄 Actas de Junta</h1>
+
+<a href="/actas/crear/" 
+   class="mb-4 inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+   + Crear Acta
+</a>
+<a href="/dashboard/" class="mt-4 inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+        Volver
+</a>
+
+<table class="min-w-full bg-white shadow rounded">
+    <thead class="bg-gray-800 text-white">
+        <tr>
+            <th class="px-4 py-2">Número</th>
+            <th class="px-4 py-2">Fecha</th>
+            <th class="px-4 py-2">Estado</th>
+            <th class="px-4 py-2 text-center">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in actas %}
+        <tr class="border-b hover:bg-gray-100">
+
+            <td class="px-4 py-2">
+                <a href="/actas/{{ a.id }}/" class="text-blue-600 hover:underline">
+                    {{ a.numero_acta }}
+                </a>
+            </td>
+
+            <td class="px-4 py-2">{{ a.fecha }}</td>
+            <td class="px-4 py-2">{{ a.estado }}</td>
+
+        <!-- ACCIONES -->
+        <td class="px-4 py-2 text-center space-x-2">
+
+            <a href="/actas/{{ a.id }}/editar/" 
+            class="inline-flex items-center justify-center w-8 h-8 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+            ✏️
+            </a>
+
+            <a href="/actas/{{ a.id }}/eliminar/" 
+            class="inline-flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded hover:bg-red-600">
+            🗑️
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">📄 Acta {{ acta.numero_acta }}</h1>
+
+<div class="bg-white p-6 rounded shadow space-y-4">
+
+
+    <p><strong>Entidad:</strong> {{ acta.nombre_entidad }}</p>
+    <p><strong>NIT:</strong> {{ acta.nit }}</p>
+
+    <p><strong>Fecha:</strong> {{ acta.fecha }}</p>
+    <p><strong>Hora:</strong> {{ acta.hora_inicio }}</p>
+    <p><strong>Lugar:</strong> {{ acta.lugar }}</p>
+
+    <p><strong>Presidente:</strong> {{ acta.presidente }}</p>
+    <p><strong>Secretario:</strong> {{ acta.secretario }}</p>
+
+    <hr>
+
+    <p><strong>Orden del día:</strong></p>
+    <p class="text-gray-700">{{ acta.orden_del_dia }}</p>
+
+    <p><strong>Desarrollo:</strong></p>
+    <p class="text-gray-700">{{ acta.desarrollo }}</p>
+
+    <p><strong>Proposiciones:</strong></p>
+    <p class="text-gray-700">{{ acta.proposiciones }}</p>
+
+    <p><strong>Estado:</strong> 
+        <span class="px-2 py-1 rounded bg-yellow-200 text-yellow-800">
+            {{ acta.estado }}
+        </span>
+    </p>
+
+</div>
+
+<a href="/actas/" class="mt-4 inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+    Volver
+</a>
+
+<a href="/actas/{{ acta.id }}/editar/" 
+    class="mb-4 inline-block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+✏️ Editar
+</a>
+<a href="/actas/{{ acta.id }}/eliminar/" 
+   class="ml-2 inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+   🗑️ Eliminar
+</a>
+
+{% endblock %}

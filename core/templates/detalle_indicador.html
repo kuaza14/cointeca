@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">📈 {{ indicador.nombre }}</h1>
+    <div class="flex gap-3">
+        <a href="/indicadores/{{ indicador.id }}/seguimiento/"
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            + Registrar Seguimiento
+        </a>
+        <a href="/indicadores/"
+           class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+            ← Volver
+        </a>
+    </div>
+</div>
+
+<!-- Info del indicador -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded shadow p-4">
+        <p class="text-sm text-gray-500">Perspectiva</p>
+        <p class="font-bold text-lg capitalize">{{ indicador.perspectiva }}</p>
+    </div>
+    <div class="bg-white rounded shadow p-4">
+        <p class="text-sm text-gray-500">Meta Anual</p>
+        <p class="font-bold text-lg text-green-600">{{ indicador.meta_anual }}</p>
+    </div>
+    <div class="bg-white rounded shadow p-4">
+        <p class="text-sm text-gray-500">Frecuencia</p>
+        <p class="font-bold text-lg">{{ indicador.get_frecuencia_display }}</p>
+    </div>
+</div>
+
+<!-- Definicion -->
+<div class="bg-white rounded shadow p-4 mb-6">
+    <p class="text-sm text-gray-500 mb-1">Definición Técnica</p>
+    <p class="text-gray-700">{{ indicador.definicion }}</p>
+</div>
+
+<!-- Tabla de seguimientos -->
+<div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-4 py-3 bg-gray-800 text-white font-semibold">
+        Historial de Seguimiento
+    </div>
+    <table class="min-w-full text-sm text-left">
+        <thead class="bg-gray-100 text-gray-700">
+            <tr>
+                <th class="px-4 py-3">Fecha</th>
+                <th class="px-4 py-3">Valor Obtenido</th>
+                <th class="px-4 py-3">Observaciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            {% for s in seguimientos %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3">{{ s.fecha }}</td>
+                <td class="px-4 py-3 font-semibold text-blue-600">{{ s.valor_obtenido }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ s.observaciones|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="px-4 py-6 text-center text-gray-400">
+                    No hay seguimientos registrados aún.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

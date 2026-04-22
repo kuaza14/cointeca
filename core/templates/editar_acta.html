@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Editar Acta</h1>
+
+<form method="POST" class="bg-white p-6 rounded shadow space-y-4">
+    {% csrf_token %}
+
+    <input type="text" name="numero_acta" value="{{ acta.numero_acta }}" class="w-full border p-2 rounded" required>
+    <input type="text" name="nombre_entidad" value="{{ acta.nombre_entidad }}" class="w-full border p-2 rounded" required>
+    <input type="text" name="nit" value="{{ acta.nit }}" class="w-full border p-2 rounded" required>
+
+    <input type="date" name="fecha" value="{{ acta.fecha|date:'Y-m-d' }}" class="w-full border p-2 rounded">
+    <input type="time" name="hora_inicio" required
+       value="{{ acta.hora_inicio|time:'H:i' }}"
+       class="w-full border p-2 rounded">
+
+    <input type="text" name="lugar" value="{{ acta.lugar }}" class="w-full border p-2 rounded">
+
+    <input type="text" name="presidente" value="{{ acta.presidente }}" class="w-full border p-2 rounded">
+    <input type="text" name="secretario" value="{{ acta.secretario }}" class="w-full border p-2 rounded">
+
+    <textarea name="orden_del_dia" class="w-full border p-2 rounded">{{ acta.orden_del_dia }}</textarea>
+    <textarea name="desarrollo" class="w-full border p-2 rounded">{{ acta.desarrollo }}</textarea>
+    <textarea name="proposiciones" class="w-full border p-2 rounded">{{ acta.proposiciones }}</textarea>
+
+    <select name="estado" class="w-full border p-2 rounded">
+        <option value="borrador" {% if acta.estado == 'borrador' %}selected{% endif %}>Borrador</option>
+        <option value="aprobada" {% if acta.estado == 'aprobada' %}selected{% endif %}>Aprobada</option>
+        <option value="anulada" {% if acta.estado == 'anulada' %}selected{% endif %}>Anulada</option>
+    </select>
+
+    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Guardar cambios
+    </button>
+
+</form>
+
+{% endblock %}

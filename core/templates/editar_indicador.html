@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+
+    <h1 class="text-2xl font-bold mb-6">📊 Editar indicador Estratégico</h1>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Perspectiva</label>
+            <select name="perspectiva" class="w-full border rounded px-3 py-2">
+                <option value="financiera" {% if indicador.perspectiva == 'financiera' %}selected{% endif %}>Financiera</option>
+                <option value="comercial" {% if indicador.perspectiva == 'comercial' %}selected{% endif %}>Comercial</option>
+                <option value="operativa" {% if indicador.perspectiva == 'operativa' %}selected{% endif %}>Operativa</option>
+                <option value="cliente" {% if indicador.perspectiva == 'cliente' %}selected{% endif %}>Cliente</option>
+                <option value="aprendizaje" {% if indicador.perspectiva == 'aprendizaje' %}selected{% endif %}>Aprendizaje</option>
+            </select>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Nombre del indicadoricador (KPI)</label>
+            <input type="text" name="nombre" required
+                value="{{ indicador.nombre }}"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <textarea name="definicion" required rows="3"
+                class="w-full border rounded px-3 py-2">{{ indicador.definicion }}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Meta Anual</label>
+            <input type="text" name="meta_anual" required
+                value="{{ indicador.meta_anual }}"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Frecuencia de Medición</label>
+            <select name="frecuencia" class="w-full border rounded px-3 py-2">
+                <option value="mensual" {% if indicador.frecuencia == 'mensual' %}selected{% endif %}>Mensual</option>
+                <option value="trimestral" {% if indicador.frecuencia == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                <option value="semestral" {% if indicador.frecuencia == 'semestral' %}selected{% endif %}>Semestral</option>
+                <option value="anual" {% if indicador.frecuencia == 'anual' %}selected{% endif %}>Anual</option>
+                <option value="por_proyecto" {% if indicador.frecuencia == 'por_proyecto' %}selected{% endif %}>Por Proyecto</option>
+            </select>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Guardar
+            </button>
+            <a href="/indicadores/"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

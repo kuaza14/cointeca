@@ -59,9 +59,14 @@
                     <td class="px-4 py-3 font-semibold text-green-600">{{ ind.meta_anual }}</td>
                     <td class="px-4 py-3">{{ ind.get_frecuencia_display }}</td>
                     <td class="px-4 py-3">
-                        <a href="/indicadores/{{ ind.id }}/eliminar/"
+
+                        <a href="/indicadores/{{ ind.id }}/editar/" 
+                           class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:scale-110 transition">
+                            ✏️
+                        </a>
+                        <a href="/indicadores/{{ ind.id }}/eliminar/" 
                            onclick="return confirm('¿Eliminar este indicador?')"
-                           class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+                           class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:scale-110 transition">
                             🗑
                         </a>
                     </td>

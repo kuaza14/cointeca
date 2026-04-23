@@ -202,3 +202,39 @@ def eliminar_indicador(request, id):
     indicador = get_object_or_404(IndicadorEstrategico, id=id)
     indicador.delete()
     return redirect('/indicadores/')
+
+@login_required
+def editar_indicador(request, id):
+    indicador = get_object_or_404(IndicadorEstrategico, id=id)
+
+    if request.method == 'POST':
+        indicador.perspectiva = request.POST['perspectiva']
+        indicador.nombre = request.POST['nombre']
+        indicador.definicion = request.POST['definicion']
+        indicador.meta_anual = request.POST['meta_anual']
+        indicador.frecuencia = request.POST['frecuencia']
+        indicador.save()
+        return redirect(f'/indicadores/{id}/')
+
+    return render(request, 'editar_indicador.html', {'indicador': indicador})
+
+@login_required
+def eliminar_seguimiento(request, id):
+    seguimiento = get_object_or_404(SeguimientoIndicador, id=id)
+    indicador_id = seguimiento.indicador.id
+    seguimiento.delete()
+    return redirect(f'/indicadores/{indicador_id}/')
+
+@login_required
+def editar_seguimiento(request, id):    
+    seguimiento = get_object_or_404(SeguimientoIndicador, id=id)
+
+    if request.method == 'POST':
+        seguimiento.fecha = request.POST['fecha']
+        seguimiento.valor_obtenido = request.POST['valor_obtenido']
+        seguimiento.observaciones = request.POST.get('observaciones', '')
+        seguimiento.save()
+        return redirect(f'/indicadores/{seguimiento.indicador.id}/')
+
+    return render(request, 'editar_seguimiento.html', {'seguimiento': seguimiento})
+

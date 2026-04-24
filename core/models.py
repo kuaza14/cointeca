@@ -111,3 +111,119 @@ class SeguimientoIndicador(models.Model):
 
     def __str__(self):
         return f"{self.indicador.nombre} - {self.fecha}"
+
+class ProyectoFacturacion(models.Model):
+    nombre = models.CharField(max_length=200)
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+class SeguimientoFacturacion(models.Model):
+    MES_CHOICES = [
+        ('enero', 'Enero'),
+        ('febrero', 'Febrero'),
+        ('marzo', 'Marzo'),
+        ('abril', 'Abril'),
+        ('mayo', 'Mayo'),
+        ('junio', 'Junio'),
+        ('julio', 'Julio'),
+        ('agosto', 'Agosto'),
+        ('septiembre', 'Septiembre'),
+        ('octubre', 'Octubre'),
+        ('noviembre', 'Noviembre'),
+        ('diciembre', 'Diciembre'),
+    ]
+
+    mes = models.CharField(max_length=20, choices=MES_CHOICES)
+    anio = models.IntegerField(default=2026)
+    meta_facturacion = models.DecimalField(max_digits=15, decimal_places=2)
+    facturacion_real = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    proyecto = models.ForeignKey(ProyectoFacturacion, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('mes', 'anio', 'proyecto')
+
+    @property
+    def porcentaje_cumplimiento(self):
+        if self.meta_facturacion > 0:
+            return round((self.facturacion_real / self.meta_facturacion) * 100, 1)
+        return 0
+
+    def __str__(self):
+        return f"{self.proyecto.nombre} - {self.mes} {self.anio}"
+
+class Empleado(models.Model):
+    # 1. INFORMACION PERSONAL
+    nombre_completo = models.CharField(max_length=200)
+    documento = models.CharField(max_length=20, unique=True)
+    lugar_expedicion = models.CharField(max_length=100, blank=True)
+
+    fecha_nacimiento = models.DateField()
+    nacionalidad = models.CharField(max_length=50, default='Colombiano')
+
+    direccion = models.TextField()
+    telefono = models.CharField(max_length=20)
+    correo = models.EmailField()
+
+    # 2. PERFIL
+    cargo = models.CharField(max_length=100)
+    area = models.CharField(max_length=100)
+    nivel_academico = models.CharField(max_length=100)
+    profesion = models.CharField(max_length=100, blank=True)
+    habilidades = models.TextField(blank=True)
+    idiomas = models.CharField(max_length=100, default='Español')
+
+    # 3. CONTRATO
+    fecha_ingreso = models.DateField()
+
+    TIPO_CONTRATO = [
+        ('fijo', 'Fijo'),
+        ('indefinido', 'Indefinido'),
+        ('obra', 'Obra o labor'),
+    ]
+    tipo_contrato = models.CharField(max_length=20, choices=TIPO_CONTRATO)
+
+    salario = models.DecimalField(max_digits=12, decimal_places=2)
+
+    JORNADA = [
+        ('diurna', 'Diurna'),
+        ('nocturna', 'Nocturna'),
+    ]
+    jornada = models.CharField(max_length=20, choices=JORNADA)
+
+    jefe = models.CharField(max_length=150)
+
+    estado = models.CharField(max_length=20, default='activo')
+
+    def __str__(self):
+        return f"{self.nombre_completo} - {self.documento}"
+
+class SaludEmpleado(models.Model):
+    empleado = models.OneToOneField(Empleado, on_delete=models.CASCADE)
+
+    grupo_sanguineo = models.CharField(max_length=5)
+    eps = models.CharField(max_length=100)
+    pension = models.CharField(max_length=100)
+    cesantias = models.CharField(max_length=100)
+    arl = models.CharField(max_length=100)
+
+    alergias = models.TextField(blank=True)
+
+    contacto_emergencia = models.CharField(max_length=150)
+    telefono_emergencia = models.CharField(max_length=20)
+
+class DotacionEmpleado(models.Model):
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
+
+    elemento = models.CharField(max_length=100)
+    descripcion = models.CharField(max_length=200)
+    fecha_entrega = models.DateField()
+
+
+
+
+
+
+

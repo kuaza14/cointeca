@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">💰 Seguimiento de Facturación</h1>
+    <div class="flex gap-3">
+        <a href="/facturacion/registrar/" 
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            + Registrar
+        </a>
+        <a href="/facturacion/crear-proyecto/" 
+           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            + Proyecto
+        </a>
+        <a href="/dashboard/" 
+           class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+            Volver
+        </a>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="bg-white shadow rounded-lg overflow-hidden">
+    <table class="min-w-full text-sm text-left">
+        <thead class="bg-gray-800 text-white">
+            <tr>
+                <th class="px-4 py-3">Mes</th>
+                <th class="px-4 py-3">Año</th>
+                <th class="px-4 py-3">Proyecto</th>
+                <th class="px-4 py-3">Meta</th>
+                <th class="px-4 py-3">Real</th>
+                <th class="px-4 py-3">% Cumplimiento</th>
+                <th class="px-4 py-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            {% for s in seguimientos %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3 capitalize">{{ s.mes }}</td>
+                <td class="px-4 py-3">{{ s.anio }}</td>
+                <td class="px-4 py-3 font-semibold">{{ s.proyecto.nombre }}</td>
+                <td class="px-4 py-3">${{ s.meta_facturacion|floatformat:0 }}</td>
+                <td class="px-4 py-3">${{ s.facturacion_real|floatformat:0 }}</td>
+                <td class="px-4 py-3">
+                    <span class="font-bold 
+                        {% if s.porcentaje_cumplimiento >= 100 %}text-green-600
+                        {% elif s.porcentaje_cumplimiento >= 70 %}text-yellow-500
+                        {% else %}text-red-500{% endif %}">
+                        {{ s.porcentaje_cumplimiento }}%
+                    </span>
+                </td>
+                <td class="px-4 py-3 flex gap-2">
+                    <a href="/facturacion/{{ s.id }}/editar/"
+                       class="bg-yellow-400 text-white px-3 py-1 rounded text-xs hover:bg-yellow-500">
+                        ✏️
+                    </a>
+                    <a href="/facturacion/{{ s.id }}/eliminar/"
+                       onclick="return confirm('¿Eliminar este registro?')"
+                       class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+                        🗑
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-gray-400">
+                    No hay registros aún. ¡Registra el primero!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

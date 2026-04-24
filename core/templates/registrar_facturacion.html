@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+
+    <h1 class="text-2xl font-bold mb-6">💰 Registrar Facturación</h1>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Proyecto</label>
+            <select name="proyecto" class="w-full border rounded px-3 py-2">
+                {% for p in proyectos %}
+                <option value="{{ p.id }}">{{ p.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Mes</label>
+            <select name="mes" class="w-full border rounded px-3 py-2">
+                <option value="enero">Enero</option>
+                <option value="febrero">Febrero</option>
+                <option value="marzo">Marzo</option>
+                <option value="abril">Abril</option>
+                <option value="mayo">Mayo</option>
+                <option value="junio">Junio</option>
+                <option value="julio">Julio</option>
+                <option value="agosto">Agosto</option>
+                <option value="septiembre">Septiembre</option>
+                <option value="octubre">Octubre</option>
+                <option value="noviembre">Noviembre</option>
+                <option value="diciembre">Diciembre</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Año</label>
+            <input type="number" name="anio" value="2026" required
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Meta de Facturación</label>
+            <input type="text" name="meta_facturacion" required
+                placeholder="Ej: 250000000"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1">Facturación Real</label>
+            <input type="text" name="facturacion_real" required
+                placeholder="Ej: 95000000"
+                class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Guardar
+            </button>
+            <a href="/facturacion/"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

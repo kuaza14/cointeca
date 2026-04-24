@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">📄 Ficha Técnica del Trabajador</h1>
+
+<div class="bg-white shadow rounded p-6 space-y-6">
+
+    <!-- 1. INFORMACION PERSONAL -->
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">1. Información Personal</h2>
+        <div class="grid grid-cols-2 gap-4 mt-3">
+            <p><strong>Nombre:</strong> {{ empleado.nombre_completo }}</p>
+            <p><strong>Documento:</strong> {{ empleado.documento }}</p>
+            <p><strong>Fecha Nacimiento:</strong> {{ empleado.fecha_nacimiento }}</p>
+            <p><strong>Nacionalidad:</strong> {{ empleado.nacionalidad }}</p>
+            <p><strong>Dirección:</strong> {{ empleado.direccion }}</p>
+            <p><strong>Teléfono:</strong> {{ empleado.telefono }}</p>
+            <p><strong>Correo:</strong> {{ empleado.correo }}</p>
+        </div>
+    </div>
+
+    <!-- 2. PERFIL -->
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">2. Perfil Profesional</h2>
+        <div class="grid grid-cols-2 gap-4 mt-3">
+            <p><strong>Cargo:</strong> {{ empleado.cargo }}</p>
+            <p><strong>Área:</strong> {{ empleado.area }}</p>
+            <p><strong>Nivel:</strong> {{ empleado.nivel_academico }}</p>
+            <p><strong>Profesión:</strong> {{ empleado.profesion }}</p>
+            <p><strong>Habilidades:</strong> {{ empleado.habilidades }}</p>
+            <p><strong>Idiomas:</strong> {{ empleado.idiomas }}</p>
+        </div>
+    </div>
+
+    <!-- 3. CONTRATO -->
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">3. Información Contractual</h2>
+        <div class="grid grid-cols-2 gap-4 mt-3">
+            <p><strong>Ingreso:</strong> {{ empleado.fecha_ingreso }}</p>
+            <p><strong>Contrato:</strong> {{ empleado.tipo_contrato }}</p>
+            <p><strong>Salario:</strong> ${{ empleado.salario }}</p>
+            <p><strong>Jornada:</strong> {{ empleado.jornada }}</p>
+            <p><strong>Jefe:</strong> {{ empleado.jefe }}</p>
+        </div>
+    </div>
+
+    <!-- 4. SALUD -->
+    {% if salud %}
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">4. Seguridad y Salud</h2>
+        <div class="grid grid-cols-2 gap-4 mt-3">
+            <p><strong>RH:</strong> {{ salud.grupo_sanguineo }}</p>
+            <p><strong>EPS:</strong> {{ salud.eps }}</p>
+            <p><strong>Pensión:</strong> {{ salud.pension }}</p>
+            <p><strong>ARL:</strong> {{ salud.arl }}</p>
+            <p><strong>Alergias:</strong> {{ salud.alergias }}</p>
+            <p><strong>Contacto:</strong> {{ salud.contacto_emergencia }}</p>
+            <p><strong>Teléfono:</strong> {{ salud.telefono_emergencia }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 5. DOTACION -->
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">5. Dotación</h2>
+
+        <table class="w-full mt-3 border">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="p-2">Elemento</th>
+                    <th class="p-2">Descripción</th>
+                    <th class="p-2">Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in dotaciones %}
+
+                <tr class="border-b">
+                    <td class="p-2">{{ d.elemento }}</td>
+                    <td class="p-2">{{ d.descripcion }}</td>
+                    <td class="p-2">{{ d.fecha_entrega }}</td>
+                                    
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

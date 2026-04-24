@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">👤 Ficha Técnica del Trabajador</h1>
+
+{% if error %}
+<div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+    {{ error }}
+</div>
+{% endif %}
+
+
+<form method="POST" class="bg-white p-6 rounded shadow space-y-6">
+    {% csrf_token %}
+
+    <!-- 1. INFORMACIÓN PERSONAL -->
+    <h2 class="text-xl font-semibold border-b pb-2">1. Información Personal</h2>
+
+    <input name="nombre_completo" placeholder="Nombre completo" class="w-full border p-2 rounded" required>
+    <input name="documento" placeholder="Documento" class="w-full border p-2 rounded" required>
+    <input name="lugar_expedicion" placeholder="Lugar expedición" class="w-full border p-2 rounded">
+
+    <input type="date" name="fecha_nacimiento" class="w-full border p-2 rounded">
+    <input name="nacionalidad" value="Colombiano" class="w-full border p-2 rounded">
+
+    <input name="direccion" placeholder="Dirección" class="w-full border p-2 rounded">
+    <input name="telefono" placeholder="Teléfono" class="w-full border p-2 rounded">
+    <input name="correo" placeholder="Correo" class="w-full border p-2 rounded">
+
+    <!-- 2. PERFIL -->
+    <h2 class="text-xl font-semibold border-b pb-2">2. Perfil Profesional</h2>
+
+    <input name="cargo" placeholder="Cargo" class="w-full border p-2 rounded">
+    <input name="area" placeholder="Área" class="w-full border p-2 rounded">
+    <input name="nivel_academico" placeholder="Nivel académico" class="w-full border p-2 rounded">
+    <input name="profesion" placeholder="Profesión" class="w-full border p-2 rounded">
+
+    <textarea name="habilidades" placeholder="Habilidades" class="w-full border p-2 rounded"></textarea>
+    <input name="idiomas" value="Español" class="w-full border p-2 rounded">
+
+    <!-- 3. CONTRATO -->
+    <h2 class="text-xl font-semibold border-b pb-2">3. Información Contractual</h2>
+
+    <input type="date" name="fecha_ingreso" class="w-full border p-2 rounded">
+
+    <select name="tipo_contrato" class="w-full border p-2 rounded">
+        <option value="fijo">Fijo</option>
+        <option value="indefinido">Indefinido</option>
+        <option value="obra">Obra o labor</option>
+    </select>
+
+    <input name="salario" placeholder="Salario" class="w-full border p-2 rounded">
+
+    <select name="jornada" class="w-full border p-2 rounded">
+        <option value="diurna">Diurna</option>
+        <option value="nocturna">Nocturna</option>
+    </select>
+
+    <input name="jefe" placeholder="Jefe inmediato" class="w-full border p-2 rounded">
+
+    <!-- 4. SALUD -->
+    <h2 class="text-xl font-semibold border-b pb-2">4. Seguridad y Salud</h2>
+
+    <input name="grupo_sanguineo" placeholder="Grupo sanguíneo" class="w-full border p-2 rounded">
+    <input name="eps" placeholder="EPS" class="w-full border p-2 rounded">
+    <input name="pension" placeholder="Pensión" class="w-full border p-2 rounded">
+    <input name="cesantias" placeholder="Cesantías" class="w-full border p-2 rounded">
+    <input name="arl" placeholder="ARL" class="w-full border p-2 rounded">
+
+    <textarea name="alergias" placeholder="Alergias" class="w-full border p-2 rounded"></textarea>
+
+    <input name="contacto_emergencia" placeholder="Contacto emergencia" class="w-full border p-2 rounded">
+    <input name="telefono_emergencia" placeholder="Teléfono emergencia" class="w-full border p-2 rounded">
+
+    <!-- BOTÓN -->
+    <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        Guardar empleado
+    </button>
+    <!--Boton volver-->
+    <a href="/empleados/" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+        Volver
+    </a>
+</form>
+
+{% endblock %}

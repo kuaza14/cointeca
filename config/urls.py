@@ -1,6 +1,38 @@
 from django.contrib import admin
 from django.urls import path
-from core.views import inicio, login_view, dashboard, caja_menor, detalle_caja, agregar_movimiento, eliminar_movimiento, editar_movimiento, actas, crear_acta, detalle_acta, editar_acta, eliminar_acta, indicadores, crear_indicador, detalle_indicador, agregar_seguimiento, eliminar_indicador, editar_indicador, editar_seguimiento, eliminar_seguimiento   
+from core.views import (
+    inicio, 
+    login_view, 
+    dashboard, 
+    caja_menor, 
+    detalle_caja, 
+    agregar_movimiento, 
+    eliminar_movimiento, 
+    editar_movimiento, 
+    actas, 
+    crear_acta, 
+    detalle_acta, 
+    editar_acta, 
+    eliminar_acta, 
+    indicadores, 
+    crear_indicador, 
+    detalle_indicador, 
+    agregar_seguimiento, 
+    eliminar_indicador, 
+    editar_indicador, 
+    editar_seguimiento, 
+    eliminar_seguimiento, 
+    facturacion, 
+    crear_proyecto, 
+    registrar_facturacion, 
+    eliminar_facturacion, 
+    editar_facturacion, 
+    empleados, 
+    rrhh,
+    agregar_dotacion,
+    crear_empleado
+) 
+from core.views import detalle_empleado
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -27,4 +59,14 @@ urlpatterns = [
     path('seguimiento/<int:id>/editar/', editar_seguimiento, name='editar_seguimiento'),
     path('seguimiento/<int:id>/eliminar/', eliminar_seguimiento, name='eliminar_seguimiento'),
     path('indicadores/<int:id>/seguimiento/', agregar_seguimiento, name='agregar_seguimiento'),
+    path('facturacion/', facturacion, name='facturacion'),
+    path('facturacion/crear-proyecto/', crear_proyecto, name='crear_proyecto'),
+    path('facturacion/registrar/', registrar_facturacion, name='registrar_facturacion'),
+    path('facturacion/<int:id>/eliminar/', eliminar_facturacion, name='eliminar_facturacion'),
+    path('facturacion/<int:id>/editar/', editar_facturacion, name='editar_facturacion'),
+    path('rrhh/', rrhh, name='rrhh'),
+    path('rrhh/empleados/', empleados, name='empleados'),
+    path('rrhh/empleados/<int:id>/', detalle_empleado, name='detalle_empleado'),
+    path('rrhh/empleados/<int:id>/dotacion/', agregar_dotacion, name='agregar_dotacion'),
+    path('rrhh/empleados/crear/', crear_empleado, name='crear_empleado'),
 ]

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Agregar Dotación</h1>
+
+<form method="POST" class="bg-white p-6 rounded shadow space-y-4">
+    {% csrf_token %}
+
+    <div>
+        <label>Elemento</label>
+        <input type="text" name="elemento" class="w-full border p-2 rounded" required>
+    </div>
+
+    <div>
+        <label>Descripción / Serial</label>
+        <input type="text" name="descripcion" class="w-full border p-2 rounded" required>
+    </div>
+
+    <div>
+        <label>Fecha de entrega</label>
+        <input type="date" name="fecha" class="w-full border p-2 rounded" required>
+    </div>
+
+    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Guardar
+    </button>
+
+</form>
+
+{% endblock %}

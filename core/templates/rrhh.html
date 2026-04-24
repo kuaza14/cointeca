@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">👥 RRHH</h1>
+
+<div class="grid grid-cols-3 gap-6">
+
+    <!-- Empleados -->
+    <div class="bg-white p-6 rounded shadow hover:shadow-lg">
+        <h2 class="text-xl font-bold">Empleados</h2>
+        <p class="text-gray-600">Gestión del personal</p>
+
+        <a href="/rrhh/empleados/" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">
+            Entrar
+        </a>
+    </div>
+
+    <!-- Nómina -->
+    <div class="bg-white p-6 rounded shadow opacity-60">
+        <h2 class="text-xl font-bold">Nómina</h2>
+        <p class="text-gray-600">Próximamente</p>
+    </div>
+
+    <!-- Vacaciones -->
+    <div class="bg-white p-6 rounded shadow opacity-60">
+        <h2 class="text-xl font-bold">Vacaciones</h2>
+        <p class="text-gray-600">Próximamente</p>
+    </div>
+
+    <!-- Documentos -->
+    <div class="bg-white p-6 rounded shadow opacity-60">
+        <h2 class="text-xl font-bold">Documentos</h2>
+        <p class="text-gray-600">Formatos y archivos</p>
+    </div>
+
+</div>
+
+{% endblock %}

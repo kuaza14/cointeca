@@ -7,23 +7,67 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">👥 Empleados</h1>
 
+        <div class="grid grid-cols-3 gap-4 mb-6">
+
+        <div class="bg-blue-500 text-white p-4 rounded shadow">
+            <p>Total empleados</p>
+            <p class="text-2xl font-bold">{{ total }}</p>
+        </div>
+
+        <div class="bg-green-500 text-white p-4 rounded shadow">
+            <p>Promedio salario</p>
+                ${{ promedio_salario|default:0|floatformat:0 }}
+            </p>
+        </div>
+
+        <div class="bg-purple-500 text-white p-4 rounded shadow">
+            <p>Cargos</p>
+            {% for c in por_cargo %}
+                <p>{{ c.cargo }} ({{ c.total }})</p>
+            {% endfor %}
+        </div>
+
+    </div>
+
         <a href="/rrhh/empleados/crear/" 
            class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition">
            + Agregar Empleado
         </a>
-    </div>
+        <a href="/rrhh/" 
+        class="inline-block mb-6 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+        ← Volver 
+        </a>
+    </div>    
+
+    <form method="GET" class="mb-6 flex gap-2">
+
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="Buscar por cédula..." 
+            value="{{ query|default:'' }}"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+        <button 
+            type="submit"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+            Buscar
+        </button>
+    </form>
 
     <div class="bg-white shadow-lg rounded-xl overflow-hidden bg-gray-100 text-gray-600">
-
         <table class="min-w-full text-sm text-gray-700">
+            <tbody id="tabla-empleados" class="divide-y divide-gray-200"></tbody>
 
             <!-- HEADER -->
             <thead class="bg-blue-600 text-white uppercase text-xs tracking-wider">
-                <tr>
+                <tr >
                     <th class="px-6 py-3 text-left">Nombre</th>
                     <th class="px-6 py-3 text-left">Documento</th>
                     <th class="px-6 py-3 text-left">Cargo</th>
                     <th class="px-6 py-3 text-left">Salario</th>
+                    <th class="px-4 py-3 text-center">Acciones</th>
                 </tr>
             </thead>
 
@@ -43,6 +87,21 @@
                     <td class="px-6 py-4 font-semibold text-green-600">
                         ${{ e.salario }}
                     </td>
+                    <td class="px-4 py-2 flex gap-2 justify-center">
+                    <!-- VER -->
+                    <a href="/rrhh/empleados/{{ e.id }}/"
+                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs">
+                    Ver
+                    </a>
+
+                    <!-- ELIMINAR -->
+                    <form action="/rrhh/empleados/{{ e.id }}/eliminar/" method="POST"
+                        onsubmit="return confirm('¿Seguro que quieres eliminar este empleado?')">
+                        {% csrf_token %}
+                        <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs">
+                            Eliminar
+                        </button>
+                    </form>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -52,5 +111,24 @@
     </div>
 
 </div>
+
+<script>
+const buscador = document.getElementById('buscador');
+const filas = document.querySelectorAll('#tabla-empleados tr');
+
+buscador.addEventListener('keyup', function() {
+    const valor = this.value.toLowerCase();
+
+    filas.forEach(fila => {
+        const documento = fila.children[1].textContent.toLowerCase();
+
+        if (documento.includes(valor)) {
+            fila.style.display = '';
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+});
+</script>
 
 {% endblock %}

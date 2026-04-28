@@ -4,32 +4,161 @@
 
 <h1 class="text-3xl font-bold mb-6">📄 Ficha Técnica del Trabajador</h1>
 
+<div class="mb-4 flex gap-2">
+    <a href="?edit=1" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+        ✏️ Editar
+    </a>
+
+    <a href="/rrhh/empleados/" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+        ← Volver
+    </a>
+
+    <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        📄 Certificación Laboral
+    </a>
+
+</div>
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error }}
+    </div>
+    {% endif %}
+
 <div class="bg-white shadow rounded p-6 space-y-6">
+    {% if editando %}
+    <form method="POST">
+    {% csrf_token %}
+    {% endif %}
+        {% csrf_token %}
 
     <!-- 1. INFORMACION PERSONAL -->
     <div>
         <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">1. Información Personal</h2>
-        <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>Nombre:</strong> {{ empleado.nombre_completo }}</p>
-            <p><strong>Documento:</strong> {{ empleado.documento }}</p>
-            <p><strong>Fecha Nacimiento:</strong> {{ empleado.fecha_nacimiento }}</p>
-            <p><strong>Nacionalidad:</strong> {{ empleado.nacionalidad }}</p>
-            <p><strong>Dirección:</strong> {{ empleado.direccion }}</p>
-            <p><strong>Teléfono:</strong> {{ empleado.telefono }}</p>
-            <p><strong>Correo:</strong> {{ empleado.correo }}</p>
-        </div>
+            <div class="grid grid-cols-2 gap-4 mt-3">
+
+                <p>
+                <strong>Nombre:</strong>
+                {% if editando %}
+                <input type="text" name="nombre_completo" value="{{ empleado.nombre_completo }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.nombre_completo }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Documento:</strong>
+                {% if editando %}
+                <input type="text" name="documento" value="{{ empleado.documento }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.documento }}
+                {% endif %}
+                </p>
+
+                <!-- la cedula de que ciudad ? -->
+                <p>
+                <strong>Ciudad de Expedición:</strong>
+                {% if editando %}
+                <input type="text" name="ciudad_expedicion" value="{{ empleado.ciudad_expedicion }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.ciudad_expedicion }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Fecha Nacimiento:</strong>
+                {% if editando %}
+                <input type="date" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.fecha_nacimiento }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Nacionalidad:</strong>
+                {% if editando %}
+                <input type="text" name="nacionalidad" value="{{ empleado.nacionalidad }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.nacionalidad }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Dirección:</strong>
+                {% if editando %}
+                <input type="text" name="direccion" value="{{ empleado.direccion }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.direccion }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Teléfono:</strong>
+                {% if editando %}
+                <input type="text" name="telefono" value="{{ empleado.telefono }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.telefono }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Correo:</strong>
+                {% if editando %}
+                <input type="email" name="correo" value="{{ empleado.correo }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.correo }}
+                {% endif %}
+                </p>
+
+            </div>
     </div>
 
     <!-- 2. PERFIL -->
     <div>
         <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">2. Perfil Profesional</h2>
         <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>Cargo:</strong> {{ empleado.cargo }}</p>
-            <p><strong>Área:</strong> {{ empleado.area }}</p>
-            <p><strong>Nivel:</strong> {{ empleado.nivel_academico }}</p>
-            <p><strong>Profesión:</strong> {{ empleado.profesion }}</p>
-            <p><strong>Habilidades:</strong> {{ empleado.habilidades }}</p>
-            <p><strong>Idiomas:</strong> {{ empleado.idiomas }}</p>
+            <p><strong>Cargo:</strong>
+                {% if editando %}
+                <input type="text" name="cargo" value="{{ empleado.cargo }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.cargo }}
+                {% endif %}
+            </p>
+            <p><strong>Área:</strong>
+                {% if editando %}
+                <input type="text" name="area" value="{{ empleado.area }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.area }}
+                {% endif %}
+            </p>
+            <p><strong>Nivel:</strong>
+                {% if editando %}
+                <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.nivel_academico }}
+                {% endif %}
+            </p>
+            <p><strong>Profesión:</strong>
+                {% if editando %}
+                <input type="text" name="profesion" value="{{ empleado.profesion }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.profesion }}
+                {% endif %}
+            </p>
+            <p><strong>Habilidades:</strong>
+                {% if editando %}
+                <input type="text" name="habilidades" value="{{ empleado.habilidades }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.habilidades }}
+                {% endif %}
+            </p>
+            <p><strong>Idiomas:</strong>
+                {% if editando %}
+                <input type="text" name="idiomas" value="{{ empleado.idiomas }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.idiomas }}
+                {% endif %}
+            </p>
         </div>
     </div>
 
@@ -37,11 +166,41 @@
     <div>
         <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">3. Información Contractual</h2>
         <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>Ingreso:</strong> {{ empleado.fecha_ingreso }}</p>
-            <p><strong>Contrato:</strong> {{ empleado.tipo_contrato }}</p>
-            <p><strong>Salario:</strong> ${{ empleado.salario }}</p>
-            <p><strong>Jornada:</strong> {{ empleado.jornada }}</p>
-            <p><strong>Jefe:</strong> {{ empleado.jefe }}</p>
+            <p><strong>Ingreso:</strong>
+                {% if editando %}
+                <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.fecha_ingreso }}
+                {% endif %}
+            </p>
+            <p><strong>Contrato:</strong> 
+                {% if editando %}
+                <input type="text" name="tipo_contrato" value="{{ empleado.tipo_contrato }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.tipo_contrato }}
+                {% endif %}
+            </p>
+            <p><strong>Salario:</strong> 
+                {% if editando %}
+                <input type="number" name="salario" value="{{ empleado.salario }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.salario }}
+                {% endif %}
+            </p>
+            <p><strong>Jornada:</strong> 
+                {% if editando %}
+                <input type="text" name="jornada" value="{{ empleado.jornada }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.jornada }}
+                {% endif %}
+            </p>
+            <p><strong>Jefe:</strong> 
+                {% if editando %}
+                <input type="text" name="jefe" value="{{ empleado.jefe }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.jefe }}
+                {% endif %}
+            </p>
         </div>
     </div>
 
@@ -85,6 +244,12 @@
             </tbody>
         </table>
     </div>
+    {% if editando %}
+    <button class="bg-blue-600 text-white px-4 py-2 rounded mt-4">
+        💾 Guardar cambios
+    </button>
+    </form>
+    {% endif %}
 
 </div>
 

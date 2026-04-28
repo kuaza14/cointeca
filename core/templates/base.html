@@ -7,7 +7,7 @@
 
 <body class="bg-gray-100">
 
-<nav class="bg-gray-900 text-white shadow">
+<nav class="bg-blue-600 text-white shadow">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
         <!-- Logo -->
@@ -29,6 +29,23 @@
 </nav>
 
 <div class="max-w-7xl mx-auto px-4 py-6">
+
+    <!-- MENSAJES -->
+    {% if messages %}
+        <div class="mb-4 space-y-2">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded shadow text-white
+                    {% if message.tags == 'success' %} bg-green-500
+                    {% elif message.tags == 'error' %} bg-red-500
+                    {% elif message.tags == 'warning' %} bg-yellow-500
+                    {% else %} bg-blue-500 {% endif %}">
+                    
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 </div>

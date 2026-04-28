@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+
 
 
 class CajaMenor(models.Model):
@@ -158,7 +158,7 @@ class Empleado(models.Model):
     # 1. INFORMACION PERSONAL
     nombre_completo = models.CharField(max_length=200)
     documento = models.CharField(max_length=20, unique=True)
-    lugar_expedicion = models.CharField(max_length=100, blank=True)
+    ciudad_expedicion = models.CharField(max_length=100, blank=True)
 
     fecha_nacimiento = models.DateField()
     nacionalidad = models.CharField(max_length=50, default='Colombiano')

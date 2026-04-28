@@ -30,7 +30,9 @@ from core.views import (
     empleados, 
     rrhh,
     agregar_dotacion,
-    crear_empleado
+    crear_empleado,
+    eliminar_empleado,
+    certificacion_laboral,
 ) 
 from core.views import detalle_empleado
 from django.contrib.auth.decorators import login_required
@@ -69,4 +71,11 @@ urlpatterns = [
     path('rrhh/empleados/<int:id>/', detalle_empleado, name='detalle_empleado'),
     path('rrhh/empleados/<int:id>/dotacion/', agregar_dotacion, name='agregar_dotacion'),
     path('rrhh/empleados/crear/', crear_empleado, name='crear_empleado'),
+    path('rrhh/empleados/<int:id>/eliminar/', eliminar_empleado, name='eliminar_empleado'),
+    path(
+    'rrhh/empleados/<int:id>/certificacion/',
+    certificacion_laboral,
+    name='certificacion_laboral'
+    ),
+
 ]

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.db.models import Avg, Count, Sum
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from .models import (
@@ -15,6 +16,25 @@ from .models import (
 )
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django.contrib import messages
+from django.http import HttpResponse
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.utils import ImageReader
+from io import BytesIO
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Image,
+    Table,
+    TableStyle,
+)
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.lib import colors
+from reportlab.platypus.flowables import HRFlowable
 
 
 # Vista de inicio 
@@ -308,8 +328,25 @@ def editar_facturacion(request, id):
 
 @login_required
 def empleados(request):
-    lista = Empleado.objects.all()
-    return render(request, 'empleados.html', {'empleados': lista})
+    query = request.GET.get('q')
+
+    if query:
+        lista = Empleado.objects.filter(documento__icontains=query)
+    else:
+        lista = Empleado.objects.all()
+
+    # 📊 ESTADÍSTICAS
+    total = lista.count()
+    promedio_salario = lista.aggregate(Avg('salario'))['salario__avg']
+    por_cargo = lista.values('cargo').annotate(total=Count('id'))
+
+    return render(request, 'empleados.html', {
+        'empleados': lista,
+        'query': query,
+        'total': total,
+        'promedio_salario': promedio_salario,
+        'por_cargo': por_cargo
+    })
 
 @login_required
 def rrhh(request):
@@ -327,10 +364,58 @@ def detalle_empleado(request, id):
 
     dotaciones = DotacionEmpleado.objects.filter(empleado=empleado)
 
+    editando = request.GET.get('edit')
+
+    if request.method == 'POST':
+        documento = request.POST['documento']
+
+        # VALIDAR DUPLICADO
+        existe = Empleado.objects.filter(documento=documento).exclude(id=id).exists()
+
+        if existe:
+            return render(request, 'detalle_empleado.html', {
+                'empleado': empleado,
+                'salud': salud,
+                'dotaciones': dotaciones,
+                'editando': True,
+                'error': '⚠️ Esta cédula ya está registrada'
+            })
+
+        # ACTUALIZAR DATOS
+        empleado.nombre_completo = request.POST['nombre_completo']
+        empleado.documento = documento
+        empleado.ciudad_expedicion = request.POST['ciudad_expedicion']
+        empleado.fecha_nacimiento = request.POST['fecha_nacimiento']
+        empleado.nacionalidad = request.POST['nacionalidad']
+        empleado.direccion = request.POST['direccion']
+        empleado.telefono = request.POST['telefono']
+        empleado.correo = request.POST['correo']
+
+        empleado.cargo = request.POST['cargo']
+        empleado.area = request.POST['area']
+        empleado.nivel_academico = request.POST['nivel_academico']
+        empleado.profesion = request.POST['profesion']
+        empleado.habilidades = request.POST['habilidades']
+        empleado.idiomas = request.POST['idiomas']
+
+        empleado.fecha_ingreso = request.POST['fecha_ingreso']
+        empleado.tipo_contrato = request.POST['tipo_contrato']
+        empleado.salario = request.POST['salario']
+        empleado.jornada = request.POST['jornada']
+        empleado.jefe = request.POST['jefe']
+
+        empleado.save()
+
+        messages.success(request, '✅ Empleado actualizado correctamente')
+
+        return redirect(f'/rrhh/empleados/{id}/')
+
+    # ✅ ESTE TE FALTABA (GET)
     return render(request, 'detalle_empleado.html', {
         'empleado': empleado,
         'salud': salud,
-        'dotaciones': dotaciones
+        'dotaciones': dotaciones,
+        'editando': editando
     })
 
 @login_required
@@ -360,7 +445,7 @@ def crear_empleado(request):
             empleado = Empleado.objects.create(
                 nombre_completo=request.POST['nombre_completo'],
                 documento=request.POST['documento'],
-                lugar_expedicion=request.POST.get('lugar_expedicion', ''),
+                ciudad_expedicion=request.POST.get('ciudad_expedicion', ''),
                 fecha_nacimiento=request.POST['fecha_nacimiento'],
                 nacionalidad=request.POST['nacionalidad'],
                 direccion=request.POST['direccion'],
@@ -399,3 +484,271 @@ def crear_empleado(request):
             })
 
     return render(request, 'crear_empleado.html')
+
+@login_required
+def eliminar_empleado(request, id):
+    empleado = get_object_or_404(Empleado, id=id)
+
+    if request.method == 'POST':
+        empleado.delete()
+        return redirect('/rrhh/empleados/')
+
+    return redirect('/rrhh/empleados/')
+
+@login_required
+def certificacion_laboral(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+
+    contenido = f"""
+    CERTIFICACIÓN LABORAL
+
+    COINTECA S.A.S certifica que:
+
+    {empleado.nombre_completo}
+
+    identificado con documento No. {empleado.documento}
+
+    trabaja con nosotros en el cargo de:
+
+    {empleado.cargo}
+
+    desde la fecha:
+
+    {empleado.fecha_ingreso}
+
+    con salario de:
+
+    ${empleado.salario}
+    """
+
+    return HttpResponse(contenido, content_type='text/plain')
+
+@login_required
+def certificacion_laboral(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=40,
+        bottomMargin=40
+    )
+
+    styles = getSampleStyleSheet()
+
+    titulo_style = ParagraphStyle(
+        'Titulo',
+        parent=styles['Heading1'],
+        alignment=TA_CENTER,
+        fontSize=18,
+        textColor=colors.HexColor("#003366"),
+        spaceAfter=30
+    )
+
+    texto_style = ParagraphStyle(
+        'Texto',
+        parent=styles['BodyText'],
+        alignment=TA_JUSTIFY,
+        fontSize=12,
+        leading=16
+    )
+
+    firma_style = ParagraphStyle(
+        'Firma',
+        parent=styles['BodyText'],
+        fontSize=12,
+        leading=20
+    )
+
+    elementos = []
+
+    # LOGO
+    logo = Image('static/img/logo-cointeca.png', width=100, height=60)
+
+    encabezado_data = [
+        [
+            logo,
+            "Tipo de documento: Formato",
+            "Código: RRHH-FR-10"
+        ],
+        [
+            "",
+            "CERTIFICACIÓN LABORAL",
+            "Versión: 2"
+        ],
+        [
+            "",
+            "",
+            "Fecha: 02/03/2026"
+        ],
+        [
+            "",
+            "",
+            "Página 1 de 1"
+        ]
+    ]
+
+    tabla = Table(
+    encabezado_data,
+    colWidths=[110, 250, 130],
+    rowHeights=[16, 22, 16, 16]
+    )
+
+    tabla.setStyle(TableStyle([
+
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+
+        # LOGO
+        ('SPAN', (0,0), (0,3)),
+        ('SPAN', (0,0), (0,3)),
+        ('SPAN', (1,1), (1,3)),
+        ('VALIGN', (1,1), (1,3), 'MIDDLE'),
+        ('ALIGN', (1,1), (1,3), 'CENTER'),
+
+        ('ALIGN', (1,0), (1,0), 'LEFT'),
+
+        # TEXTO CENTRO 
+        ('ALIGN', (1,0), (1,0), 'CENTER'),
+        ('ALIGN', (1,1), (1,1), 'CENTER'),
+
+        # DERECHA 
+        ('VALIGN', (2,0), (2,3), 'MIDDLE'),
+
+        # FUENTES 
+        ('FONTNAME', (1,0), (1,0), 'Helvetica-Bold'),
+        ('FONTNAME', (1,1), (1,1), 'Helvetica-Bold'),
+
+        ('FONTSIZE', (1,0), (1,0), 8),
+        ('FONTSIZE', (1,1), (1,1), 12),
+
+        ('FONTSIZE', (2,0), (2,3), 8),
+
+        # PADDING PEQUEÑO
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+
+    ]))
+
+    elementos.append(tabla)
+
+    elementos.append(Spacer(1, 25))
+    elementos.append(HRFlowable(
+        width="100%",
+        thickness=1,
+        color=colors.black
+    ))
+
+    elementos.append(Spacer(1, 10))
+
+    texto = f"""
+    La suscrita <b>Mayra Alejandra Ocoró Possú</b>,
+    identificada con cédula de ciudadanía No.
+    <b>1.060.416.458</b> de Padilla Cauca,
+    actuando en calidad de representante legal de
+    <b>COMERCIALIZADORA DE INGENIERÍA &amp; TECNOLOGÍAS APLICADAS S.A.S COINTECA S.A.S</b>
+    con NIT <b>900.768.648-3</b>.
+    <br/><br/>"""
+    
+    elementos.append(Paragraph(texto, texto_style))
+
+    certifica_style = ParagraphStyle(
+        'Certifica',
+        parent=styles['BodyText'],
+        alignment=TA_CENTER,
+        fontSize=14,
+        leading=18,
+        spaceBefore=15,
+        spaceAfter=20
+    )
+
+    elementos.append(
+        Paragraph("<b>CERTIFICA QUE</b>", certifica_style)
+    )
+    texto_empleado = f"""
+    El señor(a) <b>{empleado.nombre_completo}</b>,
+    identificado(a) con cédula de ciudadanía No.
+    <b>{empleado.documento}</b>, de
+    <b>{empleado.ciudad_expedicion}</b>,
+    se encuentra vinculado laboralmente con nuestra empresa
+    cumpliendo conforme a lo siguiente:
+    """
+
+    elementos.append(Paragraph(texto_empleado, texto_style))
+
+    elementos.append(Spacer(1, 10))
+
+    info = f"""
+    • <b>Cargo:</b> {empleado.cargo}<br/>
+    • <b>Tipo de contrato:</b> {empleado.tipo_contrato}<br/>
+    • <b>Fecha de ingreso:</b> {empleado.fecha_ingreso}<br/>
+    • <b>Salario:</b> ${empleado.salario} M/cte.<br/>
+    """
+
+    elementos.append(Paragraph(info, texto_style))
+
+    elementos.append(Spacer(1, 30))
+
+    texto_final = """
+    <br/>
+    Para constancia de lo anterior se firma la presente certificación laboral.
+    """
+
+
+    elementos.append(Paragraph(texto_final, texto_style))
+
+    elementos.append(Spacer(1, 80))
+
+    elementos.append(
+        HRFlowable(
+            width="40%", 
+            hAlign = 'LEFT' 
+        )
+    )
+
+    firma = """
+    <b>Mayra Alejandra Ocoró Possú</b><br/>
+    Representante Legal<br/>
+    COINTECA S.A.S
+    """
+
+    elementos.append(Paragraph(firma, firma_style))
+    footer = Paragraph(
+        """
+        <font color="white">
+        cointecasas@hotmail.com &nbsp;&nbsp; - &nbsp;&nbsp;
+        Tel. 3117121043 &nbsp;&nbsp; - &nbsp;&nbsp;
+        www.cointecasas.com
+        </font>
+        """,
+        ParagraphStyle(
+            'footer',
+            alignment=1,
+            backColor=colors.HexColor("#1D4ED8"),
+            textColor=colors.white,
+            fontSize=10,
+            leading=15,
+            spaceBefore=30,
+            spaceAfter=0,
+            padding=10
+        )
+    )
+
+    elementos.append(Spacer(1, 25))
+    elementos.append(footer)
+
+    # CREAR PDF
+    doc.build(elementos)
+
+    buffer.seek(0)
+
+    return FileResponse(
+        buffer,
+        as_attachment=True,
+        filename='certificacion_laboral.pdf'
+    )

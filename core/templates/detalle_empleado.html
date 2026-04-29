@@ -221,29 +221,225 @@
     {% endif %}
 
     <!-- 5. DOTACION -->
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">5. Dotación</h2>
+<!-- 5. DOTACION -->
+<div>
+    <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
+        5. Dotación
+    </h2>
 
-        <table class="w-full mt-3 border">
-            <thead class="bg-gray-800 text-white">
-                <tr>
-                    <th class="p-2">Elemento</th>
-                    <th class="p-2">Descripción</th>
-                    <th class="p-2">Fecha</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for d in dotaciones %}
+    <a
+        href="/rrhh/empleados/{{ empleado.id }}/dotacion/"
+        class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 mt-3 inline-block"
+    >
+        + Agregar dotación
+    </a>
+
+    <table class="w-full mt-3 border">
+        <thead class="bg-gray-800 text-white">
+            <tr>
+                <th class="p-2">Camiseta</th>
+                <th class="p-2">Pantalon</th>
+                <th class="p-2">Botas</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for d in dotaciones %}
+            <tr class="border-b">
+                <td class="p-2">{{ d.elemento }}</td>
+                <td class="p-2">{{ d.descripcion }}</td>
+                <td class="p-2">{{ d.fecha_entrega }}</td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center p-4 text-gray-500">
+                    No hay dotación registrada
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- 6. EQUIPOS -->
+<div>
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
+            6. Equipos Tecnológicos            
+        </h2>
+
+    </div>
+        <a
+            href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/"
+            class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 mt-3 inline-block">
+            + Asignar equipo
+        </a>
+        <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-3 inline-block">
+            📄 Acta Equipos
+        </a>
+    
+
+    {% with request.GET.edit_equipo as edit_equipo %}
+
+    <table class="w-full border mt-3 rounded overflow-hidden shadow">
+        <thead class="bg-gray-800 text-white mt-3">
+            <tr>
+                <th class="p-2 text-center">Equipo</th>
+                <th class="p-2 text-center">Referencia</th>
+                <th class="p-2 text-center">Serial</th>
+                <th class="p-2 w-32 text-center">Fecha entrega</th>
+                <th class="p-2 text-center">Observaciones</th>
+                <th class="p-2 w-52 text-center">Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for e in equipos %}
+                {% if edit_equipo == e.id|stringformat:"s" %}
+                <form method="POST" action="/rrhh/equipos/{{ e.id }}/editar/">
+                    {% csrf_token %}
+
+                    <tr class="border-b">
+
+                        <td class="p-2">
+                            <input
+                                type="text"
+                                name="equipo"
+                                value="{{ e.equipo }}"
+                                class="border p-1 rounded w-full"
+                            >
+                        </td>
+
+                        <td class="p-2">
+                            <input
+                                type="text"
+                                name="referencia"
+                                value="{{ e.referencia }}"
+                                class="border p-1 rounded w-full"
+                            >
+                        </td>
+
+                        <td class="p-2">
+                            <input
+                                type="text"
+                                name="serial"
+                                value="{{ e.serial }}"
+                                class="border p-1 rounded w-full"
+                            >
+                        </td>
+
+                        <td class="p-2">
+                            <input
+                                type="date"
+                                name="fecha_entrega"
+                                value="{{ e.fecha_entrega|date:'Y-m-d' }}"
+                                class="border p-1 rounded w-full"
+                            >
+                        </td>
+
+                        <td class="p-2">
+                            <input
+                                type="text"
+                                name="observaciones"
+                                value="{{ e.observaciones }}"
+                                class="border p-1 rounded w-full"
+                            >
+                        </td>
+
+                        <td class="p-2">
+                            <div class="flex gap-2">
+
+                                <button
+                                    type="submit"
+                                    class="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                >
+                                    Guardar
+                                </button>
+
+                                <a
+                                    href="/rrhh/empleados/{{ empleado.id }}/"
+                                    class="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                                >
+                                    Cancelar
+                                </a>
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                </form>
+
+                {% else %}
 
                 <tr class="border-b">
-                    <td class="p-2">{{ d.elemento }}</td>
-                    <td class="p-2">{{ d.descripcion }}</td>
-                    <td class="p-2">{{ d.fecha_entrega }}</td>
-                                    
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+                    <td class="p-2">
+                        {{ e.equipo }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ e.referencia }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ e.serial }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ e.fecha_entrega }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ e.observaciones }}
+                    </td>
+
+                    <td class="p-2">
+
+                        <div class="flex gap-2">
+
+                            <a
+                                href="?edit_equipo={{ e.id }}"
+                                class="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+                            >
+                                Editar
+                            </a>
+
+                            <a
+                                href="/rrhh/equipos/{{ e.id }}/eliminar/"
+                                class="bg-red-600 text-white px-3 py-1 rounded text-sm"
+                            >
+                                Eliminar
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endif %}
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6" class="text-center p-4 text-gray-500">
+                    No hay equipos asignados
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% endwith %}
+
+</div>
+
+</div>
     {% if editando %}
     <button class="bg-blue-600 text-white px-4 py-2 rounded mt-4">
         💾 Guardar cambios

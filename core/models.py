@@ -221,7 +221,27 @@ class DotacionEmpleado(models.Model):
     descripcion = models.CharField(max_length=200)
     fecha_entrega = models.DateField()
 
+class AsignacionEquipo(models.Model):
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
 
+    equipo = models.CharField(max_length=200)
+    referencia = models.CharField(max_length=200)
+    serial = models.CharField(max_length=200)
+    fecha_entrega = models.DateField()
+
+    observaciones = models.TextField(blank=True)
+
+    firma_empleado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.equipo} - {self.empleado.nombre_completo}"
+
+class ActaEntregaEquipo(models.Model):
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
+    fecha = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Acta Equipos - {self.empleado.nombre_completo} - {self.fecha}"
 
 
 

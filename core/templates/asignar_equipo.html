@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-xl font-bold tracking-wide hover:text-gray-300 transition">
+    💻 Asignar Equipo
+</h1>
+
+<a href="/rrhh/empleados/{{ empleado.id }}/" class="inline-block
+    mt-4 mb-6 text-blue-600 hover:text-blue-800 transition font-semibold rounded px-3 py-1">
+    ← Volver 
+</a>
+<div class="bg-white shadow rounded p-6 max-w-2xl">
+
+    <p class="mb-6">
+        <strong>Empleado:</strong>
+        {{ empleado.nombre_completo }}
+    </p>
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+
+        {% csrf_token %}
+
+        <div>
+            <label class="font-semibold">Equipo</label>
+            <input
+                type="text"
+                name="equipo"
+                class="w-full border rounded p-2"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="font-semibold">Referencia</label>
+            <input
+                type="text"
+                name="referencia"
+                class="w-full border rounded p-2"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="font-semibold">Serial</label>
+            <input
+                type="text"
+                name="serial"
+                class="w-full border rounded p-2"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="font-semibold">Fecha entrega</label>
+            <input
+                type="date"
+                name="fecha_entrega"
+                class="w-full border rounded p-2"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="font-semibold">Observaciones</label>
+            <textarea
+                name="observaciones"
+                class="w-full border rounded p-2"
+            ></textarea>
+        </div>
+
+        <button class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
+            Guardar asignación
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

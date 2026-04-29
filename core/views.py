@@ -12,7 +12,9 @@ from .models import (
     SeguimientoFacturacion, 
     Empleado, 
     DotacionEmpleado,
-    SaludEmpleado
+    SaludEmpleado,
+    AsignacionEquipo,
+    ActaEntregaEquipo
 )
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
@@ -364,6 +366,8 @@ def detalle_empleado(request, id):
 
     dotaciones = DotacionEmpleado.objects.filter(empleado=empleado)
 
+    equipos = AsignacionEquipo.objects.filter(empleado=empleado)
+
     editando = request.GET.get('edit')
 
     if request.method == 'POST':
@@ -377,6 +381,7 @@ def detalle_empleado(request, id):
                 'empleado': empleado,
                 'salud': salud,
                 'dotaciones': dotaciones,
+                'equipos': equipos,
                 'editando': True,
                 'error': '⚠️ Esta cédula ya está registrada'
             })
@@ -410,11 +415,11 @@ def detalle_empleado(request, id):
 
         return redirect(f'/rrhh/empleados/{id}/')
 
-    # ✅ ESTE TE FALTABA (GET)
     return render(request, 'detalle_empleado.html', {
         'empleado': empleado,
         'salud': salud,
         'dotaciones': dotaciones,
+        'equipos': equipos,
         'editando': editando
     })
 
@@ -606,7 +611,6 @@ def certificacion_laboral(request, id):
 
         # LOGO
         ('SPAN', (0,0), (0,3)),
-        ('SPAN', (0,0), (0,3)),
         ('SPAN', (1,1), (1,3)),
         ('VALIGN', (1,1), (1,3), 'MIDDLE'),
         ('ALIGN', (1,1), (1,3), 'CENTER'),
@@ -752,3 +756,268 @@ def certificacion_laboral(request, id):
         as_attachment=True,
         filename='certificacion_laboral.pdf'
     )
+
+@login_required
+def asignar_equipo(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+
+    if request.method == 'POST':
+
+        existe_serial = AsignacionEquipo.objects.filter(
+            serial=request.POST['serial']
+        ).exists()
+
+        if existe_serial:
+
+            return render(request, 'asignar_equipo.html', {
+                'empleado': empleado,
+                'error': '⚠️ Este serial ya está asignado a otro empleado'
+            })
+
+        AsignacionEquipo.objects.create(
+            empleado=empleado,
+            equipo=request.POST['equipo'],
+            referencia=request.POST['referencia'],
+            serial=request.POST['serial'],
+            fecha_entrega=request.POST['fecha_entrega'],
+            observaciones=request.POST['observaciones']
+        )
+
+        return redirect(f'/rrhh/empleados/{id}/')
+
+    return render(request, 'asignar_equipo.html', {
+        'empleado': empleado
+    })
+    
+
+@login_required
+def eliminar_equipo(request, id):
+
+    equipo = AsignacionEquipo.objects.get(id=id)
+
+    empleado_id = equipo.empleado.id
+
+    equipo.delete()
+
+    return redirect(f'/rrhh/empleados/{empleado_id}/')
+
+@login_required
+def editar_equipo(request, id):
+
+    equipo = AsignacionEquipo.objects.get(id=id)
+
+    empleado = equipo.empleado
+
+    if request.method == 'POST':
+
+        existe_serial = AsignacionEquipo.objects.filter(
+            serial=request.POST['serial']
+        ).exclude(id=id).exists()
+
+        if existe_serial:
+
+            return render(request, 'editar_equipo.html', {
+                'empleado': empleado,
+                'equipo': equipo,
+                'error': '⚠️ Este serial ya está asignado a otro empleado'
+            })
+
+        equipo.equipo = request.POST['equipo']
+        equipo.referencia = request.POST['referencia']
+        equipo.serial = request.POST['serial']
+        equipo.fecha_entrega = request.POST['fecha_entrega']
+        equipo.observaciones = request.POST['observaciones']
+
+        equipo.save()
+
+        return redirect(f'/rrhh/empleados/{empleado.id}/')
+
+    return render(request, 'editar_equipo.html', {
+        'empleado': empleado,
+        'equipo': equipo
+    })
+
+@login_required
+def acta_entrega_equipos(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+    equipos = AsignacionEquipo.objects.filter(empleado=empleado)
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=40,
+        leftMargin=40,
+        topMargin=40,
+        bottomMargin=40
+    )
+
+    styles = getSampleStyleSheet()
+
+    texto_style = ParagraphStyle(
+        'Texto',
+        parent=styles['BodyText'],
+        alignment=TA_JUSTIFY,
+        fontSize=9,
+        leading=14
+    )
+
+    elementos = []
+
+    # === ENCABEZADO === (no lo tocamos)
+    logo = Image('static/img/logo-cointeca.png', width=100, height=60)
+    encabezado_data = [
+        [logo, "Tipo de documento: Formato", "Código: RRHH-FR-11"],
+        ["",   "ACTA ENTREGA DE EQUIPOS",    "Versión: 1"],
+        ["",   "",                            "Fecha: 28/04/2026"],
+        ["",   "",                            "Página 1 de 1"]
+    ]
+    tabla = Table(encabezado_data, colWidths=[110, 250, 130], rowHeights=[16, 22, 16, 16])
+    tabla.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ('SPAN', (0,0), (0,3)),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (0,0), (0,0), 'CENTER'),
+        ('ALIGN', (1,0), (1,0), 'LEFT'),
+        ('ALIGN', (1,1), (1,1), 'CENTER'),
+        ('FONTNAME', (1,1), (1,1), 'Helvetica-Bold'),
+        ('FONTSIZE', (1,0), (1,0), 8),
+        ('FONTSIZE', (1,1), (1,1), 12),
+        ('FONTSIZE', (2,0), (2,3), 8),
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+    ]))
+    elementos.append(tabla)
+    elementos.append(Spacer(1, 15))
+
+    # === TEXTO PRINCIPAL ===
+    texto = f"""
+    <b>ENTRE LOS SUSCRITOS:</b>
+    <br/><br/>
+    COINTECA S.A.S., identificada con NIT 900.768.648, representada legalmente por 
+    <b>[Nombre del Representante]</b>, en adelante el EMPLEADOR, y por la otra parte 
+    <b>{empleado.nombre_completo}</b>, identificado(a) con C.C. <b>{empleado.documento}</b>, 
+    en adelante el TRABAJADOR, han convenido de manera libre y voluntaria adicionar 
+    al contrato de trabajo vigente las siguientes cláusulas:
+    """
+    elementos.append(Paragraph(texto, texto_style))
+    elementos.append(Spacer(1, 12))
+
+    # === CLAUSULA 1 ===
+    clausula1 = """
+    <b>1. CLÁUSULA PRIMERA: OBJETO Y ESPECIFICACIONES TÉCNICAS</b> El TRABAJADOR. 
+    Recibe en calidad de herramienta de trabajo los siguientes equipos para el 
+    desempeño exclusivo de sus funciones:
+    """
+    elementos.append(Paragraph(clausula1, texto_style))
+    elementos.append(Spacer(1, 8))
+
+    # === TABLA EQUIPOS (solo los asignados + filas vacías abajo) ===
+    data = [['Elemento', 'Marca / Referencia', 'Serial / IMEI', 'Estado Inicial', 'Observaciones']]
+
+    for e in equipos:
+        data.append([e.equipo, e.marca if hasattr(e, 'marca') else '', e.serial, 'Bueno', e.observaciones or ''])
+
+    # Filas vacías extra para escribir a mano
+    for _ in range(1):
+        data.append(['', '', '', '', ''])
+
+    from reportlab.platypus import Paragraph as P
+
+    # Convertir observaciones a Paragraph para que haga wrap
+    data2 = [data[0]]  # encabezado
+    for fila in data[1:]:
+        data2.append([
+            fila[0], fila[1], fila[2], fila[3],
+            Paragraph(str(fila[4]), ParagraphStyle('obs', fontSize=7, leading=10))
+        ])
+
+    tabla_equipos = Table(data2, colWidths=[80, 100, 90, 70, 150])
+    tabla_equipos.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.8, colors.black),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D9EAF7")),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,-1), 8),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ROWHEIGHT', (0,1), (-1,-1), 18),
+        ('TOPPADDING', (0,0), (-1,0), 5),
+        ('BOTTOMPADDING', (0,0), (-1,0), 5),
+        ('WORDWRAP', (4,1), (4,-1), True),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+    ]))
+    elementos.append(tabla_equipos)
+    elementos.append(Spacer(1, 12))
+
+    # === CLAUSULAS 2-5 ===
+    clausulas = """
+    <b>2. CLÁUSULA SEGUNDA: OBLIGACIONES Y USO DE LOS EQUIPOS</b>
+    <br/>
+    a) <b>Uso Exclusivo Laboral:</b> El TRABAJADOR manifiesta que recibe los equipos en perfecto 
+    estado y se obliga a usarlos exclusivamente para los fines definidos por la empresa.
+    <br/>
+    b) <b>Prohibición de Uso Personal:</b> Se prohíbe el uso de los equipos para actividades 
+    personales, así como prestarlos a familiares, amigos o terceros. Cualquier ilícito cometido 
+    mediante estos equipos será responsabilidad exclusiva del trabajador.
+    <br/>
+    c) <b>Restitución:</b> El TRABAJADOR se obliga a devolver los equipos en el mismo estado en 
+    que los recibió (salvo el deterioro natural) cuando el EMPLEADOR lo requiera o al finalizar 
+    el contrato.
+    <br/><br/>
+    <b>3. CLÁUSULA TERCERA: AUTORIZACIÓN EXPRESA DE DESCUENTO.</b> En cumplimiento del Art. 59 
+    del CST, el TRABAJADOR autoriza de manera expresa, permanente e irrevocable a COINTECA S.A.S. 
+    para descontar de sus salarios, prestaciones sociales (cesantías, intereses, primas), 
+    vacaciones, bonificaciones e indemnizaciones, el valor comercial de los equipos en caso de:
+    <br/>
+    • No devolución de los elementos al término del contrato.
+    <br/>
+    • Pérdida, hurto o daño total/parcial derivado de culpa, negligencia o mal uso.
+    <br/>
+    • Daños por manipulación de software no autorizado o retiro de sellos de seguridad.
+    <br/><br/>
+    <b>4. CLÁUSULA CUARTA: RÉGIMEN DISCIPLINARIO (FALTA GRAVE).</b> El TRABAJADOR acepta que 
+    el incumplimiento de cualquiera de las obligaciones aquí pactadas constituye una FALTA GRAVE 
+    a sus deberes laborales. En consecuencia, se considera Justa Causa para la terminación 
+    unilateral del contrato de trabajo, según el Art. 62 del Código Sustantivo del Trabajo, 
+    numeral 6.
+    <br/><br/>
+    <b>5. CLÁUSULA QUINTA: TRATAMIENTO DE DATOS Y MONITOREO.</b> El TRABAJADOR reconoce que, 
+    al ser herramientas de propiedad de la empresa, COINTECA S.A.S. se reserva el derecho de 
+    realizar auditorías, monitoreo de tráfico de datos y revisión de los equipos para garantizar 
+    la seguridad de la información corporativa, conforme a la Ley 1581 de 2012.
+    <br/><br/>
+    En constancia de lo anterior, se firma en la ciudad de Santiago de Cali, a los ____ días 
+    del mes de _______________ de 2026.
+    """
+    elementos.append(Paragraph(clausulas, texto_style))
+    elementos.append(Spacer(1, 25))
+
+    # === FIRMAS ===
+    firmas = Table([
+        ["__________________________________", "__________________________________"],
+        ["EL EMPLEADOR (COINTECA S.A.S.)",    "EL TRABAJADOR"],
+        ["NIT: 900.768.648",                   f"C.C. No: {empleado.documento}"]
+    ], colWidths=[260, 260])
+
+    firmas.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+    ]))
+    elementos.append(firmas)
+    elementos.append(Spacer(1, 20))
+
+    # === FOOTER ===
+    footer = Paragraph(
+        '<font color="white">cointecasas@hotmail.com &nbsp;&nbsp;-&nbsp;&nbsp; Tel. 3117121043 &nbsp;&nbsp;-&nbsp;&nbsp; www.cointecasas.com</font>',
+        ParagraphStyle('footer', alignment=1, backColor=colors.HexColor("#1D4ED8"), textColor=colors.white, fontSize=9, leading=15)
+    )
+    elementos.append(footer)
+
+    doc.build(elementos)
+    buffer.seek(0)
+
+    return FileResponse(buffer, as_attachment=True, filename='acta_equipos.pdf')

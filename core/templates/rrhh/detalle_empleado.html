@@ -222,39 +222,48 @@
 
     <!-- 5. DOTACION -->
 <!-- 5. DOTACION -->
-<div>
-    <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
-        5. Dotación
-    </h2>
+<div class="mt-6">
+    <!-- TITULO -->
+    <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
+        <span>
+            5. Elementos entregados para obra labor
+        </span>
+        <a
+            href="/rrhh/empleados/{{ empleado.id }}/dotacion/"
+            class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+        >
+            + Agregar elemento
+        </a>
 
-    <a
-        href="/rrhh/empleados/{{ empleado.id }}/dotacion/"
-        class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 mt-3 inline-block"
-    >
-        + Agregar dotación
-    </a>
-
-    <table class="w-full mt-3 border">
+    </div>
+    <!-- TABLA -->
+    <table class="w-full border shadow">
         <thead class="bg-gray-800 text-white">
             <tr>
-                <th class="p-2">Camiseta</th>
-                <th class="p-2">Pantalon</th>
-                <th class="p-2">Botas</th>
+                <th class="p-2 text-center">
+                    Elemento
+                </th>
+
+                <th class="p-2 text-center">
+                    Descripción / Serial
+                </th>
             </tr>
         </thead>
-
         <tbody>
             {% for d in dotaciones %}
-            <tr class="border-b">
-                <td class="p-2">{{ d.elemento }}</td>
-                <td class="p-2">{{ d.descripcion }}</td>
-                <td class="p-2">{{ d.fecha_entrega }}</td>
+            <tr class="border-b hover:bg-gray-50">
+                <td class="p-2">
+                    {{ d.elemento }}
+                </td>
+                <td class="p-2">
+                    {{ d.descripcion }}
+                </td>
             </tr>
 
             {% empty %}
             <tr>
-                <td colspan="3" class="text-center p-4 text-gray-500">
-                    No hay dotación registrada
+                <td colspan="2" class="text-center p-4 text-gray-500">
+                    No hay elementos registrados
                 </td>
             </tr>
             {% endfor %}
@@ -314,18 +323,18 @@
                         <td class="p-2">
                             <input
                                 type="text"
-                                name="referencia"
-                                value="{{ e.referencia }}"
-                                class="border p-1 rounded w-full"
+                                value="{{ e.equipo_inventario.referencia }}"
+                                class="border p-1 rounded w-full bg-gray-100"
+                                readonly
                             >
                         </td>
 
                         <td class="p-2">
                             <input
                                 type="text"
-                                name="serial"
-                                value="{{ e.serial }}"
-                                class="border p-1 rounded w-full"
+                                value="{{ e.equipo_inventario.serial }}"
+                                class="border p-1 rounded w-full bg-gray-100"
+                                readonly
                             >
                         </td>
 
@@ -376,15 +385,15 @@
                 <tr class="border-b">
 
                     <td class="p-2">
-                        {{ e.equipo }}
+                        {{ e.equipo_inventario.equipo }}
                     </td>
 
                     <td class="p-2">
-                        {{ e.referencia }}
+                        {{ e.equipo_inventario.referencia }}
                     </td>
 
                     <td class="p-2">
-                        {{ e.serial }}
+                        {{ e.equipo_inventario.serial }}
                     </td>
 
                     <td class="p-2">

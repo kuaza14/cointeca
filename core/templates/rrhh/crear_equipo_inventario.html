@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- ENCABEZADO -->
+    <div class="flex justify-between items-center mb-6">
+
+        <h1 class="text-3xl font-bold">
+            ➕ Crear Equipo Inventario
+        </h1>
+
+        <a
+            href="/rrhh/inventario/"
+            class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+        >
+            ← Volver
+        </a>
+
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="bg-white p-6 rounded shadow">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <!-- Equipo -->
+                <div>
+                    <label class="block font-bold mb-1">
+                        Equipo
+                    </label>
+
+                    <input
+                        type="text"
+                        name="equipo"
+                        required
+                        class="w-full border p-2 rounded"
+                        placeholder="Ej: Laptop Lenovo"
+                    >
+                </div>
+
+                <!-- Referencia -->
+                <div>
+                    <label class="block font-bold mb-1">
+                        Referencia
+                    </label>
+
+                    <input
+                        type="text"
+                        name="referencia"
+                        class="w-full border p-2 rounded"
+                        placeholder="Ej: ThinkPad T14"
+                    >
+                </div>
+
+                <!-- Serial -->
+                <div>
+                    <label class="block font-bold mb-1">
+                        Serial
+                    </label>
+
+                    <input
+                        type="text"
+                        name="serial"
+                        required
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <!-- Marca -->
+                <div>
+                    <label class="block font-bold mb-1">
+                        Marca
+                    </label>
+
+                    <input
+                        type="text"
+                        name="marca"
+                        class="w-full border p-2 rounded"
+                        placeholder="Ej: Lenovo"
+                    >
+                </div>
+
+                <!-- Fecha compra -->
+                <div>
+                    <label class="block font-bold mb-1">
+                        Fecha de compra
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_compra"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <!-- Estado -->
+                <div>
+                    <label class="block font-bold mb-1">
+                        Estado
+                    </label>
+
+                    <select
+                        name="estado"
+                        class="w-full border p-2 rounded"
+                    >
+                        <option value="Disponible">
+                            Disponible
+                        </option>
+
+                        <option value="Asignado">
+                            Asignado
+                        </option>
+
+                        <option value="Dañado">
+                            Dañado
+                        </option>
+
+                        <option value="Baja">
+                            Baja
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Observaciones -->
+            <div class="mt-4">
+
+                <label class="block font-bold mb-1">
+                    Observaciones
+                </label>
+
+                <textarea
+                    name="observaciones"
+                    rows="4"
+                    class="w-full border p-2 rounded"
+                    placeholder="Observaciones del equipo..."
+                ></textarea>
+
+            </div>
+
+            <!-- BOTONES -->
+            <div class="mt-6 flex gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                >
+                    Guardar Equipo
+                </button>
+
+                <a
+                    href="/rrhh/inventario/"
+                    class="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

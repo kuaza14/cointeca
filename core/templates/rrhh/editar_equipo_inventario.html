@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <h1 class="text-3xl font-bold">
+            ✏️ Editar Equipo
+        </h1>
+
+        <a
+            href="/rrhh/inventario/"
+            class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+        >
+            ← Volver
+        </a>
+
+    </div>
+
+    <div class="bg-white p-6 rounded shadow">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+                    <label class="font-bold block mb-1">
+                        Equipo
+                    </label>
+
+                    <input
+                        type="text"
+                        name="equipo"
+                        value="{{ equipo.equipo }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1">
+                        Referencia
+                    </label>
+
+                    <input
+                        type="text"
+                        name="referencia"
+                        value="{{ equipo.referencia }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1">
+                        Serial
+                    </label>
+
+                    <input
+                        type="text"
+                        name="serial"
+                        value="{{ equipo.serial }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1">
+                        Marca
+                    </label>
+
+                    <input
+                        type="text"
+                        name="marca"
+                        value="{{ equipo.marca }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1">
+                        Fecha compra
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_compra"
+                        value="{{ equipo.fecha_compra|date:'Y-m-d' }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1">
+                        Estado
+                    </label>
+
+                    <select
+                        name="estado"
+                        class="w-full border p-2 rounded"
+                    >
+
+                        <option value="Disponible"
+                            {% if equipo.estado == 'Disponible' %}selected{% endif %}>
+                            Disponible
+                        </option>
+
+                        <option value="Asignado"
+                            {% if equipo.estado == 'Asignado' %}selected{% endif %}>
+                            Asignado
+                        </option>
+
+                        <option value="Dañado"
+                            {% if equipo.estado == 'Dañado' %}selected{% endif %}>
+                            Dañado
+                        </option>
+
+                        <option value="Mantenimiento"
+                            {% if equipo.estado == 'Mantenimiento' %}selected{% endif %}>
+                            Mantenimiento
+                        </option>
+
+                    </select>
+
+                </div>
+                <div>
+                    <label class="font-semibold">
+                        Asignado a
+                    </label>
+
+                    <input
+                        type="text"
+                        value="{% if equipo.asignacionequipo_set.first %}{{ equipo.asignacionequipo_set.first.empleado.nombre_completo }}{% else %}No asignado{% endif %}"
+                        class="w-full border rounded p-2 bg-gray-100"
+                        readonly
+                    >
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+
+                <label class="font-bold block mb-1">
+                    Observaciones
+                </label>
+
+                <textarea
+                    name="observaciones"
+                    rows="4"
+                    class="w-full border p-2 rounded"
+                >{{ equipo.observaciones }}</textarea>
+
+            </div>
+
+            <div class="mt-6 flex gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                >
+                    Guardar Cambios
+                </button>
+
+                <a
+                    href="/rrhh/inventario/"
+                    class="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

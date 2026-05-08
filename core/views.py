@@ -14,7 +14,8 @@ from .models import (
     DotacionEmpleado,
     SaludEmpleado,
     AsignacionEquipo,
-    ActaEntregaEquipo
+    ActaEntregaEquipo,
+    InventarioEquipo
 )
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
@@ -342,7 +343,7 @@ def empleados(request):
     promedio_salario = lista.aggregate(Avg('salario'))['salario__avg']
     por_cargo = lista.values('cargo').annotate(total=Count('id'))
 
-    return render(request, 'empleados.html', {
+    return render(request, 'rrhh/empleados.html', {
         'empleados': lista,
         'query': query,
         'total': total,
@@ -352,7 +353,7 @@ def empleados(request):
 
 @login_required
 def rrhh(request):
-    return render(request, 'rrhh.html')
+    return render(request, 'rrhh/rrhh.html')
 
 @login_required
 def detalle_empleado(request, id):
@@ -377,7 +378,7 @@ def detalle_empleado(request, id):
         existe = Empleado.objects.filter(documento=documento).exclude(id=id).exists()
 
         if existe:
-            return render(request, 'detalle_empleado.html', {
+            return render(request, '/rrhh/detalle_empleado.html', {
                 'empleado': empleado,
                 'salud': salud,
                 'dotaciones': dotaciones,
@@ -415,7 +416,7 @@ def detalle_empleado(request, id):
 
         return redirect(f'/rrhh/empleados/{id}/')
 
-    return render(request, 'detalle_empleado.html', {
+    return render(request, 'rrhh/detalle_empleado.html', {
         'empleado': empleado,
         'salud': salud,
         'dotaciones': dotaciones,
@@ -425,23 +426,27 @@ def detalle_empleado(request, id):
 
 @login_required
 def agregar_dotacion(request, id):
+
     empleado = Empleado.objects.get(id=id)
 
     if request.method == 'POST':
-        elemento = request.POST['elemento']
-        descripcion = request.POST['descripcion']
-        fecha = request.POST['fecha']
 
-        DotacionEmpleado.objects.create(
-            empleado=empleado,
-            elemento=elemento,
-            descripcion=descripcion,
-            fecha_entrega=fecha
-        )
+        elementos = request.POST.getlist('elementos[]')
+        descripciones = request.POST.getlist('descripciones[]')
+        fecha_entrega = request.POST.get('fecha_entrega')
 
-        return redirect(f'/rrhh/empleados/{id}/')
+        for i in range(len(elementos)):
 
-    return render(request, 'agregar_dotacion.html', {'empleado': empleado})
+            DotacionEmpleado.objects.create(
+                empleado=empleado,
+                elemento=elementos[i],
+                descripcion=descripciones[i],
+                fecha_entrega=fecha_entrega
+            )
+
+        return redirect('detalle_empleado', id=empleado.id)
+
+    return render(request, 'rrhh/agregar_dotacion.html', {'empleado': empleado})
 
 @login_required
 def crear_empleado(request):
@@ -481,14 +486,14 @@ def crear_empleado(request):
                 telefono_emergencia=request.POST['telefono_emergencia']
             )
 
-            return redirect('/rrhh/empleados/')
+            return redirect('rrhh/empleados/')
 
         except IntegrityError:
             return render(request, 'crear_empleado.html', {
                 'error': '⚠️ Ya existe un empleado con ese documento'
             })
 
-    return render(request, 'crear_empleado.html')
+    return render(request, 'rrhh/crear_empleado.html')
 
 @login_required
 def eliminar_empleado(request, id):
@@ -496,9 +501,9 @@ def eliminar_empleado(request, id):
 
     if request.method == 'POST':
         empleado.delete()
-        return redirect('/rrhh/empleados/')
+        return redirect('rrhh/empleados/')
 
-    return redirect('/rrhh/empleados/')
+    return redirect('rrhh/empleados/')
 
 @login_required
 def certificacion_laboral(request, id):
@@ -762,32 +767,32 @@ def asignar_equipo(request, id):
 
     empleado = Empleado.objects.get(id=id)
 
+    equipos = InventarioEquipo.objects.filter(
+        estado='Disponible'
+    )
+
     if request.method == 'POST':
 
-        existe_serial = AsignacionEquipo.objects.filter(
-            serial=request.POST['serial']
-        ).exists()
-
-        if existe_serial:
-
-            return render(request, 'asignar_equipo.html', {
-                'empleado': empleado,
-                'error': '⚠️ Este serial ya está asignado a otro empleado'
-            })
+        equipo = InventarioEquipo.objects.get(
+            id=request.POST['equipo_inventario']
+        )
 
         AsignacionEquipo.objects.create(
             empleado=empleado,
-            equipo=request.POST['equipo'],
-            referencia=request.POST['referencia'],
-            serial=request.POST['serial'],
+            equipo_inventario=equipo,
             fecha_entrega=request.POST['fecha_entrega'],
             observaciones=request.POST['observaciones']
         )
 
+        # CAMBIAR ESTADO
+        equipo.estado = 'Asignado'
+        equipo.save()
+
         return redirect(f'/rrhh/empleados/{id}/')
 
-    return render(request, 'asignar_equipo.html', {
-        'empleado': empleado
+    return render(request, 'rrhh/asignar_equipo.html', {
+        'empleado': empleado,
+        'equipos': equipos
     })
     
 
@@ -1021,3 +1026,84 @@ def acta_entrega_equipos(request, id):
     buffer.seek(0)
 
     return FileResponse(buffer, as_attachment=True, filename='acta_equipos.pdf')
+
+@login_required
+def inventario_equipos(request):
+
+    equipos = InventarioEquipo.objects.all()
+
+    # ACTUALIZAR ESTADO AUTOMÁTICAMENTE
+    for e in equipos:
+
+        asignado = AsignacionEquipo.objects.filter(
+            equipo_inventario=e
+        ).exists()
+
+        if asignado:
+            e.estado = 'Asignado'
+        else:
+            e.estado = 'Disponible'
+
+        e.save()
+
+    return render(request, 'rrhh/inventario_equipos.html', {
+        'equipos': equipos
+    })
+
+@login_required
+def crear_equipo_inventario(request):
+
+    if request.method == 'POST':
+
+        InventarioEquipo.objects.create(
+
+            equipo=request.POST['equipo'],
+            referencia=request.POST['referencia'],
+            serial=request.POST['serial'],
+            fecha_compra=request.POST['fecha_compra'],
+            estado=request.POST['estado'],
+            observaciones=request.POST['observaciones']
+
+        )
+
+        return redirect('inventario_equipos')
+
+    return render(request, 'rrhh/crear_equipo_inventario.html')
+
+@login_required
+def editar_equipo_inventario(request, id):
+
+    equipo = InventarioEquipo.objects.get(id=id)
+
+    if request.method == 'POST':
+
+        equipo.equipo = request.POST['equipo']
+        equipo.referencia = request.POST['referencia']
+        equipo.serial = request.POST['serial']
+        equipo.marca = request.POST['marca']
+        equipo.estado = request.POST['estado']
+        equipo.fecha_compra = request.POST['fecha_compra']
+        equipo.observaciones = request.POST['observaciones']
+
+        equipo.save()
+
+        return redirect('inventario_equipos')
+
+    contexto = {
+        'equipo': equipo
+    }
+
+    return render(
+        request,
+        'rrhh/editar_equipo_inventario.html',
+        contexto
+    )
+
+@login_required
+def eliminar_equipo_inventario(request, id):
+
+    equipo = InventarioEquipo.objects.get(id=id)
+
+    equipo.delete()
+
+    return redirect('inventario_equipos')

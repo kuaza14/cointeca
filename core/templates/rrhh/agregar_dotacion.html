@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    ➕ Agregar Elementos Entregados
+</h1>
+
+<div class="bg-white p-6 rounded shadow">
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <!-- TIPO PERSONAL -->
+        <div class="mb-5">
+
+            <label class="block font-bold mb-2">
+                Tipo de personal
+            </label>
+
+            <select
+                id="tipoPersonal"
+                class="border p-2 rounded w-full"
+            >
+                <option value="">
+                    Seleccione
+                </option>
+
+                <option value="terreno">
+                    Personal de Terreno
+                </option>
+
+                <option value="administracion">
+                    Administración
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- AGREGAR ELEMENTOS -->
+        <div class="grid grid-cols-3 gap-3 mb-5">
+
+            <!-- ELEMENTO -->
+            <div>
+
+                <label class="block font-bold mb-1">
+                    Elemento
+                </label>
+
+                <select
+                    id="elemento"
+                    class="border p-2 rounded w-full"
+                >
+                    <option value="">
+                        Seleccione un tipo primero
+                    </option>
+                </select>
+
+            </div>
+
+            <!-- DESCRIPCION -->
+            <div>
+
+                <label class="block font-bold mb-1">
+                    Descripción / Talla / Serial
+                </label>
+
+                <input
+                    type="text"
+                    id="descripcion"
+                    class="border p-2 rounded w-full"
+                    placeholder="Ej: Talla M"
+                >
+
+            </div>
+
+            <!-- BOTON -->
+            <div class="flex items-end">
+
+                <button
+                    type="button"
+                    onclick="agregarElemento()"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
+                >
+                    + Agregar
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- TABLA -->
+        <table class="w-full border">
+
+            <thead class="bg-gray-800 text-white">
+
+                <tr>
+                    <th class="p-2">
+                        Elemento
+                    </th>
+
+                    <th class="p-2">
+                        Descripción / Serial
+                    </th>
+
+                    <th class="p-2 w-32">
+                        Acción
+                    </th>
+                </tr>
+
+            </thead>
+
+            <tbody id="tablaElementos">
+
+            </tbody>
+
+        </table>
+
+        <!-- FECHA -->
+        <div class="mt-5">
+
+            <label class="block font-bold mb-1">
+                Fecha entrega
+            </label>
+
+            <input
+                type="date"
+                name="fecha_entrega"
+                class="border p-2 rounded w-full"
+                required
+            >
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="flex gap-2 mt-6">
+
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+                Guardar Todo
+            </button>
+
+            <a
+                href="/rrhh/empleados/{{ empleado.id }}/"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+const elementos = {
+
+    terreno: [
+        "Botas de seguridad dieléctricas",
+        "Camisa drill azul",
+        "Casco de seguridad",
+        "Monja",
+        "Pantalón jean azul"
+    ],
+
+    administracion: [
+        "Botas de seguridad dieléctricas",
+        "Camibuzo",
+        "Casco de seguridad",
+        "Pantalón jean azul"
+    ]
+};
+
+document.getElementById('tipoPersonal').addEventListener('change', function() {
+
+    let tipo = this.value;
+
+    let select = document.getElementById('elemento');
+
+    select.innerHTML = '<option value="">Seleccione</option>';
+
+    elementos[tipo].forEach(function(item) {
+
+        select.innerHTML += `
+            <option value="${item}">
+                ${item}
+            </option>
+        `;
+
+    });
+
+});
+
+function agregarElemento() {
+
+    let elemento = document.getElementById('elemento').value;
+
+    let descripcion = document.getElementById('descripcion').value;
+
+    if(elemento === '') {
+
+        alert('Seleccione un elemento');
+
+        return;
+
+    }
+
+    let tabla = document.getElementById('tablaElementos');
+
+    tabla.innerHTML += `
+
+        <tr class="border-b">
+
+            <td class="p-2">
+                ${elemento}
+
+                <input
+                    type="hidden"
+                    name="elementos[]"
+                    value="${elemento}"
+                >
+            </td>
+
+            <td class="p-2">
+                ${descripcion}
+
+                <input
+                    type="hidden"
+                    name="descripciones[]"
+                    value="${descripcion}"
+                >
+            </td>
+
+            <td class="p-2 text-center">
+
+                <button
+                    type="button"
+                    onclick="this.parentElement.parentElement.remove()"
+                    class="bg-red-600 text-white px-3 py-1 rounded text-sm"
+                >
+                    Eliminar
+                </button>
+
+            </td>
+
+        </tr>
+
+    `;
+
+    document.getElementById('descripcion').value = '';
+
+}
+
+</script>
+
+{% endblock %}

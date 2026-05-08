@@ -36,7 +36,11 @@ from core.views import (
     asignar_equipo,
     eliminar_equipo,
     editar_equipo,
-    acta_entrega_equipos
+    acta_entrega_equipos,
+    inventario_equipos,
+    crear_equipo_inventario,
+    editar_equipo_inventario,
+    eliminar_equipo_inventario
 ) 
 from core.views import detalle_empleado
 from django.contrib.auth.decorators import login_required
@@ -81,5 +85,9 @@ urlpatterns = [
     path('rrhh/equipos/<int:id>/eliminar/', eliminar_equipo, name='eliminar_equipo'),
     path('rrhh/equipos/<int:id>/editar/', editar_equipo, name='editar_equipo'),
     path('rrhh/empleados/<int:id>/acta_equipos/', acta_entrega_equipos, name='acta_entrega_equipos'),
-    
+    path('rrhh/inventario/', inventario_equipos, name='inventario_equipos'),
+    path('rrhh/inventario/crear/', crear_equipo_inventario, name='crear_equipo_inventario'),
+    path('rrhh/inventario/<int:id>/editar/', editar_equipo_inventario, name='editar_equipo_inventario'),
+    path('rrhh/inventario/<int:id>/eliminar/', eliminar_equipo_inventario, name='eliminar_equipo_inventario')
+
 ]

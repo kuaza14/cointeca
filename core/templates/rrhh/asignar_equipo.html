@@ -8,8 +8,9 @@
 
 <a href="/rrhh/empleados/{{ empleado.id }}/" class="inline-block
     mt-4 mb-6 text-blue-600 hover:text-blue-800 transition font-semibold rounded px-3 py-1">
-    ← Volver 
+    ← Volver
 </a>
+
 <div class="bg-white shadow rounded p-6 max-w-2xl">
 
     <p class="mb-6">
@@ -27,38 +28,37 @@
 
         {% csrf_token %}
 
+        <!-- EQUIPO INVENTARIO -->
         <div>
-            <label class="font-semibold">Equipo</label>
-            <input
-                type="text"
-                name="equipo"
+            <label class="font-semibold">
+                Equipo disponible
+            </label>
+
+            <select
+                name="equipo_inventario"
                 class="w-full border rounded p-2"
                 required
             >
+
+                <option value="">
+                    Seleccione un equipo
+                </option>
+
+                {% for e in equipos %}
+                <option value="{{ e.id }}">
+                    {{ e.equipo }} | {{ e.referencia }} | {{ e.serial }}
+                </option>
+                {% endfor %}
+
+            </select>
         </div>
 
+        <!-- FECHA -->
         <div>
-            <label class="font-semibold">Referencia</label>
-            <input
-                type="text"
-                name="referencia"
-                class="w-full border rounded p-2"
-                required
-            >
-        </div>
+            <label class="font-semibold">
+                Fecha entrega
+            </label>
 
-        <div>
-            <label class="font-semibold">Serial</label>
-            <input
-                type="text"
-                name="serial"
-                class="w-full border rounded p-2"
-                required
-            >
-        </div>
-
-        <div>
-            <label class="font-semibold">Fecha entrega</label>
             <input
                 type="date"
                 name="fecha_entrega"
@@ -67,8 +67,12 @@
             >
         </div>
 
+        <!-- OBSERVACIONES -->
         <div>
-            <label class="font-semibold">Observaciones</label>
+            <label class="font-semibold">
+                Observaciones
+            </label>
+
             <textarea
                 name="observaciones"
                 class="w-full border rounded p-2"

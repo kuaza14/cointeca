@@ -222,19 +222,25 @@ class DotacionEmpleado(models.Model):
     fecha_entrega = models.DateField()
 
 class AsignacionEquipo(models.Model):
-    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
 
-    equipo = models.CharField(max_length=200)
-    referencia = models.CharField(max_length=200)
-    serial = models.CharField(max_length=200)
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    equipo_inventario = models.ForeignKey(
+        'InventarioEquipo',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
     fecha_entrega = models.DateField()
 
-    observaciones = models.TextField(blank=True)
-
-    firma_empleado = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.equipo} - {self.empleado.nombre_completo}"
+    observaciones = models.TextField(
+        blank=True,
+        null=True
+    )
 
 class ActaEntregaEquipo(models.Model):
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
@@ -243,7 +249,28 @@ class ActaEntregaEquipo(models.Model):
     def __str__(self):
         return f"Acta Equipos - {self.empleado.nombre_completo} - {self.fecha}"
 
+class InventarioEquipo(models.Model):
 
+    equipo = models.CharField(max_length=100)
+    referencia = models.CharField(max_length=100)
+    serial = models.CharField(max_length=100)
 
+    ESTADOS = [
+        ('disponible', 'Disponible'),
+        ('asignado', 'Asignado'),
+        ('mantenimiento', 'Mantenimiento'),
+    ]
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default='disponible'
+    )
+
+    fecha_compra = models.DateField()
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.equipo} - {self.serial}"
 
 

@@ -17,6 +17,11 @@
         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
         📄 Certificación Laboral
     </a>
+    
+    <a href="/rrhh/empleados/{{ empleado.id }}/contrato/"
+        class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+        📄 Ver Contrato
+    </a>
 
 </div>
     {% if error %}
@@ -209,24 +214,136 @@
     <div>
         <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">4. Seguridad y Salud</h2>
         <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>RH:</strong> {{ salud.grupo_sanguineo }}</p>
-            <p><strong>EPS:</strong> {{ salud.eps }}</p>
-            <p><strong>Pensión:</strong> {{ salud.pension }}</p>
-            <p><strong>ARL:</strong> {{ salud.arl }}</p>
-            <p><strong>Alergias:</strong> {{ salud.alergias }}</p>
-            <p><strong>Contacto:</strong> {{ salud.contacto_emergencia }}</p>
-            <p><strong>Teléfono:</strong> {{ salud.telefono_emergencia }}</p>
+            <p><strong>RH:</strong>
+                {% if editando %}
+                <input type="text" name="salud_grupo_sanguineo" value="{{ salud.grupo_sanguineo }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.grupo_sanguineo }}
+                {% endif %}
+            </p>
+            <p><strong>EPS:</strong>
+                {% if editando %}
+                <input type="text" name="salud_eps" value="{{ salud.eps }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.eps }}
+                {% endif %}
+            </p>
+            <p><strong>Pensión:</strong>
+                {% if editando %}
+                <input type="text" name="salud_pension" value="{{ salud.pension }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.pension }}
+                {% endif %}
+            </p>
+            <p><strong>ARL:</strong>
+                {% if editando %}
+                <input type="text" name="salud_arl" value="{{ salud.arl }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.arl }}
+                {% endif %}
+            </p>
+            <p><strong>Alergias:</strong>
+                {% if editando %}
+                <input type="text" name="salud_alergias" value="{{ salud.alergias }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.alergias }}
+                {% endif %}
+            </p>
+            <p><strong>Contacto:</strong>
+                {% if editando %}
+                <input type="text" name="salud_contacto_emergencia" value="{{ salud.contacto_emergencia }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.contacto_emergencia }}
+                {% endif %}
+            </p>
+            <p><strong>Teléfono:</strong>
+                {% if editando %}
+                <input type="text" name="salud_telefono_emergencia" value="{{ salud.telefono_emergencia }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ salud.telefono_emergencia }}
+                {% endif %}
+            </p>
         </div>
     </div>
     {% endif %}
 
-    <!-- 5. DOTACION -->
+    <!-- 5. CONTACTO EMERGENCIA -->
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
+            5. Contacto de Emergencia
+        </h2>
+
+        <div class="grid grid-cols-2 gap-4 mt-3">
+
+            <p>
+                <strong>Nombre contacto:</strong>
+
+                {% if editando %}
+                <input type="text"
+                    name="contacto_emergencia"
+                    value="{{ empleado.contacto_emergencia }}"
+                    class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.contacto_emergencia }}
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Teléfono:</strong>
+
+                {% if editando %}
+                <input type="text"
+                    name="telefono_emergencia"
+                    value="{{ empleado.telefono_emergencia }}"
+                    class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.telefono_emergencia }}
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Parentesco:</strong>
+
+                {% if editando %}
+                <input type="text"
+                    name="parentesco_emergencia"
+                    value="{{ empleado.parentesco_emergencia }}"
+                    class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.parentesco_emergencia }}
+                {% endif %}
+            </p>
+
+        </div>
+    </div>
+
+        <!-- 7. OBSERVACIONES -->
+    <div>
+        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
+            7. Observaciones
+        </h2>
+
+        <div class="mt-3">
+
+            {% if editando %}
+            <textarea
+                name="observaciones"
+                rows="4"
+                class="border p-2 rounded w-full"
+            >{{ empleado.observaciones }}</textarea>
+
+            {% else %}
+            <p>{{ empleado.observaciones }}</p>
+            {% endif %}
+
+        </div>
+    </div>
+
 <!-- 5. DOTACION -->
 <div class="mt-6">
-    <!-- TITULO -->
     <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
         <span>
-            5. Elementos entregados para obra labor
+            8. Elementos entregados para obra labor
         </span>
         <a
             href="/rrhh/empleados/{{ empleado.id }}/dotacion/"
@@ -274,7 +391,7 @@
 <div>
     <div>
         <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
-            6. Equipos Tecnológicos            
+            9. Equipos Tecnológicos            
         </h2>
 
     </div>
@@ -441,8 +558,96 @@
             {% endfor %}
 
         </tbody>
-
     </table>
+
+        <!-- 7. DOCUMENTOS -->
+    <div class="mt-6">
+
+        <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
+
+            <span>
+                7. Contratos y Documentos
+            </span>
+
+            <a
+                href="/rrhh/empleados/{{ empleado.id }}/subir-documento/"
+                class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+            >
+                + Subir documento
+            </a>
+
+        </div>
+
+        <table class="w-full border shadow">
+
+            <thead class="bg-gray-800 text-white">
+
+                <tr>
+                    <th class="p-2 text-center">
+                        Documento
+                    </th>
+
+                    <th class="p-2 text-center">
+                        Fecha
+                    </th>
+
+                    <th class="p-2 text-center">
+                        Archivo
+                    </th>
+
+                    <th class="p-2 text-center">
+                        Acciones
+                    </th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for d in documentos %}
+
+                <tr class="border-b hover:bg-gray-50">
+
+                    <td class="p-2">
+                        {{ d.nombre }}
+                    </td>
+
+                    <td class="p-2 text-center">
+                        {{ d.fecha }}
+                    </td>
+
+                    <td class="p-2 text-center">
+
+                        <a href="{{ d.archivo.url }}"target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                        >Ver documento
+                        </a>
+                    <td class="p-2 text-center">
+                        <a href="/rrhh/documentos/{{ d.id }}/eliminar/" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                        >Eliminar
+                        </a>
+                    </td>
+
+                    </td>
+                    
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="4" class="text-center p-4 text-gray-500">
+                        No hay documentos cargados
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
 
     {% endwith %}
 

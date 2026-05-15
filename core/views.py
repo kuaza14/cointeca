@@ -15,7 +15,8 @@ from .models import (
     SaludEmpleado,
     AsignacionEquipo,
     ActaEntregaEquipo,
-    InventarioEquipo
+    InventarioEquipo,
+    DocumentoEmpleado,
 )
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
@@ -38,6 +39,10 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.lib import colors
 from reportlab.platypus.flowables import HRFlowable
+from weasyprint import HTML
+from django.template.loader import render_to_string
+from django.conf import settings 
+import os
 
 
 # Vista de inicio 
@@ -369,6 +374,8 @@ def detalle_empleado(request, id):
 
     equipos = AsignacionEquipo.objects.filter(empleado=empleado)
 
+    documentos = DocumentoEmpleado.objects.filter(empleado=empleado)
+
     editando = request.GET.get('edit')
 
     if request.method == 'POST':
@@ -383,6 +390,7 @@ def detalle_empleado(request, id):
                 'salud': salud,
                 'dotaciones': dotaciones,
                 'equipos': equipos,
+                'documentos': documentos,
                 'editando': True,
                 'error': '⚠️ Esta cédula ya está registrada'
             })
@@ -410,7 +418,43 @@ def detalle_empleado(request, id):
         empleado.jornada = request.POST['jornada']
         empleado.jefe = request.POST['jefe']
 
+        # CONTACTO EMERGENCIA
+        empleado.contacto_emergencia = request.POST.get('contacto_emergencia')
+        empleado.telefono_emergencia = request.POST.get('telefono_emergencia')
+        empleado.parentesco_emergencia = request.POST.get('parentesco_emergencia')
+
+        # SEGURIDAD SOCIAL
+        empleado.eps = request.POST.get('eps')
+        empleado.arl = request.POST.get('arl')
+        empleado.afp = request.POST.get('afp')
+        empleado.cesantias = request.POST.get('cesantias')
+
+        # OBSERVACIONES
+        empleado.observaciones = request.POST.get('observaciones')
+
         empleado.save()
+
+        # Actualizar o crear SaludEmpleado
+        if salud:
+            salud.grupo_sanguineo = request.POST.get('salud_grupo_sanguineo', '')
+            salud.eps = request.POST.get('salud_eps', '')
+            salud.pension = request.POST.get('salud_pension', '')
+            salud.arl = request.POST.get('salud_arl', '')
+            salud.alergias = request.POST.get('salud_alergias', '')
+            salud.contacto_emergencia = request.POST.get('salud_contacto_emergencia', '')
+            salud.telefono_emergencia = request.POST.get('salud_telefono_emergencia', '')
+            salud.save()
+        else:
+            SaludEmpleado.objects.create(
+                empleado=empleado,
+                grupo_sanguineo=request.POST.get('salud_grupo_sanguineo', ''),
+                eps=request.POST.get('salud_eps', ''),
+                pension=request.POST.get('salud_pension', ''),
+                arl=request.POST.get('salud_arl', ''),
+                alergias=request.POST.get('salud_alergias', ''),
+                contacto_emergencia=request.POST.get('salud_contacto_emergencia', ''),
+                telefono_emergencia=request.POST.get('salud_telefono_emergencia', '')
+            )
 
         messages.success(request, '✅ Empleado actualizado correctamente')
 
@@ -421,7 +465,9 @@ def detalle_empleado(request, id):
         'salud': salud,
         'dotaciones': dotaciones,
         'equipos': equipos,
+        'documentos': documentos,
         'editando': editando
+        
     })
 
 @login_required
@@ -1107,3 +1153,101 @@ def eliminar_equipo_inventario(request, id):
     equipo.delete()
 
     return redirect('inventario_equipos')
+
+@login_required
+def subir_documento(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+
+    if request.method == 'POST':
+
+        DocumentoEmpleado.objects.create(
+            empleado=empleado,
+            nombre=request.POST['nombre'],
+            archivo=request.FILES['archivo']
+        )
+
+        messages.success(request, '✅ Documento subido correctamente')
+
+        return redirect(f'/rrhh/empleados/{id}/')
+
+    return render(request, 'rrhh/subir_documento.html', {
+        'empleado': empleado
+    })
+
+@login_required
+def eliminar_documento(request, id):
+
+    documento = DocumentoEmpleado.objects.get(id=id)
+
+    empleado_id = documento.empleado.id
+
+    documento.delete()
+
+    messages.success(
+        request,
+        '🗑️ Documento eliminado correctamente'
+    )
+
+    return redirect(f'/rrhh/empleados/{empleado_id}/')
+
+@login_required
+def contrato_empleado(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+
+    contrato = {
+        'numero': f'CT-2026-{empleado.id}',
+        'duracion': '1 año'
+    }
+
+    return render(
+        request,
+        'rrhh/contratos/contrato_base.html',
+        {
+            'empleado': empleado,
+            'contrato': contrato
+        }
+    )
+
+@login_required
+def generar_contrato_pdf(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+
+    contrato = {
+        'numero': f'CT-2026-{empleado.id}',
+        'duracion': '1 año'
+    }
+
+    logo_path = os.path.join(
+        settings.BASE_DIR,
+        'static',
+        'img',
+        'logo-cointeca.png'
+    )
+
+    html_string = render_to_string(
+        'rrhh/contratos/contrato_base.html',
+        {
+            'empleado': empleado,
+            'contrato': contrato,
+            'logo_path': logo_path
+        }
+    )
+
+    response = HttpResponse(
+        content_type='application/pdf'
+    )
+
+    response['Content-Disposition'] = (
+        f'inline; filename="contrato_{empleado.id}.pdf"'
+    )
+
+    HTML(
+        string=html_string,
+        base_url=request.build_absolute_uri('/')
+    ).write_pdf(response)
+
+
+    return response

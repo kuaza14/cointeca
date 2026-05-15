@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls.static import static
 from core.views import (
     inicio, 
     login_view, 
@@ -31,6 +32,7 @@ from core.views import (
     rrhh,
     agregar_dotacion,
     crear_empleado,
+    detalle_empleado,
     eliminar_empleado,
     certificacion_laboral,
     asignar_equipo,
@@ -40,10 +42,15 @@ from core.views import (
     inventario_equipos,
     crear_equipo_inventario,
     editar_equipo_inventario,
-    eliminar_equipo_inventario
+    eliminar_equipo_inventario,
+    subir_documento,
+    eliminar_documento,
+    contrato_empleado,
+    generar_contrato_pdf
 ) 
-from core.views import detalle_empleado
+
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -88,6 +95,14 @@ urlpatterns = [
     path('rrhh/inventario/', inventario_equipos, name='inventario_equipos'),
     path('rrhh/inventario/crear/', crear_equipo_inventario, name='crear_equipo_inventario'),
     path('rrhh/inventario/<int:id>/editar/', editar_equipo_inventario, name='editar_equipo_inventario'),
-    path('rrhh/inventario/<int:id>/eliminar/', eliminar_equipo_inventario, name='eliminar_equipo_inventario')
-
+    path('rrhh/inventario/<int:id>/eliminar/', eliminar_equipo_inventario, name='eliminar_equipo_inventario'),
+    path('rrhh/empleados/<int:id>/subir-documento/', subir_documento, name='subir_documento'),
+    path('rrhh/documentos/<int:id>/eliminar/', eliminar_documento, name='eliminar_documento'),
+    path('rrhh/empleados/<int:id>/contrato/', contrato_empleado, name='contrato_empleado'),
+    path('rrhh/empleados/<int:id>/contrato/pdf/', generar_contrato_pdf, name='generar_contrato_pdf'),
 ]
+
+urlpatterns += static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+)

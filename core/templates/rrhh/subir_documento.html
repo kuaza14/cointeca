@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+    📎 Subir Documento
+</h1>
+
+<a
+    href="/rrhh/empleados/{{ empleado.id }}/"
+    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+>
+    ← Volver
+</a>
+
+<div class="bg-white shadow rounded p-6 mt-6 max-w-2xl">
+
+    <form method="POST" enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <div class="mb-4">
+
+            <label class="font-semibold block mb-2">
+                Nombre documento
+            </label>
+
+            <input
+                type="text"
+                name="nombre"
+                class="w-full border rounded p-2"
+                placeholder="Ej: Contrato laboral"
+                required
+            >
+
+        </div>
+
+        <div class="mb-6">
+
+            <label class="font-semibold block mb-2">
+                Archivo
+            </label>
+
+            <input
+                type="file"
+                name="archivo"
+                class="w-full border rounded p-2"
+                required
+            >
+
+        </div>
+
+        <button
+            class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
+        >
+            Guardar documento
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

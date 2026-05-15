@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto bg-white shadow p-10">
+
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-bold">
+            CONTRATO LABORAL
+        </h1>
+    </div>
+
+    <p class="mb-4 text-justify">
+        Entre la empresa <strong>COINTECA S.A.S</strong>
+        y el trabajador
+        <strong>{{ empleado.nombre_completo }}</strong>,
+        identificado con cédula
+        <strong>{{ empleado.documento }}</strong>,
+        se celebra el presente contrato laboral.
+    </p>
+
+    <p class="mb-4 text-justify">
+        El trabajador desempeñará el cargo de
+        <strong>{{ empleado.cargo }}</strong>
+        en el área de
+        <strong>{{ empleado.area }}</strong>.
+    </p>
+
+    <p class="mb-4 text-justify">
+        El salario asignado será de
+        <strong>${{ empleado.salario }}</strong>.
+    </p>
+
+    <p class="mb-4 text-justify">
+        La fecha de ingreso del trabajador es:
+        <strong>{{ empleado.fecha_ingreso }}</strong>.
+    </p>
+
+    <div class="mt-20 grid grid-cols-2 gap-10">
+
+        <div class="text-center">
+            <hr class="mb-2">
+            EMPRESA
+        </div>
+
+        <div class="text-center">
+            <hr class="mb-2">
+            TRABAJADOR
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

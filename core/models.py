@@ -155,47 +155,167 @@ class SeguimientoFacturacion(models.Model):
         return f"{self.proyecto.nombre} - {self.mes} {self.anio}"
 
 class Empleado(models.Model):
-    # 1. INFORMACION PERSONAL
+
+    # =========================================================
+    # 1. INFORMACIÓN PERSONAL
+    # =========================================================
     nombre_completo = models.CharField(max_length=200)
-    documento = models.CharField(max_length=20, unique=True)
-    ciudad_expedicion = models.CharField(max_length=100, blank=True)
+
+    documento = models.CharField(
+        max_length=20,
+        unique=True,
+        
+    )
+
+    ciudad_expedicion = models.CharField(
+        max_length=100,
+        blank=True
+    )
 
     fecha_nacimiento = models.DateField()
-    nacionalidad = models.CharField(max_length=50, default='Colombiano')
+
+    nacionalidad = models.CharField(
+        max_length=50,
+        default='Colombiano'
+    )
 
     direccion = models.TextField()
+
     telefono = models.CharField(max_length=20)
+
     correo = models.EmailField()
 
-    # 2. PERFIL
-    cargo = models.CharField(max_length=100)
-    area = models.CharField(max_length=100)
-    nivel_academico = models.CharField(max_length=100)
-    profesion = models.CharField(max_length=100, blank=True)
-    habilidades = models.TextField(blank=True)
-    idiomas = models.CharField(max_length=100, default='Español')
+    estado_civil = models.CharField(
+        max_length=50,
+        blank=True
+    )
 
-    # 3. CONTRATO
+    # =========================================================
+    # 2. PERFIL PROFESIONAL
+    # =========================================================
+    cargo = models.CharField(max_length=100)
+
+    area = models.CharField(max_length=100)
+
+    nivel_academico = models.CharField(max_length=100)
+
+    profesion = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    habilidades = models.TextField(blank=True)
+
+    idiomas = models.CharField(
+        max_length=100,
+        default='Español'
+    )
+
+    # =========================================================
+    # 3. INFORMACIÓN CONTRACTUAL
+    # =========================================================
     fecha_ingreso = models.DateField()
 
     TIPO_CONTRATO = [
         ('fijo', 'Fijo'),
         ('indefinido', 'Indefinido'),
         ('obra', 'Obra o labor'),
+        ('aprendizaje', 'Aprendizaje'),
     ]
-    tipo_contrato = models.CharField(max_length=20, choices=TIPO_CONTRATO)
 
-    salario = models.DecimalField(max_digits=12, decimal_places=2)
+    tipo_contrato = models.CharField(
+        max_length=20,
+        choices=TIPO_CONTRATO
+    )
+
+    salario = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
 
     JORNADA = [
         ('diurna', 'Diurna'),
         ('nocturna', 'Nocturna'),
+        ('mixta', 'Mixta'),
     ]
-    jornada = models.CharField(max_length=20, choices=JORNADA)
+
+    jornada = models.CharField(
+        max_length=20,
+        choices=JORNADA
+    )
 
     jefe = models.CharField(max_length=150)
 
-    estado = models.CharField(max_length=20, default='activo')
+    estado = models.CharField(
+        max_length=20,
+        default='activo'
+    )
+
+    # =========================================================
+    # 4. CONTACTO DE EMERGENCIA
+    # =========================================================
+    contacto_emergencia = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    telefono_emergencia = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
+    parentesco_emergencia = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    # =========================================================
+    # 5. SEGURIDAD SOCIAL
+    # =========================================================
+    grupo_sanguineo = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True
+    )
+
+    eps = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    arl = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    afp = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    cesantias = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    alergias = models.TextField(blank=True)
+
+    # 6. INFORMACIÓN ADICIONAL
+    observaciones = models.TextField(blank=True)
+
+    fecha_retiro = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    motivo_retiro = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.nombre_completo} - {self.documento}"
@@ -273,4 +393,54 @@ class InventarioEquipo(models.Model):
     def __str__(self):
         return f"{self.equipo} - {self.serial}"
 
+class Contrato(models.Model):
 
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    tipo_contrato = models.CharField(max_length=100)
+
+    fecha_inicio = models.DateField()
+
+    fecha_fin = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    salario = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    cargo = models.CharField(max_length=100)
+
+    estado = models.CharField(
+        max_length=50,
+        default='Activo'
+    )
+
+    observaciones = models.TextField(blank=True)
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.empleado.nombre_completo} - {self.tipo_contrato}"
+
+class DocumentoEmpleado(models.Model):
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    nombre = models.CharField(max_length=200)
+
+    archivo = models.FileField(
+        upload_to='documentos_rrhh/'
+    )
+
+    fecha = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nombre

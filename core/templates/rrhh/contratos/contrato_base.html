@@ -1,0 +1,334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrato Laboral - {{ empleado.nombre_completo }}</title>
+    <link rel="stylesheet" href="{% static 'css/contrato.css' %}">
+</head>
+
+<body>
+
+    <div class="acciones">
+        <button onclick="window.print()" class="btn-print">
+            🖨️ Imprimir contrato
+        </button>
+    </div>
+
+    <!-- MARCA DE AGUA -->
+    <div class="watermark">COINTECA SAS</div>
+
+    <!-- PÁGINA 1 -->
+    <div class="documento">
+        <!-- ENCABEZADO -->
+        <div class="header">
+            <table class="encabezado-table">
+                <tr>
+                    <td class="logo-cell" rowspan="2">
+                        <img src="{% static 'img/logo-cointeca.png' %}" class="logo">
+                    </td>
+                    
+                    <td class="titulo-cell-pequeño" class="">
+                        Tipo de documento: Formato
+                    </td>
+                    
+                    <td class="info-cell" rowspan="2">
+                        <table class="mini-table">
+                            <tr>
+                                <td>Código: RRHH-RE-01</td>
+                            </tr>
+
+                            <tr>
+                                <td>Versión: 2</td>
+                            </tr>
+
+                            <tr>
+                                <td>Fecha: 02-03-2026</td>
+                            </tr>
+
+                            <tr>
+                                <td>Página: 1 de 2</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="titulo-cell">
+                        CONTRATO INDIVIDUAL DE TRABAJO
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="contenido">
+
+            <!-- DATOS GENERALES -->
+            <h2>1. DATOS GENERALES</h2>
+            <table class="datos-table">
+                <tr><td>Empleador</td><td>Comercializadora de ingeniería & tecnologías aplicadas S.A.S - COINTECA SAS</td></tr>
+                <tr><td>NIT</td><td>900.768.648-3</td></tr>
+                <tr><td>Domicilio</td><td>Carrera 8a # 49-53 Santiago De Cali</td></tr>
+                <tr><td>Nombre del Trabajador</td><td>{{ empleado.nombre_completo }}</td></tr>
+                <tr><td>CC No.</td><td>{{ empleado.documento }}</td></tr>
+                <tr><td>Dirección</td><td>{{ empleado.direccion }}</td></tr>
+                <tr><td>N.º contacto telefónico</td><td>{{ empleado.telefono }}</td></tr>
+                <tr><td>Correo electrónico</td><td>{{ empleado.correo }}</td></tr>
+                <tr><td>Tipo de contrato</td><td>{{ empleado.tipo_contrato }}</td></tr>
+                <tr><td>Cargo</td><td>{{ empleado.cargo }}</td></tr>
+                <tr><td>Fecha de ingreso</td><td>{{ empleado.fecha_ingreso }}</td></tr>
+            </table>
+
+            <p>
+                Entre los suscritos a saber, por una parte, COINTECA SAS identificada con NIT 900.768.648-3 
+                Representada legalmente por MAYRA ALEJANDRA OCORÓ, mayor de edad y vecina del Municipio de Padilla, 
+                identificada como aparece al pie de su firma, quien en adelante se llamará <strong>"EL EMPLEADOR"</strong> 
+                y por otra <strong>{{ empleado.nombre_completo }}</strong>, mayor de edad y vecino(a) de la ciudad de 
+                {{ empleado.direccion }}, identificado(a) con cedula de ciudadanía No. <strong>{{ empleado.documento }}</strong>, 
+                con nacionalidad COLOMBIANA, quien actúa en nombre propio y quien en adelante se llamará 
+                <strong>"EL TRABAJADOR"</strong>, se ha celebrado el contrato de trabajo, el cual se regirá por las normas 
+                del Código Sustantivo del Trabajo, el Reglamento Interno de la empresa y por las siguientes clausulas:
+            </p>
+
+            <h2>CLÁUSULA PRIMERA: OBJETO Y FUNCIONES.</h2>
+            <p>
+                EL EMPLEADOR contrata los servicios personales de EL TRABAJADOR, para que éste desempeñe en forma 
+                exclusiva las funciones inherentes al cargo de <strong>{{ empleado.cargo }}</strong>, en Carrera 8a # 49-53 
+                Santiago De Cali, y su desempeño de las actividades será donde sea enviado por motivo de las funciones 
+                de su cargo. Para desarrollar las actividades contenidas en el objeto, así como la ejecución de las tareas 
+                ordinarias y anexas al mencionado cargo, de conformidad con los reglamentos, ordenes e instrucciones que 
+                le imparta EL EMPLEADOR, observando en su cumplimiento la diligencia y el cuidado necesarios.
+            </p>
+            <p>
+                <strong>PARÁGRAFO PRIMERO:</strong> Las funciones asociadas a su cargo son, entre otras: las propias del 
+                cargo de {{ empleado.cargo }}, brindar el soporte necesario para el desarrollo efectivo de las actividades 
+                operativas.
+            </p>
+            <p>
+                <strong>PARÁGRAFO SEGUNDO:</strong> Las partes acuerdan expresamente que EL TRABAJADOR durante la vigencia 
+                de este contrato de trabajo, no podrá prestar directa o indirectamente sus servicios laborales a otros 
+                contratantes ni aportar su fuerza de trabajo en forma que afecte su salud u ocasione el desgaste de su 
+                organismo y esto le impida prestar eficazmente el servicio contenido en este contrato.
+            </p>
+            <p>
+                <strong>PARÁGRAFO TERCERO:</strong> EL TRABAJADOR durante la vigencia del contrato podrá realizar labores 
+                que no fueran inherentes al cargo contratado, para desarrollar temporalmente las actividades contenidas en 
+                el objeto de la empresa usuaria, de conformidad con los reglamentos, ordenes e instrucciones que le imparta 
+                EL EMPLEADOR.
+            </p>
+            <p>
+                <strong>PARÁGRAFO CUARTO:</strong> El incumplimiento de una de las obligaciones contenidas en esta cláusula, 
+                por una sola vez, será considerado como violación grave, para todos los efectos legales.
+            </p>
+
+            <h2>CLÁUSULA SEGUNDA: OBLIGACIONES DE EL TRABAJADOR.</h2>
+            <p>Además de las obligaciones determinadas en la Ley y en los reglamentos, EL TRABAJADOR se compromete a cumplir las siguientes obligaciones especiales:</p>
+            <p>1) Poner al servicio de EL EMPLEADOR toda su capacidad normal de trabajo, en el desempeño de las funciones propias del cargo contratado.</p>
+            <p>2) Llenar los registros de asistencia al lugar de trabajo.</p>
+            <p>3) Cumplir el contrato de manera cuidadosa en el lugar, tiempo y condiciones que EL EMPLEADOR le señale y de acuerdo con los horarios que se fijen.</p>
+            <p>4) Llegar oportunamente al sitio de trabajo conforme a lo pactado y cumplir el horario establecido.</p>
+            <p>5) Guardar absoluta y estricta reserva sobre los hechos, documentos e informaciones que lleguen a su conocimiento por razón de su oficio.</p>
+
+        </div>
+
+        <div class="page-number">Página 1 de 2</div>
+    </div>
+
+    <!-- PÁGINA 2 -->
+    <div class="documento">
+        <!-- ENCABEZADO (REPETIDO) -->
+        <div class="header">
+            <table class="encabezado-table">
+                <tr>
+                    <td class="logo-cell" rowspan="2">
+                        <img src="{% static 'img/logo-cointeca.png' %}" class="logo">
+                    </td>
+                    
+                    <td class="titulo-cell-pequeño">
+                        Tipo de documento: Formato
+                    </td>
+                    
+                    <td class="info-cell" rowspan="2">
+                        <table class="mini-table">
+                            <tr>
+                                <td>Código: RRHH-RE-01</td>
+                            </tr>
+
+                            <tr>
+                                <td>Versión: 2</td>
+                            </tr>
+
+                            <tr>
+                                <td>Fecha: 02-03-2026</td>
+                            </tr>
+
+                            <tr>
+                                <td>Página: 2 de 2</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="titulo-cell">
+                        CONTRATO INDIVIDUAL DE TRABAJO
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="contenido">
+
+            <h2>CLÁUSULA SEGUNDA (CONTINUACIÓN):</h2>
+            <p>6) Evitar cualquier disminución intencional del ritmo de trabajo o suspensión de labores injustificables.</p>
+            <p>7) Mantener relaciones respetuosas y morales con los directivos y demás compañeros.</p>
+            <p>8) Responder económicamente por las pérdidas de los dineros y demás bienes que estén bajo su manejo y responsabilidad.</p>
+            <p>9) Ayudar al cuidado y ejecución de las labores en el trabajo, prevenir los accidentes de trabajo y las enfermedades profesionales.</p>
+            <p>10) Presentarse al trabajo en óptimas condiciones para laborar, no alterados por estado de embriaguez o bajo la influencia de sustancias psicoactivas.</p>
+            <p>11) Los correos electrónicos y mensajes vía WhatsApp referentes a asuntos laborales serán atendidos de manera prioritaria durante la jornada laboral.</p>
+            <p>12) EL TRABAJADOR que presente incapacidad, deberá entregarla dentro de los dos (2) días hábiles siguientes a la expedición de la misma.</p>
+            <p>13) Cumplir con las demás obligaciones legales y reglamentarias.</p>
+
+            <h2>CLÁUSULA TERCERA: REMUNERACIÓN.</h2>
+            <p>
+                EL EMPLEADOR pagará a EL TRABAJADOR, un salario mensual de 
+                <strong>${{ empleado.salario }}</strong> M/CTE. Adicionalmente, se reconocerá el auxilio de transporte 
+                legal vigente si a ello hubiere lugar.
+            </p>
+            <p><strong>PARÁGRAFO PRIMERO:</strong> EL EMPLEADOR tiene organizado el pago del salario MES VENCIDO.</p>
+            <p><strong>PARÁGRAFO SEGUNDO:</strong> PAGOS QUE NO CONSTITUYEN SALARIO. Las partes expresamente acuerdan 
+            que lo que reciba el trabajador adicional a su salario ordinario, ya sean beneficios o auxilios habituales u 
+            ocasionales, no constituye salario acogiéndonos al Artículo 15, Ley 50 de 1990.</p>
+            <p><strong>PARÁGRAFO TERCERO:</strong> FORMA DE PAGO. El valor del salario será cancelado mediante transferencia 
+            electrónica en la entidad bancaria y cuenta que el trabajador acredite.</p>
+
+            <h2>CLÁUSULA CUARTA: DURACIÓN, PRÓRROGA Y JORNADA DEL CONTRATO.</h2>
+            <p>
+                El presente contrato tendrá una duración de <strong>{{ empleado.tipo_contrato }}</strong>, con fecha de 
+                inicio: <strong>{{ empleado.fecha_ingreso }}</strong>. Si antes de la fecha de vencimiento ninguna de las 
+                partes avisare por escrito a la otra su determinación de no prorrogarlo, con una antelación no inferior a 
+                treinta (30) días, el contrato se entenderá renovado por un periodo igual al inicialmente pactado.
+            </p>
+            <p>
+                <strong>PARÁGRAFO:</strong> La jornada laboral ordinaria mínima será de cuarenta y cuatro (44) horas 
+                semanales, en los turnos y dentro de las horas señaladas por EL EMPLEADOR. Horario: lunes a viernes de 
+                7:00 a.m. a 4:30 p.m. y sábados de 7:00 am a 11:00 am.
+            </p>
+
+            <h2>CLÁUSULA QUINTA: PERÍODO DE PRUEBA.</h2>
+            <p>
+                EL TRABAJADOR está sujeto a un periodo de prueba de dos (02) meses, y por consiguiente cualquiera de las 
+                PARTES podrá terminar el contrato unilateralmente durante dicho periodo, sin que se cause el pago de 
+                indemnización alguna, como lo establece el Art. 78 del C.S.T.
+            </p>
+
+            <h2>CLÁUSULA SEXTA: FALTAS GRAVES.</h2>
+            <p>Son justas causas para dar por terminado unilateralmente este contrato las enumeradas en los Arts. 62 y 63 del C.S.T., y además las siguientes faltas que se califican expresamente como graves:</p>
+            <p>a) La violación de cualquiera de sus obligaciones y prohibiciones legales, contractuales o reglamentarias.</p>
+            <p>b) El retardo de diez (10) minutos en la hora de entrada sin excusa suficiente.</p>
+            <p>c) La falta en el trabajo sin excusa previa.</p>
+            <p>d) La ejecución de labores remuneradas al servicio de terceros sin autorización previa.</p>
+            <p>e) La revelación de secretos y datos reservados de EL EMPLEADOR.</p>
+            <p>f) Todo acto de violencia contra el personal directivo o compañeros de trabajo.</p>
+            <p>g) Llegar embriagado o consumir dentro de la empresa licores o drogas enervantes.</p>
+            <p>h) El incumplimiento de las funciones específicas asignadas por la Empresa.</p>
+            <p>i) Utilizar los recursos de la empresa para uso personal.</p>
+            <p>j) El uso indebido y/o negligencia en el cuidado de la dotación y demás implementos de seguridad industrial.</p>
+
+            <h2>CLÁUSULA SÉPTIMA: ELEMENTOS Y HERRAMIENTAS.</h2>
+            <p>
+                Los elementos, herramientas y equipos que se suministren a EL TRABAJADOR deben ser conservados y 
+                devueltos a la Empresa a la terminación del contrato mediante acta de entrega. EL TRABAJADOR pagará 
+                el valor comercial del objeto dañado o perdido cuando ocurriesen daños o pérdidas no imputables al 
+                uso normal.
+            </p>
+
+            <h2>CLÁUSULA OCTAVA: INVENCIONES Y DESCUBRIMIENTOS.</h2>
+            <p>
+                Los derechos patrimoniales derivados de las invenciones o descubrimientos realizados por EL TRABAJADOR 
+                pertenecen a EL EMPLEADOR, de acuerdo con la ley 23 de 1982.
+            </p>
+
+            <h2>CLÁUSULA NOVENA: REGLAMENTOS.</h2>
+            <p>
+                Forman parte del presente contrato los reglamentos de EL EMPLEADOR: Reglamento Interno de Trabajo, 
+                Reglamento de Higiene y Seguridad Industrial y Manual de Funciones.
+            </p>
+
+            <h2>CLÁUSULA DÉCIMA: CLÁUSULA DE CONFIDENCIALIDAD.</h2>
+            <p>
+                EL TRABAJADOR se compromete a mantener un convenio de confiabilidad especial en cumplimiento a la 
+                normatividad relacionada con la protección de datos personales (Ley 1581 de 2012). Toda información 
+                conocida por EL TRABAJADOR relacionada con datos personales es completamente reservada. La violación 
+                de este acuerdo será considerada falta grave y causal de terminación contractual con justa causa.
+            </p>
+
+            <h2>CLÁUSULA DÉCIMA PRIMERA: AUTORIZACIÓN PARA EL TRATAMIENTO DE DATOS PERSONALES.</h2>
+            <p>
+                EL TRABAJADOR autoriza expresamente a EL EMPLEADOR para realizar la recolección, almacenamiento, uso, 
+                circulación y tratamiento de sus datos personales, incluyendo datos sensibles como huellas digitales, 
+                fotografías y videos, conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013.
+            </p>
+
+            <h2>CLÁUSULA DÉCIMA SEGUNDA: MODIFICACIÓN DE LAS CONDICIONES LABORALES.</h2>
+            <p>
+                EL TRABAJADOR acepta todas las modificaciones de sus condiciones laborales determinadas por EL EMPLEADOR 
+                en ejercicio de su poder subordinante, siempre que no afecten su honor, dignidad o sus derechos mínimos, 
+                de conformidad con el artículo 23 del C.S.T.
+            </p>
+
+            <h2>CLÁUSULA DÉCIMA TERCERA: DIRECCIÓN PARA NOTIFICACIÓN.</h2>
+            <p>
+                EL TRABAJADOR se compromete a informar por escrito cualquier cambio en su dirección de residencia 
+                (<strong>{{ empleado.direccion }}</strong>), teniéndose como suya la última dirección registrada.
+            </p>
+
+            <h2>CLÁUSULA DÉCIMA CUARTA: EFECTOS.</h2>
+            <p>
+                El presente contrato reemplaza en su integridad cualquier otro contrato, verbal o escrito, celebrado 
+                entre las partes con anterioridad.
+            </p>
+
+            <h2>CLÁUSULA DÉCIMA QUINTA: EXCLUSIÓN DE VÍNCULO ADICIONAL.</h2>
+            <p>
+                EL TRABAJADOR no adquiere, ni adquirirá, por razón de la suscripción y ejecución del presente contrato, 
+                vínculo laboral alguno con los contratantes de EL EMPLEADOR.
+            </p>
+
+            <p style="margin-top: 20px;">
+                Para constancia se firma en dos ejemplares del mismo tenor y valor, en la ciudad de Santiago de Cali, 
+                a los <strong>{{ empleado.fecha_ingreso }}</strong>.
+            </p>
+
+            <!-- FIRMAS -->
+            <div class="firmas">
+
+                <div class="firma-box">
+                    <div class="linea">
+                        ___________________________
+                    </div>
+
+                    <strong>MAYRA ALEJANDRA OCORO POSSU</strong><br>
+                    C.C. No. 1.060.416.368 de Padilla<br>
+                    <em>Por el EMPLEADOR</em>
+                </div>
+
+                <div class="firma-box" style="float:right;">
+                    <div class="linea">
+                        ___________________________
+                    </div>
+
+                    <strong>{{ empleado.nombre_completo|upper }}</strong><br>
+                    C.C. No. {{ empleado.documento }}<br>
+                    <em>EL TRABAJADOR</em>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="page-number">Página 2 de 2</div>
+    </div>
+
+</body>
+</html>

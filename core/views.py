@@ -41,8 +41,7 @@ from reportlab.lib import colors
 from reportlab.platypus.flowables import HRFlowable
 from weasyprint import HTML
 from django.template.loader import render_to_string
-from django.conf import settings 
-import os
+from .services.contracts import build_contract_context
 
 
 # Vista de inicio 
@@ -1195,45 +1194,24 @@ def eliminar_documento(request, id):
 def contrato_empleado(request, id):
 
     empleado = Empleado.objects.get(id=id)
-
-    contrato = {
-        'numero': f'CT-2026-{empleado.id}',
-        'duracion': '1 año'
-    }
+    context = build_contract_context(empleado)
 
     return render(
         request,
-        'rrhh/contratos/contrato_base.html',
-        {
-            'empleado': empleado,
-            'contrato': contrato
-        }
+        'rrhh/contratos/contrato_modular.html',
+        context
     )
 
 @login_required
 def generar_contrato_pdf(request, id):
 
     empleado = Empleado.objects.get(id=id)
-
-    contrato = {
-        'numero': f'CT-2026-{empleado.id}',
-        'duracion': '1 año'
-    }
-
-    logo_path = os.path.join(
-        settings.BASE_DIR,
-        'static',
-        'img',
-        'logo-cointeca.png'
-    )
+    context = build_contract_context(empleado)
+    context['is_pdf'] = True
 
     html_string = render_to_string(
-        'rrhh/contratos/contrato_base.html',
-        {
-            'empleado': empleado,
-            'contrato': contrato,
-            'logo_path': logo_path
-        }
+        'rrhh/contratos/contrato_modular.html',
+        context
     )
 
     response = HttpResponse(

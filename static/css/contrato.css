@@ -127,11 +127,17 @@ body{
 
 /* CONTENIDO - CON ESPACIADO CORRECTO */
 .contenido{
-    position: relative;
+    /* position: relative; */
     z-index: 1;
-    padding: 0 12mm 25mm 12mm;
+    padding-right: 70px;
+    padding-bottom: 60px;
+    padding-left: 70px;
+    /* Márgenes amplios: 30mm a los lados */
     box-sizing: border-box;
-    min-height: 250mm;
+    min-height: 120mm;
+    margin: 0 auto;
+    max-width: 250mm;
+    /* Ancho máximo para que el contenido se vea centrado */
 }
 
 h2{
@@ -149,8 +155,9 @@ p{
 
 /* TABLA DATOS */
 .datos-table{
-    width: 100%;
+    width: 90%;
     border-collapse: collapse;
+    margin: 0 auto 12px auto;
     margin-bottom: 12px;
     font-size: 10px;
 }
@@ -186,16 +193,59 @@ p{
     height: 30px;
 }
 
-/* NUMERACIÓN DE PÁGINAS */
-.page-number{
-    text-align: center;
+/* FOOTER CON DATOS DE EMPRESA */
+.footer-empresa{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 8mm 12mm;
+    box-sizing: border-box;
+    background: white;
+    border-top: 2px solid #003d6b;
+    z-index: 998;
+    font-size: 9px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-info{
+    flex: 1;
+    padding-right: 20px;
+}
+
+.footer-info a{
+    color: #003d6b;
+    text-decoration: none;
+}
+
+.footer-info p{
+    margin: 2px 0;
+    text-align: left;
     font-size: 8px;
-    color: #999;
-    margin-top: 5px;
+}
+
+.footer-pagina{
+    text-align: right;
+    font-size: 10px;
+    font-weight: bold;
+    color: #003d6b;
+    background: #90EE90;
+    padding: 4px 12px;
+    border-radius: 4px;
+    min-width: 60px;
+}
+
+/* NUMERACIÓN DE PÁGINAS */
+.pageNumber::after {
+    content: counter(page) " de " counter(pages);
 }
 
 /* IMPRESIÓN */
 @media print{
+    
     body{
         background: white;
         padding: 0;
@@ -208,10 +258,13 @@ p{
 
     .documento{
         width: 100%;
-        padding: 0;
         margin: 0;
+        padding-top: 120px;
+        padding-bottom: 90px;
+        padding-left: 20px;
+        padding-right: 20px;
+        box-sizing: border-box;
         box-shadow: none;
-        page-break-after: always;
     }
 
     .documento:last-child {
@@ -223,21 +276,19 @@ p{
         top: 0;
         left: 0;
         right: 0;
-        width: 100%;
-        padding: 8mm 12mm;
-        box-sizing: border-box;
+        height: 90px;
+        padding: 10px 20px;
         background: white;
         z-index: 999;
-        margin: 0;
-        border-bottom: 1px solid #ddd;
     }
 
     .contenido{
-        margin-top: 90px;
-        padding: 8mm 12mm 30mm 12mm;
-        box-sizing: border-box;
-        margin-bottom: 20mm;
-    }
+        padding-top: 10px;
+        margin-bottom: 100px;
+        /* margin-top: 120px; */
+        box-sizing: border-box; 
+        max-width: 100%;
+    } 
 
     .page-number{
         position: fixed;
@@ -251,6 +302,18 @@ p{
         border-top: 1px solid #ddd;
         padding-top: 3mm;
         background: white;
+    }
+
+    .footer-empresa {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 55px;
+        padding: 8px 20px;
+        background: white;
+        border-top: 2px solid #003d6b;
+        z-index: 998;
     }
 
     .watermark{

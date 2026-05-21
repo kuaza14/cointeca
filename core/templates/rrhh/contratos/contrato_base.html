@@ -1,10 +1,32 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Contrato Laboral - {{ empleado.nombre_completo }}</title>
     <link rel="stylesheet" href="{% static 'css/contrato.css' %}">
+    <script>
+        // Script para numerar páginas automáticamente
+        window.addEventListener('load', function () {
+            const documentos = document.querySelectorAll('.documento');
+            const totalPages = documentos.length;
+
+            documentos.forEach((doc, index) => {
+                const pageNum = index + 1;
+                const pageIndicator = doc.querySelector('.page-indicator');
+                if (pageIndicator) {
+                    pageIndicator.textContent = pageNum;
+                }
+
+                // Actualizar la tabla de info también
+                const paginaCell = doc.querySelector('.info-pagina');
+                if (paginaCell) {
+                    paginaCell.textContent = `Página: ${pageNum} de ${totalPages}`;
+                }
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -27,11 +49,11 @@
                     <td class="logo-cell" rowspan="2">
                         <img src="{% static 'img/logo-cointeca.png' %}" class="logo">
                     </td>
-                    
+
                     <td class="titulo-cell-pequeño" class="">
                         Tipo de documento: Formato
                     </td>
-                    
+
                     <td class="info-cell" rowspan="2">
                         <table class="mini-table">
                             <tr>
@@ -43,16 +65,28 @@
                             </tr>
 
                             <tr>
-                                <td>Fecha: 02-03-2026</td>
+                                <td>
+                                    Fecha:
+                                    <script>
+                                        const fecha = new Date();
+                                        const dia = String(fecha.getDate()).padStart(2, '0');
+                                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                                        const anio = fecha.getFullYear();
+
+                                        document.write(`${dia}-${mes}-${anio}`);
+                                    </script>
+                                </td>
                             </tr>
 
                             <tr>
-                                <td>Página: 1 de 2</td>
+                                <td>
+                                    Página: <span class="pageNumber"></span>
+                                </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
-                
+
                 <tr>
                     <td class="titulo-cell">
                         CONTRATO INDIVIDUAL DE TRABAJO
@@ -61,242 +95,565 @@
             </table>
         </div>
 
-        <div class="contenido">
+        <div class="contenido" style="max-height: 100px;">
 
             <!-- DATOS GENERALES -->
             <h2>1. DATOS GENERALES</h2>
             <table class="datos-table">
-                <tr><td>Empleador</td><td>Comercializadora de ingeniería & tecnologías aplicadas S.A.S - COINTECA SAS</td></tr>
-                <tr><td>NIT</td><td>900.768.648-3</td></tr>
-                <tr><td>Domicilio</td><td>Carrera 8a # 49-53 Santiago De Cali</td></tr>
-                <tr><td>Nombre del Trabajador</td><td>{{ empleado.nombre_completo }}</td></tr>
-                <tr><td>CC No.</td><td>{{ empleado.documento }}</td></tr>
-                <tr><td>Dirección</td><td>{{ empleado.direccion }}</td></tr>
-                <tr><td>N.º contacto telefónico</td><td>{{ empleado.telefono }}</td></tr>
-                <tr><td>Correo electrónico</td><td>{{ empleado.correo }}</td></tr>
-                <tr><td>Tipo de contrato</td><td>{{ empleado.tipo_contrato }}</td></tr>
-                <tr><td>Cargo</td><td>{{ empleado.cargo }}</td></tr>
-                <tr><td>Fecha de ingreso</td><td>{{ empleado.fecha_ingreso }}</td></tr>
+                <tr>
+                    <td>Empleador</td>
+                    <td>Comercializadora de ingeniería & tecnologías aplicadas S.A.S - COINTECA SAS</td>
+                </tr>
+                <tr>
+                    <td>NIT</td>
+                    <td>900.768.648-3</td>
+                </tr>
+                <tr>
+                    <td>Domicilio</td>
+                    <td>Carrera 8a # 49-53 Santiago De Cali</td>
+                </tr>
+                <tr>
+                    <td>Nombre del Trabajador</td>
+                    <td>{{ empleado.nombre_completo }}</td>
+                </tr>
+                <tr>
+                    <td>CC No.</td>
+                    <td>{{ empleado.documento }}</td>
+                </tr>
+                <tr>
+                    <td>Dirección</td>
+                    <td>{{ empleado.direccion }}</td>
+                </tr>
+                <tr>
+                    <td>N.º contacto telefónico</td>
+                    <td>{{ empleado.telefono }}</td>
+                </tr>
+                <tr>
+                    <td>Correo electrónico</td>
+                    <td>{{ empleado.correo }}</td>
+                </tr>
+                <tr>
+                    <td>Tipo de contrato</td>
+                    <td>{{ empleado.tipo_contrato }}</td>
+                </tr>
+                <tr>
+                    <td>Cargo</td>
+                    <td>{{ empleado.cargo }}</td>
+                </tr>
+                <tr>
+                    <td>Fecha de ingreso</td>
+                    <td>{{ empleado.fecha_ingreso }}</td>
+                </tr>
             </table>
 
             <p>
-                Entre los suscritos a saber, por una parte, COINTECA SAS identificada con NIT 900.768.648-3 
-                Representada legalmente por MAYRA ALEJANDRA OCORÓ, mayor de edad y vecina del Municipio de Padilla, 
-                identificada como aparece al pie de su firma, quien en adelante se llamará <strong>"EL EMPLEADOR"</strong> 
-                y por otra <strong>{{ empleado.nombre_completo }}</strong>, mayor de edad y vecino(a) de la ciudad de 
-                {{ empleado.direccion }}, identificado(a) con cedula de ciudadanía No. <strong>{{ empleado.documento }}</strong>, 
-                con nacionalidad COLOMBIANA, quien actúa en nombre propio y quien en adelante se llamará 
-                <strong>"EL TRABAJADOR"</strong>, se ha celebrado el contrato de trabajo, el cual se regirá por las normas 
+                Entre los suscritos a saber, por una parte, COINTECA SAS identificada con NIT 900.768.648-3
+                Representada legalmente por MAYRA ALEJANDRA OCORÓ, mayor de edad y vecina del Municipio de Padilla,
+                identificada como aparece al pie de su firma, quien en adelante se llamará <strong>"EL
+                    EMPLEADOR"</strong>
+                y por otra <strong>{{ empleado.nombre_completo }}</strong>, mayor de edad y vecino(a) de la ciudad de
+                {{ empleado.direccion }}, identificado(a) con cedula de ciudadanía No. <strong>{{ empleado.documento
+                    }}</strong>,
+                con nacionalidad COLOMBIANA, quien actúa en nombre propio y quien en adelante se llamará
+                <strong>"EL TRABAJADOR"</strong>, se ha celebrado el contrato de trabajo, el cual se regirá por las
+                normas
                 del Código Sustantivo del Trabajo, el Reglamento Interno de la empresa y por las siguientes clausulas:
             </p>
 
-            <h2>CLÁUSULA PRIMERA: OBJETO Y FUNCIONES.</h2>
+            <strong>CLÁUSULA PRIMERA: OBJETO Y FUNCIONES.</strong>
             <p>
-                EL EMPLEADOR contrata los servicios personales de EL TRABAJADOR, para que éste desempeñe en forma 
-                exclusiva las funciones inherentes al cargo de <strong>{{ empleado.cargo }}</strong>, en Carrera 8a # 49-53 
-                Santiago De Cali, y su desempeño de las actividades será donde sea enviado por motivo de las funciones 
-                de su cargo. Para desarrollar las actividades contenidas en el objeto, así como la ejecución de las tareas 
-                ordinarias y anexas al mencionado cargo, de conformidad con los reglamentos, ordenes e instrucciones que 
+                EL EMPLEADOR contrata los servicios personales de EL TRABAJADOR, para que éste desempeñe en forma
+                exclusiva las funciones inherentes al cargo de <strong>{{ empleado.cargo }}</strong>, en Carrera 8a #
+                49-53
+                Santiago De Cali, y su desempeño de las actividades será donde sea enviado por motivo de las funciones
+                de su cargo. Para desarrollar las actividades contenidas en el objeto, así como la ejecución de las
+                tareas
+                ordinarias y anexas al mencionado cargo, de conformidad con los reglamentos, ordenes e instrucciones que
                 le imparta EL EMPLEADOR, observando en su cumplimiento la diligencia y el cuidado necesarios.
-            </p>
-            <p>
-                <strong>PARÁGRAFO PRIMERO:</strong> Las funciones asociadas a su cargo son, entre otras: las propias del 
-                cargo de {{ empleado.cargo }}, brindar el soporte necesario para el desarrollo efectivo de las actividades 
-                operativas.
-            </p>
-            <p>
-                <strong>PARÁGRAFO SEGUNDO:</strong> Las partes acuerdan expresamente que EL TRABAJADOR durante la vigencia 
-                de este contrato de trabajo, no podrá prestar directa o indirectamente sus servicios laborales a otros 
-                contratantes ni aportar su fuerza de trabajo en forma que afecte su salud u ocasione el desgaste de su 
+                <strong>PARÁGRAFO PRIMERO:</strong> Las funciones asociadas a su cargo son, entre otras: las propias del
+                cargo de {{ empleado.cargo }}, brindar el soporte necesario para el desarrollo efectivo de las
+                actividades
+                operativas. <strong>PARÁGRAFO SEGUNDO:</strong> Las partes acuerdan expresamente que EL TRABAJADOR
+                durante la vigencia
+                de este contrato de trabajo, no podrá prestar directa o indirectamente sus servicios laborales a otros
+                contratantes ni aportar su fuerza de trabajo en forma que afecte su salud u ocasione el desgaste de su
                 organismo y esto le impida prestar eficazmente el servicio contenido en este contrato.
-            </p>
-            <p>
-                <strong>PARÁGRAFO TERCERO:</strong> EL TRABAJADOR durante la vigencia del contrato podrá realizar labores 
-                que no fueran inherentes al cargo contratado, para desarrollar temporalmente las actividades contenidas en 
-                el objeto de la empresa usuaria, de conformidad con los reglamentos, ordenes e instrucciones que le imparta 
-                EL EMPLEADOR.
-            </p>
-            <p>
-                <strong>PARÁGRAFO CUARTO:</strong> El incumplimiento de una de las obligaciones contenidas en esta cláusula, 
+                <strong>PARÁGRAFO TERCERO:</strong> EL TRABAJADOR durante la vigencia del contrato podrá realizar
+                labores
+                que no fueran inherentes al cargo contratado, para desarrollar temporalmente las actividades contenidas
+                en
+                el objeto de la empresa usuaria, de conformidad con los reglamentos, ordenes e instrucciones que le
+                imparta
+                EL EMPLEADOR. <strong>PARÁGRAFO CUARTO:</strong> El incumplimiento de una de las obligaciones contenidas
+                en esta cláusula,
                 por una sola vez, será considerado como violación grave, para todos los efectos legales.
+                <strong>PARÁGRAFO QUINTO:</strong> EL TRABAJADOR No podrá ceder el uso del vehículo a otras personas,
+                ni transportar personal no autorizado, ni mover el vehículo para cosas distintas a las oficialmente
+                asignadas
+                por la empresa.
+            </p>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+
+            <p>
+                <strong>CLÁUSULA SEGUNDA: OBLIGACIONES DEL “EL TRABAJADOR”.</strong> Además de las obligaciones
+                determinadas en la Ley y
+                en los reglamentos, EL TRABAJADOR se compromete a cumplir las siguientes obligaciones especiales:
+                1) A poner al servicio de EL EMPLEADOR toda su capacidad normal de trabajo, en el desempeño de las
+                funciones
+                propias de la obra o labor contratada[MO1.1] y, en las labores anexas complementarias del mismo, de
+                conformidad con
+                las ordenes e instrucciones que imparta EL EMPLEADOR, esto, a través de sus representantes autorizados,
+                en virtud
+                de la subordinación delegada. 2) Llenar los registros de asistencia al lugar de trabajo (listado de
+                asistencia o
+                huellero dactilar), elemento que será parte integral para la liquidación de su contrato de obra
+                labor[MO2.1].
+                3) Cumplir el contrato de manera cuidadosa en el lugar, tiempo y condiciones que EL EMPLEADOR le señale
+                y de acuerdo
+                con los horarios que se fijen conforme a las necesidades del servicio. Observando rigurosamente la norma
+                que le
+                fije EL EMPLEADOR para la realización de la labor a que se refiere el presente contrato. 4) Llegar
+                oportunamente al
+                sitio de trabajo conforme a lo pacado y cumplir el horario establecido, salvo aquellos casos debidamente
+                justificados
+                y comprobados de fuerza mayor o caso fortuito, o previo permiso de la autoridad superior. En caso de que
+                deba
+                ausentarse del sitio de trabajo, por cualquier motivo, debe notificar oportunamente su necesidad al
+                coordinador
+                del trabajo o autoridad superior en el sitio asignado y solicitar previamente su permiso para retirarse.
+                5)
+                Guardar absoluta y estricta reserva sobre los hechos, documentos físicos y/o electrónicas informaciones
+                y en
+                general, sobre todo los asuntos y materias que lleguen a su conocimiento por razón de su oficio por
+                causa o con
+                casión de su contrato de trabajo y cuya difusión pudiere causar perjuicio al empleador o a las entidades
+                o personas
+                en cuyos establecimientos trabaje. 6) Evitar cualquier disminución intensional del ritmo de trabajo o
+                suspensión
+                de labores injustificables e intempestivas o impedir el buen desarrollo de las labores de los demás
+                compañeros y
+                no incitar con declaraciones a que las anteriores acciones se produzcan, ni participar en la celebración
+                de ellas
+                o sumarse en las mismas, sin perjuicio de hacer conocer sus desacuerdos en materia de sus actividades y
+                dejar
+                sentadas sus protestas. 7) Mantener relaciones respetuosas y morales con los directivos, órganos de
+                vigilancia y
+                control y demás compañeros, favoreciendo un clima cordial y culto, evitando insultos, malos tratos y
+                divulgar
+                asuntos que vayan en contra de la dignidad y la moral de los compañeros de labores, que afecten su vida
+                privada.
+                8) Responder económicamente por las pérdidas de los dineros y demás bienes que estén bajo su manejo y
+                responsabilidad. 9) Ayudar al cuidado y ejecución de las labores en el trabajo, prevenir los accidentes
+                de
+                trabajo y las enfermedades profesionales, para lo cual deberán acatar las normas de higiene y seguridad
+                industrial que determine el comité paritario de seguridad y salud en el trabajo de la EMPRESA. 10)
+                Presentarse
+                al trabajo en óptimas condiciones para laborar, no alterados por estado de embriaguez o bajo la
+                influencia de
+                sustancias psicoactivas que afecte las funciones laborales y la de sus compañeros de trabajo. 11) Los
+                correos
+                electrónicos y mensajes vía WhatsApp referentes a asuntos laborales serán atendidos de manera
+                prioritaria por
+                el trabajador durante la jornada laboral o trabajo en casa, respetando siempre la vida personal y los
+                espacios
+                de descanso a los que este tiene derecho. 12) EL TRABAJADOR que presente incapacidad, deberá entregarla
+                juntos
+                con sus soportes respectivos, a EL EMPLEADOR a más tardar dentro de los dos (2) días hábiles siguientes
+                a la
+                expedición de la misma por medio de los canales dispuestos por EL EMPLEADOR. 13) Cumplir con las demás
+                obligaciones legales y reglamentarias. 14) EL TRABAJADOR es responsable de participar en la ejecución,
+                vigilancia
+                y control de los programas y actividades de Seguridad y Salud en el Trabajo, por medio de sus
+                representantes
+                en los Comités de Medicina, Higiene y Seguridad Industrial de la empresa y asistir a los cursos y
+                programas
+                educativos; asimismo, colaborará activamente con el desarrollo de los programas de Salud Ocupacional de
+                la
+                Empresa. 15) EL TRABAJADOR dará estricto cumplimiento a las normas que para la Protección del Medio
+                Ambiente
+                se han trazado, evitando el deterioro ecológico, mejorando la calidad de vida, manteniendo la
+                productividad de
+                los sistemas naturales de las regiones y conservando la calidad ambiental, tales como los suelos, la
+                hidrología,
+                la fauna y la flora y en general acatando todas las políticas del EMPLEADOR en este aspecto. 16) Cumplir
+                permanentemente con espíritu de lealtad, colaboración y disciplina con la empresa. 17) Permitir la
+                prueba de
+                alcoholimetría que se disponga a realizarle. 18) Abstenerse de retirar de las instalaciones donde
+                funcione la
+                empresa, elementos, máquinas, útiles o papelería de propiedad del EMPLEADOR sin su autorización escrita.
+                <strong>PARÁGRAFO:</strong> El trabajador deberá responder por las herramientas y objetos que hacen
+                parte
+                del vehículo. 19) Será responsable de las fotos multas que ocasione en la prestación del servicio.
+
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+
+            <p><strong>CLÁUSULA TERCERA: REMUNERACIÓN. </strong> EL EMPLEADOR pagará a EL TRABAJADOR, un salario mensual
+                de
+                <strong>${{ empleado.salario }}</strong> M/CTE. Adicionalmente, se reconocerá el auxilio de transporte
+                legal vigente si a ello hubiere lugar.<strong>PARÁGRAFO PRIMERO:</strong> EL EMPLEADOR tiene organizado
+                el pago del salario MES VENCIDO.
+                <strong>PARÁGRAFO SEGUNDO:</strong> PAGOS QUE NO CONSTITUYEN SALARIO. Las partes expresamente acuerdan
+                que lo
+                que reciba el trabajador o llegue a recibir en el futuro, adicional a su salario ordinario, ya sean
+                beneficios o auxilios habituales u ocasionales, tales como alimentación, habitación o vestuario,
+                bonificaciones ocasionales o cualquier otra que reciba, en dinero o en especie, no constituye salario
+                acogiéndonos al Artículo 15, Ley 50 de 1990. “No constituye salario las sumas que ocasionalmente y por
+                mera liberalidad recibe el empleado del empleador, como primas, bonificaciones o gratificaciones
+                ocasionales,
+                participación de utilidades, excedentes de las empresas de la economía solidaria y lo que recibe en
+                dinero o
+                en especie no para su beneficio, ni para enriquecer su patrimonio, sino para desempeñar a cabalidad sus
+                funciones, como gastos de representación, medios de transporte, elementos de trabajo y otros semejantes.
+                Tampoco las prestaciones sociales de que tratan los títulos VII y IX del C.S.T, ni los beneficioso
+                auxilios
+                habituales u ocasionales acordados convencional o contractualmente u otorgados en forma extralegal por
+                EL EMPLEADOR, cuando las partes hayan dispuesto expresamente que no constituyen salario en dinero o en
+                especie, tales como la alimentación, habitación o vestuario, las primas extralegales, de vacaciones, de
+                servicios o de navidad. (Resumen de este articulo; el trabajador solo tendrá derecho directamente a lo
+                de
+                ley, salario, primas, cesantías, vacaciones, intereses a las cesantías, dotación y auxilio de
+                transporte.),
+                <strong>PARÁGRAFO TERCERO:</strong> FORMA DE PAGO. Las partes acuerdan que el valor del salario pactado
+                en
+                la presente cláusula será cancelado a EL TRABAJADOR, mediante transferencia electrónica, en la entidad
+                bancaria
+                y cuenta que el trabajador acredite, y en caso de no tener una cuenta bancaria se compromete a abrirla
+                dentro de
+                tres (3) días posteriores a la firma del presente contrato. <strong>PARÁGRAFO CUATRO:</strong> Para este
+                efecto,
+                prestarán mérito de comprobante de pago los documentos que acrediten tal consignación. <strong>PARÁGRAFO
+                    QUINTO:</strong>
+                Según lo requerido por EL TRABAJADOR, EL EMPLEADOR podrá otorgar a EL TRABAJADOR avances o préstamos,
+                extraordinarios o periódicos, con cargo a las obligaciones laborales que obren a favor de EL TRABAJADOR,
+                avances o préstamos que EL EMPLEADOR entregará y registrará con cada pago que realice a EL TRABAJADOR,
+                directamente o efectuados a la entidad bancaria y cuenta que EL TRABAJADOR indique como documento anexo
+                a
+                este Contrato. Para este efecto, prestarán mérito de comprobante de pago los documentos que acrediten
+                tal
+                consignación. Expresamente acepta EL TRABAJADOR que los avances o préstamos que así se realicen a su
+                favor
+                NO constituyen un mayor valor de su salario ni constituyen un ingreso adicional suyo, sino que se
+                efectúan
+                con cargo a cualquier valor que obre a favor de EL TRABAJADOR, incluyendo los pagos que deba realizarle
+                EL EMPLEADOR por concepto de prestaciones sociales, indemnizaciones, liquidación laboral o cualquier
+                otro
+                concepto que legal o extralegalmente le corresponda. <strong>PARÁGRAFO SEXTO:</strong> Cuando por causa
+                emanada directa o indirectamente de la relación contractual existan obligaciones de tipo económico a
+                cargo de
+                EL TRABAJADOR y a favor del EMPLEADOR, incluyendo los avances o préstamos que se tratan en el parágrafo
+                anterior,
+                éste procederá a efectuar las deducciones a que hubiere lugar en cualquier tiempo y más concretamente, a
+                la
+                terminación del presente Contrato y la liquidación del Contrato Laboral, y así lo autoriza desde ahora
+                EL TRABAJADOR, entendiendo expresamente las partes que la presente autorización cumple las condiciones
+                de
+                orden escrita previa, aplicable para cada caso.
+
+                <strong>CLÁUSULA TERCERO: DURACIÓN, PRÓRROGA Y JORNADA DEL CONTRATO.</strong>
+                El presente contrato tendrá una duración de <strong>{{ empleado.tipo_contrato }}</strong>, con fecha de
+                inicio: <strong>{{ empleado.fecha_ingreso }}</strong>. Si antes de la fecha de vencimiento ninguna
+                de las partes avisare por escrito a la otra su determinación de no prorrogarlo, con una antelación no
+                inferior a treinta (30) días, el contrato se entenderá renovado por un periodo igual al inicialmente
+                pactado. <strong>PARÁGRAFO:</strong> Las partes pactan de común acuerdo un período de prueba
+                correspondiente a los dos
+                (2) primeros meses de labores. El detalle y los efectos de este periodo se especifican más adelante en
+                el cuerpo de este contrato.
+
+            <p>
+                El presente contrato se celebra POR OBRA O LABOR CONTRATADA, para realizar la conducción de un
+                vehículo dentro de la ejecución de las obras eléctricas y civil, estas se asignarán de acuerdo con
+                el desarrollo de la obra, las capacidades y aptitudes del Trabajador y a las necesidades del frente
+                de trabajo. No obstante, lo anterior,
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                las PARTES dejan expresa constancia de conocer y aceptar que
+                la obra mencionada, como todas las obras eléctricas y civiles, van terminando gradualmente, a medida
+                que van siendo concluidas las diferentes etapas o tramos de su ejecución, lo cual impone una disminución
+                gradual y progresiva del personal empleado en ella, concepto que expresamente conocen y aceptan las
+                PARTES del contrato. Ejecutada dicha obra o la parte de la obra pactada, se entenderá terminado el
+                contrato de trabajo, sin necesidad de preaviso alguno. <strong>PARÁGRAFO PRIMERO:</strong> La duración
+                del contrato
+                laboral está supeditada al seguimiento del desempeño laboral. En caso de no cumplir con el desempeño
+                exigido, será causal de la terminación de la labor contratada. <strong>PARÁGRAFO SEGUNDO:</strong> Las
+                partes convienen
+                en que la jornada laboral que rige el presente contrato será la siguiente: se obliga a laborar una
+                jornada ordinaria mínima de cuarenta y cuatro (44) Horas Semanales, en los turnos y dentro de las
+                horas señaladas por EL EMPLEADOR, pudiendo hacer éste ajustes o cambios de horario cuando lo estime
+                conveniente. Por el acuerdo expreso o tácito de las partes, podrán repartirse las horas de la jornada
+                ordinaria en la forma prevista en el artículo 164 del Código Sustantivo del Trabajo, modificado por el
+                Art. 23 de la Ley 50 de 1.990, teniendo en cuenta que los tiempos de descanso entre las secciones de
+                la jornada no se computan dentro de la misma, según el artículo 167 ibidem. EL TRABAJADOR se obliga
+                a laborar la jornada ordinaria en los turnos y dentro de las horas señaladas por EL EMPLEADOR, pudiendo
+                este hacer ajustes o cambios de horario cuando lo estime conveniente. Así mismo EL EMPLEADOR y
+                EL TRABAJADOR podrán acordar que la jornada semanal de cuarenta y cuatro (44) horas se realice
+                mediante jornadas diarias flexibles de trabajo, distribuidas en máximo seis (6) días a la semana,
+                En esté, el número de horas de trabajo diario podrá repartirse de manera variable durante la respectiva
+                semana y podrá ser de mínimo cuatro (4) horas continuas y hasta diez (10) horas diarias sin lugar a
+                ningún recargo por trabajo suplementario, cuando el número de horas de trabajo no exceda el promedio
+                de cuarenta y cuatro (44) horas semanales dentro de la jornada ordinaria de 7:00 a.m. a 4:30 p.m. y
+                sábados de 7:00 am a 11:00 am <STRONG>PARÁGRAFO TERCERO:</STRONG> Estas disposiciones NO aplica para los
+                trabajadores
+                considerados como de dirección, manejo y confianza, ya que ellos NO están limitados a la jornada
+                máxima laboral.
             </p>
 
-            <h2>CLÁUSULA SEGUNDA: OBLIGACIONES DE EL TRABAJADOR.</h2>
-            <p>Además de las obligaciones determinadas en la Ley y en los reglamentos, EL TRABAJADOR se compromete a cumplir las siguientes obligaciones especiales:</p>
-            <p>1) Poner al servicio de EL EMPLEADOR toda su capacidad normal de trabajo, en el desempeño de las funciones propias del cargo contratado.</p>
-            <p>2) Llenar los registros de asistencia al lugar de trabajo.</p>
-            <p>3) Cumplir el contrato de manera cuidadosa en el lugar, tiempo y condiciones que EL EMPLEADOR le señale y de acuerdo con los horarios que se fijen.</p>
-            <p>4) Llegar oportunamente al sitio de trabajo conforme a lo pactado y cumplir el horario establecido.</p>
-            <p>5) Guardar absoluta y estricta reserva sobre los hechos, documentos e informaciones que lleguen a su conocimiento por razón de su oficio.</p>
-
-        </div>
-
-        <div class="page-number">Página 1 de 2</div>
-    </div>
-
-    <!-- PÁGINA 2 -->
-    <div class="documento">
-        <!-- ENCABEZADO (REPETIDO) -->
-        <div class="header">
-            <table class="encabezado-table">
-                <tr>
-                    <td class="logo-cell" rowspan="2">
-                        <img src="{% static 'img/logo-cointeca.png' %}" class="logo">
-                    </td>
-                    
-                    <td class="titulo-cell-pequeño">
-                        Tipo de documento: Formato
-                    </td>
-                    
-                    <td class="info-cell" rowspan="2">
-                        <table class="mini-table">
-                            <tr>
-                                <td>Código: RRHH-RE-01</td>
-                            </tr>
-
-                            <tr>
-                                <td>Versión: 2</td>
-                            </tr>
-
-                            <tr>
-                                <td>Fecha: 02-03-2026</td>
-                            </tr>
-
-                            <tr>
-                                <td>Página: 2 de 2</td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="titulo-cell">
-                        CONTRATO INDIVIDUAL DE TRABAJO
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="contenido">
-
-            <h2>CLÁUSULA SEGUNDA (CONTINUACIÓN):</h2>
-            <p>6) Evitar cualquier disminución intencional del ritmo de trabajo o suspensión de labores injustificables.</p>
-            <p>7) Mantener relaciones respetuosas y morales con los directivos y demás compañeros.</p>
-            <p>8) Responder económicamente por las pérdidas de los dineros y demás bienes que estén bajo su manejo y responsabilidad.</p>
-            <p>9) Ayudar al cuidado y ejecución de las labores en el trabajo, prevenir los accidentes de trabajo y las enfermedades profesionales.</p>
-            <p>10) Presentarse al trabajo en óptimas condiciones para laborar, no alterados por estado de embriaguez o bajo la influencia de sustancias psicoactivas.</p>
-            <p>11) Los correos electrónicos y mensajes vía WhatsApp referentes a asuntos laborales serán atendidos de manera prioritaria durante la jornada laboral.</p>
-            <p>12) EL TRABAJADOR que presente incapacidad, deberá entregarla dentro de los dos (2) días hábiles siguientes a la expedición de la misma.</p>
-            <p>13) Cumplir con las demás obligaciones legales y reglamentarias.</p>
-
-            <h2>CLÁUSULA TERCERA: REMUNERACIÓN.</h2>
-            <p>
-                EL EMPLEADOR pagará a EL TRABAJADOR, un salario mensual de 
-                <strong>${{ empleado.salario }}</strong> M/CTE. Adicionalmente, se reconocerá el auxilio de transporte 
-                legal vigente si a ello hubiere lugar.
-            </p>
-            <p><strong>PARÁGRAFO PRIMERO:</strong> EL EMPLEADOR tiene organizado el pago del salario MES VENCIDO.</p>
-            <p><strong>PARÁGRAFO SEGUNDO:</strong> PAGOS QUE NO CONSTITUYEN SALARIO. Las partes expresamente acuerdan 
-            que lo que reciba el trabajador adicional a su salario ordinario, ya sean beneficios o auxilios habituales u 
-            ocasionales, no constituye salario acogiéndonos al Artículo 15, Ley 50 de 1990.</p>
-            <p><strong>PARÁGRAFO TERCERO:</strong> FORMA DE PAGO. El valor del salario será cancelado mediante transferencia 
-            electrónica en la entidad bancaria y cuenta que el trabajador acredite.</p>
-
-            <h2>CLÁUSULA CUARTA: DURACIÓN, PRÓRROGA Y JORNADA DEL CONTRATO.</h2>
-            <p>
-                El presente contrato tendrá una duración de <strong>{{ empleado.tipo_contrato }}</strong>, con fecha de 
-                inicio: <strong>{{ empleado.fecha_ingreso }}</strong>. Si antes de la fecha de vencimiento ninguna de las 
-                partes avisare por escrito a la otra su determinación de no prorrogarlo, con una antelación no inferior a 
-                treinta (30) días, el contrato se entenderá renovado por un periodo igual al inicialmente pactado.
-            </p>
-            <p>
-                <strong>PARÁGRAFO:</strong> La jornada laboral ordinaria mínima será de cuarenta y cuatro (44) horas 
-                semanales, en los turnos y dentro de las horas señaladas por EL EMPLEADOR. Horario: lunes a viernes de 
-                7:00 a.m. a 4:30 p.m. y sábados de 7:00 am a 11:00 am.
+            <P><strong>CLÁUSULA CUARTA: PERÍODO DE PRUEBA.</strong>
+                EL TRABAJADOR EL TRABAJADOR está sujeto a un periodo de prueba que corresponde a dos (02) meses o la
+                quinta parte de la duración de la obra o labor contratada, y por consiguiente cualquiera de las
+                PARTES podrá terminar el contrato unilateralmente, en cualquier momento durante dicho periodo,
+                sin que por este hecho se cause el pago de indemnización alguna, como lo establece el
+                <strong>Art. 78 del C.S.T.</strong>
             </p>
 
-            <h2>CLÁUSULA QUINTA: PERÍODO DE PRUEBA.</h2>
-            <p>
-                EL TRABAJADOR está sujeto a un periodo de prueba de dos (02) meses, y por consiguiente cualquiera de las 
-                PARTES podrá terminar el contrato unilateralmente durante dicho periodo, sin que se cause el pago de 
-                indemnización alguna, como lo establece el Art. 78 del C.S.T.
+            <p><strong>CLÁUSULA QUINTA: FALTAS GRAVES CONFIANZA Y MANEJO.</strong>
+                Si las funciones que desempeñe EL TRABAJADOR llegaren a considerarse como de
+                dirección, manejo y confianza, éste se encuentra excluido de la regulación sobre jornada máxima legal
+                y deberá trabajar el tiempo necesario para el cabal desempeño de sus funciones, sin perjuicio de cumplir
+                los horarios mínimos establecidos por EL EMPLEADOR. Para el caso de este contrato laboral, el cargo para
+                el cual es contratado EL TRABAJADOR NO es considerado como de dirección, manejo y confianza. PARÁGRAFO
+                PRIMERO: Si por cualquier circunstancia EL TRABAJADOR prestare su servicio en día dominical o festivo,
+                o en un horario adicional al mínimo establecido, no tendrá derecho a sobre remuneración alguna, si tal
+                trabajo no hubiere sido autorizado por EL EMPLEADOR previamente; no obstante lo anterior, cuando así
+                se lo requiera EL EMPLEADOR, por necesidades de la labor para la cual ha sido contratado, EL TRABAJADOR
+                se compromete a prestar sus servicios durante esos tiempos adicionales y no podrá negarse a ello,
+                excepto que medie una causa debidamente justificada para el efecto, so pena de incurrir en una falta
+                grave al cumplimiento de sus obligaciones. Esta disposición NO aplica para los trabajadores considerados
+                como de dirección, manejo y confianza, ya que ellos NO están limitados a la jornada máxima laboral.</p>
+
+
+            <P><strong> CLAUSULA SEXTA: FALTAS GRAVES.</strong>
+                Son justas causas para dar por terminado unilateralmente este contrato, por cualquiera de las partes,
+                las enumeradas en los Arts. 62 Y 63 del C.S.T., modificados por el Art. 7º del Decreto 2351/65 y además,
+                por parte de EL EMPLEADOR, las faltas que para el efecto se califiquen como graves en reglamentos y
+                demás documentos que contengan reglamentaciones, ordenes, instrucciones o prohibiciones de carácter
+                general o particular, pactos, convenciones colectivas, laudos arbitrales y las que expresamente
+                convengan calificar así en escritos que formaran parte integrante del presente contrato. Expresamente
+                se califican en este acto como faltas graves las siguientes:</P>
+
+            <p> a). La violación por parte de EL TRABAJADOR de cualquiera de sus obligaciones y prohibiciones legales,
+                contractuales o reglamentarias, en particular las contempladas como tales en el Reglamento Interno de
+                Trabajo. b). El retardo de Diez (10) minutos en la hora de entrada, en un día o dentro del mismo mes,
+                sin excusa suficiente. c). La falta en el trabajo en la mañana, en la tarde o en el turno
+                correspondiente,
+                sin excusa previa por primera vez. d). Faltar al trabajo durante el día sin excusa suficiente.
+                e). La ejecución por parte de EL TRABAJADOR de labores remuneradas al servicio de terceros, sin que
+                medie autorización previa, expresa y escrita de EL EMPLEADOR. f). Ausentarse del lugar de trabajo sin
+                permiso del empleador o sin justa causa debidamente. g). La revelación de secretos y datos reservados
+                de EL EMPLEADOR. h). Todo acto de violencia en que incurra EL TRABAJADOR fuera del servicio en contra
+                del personal directivo de la Empresa o sus compañeros de trabajo. i). La negligencia en que incurra en
+                su trabajo y por virtud de la cual se ponga en peligro la vida de sus compañeros, la seguridad del
+                establecimiento, de los elementos de trabajo o de sus máquinas, herramientas, materias primas,
+                productos en proceso o terminados. j). Realizar actos inseguros o no reportar los mismos en detrimento
+                de la salud y la vida propia y la de los demás compañeros. k). No reportar incidentes y accidentes de
+                trabajo al personal encargado o al área encargada y dentro del día siguiente a su ocurrencia.
+                l). Cambiar turno sin previa autorización de la jefatura del área por segunda vez. m). El abandono de
+                sus obligaciones y responsabilidades, sin previa autorización de su superior. n). El hecho de que
+                EL TRABAJADOR llegue embriagado a la Empresa o consuma dentro de ella licores o bebidas embriagantes, o
+                drogas enervantes aún por la primera vez. o). El incumplimiento por parte de EL TRABAJADOR de cualquiera
+                de las funciones específicas asignadas por la Empresa para su cargo a la firma del presente contrato, o
+                las que le asignen posteriormente. p). Utilizar los recursos de la empresa para uso personal.
+                q). Pelear, provocar riñas, amenazar, intimidar, coaccionar, usar lenguaje irrespetuoso o indecente,
+                (incluye maltratamientos de obra o verbales) para con sus compañeros o superiores dentro o fuera del
+                trabajo. r). Crear o levantar falsos testimonios o rumores sobre compañeros, jefes, subordinados o
+                superiores, dependientes, clientes y en general de las personas que intervienen con la empresa.
+                s). Conservar armas de cualquier clase, en el sitio de trabajo o dependencias de la empresa, excepto
+                los trabajadores contratados para fines de seguridad. t). Proporcionar ambientes tensos y de discordia
+                que pueda afectar el clima laboral. u). El uso indebido que haga de sumas de dinero entregadas como
+                anticipo de gastos u otro motivo especifico. v). Faltar a las actividades o capacitaciones programadas
+                por la empresa sin justa causa o previo permiso. w). El uso indebido y/o negligencia en el cuidado
+                de la dotación y demás implementos de seguridad industrial que le sean entregados por EL EMPLEADOR
+                con el objeto de prevenir y/o mitigar la ocurrencia de accidentes de trabajo, así como la
+                inobservancia de los procedimientos y medidas establecidas por EL EMPLEADOR para minimizar los
+                riesgos derivados de la ocurrencia de los mencionados accidentes de trabajo.
+            </P>
+            <p> <strong> PARÁGRAFO PRIMERO: </strong>
+                La tolerancia por parte de EL EMPLEADOR de alguna (s) de las anteriores causales
+                o de cualquier otra, no significan aceptación alguna a la misma y no impiden la terminación del
+                presente contrato de trabajo en forma unilateral y con justa causa.</p>
+
+
+            <p><strong>CLÁUSULA SÉPTIMA: ELEMENTOS Y HERRAMIENTAS.</strong>
+
+                Los elementos, herramientas especiales de trabajo que se suministren a EL TRABAJADOR, tales
+                como dotaciones, carnés, computadores, entre otros objetos y elementos. deben ser conservados
+                por EL TRABAJADOR y devueltos a la Empresa a la terminación del contrato de trabajo, mediante
+                acta de entrega. <strong>PARÁGRAFO PRIMERO:</strong> Responder por la integridad y el buen orden
+                de los útiles, maquinaria, equipo y cualquier clase de elementos que EL EMPLEADOR ponga bajo
+                su responsabilidad y cuidado para la correcta ejecución de las tareas a cargo de EL TRABAJADOR,
+                cuando ocurriesen daños o pérdidas no imputables al uso normal de dichos elementos,
+                EL TRABAJADOR pagará el valor comercial del objeto dañado o perdido, o el precio del arreglo,
+                siempre que a juicio de EL EMPLEADOR tal arreglo sea posible. Cualquier obligación pendiente
+                a cargo de EL TRABAJADOR y a favor de EL EMPLEADOR por este concepto, podrá ser deducida o
+                compensada, facultad cuyo ejercicio en forma expresa acepta EL TRABAJADOR. Para efectos de
+                registrar la entrega se suscribirá un acta de entrega, en la cual de forma expresa deberá
+                establecerse esta autorización de descuento.
             </p>
 
-            <h2>CLÁUSULA SEXTA: FALTAS GRAVES.</h2>
-            <p>Son justas causas para dar por terminado unilateralmente este contrato las enumeradas en los Arts. 62 y 63 del C.S.T., y además las siguientes faltas que se califican expresamente como graves:</p>
-            <p>a) La violación de cualquiera de sus obligaciones y prohibiciones legales, contractuales o reglamentarias.</p>
-            <p>b) El retardo de diez (10) minutos en la hora de entrada sin excusa suficiente.</p>
-            <p>c) La falta en el trabajo sin excusa previa.</p>
-            <p>d) La ejecución de labores remuneradas al servicio de terceros sin autorización previa.</p>
-            <p>e) La revelación de secretos y datos reservados de EL EMPLEADOR.</p>
-            <p>f) Todo acto de violencia contra el personal directivo o compañeros de trabajo.</p>
-            <p>g) Llegar embriagado o consumir dentro de la empresa licores o drogas enervantes.</p>
-            <p>h) El incumplimiento de las funciones específicas asignadas por la Empresa.</p>
-            <p>i) Utilizar los recursos de la empresa para uso personal.</p>
-            <p>j) El uso indebido y/o negligencia en el cuidado de la dotación y demás implementos de seguridad industrial.</p>
-
-            <h2>CLÁUSULA SÉPTIMA: ELEMENTOS Y HERRAMIENTAS.</h2>
+            <strong>CLÁUSULA OCTAVA: INVENCIONES Y DESCUBRIMIENTOS.</strong>
             <p>
-                Los elementos, herramientas y equipos que se suministren a EL TRABAJADOR deben ser conservados y 
-                devueltos a la Empresa a la terminación del contrato mediante acta de entrega. EL TRABAJADOR pagará 
-                el valor comercial del objeto dañado o perdido cuando ocurriesen daños o pérdidas no imputables al 
-                uso normal.
+                Los derechos patrimoniales derivados de las invenciones o descubrimientos realizados por
+                EL TRABAJADOR pertenecen a EL EMPLEADOR, sin perjuicio de los derechos morales de autor que
+                permanecerán en cabeza del creador de la obra, de acuerdo con la ley 23 de 1982 y la Decisión
+                351 de la Comisión del Acuerdo de Cartagena.
             </p>
 
-            <h2>CLÁUSULA OCTAVA: INVENCIONES Y DESCUBRIMIENTOS.</h2>
+            <strong>CLÁUSULA NOVENA: REGLAMENTOS.</strong>
             <p>
-                Los derechos patrimoniales derivados de las invenciones o descubrimientos realizados por EL TRABAJADOR 
-                pertenecen a EL EMPLEADOR, de acuerdo con la ley 23 de 1982.
+                Forman parte del presente contrato los reglamentos de EL EMPLEADOR tales como: Reglamento Interno
+                de Trabajo, Reglamento de Higiene y Seguridad Industrial y Manual de Funciones. <strong>PARÁGRAFO
+                    PRIMERO:</strong>
+                EL EMPLEADOR queda facultado para imponer a EL TRABAJADOR sanciones disciplinarias consistentes en
+                suspensión no mayor Ocho (8) días por la primera falta y hasta dos (2) meses en caso de reincidencia
+                según formato sanciones disciplinarias, de conformidad con la ley laboral vigente y Reglamento
+                Interno de Trabajo.
             </p>
 
-            <h2>CLÁUSULA NOVENA: REGLAMENTOS.</h2>
+            <strong>CLÁUSULA DÉCIMA: CLÁUSULA DE CONFIDENCIALIDAD.</strong>
             <p>
-                Forman parte del presente contrato los reglamentos de EL EMPLEADOR: Reglamento Interno de Trabajo, 
-                Reglamento de Higiene y Seguridad Industrial y Manual de Funciones.
+                EL TRABAJADOR se compromete a mantener un convenio de confiabilidad especial en cumplimiento a la
+                normatividad relacionada con la protección de datos personales (Ley 1581 de 2012)
+                <strong>PARAGRAFO PRIMERO CONFIDENCIALIDAD.</strong> información que conozca EL TRABAJADOR”
+                relacionada con datos personales de los trabajadores de la empresa como consecuencia del manejo
+                a su cargo de las bases de datos existentes en la compañía y en las que se guardan o mantienen
+                datos personales de los trabajadores es completamente reservada. EL TRABAJADOR se compromete
+                a guardar la más estricta reserva sobre dicha información y a no divulgarla a terceros sin
+                autorización del trabajador titular de la misma ni a usarla para propósitos distintos del
+                cumplimiento de sus obligaciones laborales. a) es deber especial a cargo del trabajador
+                responsable de las bases de datos garantizar la reserva de la información, conservar la
+                información bajo condiciones de seguridad necesarias para impedir su adulteración, perdida,
+                consulta, uso o acceso no autorizado o fraudulento, b) La violación de este acuerdo de
+                confidencialidad a juicio de la empresa, será considerado falta grave y causal de terminación
+                contractual con justa causa imputable a EL TRABAJADOR. c) El presente acuerdo obedece al principio
+                de bilateralidad contractual y es resultado de la libre voluntad de las partes contractuales.
+                d) La parte receptora de la información solo podrá revelar información de la otra a quienes la
+                requieran judicialmente o mediante explicita autorización del propietario de la información.
+                e) se considera también información confidencial: 1. Aquella que como conjunto o por la configuración
+                o estructuración exacta de sus componentes, no sea generalmente conocida entre los expertos en los
+                campos correspondientes. 2. La que no sea de fácil acceso, y 3. Aquella información que no esté
+                sujeta a medidas de protección razonables, de acuerdo con las circunstancias del caso, a fin de
+                mantener su carácter confidencial. f) EL TRABAJADOR expresa su absoluta conformidad con el presente
+                acuerdo y manifiesta que el mismo no constituye modificación unilateral de sus condiciones de trabajo
+                por parte de la empresa. g) El incumplimiento de cualquiera de las partes de la cláusula de
+                confidencialidad derivadas de este acuerdo de confidencialidad, la constituirá en deudora de la
+                otra, por la suma equivalente a cinco (5) Salarios Mínimos Legales Mensuales Vigente, a título de
+                pena, sin menoscabo del pago de la indemnización de perjuicios que pudieran ocasionarse como
+                consecuencia del incumplimiento de este contrato. lo cual puede ser cobrado ejecutivamente sin
+                reconvención de la parte infractora.
             </p>
 
-            <h2>CLÁUSULA DÉCIMA: CLÁUSULA DE CONFIDENCIALIDAD.</h2>
-            <p>
-                EL TRABAJADOR se compromete a mantener un convenio de confiabilidad especial en cumplimiento a la 
-                normatividad relacionada con la protección de datos personales (Ley 1581 de 2012). Toda información 
-                conocida por EL TRABAJADOR relacionada con datos personales es completamente reservada. La violación 
-                de este acuerdo será considerada falta grave y causal de terminación contractual con justa causa.
+            <p>En caso de incumplimiento del objeto de presente contrato se podrá cobrar ejecutivamente el valor
+                de la cláusula penal y [MO3.1]la indemnización por perjuicios que demuestra sufrir el acreedor,
+                bastando también para ello la sola afirmación del incumplimiento, la estimación de los perjuicios
+                y la presentación de este contrato. Las partes renuncian desde ya a cualquier tipo de constitución
+                en mora que la ley exija para que le sea exigible la pena e indemnización que trata esta cláusula.
+                Las partes conviven y aceptan, que, para todos los efectos legales, el presente contrato presta
+                merito ejecutivo.
             </p>
 
-            <h2>CLÁUSULA DÉCIMA PRIMERA: AUTORIZACIÓN PARA EL TRATAMIENTO DE DATOS PERSONALES.</h2>
+            <strong>CLÁUSULA DÉCIMA PRIMERA: AUTORIZACIÓN PARA EL TRATAMIENTO DE DATOS PERSONALES.</strong>
             <p>
-                EL TRABAJADOR autoriza expresamente a EL EMPLEADOR para realizar la recolección, almacenamiento, uso, 
-                circulación y tratamiento de sus datos personales, incluyendo datos sensibles como huellas digitales, 
-                fotografías y videos, conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013.
+                EL TRABAJADOR autoriza expresamente a EL EMPLEADOR para que en los términos del literal
+                a) del artículo 6 de la Ley 1581 de 2012, realice la recolección, almacenamiento, uso, circulación,
+                supresión, y en general tratamiento de mis datos personales, incluyendo datos sensibles, como mis
+                huella digitales, fotografías, videos y demás datos que puedan llegar hacer considerados sensibles
+                de conformidad con la Ley, para dicho tratamiento se realice con el fin de lograr las finalidades
+                relativas a ejecutar el control, seguimiento, monitoreo, vigilancia y en general, garantizar la
+                seguridad de sus instalaciones; así como para documentar las actividades empresariales y almacenar
+                dichos datos en la base de datos y sistemas o software de la empresa. Igualmente confirmo que en la
+                empresa me ha enterado de mi derecho a conocer el uso dado a mis datos, acceder a ellos,
+                actualizarlos y rectificarlos en cualquier momento y que puedo tener acceso a los mismo en cualquier
+                momento, tanto durante la vigencia de la relación laboral como con posterioridad a la misma. Siendo
+                así que EL TRABAJADOR autoriza de manera libre y voluntaria a la empresa COINTECA SAS identificada
+                con NIT 900.768.648-3, al manejo de su información personal consignad en la base de datos de
+                EL EMPLEADOR, así como él envió de comunicaciones, novedades y modificaciones de sus productos y
+                servicios, conforme a lo previsto en la Ley 1581 de 2012 y el Decreto 1377 de 2013, que desarrollan
+                el derecho a las personas a conocer, actualizar, rectificar o suprimir la información personal que
+                haya sido o se recoja sobre ellas en cualquier base de datos o archivo. EL TRABAJADOR entiende que
+                información o datos personales podrán ser solicitados o utilizados por sus jefes inmediatos, por
+                la empresa, por requerimiento de la autoridad judicial, por requerimiento de autoridad administrativa,
+                por requerimiento de autoridad disciplinaria y demás entidades de control y que le he informado que
+                la persona o personas que tendrán acceso a mis datos personales serán las que ocupen cargos directivos
+                en la empresa.
             </p>
 
-            <h2>CLÁUSULA DÉCIMA SEGUNDA: MODIFICACIÓN DE LAS CONDICIONES LABORALES.</h2>
+            <strong>CLÁUSULA DÉCIMA SEGUNDA: MODIFICACIÓN DE LAS CONDICIONES LABORALES.</strong>
             <p>
-                EL TRABAJADOR acepta todas las modificaciones de sus condiciones laborales determinadas por EL EMPLEADOR 
-                en ejercicio de su poder subordinante, siempre que no afecten su honor, dignidad o sus derechos mínimos, 
-                de conformidad con el artículo 23 del C.S.T.
+                EL TRABAJADOR acepta desde ahora expresamente todas las modificaciones de sus condiciones laborales
+                determinadas por EL EMPLEADOR en ejercicio de su poder subordinante, tales como los turnos y jornadas
+                de trabajo, el lugar de prestación de servicio, el cargo u oficio y/o funciones y la forma de
+                remuneración, siempre que tales modificaciones no afecten su honor, dignidad o sus derechos mínimos,
+                ni impliquen desmejoras sustanciales o graves perjuicios para él, de conformidad con lo dispuesto
+                por el artículo 23 del C.S.T. modificado por el artículo 1 de la ley 50/90. Los gastos que se originen
+                con el traslado de lugar de prestación del servicio serán cubiertos por EL EMPLEADOR, de conformidad
+                con el numeral 8 del artículo 57 del C.S.T. PARAGRAFO PRIMERO: Las partes podrán convenir que el
+                trabajo se preste en lugar distinto del inicialmente contratado, siempre que tales traslados no
+                desmejoren las condiciones laborales o de remuneración de EL TRABAJADOR, o impliquen perjuicios
+                para él.
             </p>
 
-            <h2>CLÁUSULA DÉCIMA TERCERA: DIRECCIÓN PARA NOTIFICACIÓN.</h2>
+            <strong>CLÁUSULA DÉCIMA TERCERA: DIRECCIÓN PARA NOTIFICACIÓN.</strong>
             <p>
-                EL TRABAJADOR se compromete a informar por escrito cualquier cambio en su dirección de residencia 
-                (<strong>{{ empleado.direccion }}</strong>), teniéndose como suya la última dirección registrada.
+                EL TRABAJADOR para todos los efectos legales y en especial para la aplicación del parágrafo 1 del
+                artículo 29 de la ley 789/02, norma que modificó el artículo 65 del C.S.T., se compromete a informar
+                por escrito y de manera inmediata a EL EMPLEADOR cualquier cambio en su dirección de residencia,
+                teniéndose en todo caso como suya, la última dirección registrada en su hoja de vida.
+                <strong>PARÁGRAFO PRIMERO:</strong> En forma expresa manifiesta EL TRABAJADOR que la información
+                suministrada que
+                aparece en la parte initial de este Contrato es cierta y forma integral del mismo.
             </p>
 
-            <h2>CLÁUSULA DÉCIMA CUARTA: EFECTOS.</h2>
+            <strong>CLÁUSULA DÉCIMA CUARTA: EFECTOS.</strong>
             <p>
-                El presente contrato reemplaza en su integridad cualquier otro contrato, verbal o escrito, celebrado 
-                entre las partes con anterioridad.
+                El presente contrato reemplaza en su integridad y deja sin efecto cualquier otro contrato,
+                verbal o escrito, celebrado entre las partes con anterioridad, pudiendo las partes convenir por
+                escrito modificaciones al mismo, las que formaran parte integrante de este contrato, al igual que
+                las circulares e instrucciones impartidas que complementen, adicionen o desarrollen las previsiones
+                contenidas en el presente documento
             </p>
 
-            <h2>CLÁUSULA DÉCIMA QUINTA: EXCLUSIÓN DE VÍNCULO ADICIONAL.</h2>
+            <strong>CLÁUSULA DÉCIMA QUINTA: EXCLUSIÓN DE VÍNCULO ADICIONAL.</strong>
             <p>
-                EL TRABAJADOR no adquiere, ni adquirirá, por razón de la suscripción y ejecución del presente contrato, 
-                vínculo laboral alguno con los contratantes de EL EMPLEADOR.
+                El TRABAJADOR no adquiere, ni Adquirirá, por razón de la suscripción y ejecución del presente
+                contrato, vínculo laboral alguno con los contratantes de EL EMPLEADOR. Toda responsabilidad
+                derivada de este instrumento correrá a cargo exclusivo de EL TRABAJADOR. <strong>PARÁGRAFO
+                    PRIMERO:</strong>
+                En aplicación de lo antes indicado, dada la exclusión de vínculo adicional, EL TRABAJADOR declara
+                conocer y acepta la cláusula de indemnidad que rige el contrato suscrito ente EL EMPLEADOR y su
+                contratante - copia de la cual, de existir, declara recibir a través del presente instrumento, por lo
+                cual se obliga a acoger y cumplir.
             </p>
 
             <p style="margin-top: 20px;">
-                Para constancia se firma en dos ejemplares del mismo tenor y valor, en la ciudad de Santiago de Cali, 
+                Para constancia se firma en dos ejemplares del mismo tenor y valor, en la ciudad de Santiago de Cali,
                 a los <strong>{{ empleado.fecha_ingreso }}</strong>.
             </p>
 
@@ -327,8 +684,16 @@
 
         </div>
 
-        <div class="page-number">Página 2 de 2</div>
+        <div class="footer-empresa">
+            <div class="footer-info">
+                <p><strong>cointecasas@hotmail.com</strong> - Tel. 311/1211043 - www.cointecasas.com</p>
+            </div>
+            <div class="footer-pagina">
+                Página <span class="page-indicator">2</span>
+            </div>
+        </div>
     </div>
 
 </body>
+
 </html>

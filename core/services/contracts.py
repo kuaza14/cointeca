@@ -73,11 +73,8 @@ def _get_clause_templates() -> Iterable[ClauseTemplate]:
                 "<strong>PARÁGRAFO QUINTO:</strong> EL TRABAJADOR no podrá ceder el uso del "
                 "vehículo a otras personas, ni transportar personal no autorizado, ni mover el "
                 "vehículo para cosas distintas a las oficialmente asignadas por la empresa."
-            ),
-        ),
-        ClauseTemplate(
-            title="CLÁUSULA SEGUNDA: OBLIGACIONES DE EL TRABAJADOR",
-            body_template=(
+
+            
                 "Además de las obligaciones determinadas en la Ley y en los reglamentos, EL "
                 "TRABAJADOR se compromete a cumplir las siguientes obligaciones especiales: "
                 "<strong>1)</strong> A poner al servicio de EL EMPLEADOR toda su capacidad normal "
@@ -143,6 +140,7 @@ def _get_clause_templates() -> Iterable[ClauseTemplate]:
                 "y objetos que hacen parte del vehículo."
             ),
         ),
+        
         ClauseTemplate(
             title="CLÁUSULA TERCERA: REMUNERACIÓN",
             body_template=(

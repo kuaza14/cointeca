@@ -1,6 +1,6 @@
 @page {
     size: letter;
-    margin: 34mm 16mm 26mm 16mm;
+    margin: 22mm 14mm 20mm 14mm;
 
     @top-center {
         content: element(pdf-header);
@@ -83,13 +83,13 @@ body.screen-mode {
 }
 
 .header-logo img {
-    width: 120px;
+    width: 150px;
     max-width: 100%;
     height: auto;
 }
 
 .header-doc-type {
-    font-size: 9px;
+    font-size: 10px;
 }
 
 .header-title {
@@ -130,6 +130,8 @@ body.screen-mode .footer-page {
 .contract-content {
     box-sizing: border-box;
     width: 100%;
+    max-width: 170mm;
+    margin: 0 auto;
 }
 
 body.screen-mode .contract-content {
@@ -137,7 +139,7 @@ body.screen-mode .contract-content {
     width: 210mm;
     min-height: 280mm;
     margin: 0 auto;
-    padding: 18mm 16mm;
+    padding: 18mm 0;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
 
@@ -150,8 +152,9 @@ body.screen-mode .contract-content {
 }
 
 .contract-section {
+    width: 80%;
     break-inside: avoid;
-    margin-bottom: 10px;
+    margin: 0px auto 10px;
 }
 
 .contract-section h2,
@@ -163,6 +166,8 @@ body.screen-mode .contract-content {
 .contract-section p {
     margin: 0;
     text-align: justify;
+    font-size: 11px;
+    line-height: 1.55;
 }
 
 .page-break-before {
@@ -170,9 +175,10 @@ body.screen-mode .contract-content {
 }
 
 .employee-table {
-    width: 100%;
+    width: 80%;
     border-collapse: collapse;
-    margin-bottom: 8px;
+    margin: 0 auto 8px auto;
+    font-size: 9px;
 }
 
 .employee-table th,
@@ -228,323 +234,4 @@ body.screen-mode .contract-content {
         padding: 0;
         box-shadow: none;
     }
-}
-
-/* Legacy styles kept below for backward compatibility */
-/* CONTENEDOR */
-.documento{
-    width: 190mm;
-    background: white;
-    margin: auto;
-    padding: 0;
-    box-sizing: border-box;
-    position: relative;
-    page-break-after: always;
-}
-
-.documento:last-child {
-    page-break-after: avoid;
-}
-
-/* BOTÓN */
-.acciones{
-    text-align: right;
-    margin-bottom: 15px;
-}
-
-.btn-print{
-    padding: 10px 18px;
-    background: #0d6efd;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-/* ENCABEZADO - COMPACTO */
-.header{
-    width: 100%;
-    padding: 8mm 12mm;
-    box-sizing: border-box;
-    background: white;
-    margin-bottom: 0;
-}
-
-.encabezado-table{
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.encabezado-table td{
-    border: 1px solid #000;
-    padding: 0px;
-    vertical-align: middle;
-}
-
-/* LOGO - REDUCIDO */
-.logo-cell{
-    width: 150px !important;
-}
-
-.logo{
-    width: 140px;
-    height: auto;
-    display: block;
-    margin: auto;
-    padding: 3px;
-}
-
-/* TITULO - COMPACTO (Primera fila con texto pequeño) */
-.titulo-cell-pequeño{
-    text-align: left;
-    font-size: 10px;
-    font-weight: normal;
-    line-height: 1.2;
-    padding: 1px;
-    vertical-align: middle;
-    height: 30px;
-}
-
-/* TITULO - Grande (Segunda fila con CONTRATO...) */
-.titulo-cell{
-    text-align: center;
-    font-size: 13px;
-    font-weight: bold;
-    line-height: 1.3;
-    padding: 9px;
-    vertical-align: middle;
-}
-
-/* TABLA DERECHA - Info Cell */
-.info-cell{
-    width: 160px !important;
-}
-
-/* TABLA DERECHA - PEQUEÑA */
-.mini-table{
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 9px;
-}
-
-.mini-table td{
-    border: 1px solid #000;
-    padding: 3px 5px;
-    vertical-align: middle;
-}
-
-/* MARCA AGUA */
-.watermark{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-35deg);
-    font-size: 75px;
-    color: rgba(0,0,0,0.04);
-    font-weight: bold;
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* CONTENIDO - CON ESPACIADO CORRECTO */
-.contenido{
-    /* position: relative; */
-    z-index: 1;
-    padding-right: 70px;
-    padding-bottom: 60px;
-    padding-left: 70px;
-    /* Márgenes amplios: 30mm a los lados */
-    box-sizing: border-box;
-    min-height: 120mm;
-    margin: 0 auto;
-    max-width: 250mm;
-    /* Ancho máximo para que el contenido se vea centrado */
-}
-
-h2{
-    font-size: 12px;
-    margin-top: 12px;
-    margin-bottom: 6px;
-    font-weight: bold;
-}
-
-p{
-    text-align: justify;
-    margin-bottom: 6px;
-    margin-top: 0;
-}
-
-/* TABLA DATOS */
-.datos-table{
-    width: 90%;
-    border-collapse: collapse;
-    margin: 0 auto 12px auto;
-    margin-bottom: 12px;
-    font-size: 10px;
-}
-
-.datos-table td{
-    border: 1px solid #000;
-    padding: 4px 6px;
-}
-
-.datos-table td:first-child{
-    width: 30%;
-    font-weight: bold;
-    background: #f2f2f2;
-}
-
-/* FIRMAS */
-.firmas{
-    margin-top: 40px;
-    width: 100%;
-    clear: both;
-}
-
-.firma-box{
-    width: 40%;
-    display: inline-block;
-    text-align: center;
-    margin-right: 5%;
-}
-
-.linea{
-    margin-bottom: 8px;
-    border-bottom: 1px solid #000;
-    height: 30px;
-}
-
-/* FOOTER CON DATOS DE EMPRESA */
-.footer-empresa{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    padding: 8mm 12mm;
-    box-sizing: border-box;
-    background: white;
-    border-top: 2px solid #003d6b;
-    z-index: 998;
-    font-size: 9px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.footer-info{
-    flex: 1;
-    padding-right: 20px;
-}
-
-.footer-info a{
-    color: #003d6b;
-    text-decoration: none;
-}
-
-.footer-info p{
-    margin: 2px 0;
-    text-align: left;
-    font-size: 8px;
-}
-
-.footer-pagina{
-    text-align: right;
-    font-size: 10px;
-    font-weight: bold;
-    color: #003d6b;
-    background: #90EE90;
-    padding: 4px 12px;
-    border-radius: 4px;
-    min-width: 60px;
-}
-
-/* NUMERACIÓN DE PÁGINAS */
-.pageNumber::after {
-    content: counter(page) " de " counter(pages);
-}
-
-/* IMPRESIÓN */
-@media print{
-    
-    body{
-        background: white;
-        padding: 0;
-        margin: 0;
-    }
-
-    .acciones{
-        display: none;
-    }
-
-    .documento{
-        width: 100%;
-        margin: 0;
-        padding-top: 120px;
-        padding-bottom: 90px;
-        padding-left: 20px;
-        padding-right: 20px;
-        box-sizing: border-box;
-        box-shadow: none;
-    }
-
-    .documento:last-child {
-        page-break-after: avoid;
-    }
-
-    .header{
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 90px;
-        padding: 10px 20px;
-        background: white;
-        z-index: 999;
-    }
-
-    .contenido{
-        padding-top: 10px;
-        margin-bottom: 100px;
-        /* margin-top: 120px; */
-        box-sizing: border-box; 
-        max-width: 100%;
-    } 
-
-    .page-number{
-        position: fixed;
-        bottom: 5mm;
-        left: 0;
-        right: 0;
-        width: 100%;
-        margin: 0;
-        padding: 0 12mm;
-        text-align: center;
-        border-top: 1px solid #ddd;
-        padding-top: 3mm;
-        background: white;
-    }
-
-    .footer-empresa {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 55px;
-        padding: 8px 20px;
-        background: white;
-        border-top: 2px solid #003d6b;
-        z-index: 998;
-    }
-
-    .watermark{
-        display: none;
-    }
-}
-
-/* SALTOS DE PÁGINA */
-.page-break{
-    page-break-after: always;
 }

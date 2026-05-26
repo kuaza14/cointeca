@@ -42,6 +42,12 @@ from reportlab.platypus.flowables import HRFlowable
 from weasyprint import HTML
 from django.template.loader import render_to_string
 from .services.contracts import build_contract_context
+from docxtpl import DocxTemplate
+from docx2pdf import convert
+import os
+import tempfile
+from django.conf import settings
+from docx import Document
 
 
 # Vista de inicio 
@@ -401,6 +407,7 @@ def detalle_empleado(request, id):
         empleado.fecha_nacimiento = request.POST['fecha_nacimiento']
         empleado.nacionalidad = request.POST['nacionalidad']
         empleado.direccion = request.POST['direccion']
+        empleado.ciudad_residencia = request.POST['ciudad_residencia']
         empleado.telefono = request.POST['telefono']
         empleado.correo = request.POST['correo']
 
@@ -412,6 +419,7 @@ def detalle_empleado(request, id):
         empleado.idiomas = request.POST['idiomas']
 
         empleado.fecha_ingreso = request.POST['fecha_ingreso']
+        empleado.fecha_finalizacion = request.POST['fecha_finalizacion']
         empleado.tipo_contrato = request.POST['tipo_contrato']
         empleado.salario = request.POST['salario']
         empleado.jornada = request.POST['jornada']
@@ -504,6 +512,7 @@ def crear_empleado(request):
                 fecha_nacimiento=request.POST['fecha_nacimiento'],
                 nacionalidad=request.POST['nacionalidad'],
                 direccion=request.POST['direccion'],
+                ciudad_residencia=request.POST.get('ciudad_residencia', ''),
                 telefono=request.POST['telefono'],
                 correo=request.POST['correo'],
                 cargo=request.POST['cargo'],
@@ -513,6 +522,7 @@ def crear_empleado(request):
                 habilidades=request.POST.get('habilidades', ''),
                 idiomas=request.POST['idiomas'],
                 fecha_ingreso=request.POST['fecha_ingreso'],
+                fecha_finalizacion=request.POST['fecha_finalizacion'],
                 tipo_contrato=request.POST['tipo_contrato'],
                 salario=request.POST['salario'],
                 jornada=request.POST['jornada'],
@@ -1203,29 +1213,57 @@ def contrato_empleado(request, id):
     )
 
 @login_required
-def generar_contrato_pdf(request, id):
+def generar_contrato(request, id):
 
-    empleado = Empleado.objects.get(id=id)
-    context = build_contract_context(empleado)
-    context['is_pdf'] = True
+    empleado = get_object_or_404(Empleado, id=id)
 
-    html_string = render_to_string(
-        'rrhh/contratos/contrato_modular.html',
-        context
+    ruta_plantilla = os.path.join(
+        settings.BASE_DIR,
+        "core",
+        "templates",
+        "rrhh",
+        "contratos",
+        "test.docx"
     )
 
-    response = HttpResponse(
-        content_type='application/pdf'
+    # ABRIR PLANTILLA
+    doc = DocxTemplate(ruta_plantilla)
+
+    # VARIABLES
+    contexto = {
+        "empleado": {
+            "nombre_completo": empleado.nombre_completo.upper(),
+            "documento": empleado.documento,
+            "direccion": empleado.direccion.upper(),
+            "telefono": empleado.telefono,
+            "cargo": empleado.cargo.upper(),
+            "salario": empleado.salario,
+            "fecha_ingreso": empleado.fecha_ingreso.strftime("%d/%m/%Y"),
+            "fecha_finalizacion": empleado.fecha_finalizacion.strftime("%d/%m/%Y") if empleado.fecha_finalizacion else None,
+            "tipo_contrato": empleado.tipo_contrato.upper(),
+            "jornada": empleado.jornada.upper(),
+            "ciudad_expedicion": empleado.ciudad_expedicion.upper(),
+            "nacionalidad": empleado.nacionalidad.upper(),
+            "ciudad_residencia": empleado.ciudad_residencia.upper(),
+            "correo": empleado.correo.upper(),
+
+        }
+    }
+
+    # REEMPLAZAR VARIABLES
+    doc.render(contexto)
+
+    # GUARDAR NUEVO WORD
+    ruta_salida = os.path.join(
+        settings.MEDIA_ROOT,
+        f"contrato_{empleado.nombre_completo}.docx"
     )
 
-    response['Content-Disposition'] = (
-        f'inline; filename="contrato_{empleado.id}.pdf"'
+    doc.save(ruta_salida)
+
+    # DESCARGAR
+    return FileResponse(
+        open(ruta_salida, "rb"),
+        as_attachment=True,
+        filename=f"contrato_{empleado.nombre_completo}.docx"
     )
-
-    HTML(
-        string=html_string,
-        base_url=request.build_absolute_uri('/')
-    ).write_pdf(response)
-
-
-    return response

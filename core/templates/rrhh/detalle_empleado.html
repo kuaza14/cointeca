@@ -98,6 +98,16 @@
                 </p>
 
                 <p>
+                <strong>Ciudad de Residencia:</strong>
+
+                {% if editando %}
+                <input type="text" name="ciudad_residencia" value="{{ empleado.ciudad_residencia }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.ciudad_residencia }}
+                {% endif %}
+                </p>
+
+                <p>
                 <strong>Teléfono:</strong>
                 {% if editando %}
                 <input type="text" name="telefono" value="{{ empleado.telefono }}" class="border p-1 rounded w-full">
@@ -178,6 +188,15 @@
                 {{ empleado.fecha_ingreso }}
                 {% endif %}
             </p>
+
+            <p><strong>Finaliza:</strong>
+                {% if editando %}
+                <input type="date" name="fecha_finalizacion" value="{{ empleado.fecha_finalizacion|date:'Y-m-d' }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.fecha_finalizacion }}
+                {% endif %}
+            </p>
+
             <p><strong>Contrato:</strong> 
                 {% if editando %}
                 <input type="text" name="tipo_contrato" value="{{ empleado.tipo_contrato }}" class="border p-1 rounded w-full">

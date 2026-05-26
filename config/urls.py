@@ -46,7 +46,7 @@ from core.views import (
     subir_documento,
     eliminar_documento,
     contrato_empleado,
-    generar_contrato_pdf
+    generar_contrato
 ) 
 
 from django.contrib.auth.decorators import login_required
@@ -98,8 +98,7 @@ urlpatterns = [
     path('rrhh/inventario/<int:id>/eliminar/', eliminar_equipo_inventario, name='eliminar_equipo_inventario'),
     path('rrhh/empleados/<int:id>/subir-documento/', subir_documento, name='subir_documento'),
     path('rrhh/documentos/<int:id>/eliminar/', eliminar_documento, name='eliminar_documento'),
-    path('rrhh/empleados/<int:id>/contrato/', contrato_empleado, name='contrato_empleado'),
-    path('rrhh/empleados/<int:id>/contrato/pdf/', generar_contrato_pdf, name='generar_contrato_pdf'),
+    path('rrhh/empleados/<int:id>/contrato/', generar_contrato, name='generar_contrato'),
 ]
 
 urlpatterns += static(

@@ -181,6 +181,11 @@ class Empleado(models.Model):
 
     direccion = models.TextField()
 
+    ciudad_residencia = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
     telefono = models.CharField(max_length=20)
 
     correo = models.EmailField()
@@ -215,6 +220,8 @@ class Empleado(models.Model):
     # 3. INFORMACIÓN CONTRACTUAL
     # =========================================================
     fecha_ingreso = models.DateField()
+
+    fecha_finalizacion = models.DateField(blank=True, null=True)
 
     TIPO_CONTRATO = [
         ('fijo', 'Fijo'),

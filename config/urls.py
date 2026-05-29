@@ -46,7 +46,8 @@ from core.views import (
     subir_documento,
     eliminar_documento,
     contrato_empleado,
-    generar_contrato
+    generar_contrato,
+    permiso_laboral
 ) 
 
 from django.contrib.auth.decorators import login_required
@@ -99,6 +100,7 @@ urlpatterns = [
     path('rrhh/empleados/<int:id>/subir-documento/', subir_documento, name='subir_documento'),
     path('rrhh/documentos/<int:id>/eliminar/', eliminar_documento, name='eliminar_documento'),
     path('rrhh/empleados/<int:id>/contrato/', generar_contrato, name='generar_contrato'),
+    path('rrhh/<int:id>/permiso/', permiso_laboral, name='permiso_laboral'),
 ]
 
 urlpatterns += static(

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Avg, Count, Sum
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from .models import (
+from core.models import (
     CajaMenor, 
     MovimientoCajaMenor, 
     IndicadorEstrategico, 
@@ -26,7 +26,6 @@ from django.http import HttpResponse
 from django.http import FileResponse
 from weasyprint import HTML
 from django.template.loader import render_to_string
-from .services.contracts import build_contract_context
 from docxtpl import DocxTemplate
 from docx2pdf import convert
 import os

@@ -451,3 +451,31 @@ class DocumentoEmpleado(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class SolicitudVacaciones(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha_solicitud = models.DateField()
+
+    periodo_desde = models.DateField()
+    periodo_hasta = models.DateField()
+
+    dias_solicitados = models.IntegerField()
+
+    vacaciones_desde = models.DateField()
+    vacaciones_hasta = models.DateField()
+
+    dias_disponibles = models.IntegerField(default=15)
+
+    nombre_rrhh = models.CharField(max_length=200)
+
+    jefe_inmediato = models.CharField(max_length=200)
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.empleado.nombre_completo} - Vacaciones"

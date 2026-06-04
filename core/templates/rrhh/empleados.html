@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load filtros %}
+
 {% block content %}
 
 <div class="max-w-7xl mx-auto px-4">
@@ -39,26 +41,19 @@
         </a>
     </div>    
 
-    <form method="GET" class="mb-6 flex gap-2">
+    <div class="mb-6 ">
 
         <input 
             type="text" 
+            id="buscarEmpleado"
             name="q" 
-            placeholder="Buscar por cédula..." 
+            placeholder="Buscar por cédula o nombre" 
             value="{{ query|default:'' }}"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-        >
-        <button 
-            type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-            Buscar
-        </button>
-    </form>
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
 
     <div class="bg-white shadow-lg rounded-xl overflow-hidden bg-gray-100 text-gray-600">
         <table class="min-w-full text-sm text-gray-700">
-            <tbody id="tabla-empleados" class="divide-y divide-gray-200"></tbody>
 
             <!-- HEADER -->
             <thead class="bg-blue-600 text-white uppercase text-xs tracking-wider">
@@ -72,9 +67,8 @@
             </thead>
 
             <!-- BODY -->
-            <tbody class="divide-y divide-gray-200">
                 {% for e in empleados %}
-                <tr class="hover:bg-gray-50 transition">
+                <tr class="fila-empleado hover:bg-gray-50 transition">
                     <td class="px-6 py-4 font-medium text-gray-900">
                         {{ e.nombre_completo }}
                     </td>
@@ -85,7 +79,7 @@
                         {{ e.cargo }}
                     </td>
                     <td class="px-6 py-4 font-semibold text-green-600">
-                        ${{ e.salario }}
+                        ${{ e.salario|pesos_colombianos }}
                     </td>
                     <td class="px-4 py-2 flex gap-2 justify-center">
                     <!-- VER -->
@@ -113,22 +107,29 @@
 </div>
 
 <script>
-const buscador = document.getElementById('buscador');
-const filas = document.querySelectorAll('#tabla-empleados tr');
 
-buscador.addEventListener('keyup', function() {
-    const valor = this.value.toLowerCase();
+const buscador = document.getElementById("buscarEmpleado");
 
-    filas.forEach(fila => {
-        const documento = fila.children[1].textContent.toLowerCase();
+buscador.addEventListener("keyup", function() {
 
-        if (documento.includes(valor)) {
-            fila.style.display = '';
+    let texto = this.value.toLowerCase();
+
+    let filas = document.querySelectorAll(".fila-empleado");
+
+    filas.forEach(function(fila) {
+
+        let contenido = fila.textContent.toLowerCase();
+
+        if (contenido.includes(texto)) {
+            fila.style.display = "";
         } else {
-            fila.style.display = 'none';
+            fila.style.display = "none";
         }
+
     });
+
 });
+
 </script>
 
 {% endblock %}

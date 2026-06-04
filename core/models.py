@@ -479,3 +479,45 @@ class SolicitudVacaciones(models.Model):
 
     def __str__(self):
         return f"{self.empleado.nombre_completo} - Vacaciones"
+
+class Vacacion(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    periodo = models.CharField(
+        max_length=20
+    )
+
+    fecha_inicio = models.DateField()
+
+    fecha_fin = models.DateField()
+
+    dias_disponibles = models.IntegerField(
+        default=15
+    )
+
+    dias_tomados = models.IntegerField()
+
+    dias_pendientes = models.IntegerField()
+
+    fecha_regreso = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.empleado.nombre_completo} - {self.periodo}"
+        )

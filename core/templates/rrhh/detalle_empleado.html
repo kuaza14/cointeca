@@ -235,9 +235,9 @@
             </p>
             <p><strong>Salario:</strong> 
                 {% if editando %}
-                <input type="number" name="salario" value="{{ empleado.salario }}" class="border p-1 rounded w-full">
+                <input type="text" id="salario" name="salario" value="{{ empleado.salario }}" class="border p-1 rounded w-full moneda-col">
                 {% else %}
-                {{ empleado.salario }}
+                ${{ e.salario|floatformat:0 }}
                 {% endif %}
             </p>
             <p><strong>Jornada:</strong> 
@@ -608,13 +608,13 @@
         </tbody>
     </table>
 
-        <!-- 7. DOCUMENTOS -->
+        <!-- 10. DOCUMENTOS -->
     <div class="mt-6">
 
         <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
 
             <span>
-                7. Contratos y Documentos
+                10. Contratos y Documentos
             </span>
 
             <a
@@ -669,6 +669,7 @@
                         <a href="{{ d.archivo.url }}"target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                         >Ver documento
                         </a>
+                    </td>
                     <td class="p-2 text-center">
                         <a href="/rrhh/documentos/{{ d.id }}/eliminar/" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
                         >Eliminar
@@ -678,9 +679,6 @@
                     </td>
                     
                 </tr>
-                <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/">
-                    + Registrar vacaciones
-                </a>
 
                 {% empty %}
 
@@ -698,6 +696,28 @@
 
 
         </table>
+
+        <!--11. VACACIONES -->
+        <div class="mt-6">
+
+            <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
+
+                <span>
+                    11. Vacaciones
+                </span>
+
+                <a
+                    href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
+                    class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+                >
+                    + Registrar vacaciones
+                </a>
+
+            </div>
+
+            <!-- aquí iría la tabla -->
+        </div>
+</div>
         
 
     </div>
@@ -715,5 +735,25 @@
     {% endif %}
 
 </div>
+
+<script>
+
+document.querySelectorAll('.moneda-col').forEach(campo => {
+
+    campo.addEventListener('input', function() {
+
+        let valor = this.value.replace(/\D/g, '');
+
+        if (valor !== '') {
+            this.value = Number(valor).toLocaleString('es-CO');
+        } else {
+            this.value = '';
+        }
+
+    });
+
+});
+
+</script>
 
 {% endblock %}

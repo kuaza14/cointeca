@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+    ➕ Registrar Vacaciones
+</h1>
+
+<div class="flex justify-end mb-6">
+    <a href="/rrhh/vacaciones/" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        Volver a Vacaciones
+    </a>
+</div>
+
+<form method="POST" class="bg-white p-6 rounded shadow space-y-4">
+
+    {% csrf_token %}
+
+        <div>
+
+            <label class="font-bold">
+                Empleado
+            </label>
+
+            {% if empleado %}
+
+                <input
+                    type="text"
+                    value="{{ empleado.nombre_completo }}"
+                    class="border p-2 rounded w-full bg-gray-100"
+                    readonly
+                >
+
+                <input
+                    type="hidden"
+                    name="empleado"
+                    value="{{ empleado.id }}"
+                >
+
+            {% else %}
+
+                <select
+                    name="empleado"
+                    class="border p-2 rounded w-full"
+                >
+
+                    {% for e in empleados %}
+
+                    <option value="{{ e.id }}">
+                        {{ e.nombre_completo }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            {% endif %}
+
+        </div>
+
+    <div>
+        <label class="font-bold">
+            Periodo
+        </label>
+
+        <input
+            type="text"
+            name="periodo"
+            class="border p-2 rounded w-full"
+            placeholder="2025-2026"
+        >
+    </div>
+
+    <div>
+        <label class="font-bold">
+            Fecha inicio de vacaciones
+        </label>
+
+        <input
+            type="date"
+            name="fecha_inicio"
+            class="border p-2 rounded w-full"
+        >
+    </div>
+
+    <div>
+        <label class="font-bold">
+            Días a disfrutar
+        </label>
+
+        <input
+            type="number"
+            name="dias_tomados"
+            class="border p-2 rounded w-full"
+        >
+    </div>
+
+    <div>
+        <label class="font-bold">
+            Observaciones
+        </label>
+
+        <textarea
+            name="observaciones"
+            rows="4"
+            class="border p-2 rounded w-full"
+        ></textarea>
+    </div>
+
+    <button
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    >
+        Guardar
+    </button>
+
+</form>
+
+{% if error %}
+<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ error }}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -2,8 +2,14 @@
 
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-6">👤 Ficha Técnica del Trabajador</h1>
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">👤 Ficha Técnica del Trabajador</h1>
 
+    
+        <a href="{% url 'empleados' %}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+            Volver
+        </a>
+</div>
 {% if error %}
 <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
     {{ error }}
@@ -19,8 +25,11 @@
 
     <input name="nombre_completo" placeholder="Nombre completo" class="w-full border p-2 rounded" required>
     <input name="documento" placeholder="Documento" class="w-full border p-2 rounded" required>
-    <input name="lugar_expedicion" placeholder="Lugar expedición" class="w-full border p-2 rounded">
+    <input name="ciudad_expedicion" placeholder="Lugar expedición" class="w-full border p-2 rounded">
 
+    <label class="block font-medium mb-1">
+        Fecha de nacimiento
+    </label>
     <input type="date" name="fecha_nacimiento" class="w-full border p-2 rounded">
     <input name="nacionalidad" value="Colombiano" class="w-full border p-2 rounded">
 
@@ -42,6 +51,9 @@
     <!-- 3. CONTRATO -->
     <h2 class="text-xl font-semibold border-b pb-2">3. Información Contractual</h2>
 
+    <label class="block font-medium mb-1">
+        Fecha de ingreso
+    </label>
     <input type="date" name="fecha_ingreso" class="w-full border p-2 rounded">
 
     <select name="tipo_contrato" class="w-full border p-2 rounded">
@@ -50,7 +62,16 @@
         <option value="obra">Obra o labor</option>
     </select>
 
-    <input name="salario" placeholder="Salario" class="w-full border p-2 rounded">
+    <label class="block font-medium mb-1">
+        Fecha finalización del contrato
+    </label>
+    <input type="date" name="fecha_finalizacion" class="w-full border p-2 rounded" placeholder="Solo para contratos a término fijo">
+
+    <input
+    id="salario"
+    name="salario"
+    placeholder="Salario"
+    class="w-full border p-2 rounded">
 
     <select name="jornada" class="w-full border p-2 rounded">
         <option value="diurna">Diurna</option>
@@ -78,9 +99,21 @@
         Guardar empleado
     </button>
     <!--Boton volver-->
-    <a href="/empleados/" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+    <a href="{% url 'empleados' %}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
         Volver
     </a>
 </form>
+
+<script>
+const salario = document.getElementById('salario');
+
+salario.addEventListener('input', function() {
+
+    let valor = this.value.replace(/\D/g, '');
+
+    this.value = Number(valor).toLocaleString('es-CO');
+
+});
+</script>
 
 {% endblock %}

@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load filtros %}
+
 {% block content %}
 
 <h1 class="text-3xl font-bold mb-6">📄 Ficha Técnica del Trabajador</h1>
@@ -237,7 +239,7 @@
                 {% if editando %}
                 <input type="text" id="salario" name="salario" value="{{ empleado.salario }}" class="border p-1 rounded w-full moneda-col">
                 {% else %}
-                ${{ e.salario|floatformat:0 }}
+                ${{ empleado.salario|pesos_colombianos }}
                 {% endif %}
             </p>
             <p><strong>Jornada:</strong> 
@@ -297,20 +299,7 @@
                 {{ salud.alergias }}
                 {% endif %}
             </p>
-            <p><strong>Contacto:</strong>
-                {% if editando %}
-                <input type="text" name="salud_contacto_emergencia" value="{{ salud.contacto_emergencia }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.contacto_emergencia }}
-                {% endif %}
-            </p>
-            <p><strong>Teléfono:</strong>
-                {% if editando %}
-                <input type="text" name="salud_telefono_emergencia" value="{{ salud.telefono_emergencia }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.telefono_emergencia }}
-                {% endif %}
-            </p>
+            
         </div>
     </div>
     {% endif %}
@@ -332,7 +321,7 @@
                     value="{{ empleado.contacto_emergencia }}"
                     class="border p-1 rounded w-full">
                 {% else %}
-                {{ empleado.contacto_emergencia }}
+                {{ salud.contacto_emergencia }}
                 {% endif %}
             </p>
 
@@ -345,20 +334,7 @@
                     value="{{ empleado.telefono_emergencia }}"
                     class="border p-1 rounded w-full">
                 {% else %}
-                {{ empleado.telefono_emergencia }}
-                {% endif %}
-            </p>
-
-            <p>
-                <strong>Parentesco:</strong>
-
-                {% if editando %}
-                <input type="text"
-                    name="parentesco_emergencia"
-                    value="{{ empleado.parentesco_emergencia }}"
-                    class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.parentesco_emergencia }}
+                {{ salud.telefono_emergencia }}
                 {% endif %}
             </p>
 

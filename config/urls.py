@@ -133,11 +133,11 @@ urlpatterns = [
     path('rrhh/<int:id>/permiso/', permiso_laboral, name='permiso_laboral'),
 
     # VACACIONES
-    path('rrhh/empleados/<int:id>/vacaciones/', solicitud_vacaciones, name='solicitud_vacaciones'),
+    path('rrhh/empleados/<int:id>/vacaciones/', vacaciones_empleado, name='vacaciones_empleado'),
     path('rrhh/vacaciones/', vacaciones, name='vacaciones'),
     path('rrhh/vacaciones/crear/', crear_vacacion, name='crear_vacacion'),
     path('rrhh/empleados/<int:id>/vacaciones/crear/', crear_vacacion, name='crear_vacacion_empleado'),
-    path('rrhh/empleados/<int:id>/vacaciones/', vacaciones_empleado, name='vacaciones_empleado'),
+    path('rrhh/vacaciones/<int:id>/solicitud/', solicitud_vacaciones, name='solicitud_vacaciones'),
 ]
 
 # =========================

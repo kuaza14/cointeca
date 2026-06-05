@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,9 +12,13 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
         <!-- Logo -->
-        <a href="/dashboard/" class="text-xl font-bold tracking-wide hover:text-gray-300 transition">
-            Cointeca S.A.S
+
+        <a href="/dashboard/" class="flex items-center gap-3">
+        <img src="{% static 'img/logo-cointeca.png' %}"
+            alt="Cointeca S.A.S"
+            class="h-12 w-auto">
         </a>
+
 
         <!-- Botones -->
         <div class="flex items-center gap-3">

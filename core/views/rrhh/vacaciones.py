@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import FileResponse
+import os
+from django.http import HttpResponse
 
 from docxtpl import DocxTemplate
 from datetime import timedelta,date
@@ -8,21 +10,78 @@ import holidays
 
 from django.conf import settings
 
-from core.models import Empleado, Vacacion
+from core.models import Empleado, Vacacion, SolicitudVacaciones
 
 @login_required
 def solicitud_vacaciones(request, id):
+    """
+    Genera un documento Word con la solicitud de vacaciones del empleado
+    """
+    
     empleado = get_object_or_404(Empleado, id=id)
 
-    if request.method == 'POST':
-        # generar documento
-        pass
+    # Obtener la última vacación del empleado
+    vacacion = Vacacion.objects.filter(
+        empleado=empleado
+    ).order_by('-fecha_inicio').first()  # Usar order_by en lugar de latest
 
-    return render(
-        request,
-        'rrhh/vacaciones/solicitud_vacaciones.html',
-        {'empleado': empleado}
+    # Verificar que existe una vacación registrada
+    if not vacacion:
+        return HttpResponse(
+            "Este empleado no tiene solicitudes de vacaciones registradas."
+        )
+
+    # Ruta de la plantilla Word
+    ruta_plantilla = os.path.join(
+        settings.BASE_DIR,
+        'plantillas_word',
+        'solicitud_vacaciones.docx'
     )
+
+    # Cargar la plantilla
+    doc = DocxTemplate(ruta_plantilla)
+
+    # Preparar el contexto con los datos de la vacación
+    contexto = {
+        'empleado': empleado,           # Objeto completo - puedes usar {{ empleado.nombre_completo }}, etc
+        'vacacion': vacacion,           # Objeto completo
+        
+        'empleado_area': empleado.area if hasattr(empleado, 'area') else '',
+        
+        'fecha_solicitud': vacacion.fecha_inicio.strftime('%d/%m/%Y'),
+        'fecha_periodo_servido': empleado.fecha_ingreso.strftime('%d/%m/%Y'),
+        
+        'periodo_desde': vacacion.fecha_inicio.strftime('%d/%m/%Y'),
+        'periodo_hasta': vacacion.fecha_fin.strftime('%d/%m/%Y'),
+        
+        'dias_solicitados': vacacion.dias_tomados,
+        
+        'vacaciones_desde': vacacion.fecha_inicio.strftime('%d/%m/%Y'),
+        'vacaciones_hasta': vacacion.fecha_fin.strftime('%d/%m/%Y'),
+        
+        'dias_disponibles': vacacion.dias_disponibles,
+        
+        'nombre_rrhh': 'Gestión RRHH',  # Cambiar según corresponda
+    }
+
+    # Renderizar la plantilla con los datos
+    doc.render(contexto)
+
+    # Guardar el archivo
+    ruta_salida = os.path.join(
+        settings.MEDIA_ROOT,
+        f'solicitud_vacaciones_{empleado.id}_{vacacion.id}.docx'
+    )
+
+    doc.save(ruta_salida)
+
+    # Descargar el archivo
+    return FileResponse(
+        open(ruta_salida, 'rb'),
+        as_attachment=True,
+        filename=f'Solicitud_Vacaciones_{empleado.nombre_completo}.docx'
+    )
+
 
 @login_required
 def vacaciones_home(request):

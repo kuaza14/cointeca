@@ -172,12 +172,6 @@ def detalle_empleado(request, id):
         empleado.telefono_emergencia = request.POST.get('telefono_emergencia')
         empleado.parentesco_emergencia = request.POST.get('parentesco_emergencia')
 
-        # SEGURIDAD SOCIAL
-        empleado.eps = request.POST.get('eps')
-        empleado.arl = request.POST.get('arl')
-        empleado.afp = request.POST.get('afp')
-        empleado.cesantias = request.POST.get('cesantias')
-
         # OBSERVACIONES
         empleado.observaciones = request.POST.get('observaciones')
 

@@ -22,13 +22,6 @@
             </p>
         </div>
 
-        <div class="bg-purple-500 text-white p-4 rounded shadow">
-            <p>Cargos</p>
-            {% for c in por_cargo %}
-                <p>{{ c.cargo }} ({{ c.total }})</p>
-            {% endfor %}
-        </div>
-
     </div>
 
         <a href="/rrhh/empleados/crear/" 
@@ -69,13 +62,13 @@
             <!-- BODY -->
                 {% for e in empleados %}
                 <tr class="fila-empleado hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 font-medium text-gray-900">
+                    <td class=" uppercase px-6 py-4 font-medium text-gray-900">
                         {{ e.nombre_completo }}
                     </td>
                     <td class="px-6 py-4">
                         {{ e.documento }}
                     </td>
-                    <td class="px-6 py-4">
+                    <td class=" uppercase px-6 py-4">
                         {{ e.cargo }}
                     </td>
                     <td class="px-6 py-4 font-semibold text-green-600">
@@ -104,6 +97,14 @@
 
     </div>
 
+<div> 
+
+        <div class=" uppercase bg-purple-500 text-white p-4 rounded shadow inline-block mt-6">
+            <p>Cargos: </p>
+            {% for c in por_cargo %}
+                <p>{{ c.cargo }}: ({{ c.total }})</p>
+            {% endfor %}
+        </div>
 </div>
 
 <script>

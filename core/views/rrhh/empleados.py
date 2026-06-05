@@ -21,6 +21,9 @@ def rrhh_home(request):
 def crear_empleado(request):
     if request.method == 'POST':
         try:
+
+            salario = request.POST['salario'].replace('.', '')
+
             empleado = Empleado.objects.create(
                 nombre_completo=request.POST['nombre_completo'],
                 documento=request.POST['documento'],
@@ -40,7 +43,7 @@ def crear_empleado(request):
                 fecha_ingreso=request.POST['fecha_ingreso'],
                 fecha_finalizacion=request.POST['fecha_finalizacion'],
                 tipo_contrato=request.POST['tipo_contrato'],
-                salario=request.POST['salario'],
+                salario=int(salario),
                 jornada=request.POST['jornada'],
                 jefe=request.POST['jefe']
             )
@@ -57,10 +60,10 @@ def crear_empleado(request):
                 telefono_emergencia=request.POST['telefono_emergencia']
             )
 
-            return redirect('rrhh/empleados/')
+            return redirect('/rrhh/empleados/')
 
         except IntegrityError:
-            return render(request, 'crear_empleado.html', {
+            return render(request, 'rrhh/crear_empleado.html', {
                 'error': '⚠️ Ya existe un empleado con ese documento'
             })
 
@@ -71,7 +74,10 @@ def empleados(request):
     query = request.GET.get('q')
 
     if query:
-        lista = Empleado.objects.filter(documento__icontains=query)
+        lista = Empleado.objects.filter(
+            Q(documento__icontains=query) |
+            Q(nombre_completo__icontains=query)
+        )
     else:
         lista = Empleado.objects.all()
 
@@ -95,9 +101,9 @@ def eliminar_empleado(request, id):
 
     if request.method == 'POST':
         empleado.delete()
-        return redirect('rrhh/empleados/')
+        return redirect('/rrhh/empleados/')
 
-    return redirect('rrhh/empleados/')
+    return redirect('/rrhh/empleados/')
 
 @login_required
 def detalle_empleado(request, id):
@@ -123,8 +129,10 @@ def detalle_empleado(request, id):
         # VALIDAR DUPLICADO
         existe = Empleado.objects.filter(documento=documento).exclude(id=id).exists()
 
+        salario = request.POST['salario'].replace('.', '')
+
         if existe:
-            return render(request, '/rrhh/detalle_empleado.html', {
+            return render(request, 'rrhh/detalle_empleado.html', {
                 'empleado': empleado,
                 'salud': salud,
                 'dotaciones': dotaciones,
@@ -155,7 +163,7 @@ def detalle_empleado(request, id):
         empleado.fecha_ingreso = request.POST['fecha_ingreso']
         empleado.fecha_finalizacion = request.POST['fecha_finalizacion']
         empleado.tipo_contrato = request.POST['tipo_contrato']
-        empleado.salario = request.POST['salario']
+        empleado.salario = int(salario)
         empleado.jornada = request.POST['jornada']
         empleado.jefe = request.POST['jefe']
 
@@ -163,12 +171,6 @@ def detalle_empleado(request, id):
         empleado.contacto_emergencia = request.POST.get('contacto_emergencia')
         empleado.telefono_emergencia = request.POST.get('telefono_emergencia')
         empleado.parentesco_emergencia = request.POST.get('parentesco_emergencia')
-
-        # SEGURIDAD SOCIAL
-        empleado.eps = request.POST.get('eps')
-        empleado.arl = request.POST.get('arl')
-        empleado.afp = request.POST.get('afp')
-        empleado.cesantias = request.POST.get('cesantias')
 
         # OBSERVACIONES
         empleado.observaciones = request.POST.get('observaciones')

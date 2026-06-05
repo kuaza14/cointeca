@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+    🌴 Vacaciones de {{ empleado.nombre_completo }}
+</h1>
+
+<div class="mb-6 flex justify-between">
+
+    <div class="bg-green-100 px-4 py-3 rounded shadow">
+
+        <strong>Días disponibles:</strong>
+        {{ dias_disponibles }}
+
+    </div>
+
+    <a
+        href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+    >
+        + Registrar vacaciones
+    </a>
+
+</div>
+
+<table class="w-full border shadow">
+
+    <thead class="bg-gray-800 text-white">
+
+        <tr>
+            <th class="p-2">Periodo</th>
+            <th class="p-2">Inicio</th>
+            <th class="p-2">Fin</th>
+            <th class="p-2">Regreso</th>
+            <th class="p-2">Días tomados</th>
+            <th class="p-2">Pendientes</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for v in vacaciones %}
+
+        <tr class="border-b">
+
+            <td class="p-2">{{ v.periodo }}</td>
+            <td class="p-2">{{ v.fecha_inicio }}</td>
+            <td class="p-2">{{ v.fecha_fin }}</td>
+            <td class="p-2">{{ v.fecha_regreso }}</td>
+            <td class="p-2">{{ v.dias_tomados }}</td>
+            <td class="p-2">{{ v.dias_pendientes }}</td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="6" class="text-center p-4">
+                No hay vacaciones registradas
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

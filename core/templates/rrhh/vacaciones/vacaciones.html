@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+    🏖️ Control de Vacaciones
+</h1>
+
+<div class="flex justify-between mb-6">
+    <a
+        href="/rrhh/vacaciones/crear/"
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+    >
+        + Registrar vacaciones
+    </a>
+    <a href="/rrhh/" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        Volver a RRHH
+    </a>
+</div>
+
+<table class="w-full border shadow">
+
+    <thead class="bg-gray-800 text-white">
+        <tr>
+            <th class="p-2">Empleado</th>
+            <th class="p-2">Periodo</th>
+            <th class="p-2">Inicio</th>
+            <th class="p-2">Fin</th>
+            <th class="p-2">Tomados</th>
+            <th class="p-2">Pendientes</th>
+            <th class="p-2">Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for v in vacaciones %}
+
+        <tr class="border-b">
+
+            <td class="p-2">
+                {{ v.empleado.nombre_completo }}
+            </td>
+
+            <td class="p-2">
+                {{ v.periodo }}
+            </td>
+
+            <td class="p-2">
+                {{ v.fecha_inicio }}
+            </td>
+
+            <td class="p-2">
+                {{ v.fecha_fin }}
+            </td>
+
+            <td class="p-2">
+                {{ v.dias_tomados }}
+            </td>
+
+            <td class="p-2">
+                {{ v.dias_pendientes }}
+            </td>
+
+            <td class="p-2">
+                <a href="/rrhh/vacaciones/{{ v.id }}/editar/" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Editar
+                </a>
+                <a href="/rrhh/vacaciones/{{ v.id }}/eliminar/" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    Eliminar
+                </a>
+                <a
+                    href="/rrhh/vacaciones/{{ v.empleado.id }}/solicitud/"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                    📄 Solicitud
+                </a>
+            </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="7" class="text-center p-4">
+                No hay vacaciones registradas
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

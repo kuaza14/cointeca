@@ -60,7 +60,7 @@ from core.views.rrhh.equipos import asignar_equipo, eliminar_equipo, editar_equi
 
 from core.views.rrhh.contratos import generar_contrato
 
-from core.views.rrhh.vacaciones import solicitud_vacaciones, vacaciones_home, vacaciones, crear_vacacion, vacaciones_empleado
+from core.views.rrhh.vacaciones import solicitud_vacaciones, vacaciones_home, vacaciones, crear_vacacion, vacaciones_empleado, crear_vacacion_empleado, editar_vacacion, eliminar_vacacion
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -138,6 +138,8 @@ urlpatterns = [
     path('rrhh/vacaciones/crear/', crear_vacacion, name='crear_vacacion'),
     path('rrhh/empleados/<int:id>/vacaciones/crear/', crear_vacacion, name='crear_vacacion_empleado'),
     path('rrhh/vacaciones/<int:id>/solicitud/', solicitud_vacaciones, name='solicitud_vacaciones'),
+    path('rrhh/vacaciones/<int:id>/editar/', editar_vacacion, name='editar_vacacion'),
+    path('rrhh/vacaciones/<int:id>/eliminar/', eliminar_vacacion, name='eliminar_vacacion'),
 ]
 
 # =========================

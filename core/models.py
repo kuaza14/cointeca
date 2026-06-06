@@ -495,10 +495,6 @@ class Vacacion(models.Model):
 
     fecha_fin = models.DateField()
 
-    dias_disponibles = models.IntegerField(
-        default=15
-    )
-
     dias_tomados = models.IntegerField()
 
     dias_pendientes = models.IntegerField()

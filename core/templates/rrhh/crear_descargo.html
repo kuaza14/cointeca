@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    Descargos disciplinarios
+</h1>
+
+<h2 class="text-xl font-semibold mb-4">
+    {{ empleado.nombre_completo }}
+</h2>
+    <div class="mb-6">
+        <a href="/rrhh/empleados/{{ empleado.id }}/"
+        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        Volver a Detalle del Empleado
+        </a>
+    </div>
+
+<!-- ===================== -->
+<!-- FORMULARIO DESCARGO -->
+<!-- ===================== -->
+
+<form method="POST" class="mb-10">
+
+    {% csrf_token %}
+
+    <div class="mb-4">
+        <label class="font-semibold">
+            Fecha de los hechos
+        </label>
+
+        <input
+            type="date"
+            name="fecha_hechos"
+            class="border p-2 rounded w-full"
+            required>
+    </div>
+
+    <div class="mb-4">
+        <label class="font-semibold">
+            Hora de inicio
+        </label>
+
+        <input
+            type="time"
+            name="hora_inicio"
+            class="border p-2 rounded w-full"
+            required>
+    </div>
+
+    <div class="mb-4">
+        <label class="font-semibold">
+            Descripción de la falta
+        </label>
+
+        <textarea
+            name="descripcion_falta"
+            rows="4"
+            class="border p-2 rounded w-full"
+            placeholder="Describa brevemente los hechos..."
+            required>
+        </textarea>
+    </div>
+
+    <div class="mb-4">
+        <label class="font-semibold">
+            Testigo o acompañante (Opcional)
+        </label>
+
+        <input
+            type="text"
+            name="testigo"
+            class="border p-2 rounded w-full">
+    </div>
+
+    <button
+        type="submit"
+        class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
+
+        📄 Generar Acta de Descargos
+
+    </button>
+
+</form>
+
+<!-- ===================== -->
+<!-- TABLA DE DESCARGOS -->
+<!-- ===================== -->
+
+<h2 class="text-xl font-bold mb-4">
+    Historial de descargos
+</h2>
+
+<table class="w-full border-collapse border border-gray-300 text-sm">
+
+    <thead class="bg-gray-200">
+        <tr>
+            <th class="border p-2">Fecha hechos</th>
+            <th class="border p-2">Hora inicio</th>
+            <th class="border p-2">Testigo</th>
+            <th class="border p-2">Descripción</th>
+            <th class="border p-2">Fecha registro</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for d in descargos %}
+        <tr>
+            <td class="border p-2">
+                {{ d.fecha_hechos }}
+            </td>
+
+            <td class="border p-2">
+                {{ d.hora_inicio }}
+            </td>
+
+            <td class="border p-2">
+                {{ d.testigo|default:"-" }}
+            </td>
+
+            <td class="border p-2">
+                {{ d.descripcion_falta }}
+            </td>
+
+            <td class="border p-2">
+                {{ d.fecha_registro }}
+            </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="5" class="text-center p-4">
+                No hay descargos registrados para este empleado
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    Editar diligencia de descargo
+</h1>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="mb-4">
+        <label>Testigo</label>
+
+        <input
+            type="text"
+            name="testigo"
+            value="{{ descargo.testigo }}"
+            class="border p-2 w-full"
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Fecha de los hechos</label>
+
+        <input
+            type="date"
+            name="fecha_hechos"
+            value="{{ descargo.fecha_hechos|date:'Y-m-d' }}"
+            class="border p-2 w-full"
+            required
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Hora inicio</label>
+
+        <input
+            type="time"
+            name="hora_inicio"
+            value="{{ descargo.hora_inicio|time:'H:i' }}"
+            class="border p-2 w-full"
+            required
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Hora cierre</label>
+
+        <input
+            type="time"
+            name="hora_cierre"
+            value="{{ descargo.hora_cierre|time:'H:i' }}"
+            class="border p-2 w-full"
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Descripción de la falta</label>
+
+        <textarea
+            name="descripcion_falta"
+            rows="5"
+            class="border p-2 w-full"
+        >{{ descargo.descripcion_falta }}</textarea>
+    </div>
+
+    <div class="mb-4">
+        <label>Observaciones finales</label>
+
+        <textarea
+            name="observaciones_finales"
+            rows="5"
+            class="border p-2 w-full"
+        >{{ descargo.observaciones_finales }}</textarea>
+    </div>
+
+    <button
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
+    >
+        Guardar cambios
+    </button>
+
+</form>
+
+{% endblock %}

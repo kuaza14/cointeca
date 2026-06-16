@@ -517,3 +517,84 @@ class Vacacion(models.Model):
         return (
             f"{self.empleado.nombre_completo} - {self.periodo}"
         )
+
+class Descargo(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    representante_rrhh = models.CharField(
+        max_length=150,
+        default='Gestión RRHH'
+    )
+
+    testigo = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    fecha_hechos = models.DateField()
+
+    descripcion_falta = models.TextField()
+
+    hora_inicio = models.TimeField()
+
+    hora_cierre = models.TimeField(
+        blank=True,
+        null=True
+    )
+
+    observaciones_finales = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.empleado.nombre_completo
+
+class CitacionDescargo(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha_diligencia = models.DateField()
+
+    hora_diligencia = models.TimeField()
+
+    lugar_diligencia = models.CharField(
+        max_length=150,
+        default='Oficina de RRHH'
+    )
+
+    descripcion_hechos = models.TextField()
+
+    clausula_contrato = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    articulo_reglamento = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    norma_cst = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )

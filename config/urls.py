@@ -60,7 +60,30 @@ from core.views.rrhh.equipos import asignar_equipo, eliminar_equipo, editar_equi
 
 from core.views.rrhh.contratos import generar_contrato
 
-from core.views.rrhh.vacaciones import solicitud_vacaciones, vacaciones_home, vacaciones, crear_vacacion, vacaciones_empleado, crear_vacacion_empleado, editar_vacacion, eliminar_vacacion
+from core.views.rrhh.vacaciones import (
+    solicitud_vacaciones,
+    vacaciones_home,
+    vacaciones,
+    crear_vacacion,
+    vacaciones_empleado,
+    crear_vacacion_empleado,
+    editar_vacacion,
+    eliminar_vacacion,
+    registrar_saldo_inicial,
+)
+
+from core.views.rrhh.descargos import (
+    empleado_descargo, 
+    crear_descargo,
+    descargos_empleado,
+    crear_citacion_descargo,
+    generar_citacion_descargo,
+    editar_citacion_descargo,
+    eliminar_citacion_descargo,
+    eliminar_descargo,
+    editar_descargo
+
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -129,6 +152,7 @@ urlpatterns = [
     path('rrhh/empleados/<int:id>/contrato/', generar_contrato, name='generar_contrato'),
     path('rrhh/empleados/<int:id>/certificacion/', certificacion_laboral, name='certificacion_laboral'),
 
+
     # PERMISOS
     path('rrhh/<int:id>/permiso/', permiso_laboral, name='permiso_laboral'),
 
@@ -140,6 +164,19 @@ urlpatterns = [
     path('rrhh/vacaciones/<int:id>/solicitud/', solicitud_vacaciones, name='solicitud_vacaciones'),
     path('rrhh/vacaciones/<int:id>/editar/', editar_vacacion, name='editar_vacacion'),
     path('rrhh/vacaciones/<int:id>/eliminar/', eliminar_vacacion, name='eliminar_vacacion'),
+    path('rrhh/vacaciones/registrar-saldo-inicial/', registrar_saldo_inicial, name='registrar_saldo_inicial'),
+
+    #DESCARGOS
+    path('rrhh/empleados/<int:id>/descargo/', empleado_descargo, name='empleado_descargo'),
+    path('rrhh/empleados/<int:id>/crear-descargo/', crear_descargo, name='crear_descargo'),
+    path('rrhh/empleados/<int:id>/descargos/', descargos_empleado, name='descargos_empleado'),
+    path('rrhh/empleados/<int:id>/diligencia_descargos/', empleado_descargo, name='empleado_descargo'),
+    path('rrhh/empleados/<int:id>/crear_citacion_descargo/', crear_citacion_descargo, name='crear_citacion_descargo'),
+    path('rrhh/citacion_descargo/<int:id>/', generar_citacion_descargo, name='generar_citacion_descargo'),
+    path('rrhh/empleados/citacion/<int:id>/eliminar/', eliminar_citacion_descargo, name='eliminar_citacion_descargo'),
+    path('rrhh/empleados/citacion/<int:id>/editar/', editar_citacion_descargo, name='editar_citacion_descargo'),
+    path('rrhh/empleados/descargo/<int:id>/editar/', editar_descargo, name='editar_descargo'),
+    path('rrhh/empleados/descargo/<int:id>/eliminar/', eliminar_descargo, name='eliminar_descargo'),
 ]
 
 # =========================

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    Editar citación de descargo
+</h1>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="mb-4">
+        <label>Fecha de diligencia</label>
+
+        <input
+            type="date"
+            name="fecha_diligencia"
+            value="{{ citacion.fecha_diligencia|date:'Y-m-d' }}"
+            class="border p-2 w-full"
+            required
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Hora de diligencia</label>
+
+        <input
+            type="time"
+            name="hora_diligencia"
+            value="{{ citacion.hora_diligencia|time:'H:i' }}"
+            class="border p-2 w-full"
+            required
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Lugar de diligencia</label>
+
+        <input
+            type="text"
+            name="lugar_diligencia"
+            value="{{ citacion.lugar_diligencia }}"
+            class="border p-2 w-full"
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Descripción de los hechos</label>
+
+        <textarea
+            name="descripcion_hechos"
+            class="border p-2 w-full"
+            rows="5"
+        >{{ citacion.descripcion_hechos }}</textarea>
+    </div>
+
+    <div class="mb-4">
+        <label>Cláusula del contrato</label>
+
+        <input
+            type="text"
+            name="clausula_contrato"
+            value="{{ citacion.clausula_contrato }}"
+            class="border p-2 w-full"
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Artículo del reglamento</label>
+
+        <input
+            type="text"
+            name="articulo_reglamento"
+            value="{{ citacion.articulo_reglamento }}"
+            class="border p-2 w-full"
+        >
+    </div>
+
+    <div class="mb-4">
+        <label>Norma CST</label>
+
+        <input
+            type="text"
+            name="norma_cst"
+            value="{{ citacion.norma_cst }}"
+            class="border p-2 w-full"
+        >
+    </div>
+
+    <button
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
+    >
+        Guardar cambios
+    </button>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+
+    <h1 class="text-3xl font-bold mb-6 text-blue-700">
+        ✏️ Editar Retiro de Cesantías
+    </h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <!-- Tipo -->
+        <div class="mb-4">
+
+            <label class="font-semibold block mb-2">
+                Tipo de retiro
+            </label>
+
+            <select
+                name="tipo_retiro"
+                id="tipo_retiro"
+                class="border rounded w-full p-2"
+            >
+
+                <option value="VIVIENDA"
+                    {% if retiro.tipo_retiro == 'VIVIENDA' %}selected{% endif %}>
+                    Vivienda
+                </option>
+
+                <option value="EDUCACION"
+                    {% if retiro.tipo_retiro == 'EDUCACION' %}selected{% endif %}>
+                    Educación
+                </option>
+
+                <option value="DEFINITIVO"
+                    {% if retiro.tipo_retiro == 'DEFINITIVO' %}selected{% endif %}>
+                    Retiro definitivo
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Fondo -->
+        <div class="mb-4">
+
+            <label class="font-semibold block mb-2">
+                Fondo de cesantías
+            </label>
+
+            <input
+                type="text"
+                name="fondo_cesantias"
+                value="{{ retiro.fondo_cesantias }}"
+                class="border rounded w-full p-2"
+            >
+
+        </div>
+
+        <!-- Fecha solicitud -->
+        <div class="mb-4">
+
+            <label class="font-semibold block mb-2">
+                Fecha solicitud
+            </label>
+
+            <input
+                type="date"
+                name="fecha_solicitud"
+                value="{{ retiro.fecha_solicitud|date:'Y-m-d' }}"
+                class="border rounded w-full p-2"
+            >
+
+        </div>
+
+        <!-- Valor -->
+        <div class="mb-4">
+
+            <label class="font-semibold block mb-2">
+                Valor retiro
+            </label>
+
+            <input
+                type="number"
+                step="0.01"
+                name="valor_retiro"
+                value="{{ retiro.valor_retiro }}"
+                class="border rounded w-full p-2"
+            >
+
+        </div>
+
+        <!-- VIVIENDA -->
+        <div id="campos_vivienda">
+
+            <h3 class="font-bold text-green-700 mb-3">
+                🏠 Información Vivienda
+            </h3>
+
+            <div class="mb-4">
+
+                <label class="block mb-2">
+                    Dirección vivienda
+                </label>
+
+                <input
+                    type="text"
+                    name="direccion_vivienda"
+                    value="{{ retiro.direccion_vivienda }}"
+                    class="border rounded w-full p-2"
+                >
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="block mb-2">
+                    Descripción vivienda
+                </label>
+
+                <textarea
+                    name="descripcion_vivienda"
+                    class="border rounded w-full p-2"
+                >{{ retiro.descripcion_vivienda }}</textarea>
+
+            </div>
+
+        </div>
+
+        <!-- EDUCACION -->
+        <div id="campos_educacion">
+
+            <h3 class="font-bold text-blue-700 mb-3">
+                🎓 Información Educación
+            </h3>
+
+            <div class="mb-4">
+
+                <label class="block mb-2">
+                    Institución educativa
+                </label>
+
+                <input
+                    type="text"
+                    name="institucion_educativa"
+                    value="{{ retiro.institucion_educativa }}"
+                    class="border rounded w-full p-2"
+                >
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="block mb-2">
+                    Programa estudio
+                </label>
+
+                <input
+                    type="text"
+                    name="programa_estudio"
+                    value="{{ retiro.programa_estudio }}"
+                    class="border rounded w-full p-2"
+                >
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="block mb-2">
+                    Beneficiario
+                </label>
+
+                <input
+                    type="text"
+                    name="beneficiario"
+                    value="{{ retiro.beneficiario }}"
+                    class="border rounded w-full p-2"
+                >
+
+            </div>
+
+        </div>
+
+        <!-- DEFINITIVO -->
+        <div id="campos_definitivo">
+
+            <h3 class="font-bold text-red-700 mb-3">
+                🚪 Retiro Definitivo
+            </h3>
+
+            <div class="mb-4">
+
+                <label class="block mb-2">
+                    Fecha retiro definitivo
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha_retiro_definitivo"
+                    value="{{ retiro.fecha_retiro_definitivo|date:'Y-m-d' }}"
+                    class="border rounded w-full p-2"
+                >
+
+            </div>
+
+        </div>
+
+        <!-- Observaciones -->
+        <div class="mb-4">
+
+            <label class="block mb-2">
+                Observaciones
+            </label>
+
+            <textarea
+                name="observaciones"
+                class="border rounded w-full p-2"
+            >{{ retiro.observaciones }}</textarea>
+
+        </div>
+
+        <div class="flex gap-3">
+
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+                💾 Guardar cambios
+            </button>
+
+            <a
+                href="{% url 'retiros_cesantias_empleado' retiro.empleado.id %}"
+                class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+function actualizarCampos() {
+
+    let tipo = document.getElementById("tipo_retiro").value;
+
+    document.getElementById("campos_vivienda").style.display = "none";
+    document.getElementById("campos_educacion").style.display = "none";
+    document.getElementById("campos_definitivo").style.display = "none";
+
+    if(tipo === "VIVIENDA") {
+        document.getElementById("campos_vivienda").style.display = "block";
+    }
+
+    if(tipo === "EDUCACION") {
+        document.getElementById("campos_educacion").style.display = "block";
+    }
+
+    if(tipo === "DEFINITIVO") {
+        document.getElementById("campos_definitivo").style.display = "block";
+    }
+
+}
+
+document
+    .getElementById("tipo_retiro")
+    .addEventListener("change", actualizarCampos);
+
+window.onload = actualizarCampos;
+
+</script>
+
+{% endblock %}

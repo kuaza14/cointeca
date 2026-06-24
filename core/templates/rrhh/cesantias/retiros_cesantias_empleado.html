@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1 class="text-3xl font-bold mb-6">
+        💰 Retiros de Cesantías - {{ empleado.nombre_completo }}
+    </h1>
+
+    <div class="flex justify-between mb-6">
+        <a
+            href="{% url 'crear_retiro_cesantias' empleado.id %}"
+            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+            + Nuevo Retiro
+        </a>
+        <a href="/rrhh/" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+            Volver a RRHH
+        </a>
+    </div>
+
+    {% if retiros %}
+
+        <div class="overflow-x-auto shadow rounded">
+            <table class="w-full min-w-max border">
+
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-3 text-left">Tipo Retiro</th>
+                        <th class="p-3 text-center">Valor</th>
+                        <th class="p-3 text-center">Fondo</th>
+                        <th class="p-3 text-center">Fecha Solicitud</th>
+                        <th class="p-3 text-left">Detalles</th>
+                        <th class="p-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for retiro in retiros %}
+
+                    <tr class="border-b hover:bg-gray-50">
+
+                        <td class="p-3">
+                            {% if retiro.tipo_retiro == 'EDUCACION' %}
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm">
+                                    🎓 Educación
+                                </span>
+                            {% elif retiro.tipo_retiro == 'VIVIENDA' %}
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded text-sm">
+                                    🏠 Vivienda
+                                </span>
+                            {% elif retiro.tipo_retiro == 'DEFINITIVO' %}
+                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded text-sm">
+                                    🚪 Definitivo
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="p-3 text-center font-bold">
+                            ${{ retiro.valor_retiro|floatformat:0 }}
+                        </td>
+
+                        <td class="p-3 text-center">
+                            {{ retiro.fondo_cesantias }}
+                        </td>
+
+                        <td class="p-3 text-center">
+                            {{ retiro.fecha_solicitud|date:'d/m/Y' }}
+                        </td>
+
+                        <td class="p-3 text-sm">
+                            {% if retiro.tipo_retiro == 'EDUCACION' %}
+                                <strong>Institución:</strong> {{ retiro.institucion_educativa }}<br>
+                                <strong>Programa:</strong> {{ retiro.programa_estudio }}<br>
+                                <strong>Beneficiario:</strong> {{ retiro.beneficiario }}
+                            {% elif retiro.tipo_retiro == 'VIVIENDA' %}
+                                <strong>Dirección:</strong> {{ retiro.direccion_vivienda }}<br>
+                                <strong>Mejoras:</strong> {{ retiro.descripcion_vivienda }}
+                            {% elif retiro.tipo_retiro == 'DEFINITIVO' %}
+                                <strong>Fecha Retiro:</strong> {{ retiro.fecha_retiro_definitivo|date:'d/m/Y' }}
+                            {% endif %}
+                        </td>
+
+                        <td class="p-3 text-center">
+                            <a
+                                href="/rrhh/cesantias/{{ retiro.id }}/editar/"
+                                class="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 text-sm"
+                            >
+                                ✏️ Editar
+                            </a>
+
+                            <button
+                                onclick="confirmarEliminar({{ retiro.id }})"
+                                class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
+                            >
+                                🗑️ Eliminar
+                            </button>
+
+                            <a href="{% url 'generar_retiro_cesantias' retiro.id %}"
+                            class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm">
+                                📄
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+    {% else %}
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded p-6 text-center">
+            <p class="text-yellow-800 text-lg">
+                ℹ️ No hay retiros de cesantías registrados
+            </p>
+            <a
+                href="/rrhh/cesantias/crear/{{ empleado.id }}/"
+                class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+                Crear primer retiro
+            </a>
+        </div>
+
+    {% endif %}
+
+    <!-- Modal eliminar -->
+    <div
+        id="modalEliminar"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center"
+    >
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-2xl font-bold mb-4">
+                ¿Eliminar retiro?
+            </h2>
+            <p class="text-gray-600 mb-6">
+                Esta acción no se puede deshacer.
+            </p>
+            <form
+                id="formEliminar"
+                method="POST"
+                class="flex gap-3"
+            >
+                {% csrf_token %}
+                <button
+                    type="submit"
+                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                >
+                    Sí, eliminar
+                </button>
+                <button
+                    type="button"
+                    onclick="cerrarModal()"
+                    class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                >
+                    Cancelar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function confirmarEliminar(id) {
+            document.getElementById('modalEliminar').classList.remove('hidden');
+            document.getElementById('formEliminar').action = `/rrhh/cesantias/${id}/eliminar/`;
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEliminar').classList.add('hidden');
+        }
+    </script>
+
+{% endblock %}

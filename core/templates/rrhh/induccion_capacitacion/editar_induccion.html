@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+
+    <div class="bg-white shadow rounded-lg p-6">
+
+        <h1 class="text-3xl font-bold mb-6">
+            ✏️ Editar Inducción / Capacitación
+        </h1>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="font-semibold">
+                        Fecha
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha"
+                        value="{{ induccion.fecha|date:'Y-m-d' }}"
+                        class="w-full border rounded px-3 py-2"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label class="font-semibold">
+                        Tipo de evento
+                    </label>
+
+                    <select
+                        name="tipo_evento"
+                        class="w-full border rounded px-3 py-2"
+                        required
+                    >
+
+                        <option value="INDUCCION"
+                            {% if induccion.tipo_evento == 'INDUCCION' %}
+                                selected
+                            {% endif %}
+                        >
+                            Inducción
+                        </option>
+
+                        <option value="REINDUCCION"
+                            {% if induccion.tipo_evento == 'REINDUCCION' %}
+                                selected
+                            {% endif %}
+                        >
+                            Reinducción
+                        </option>
+
+                        <option value="CAPACITACION"
+                            {% if induccion.tipo_evento == 'CAPACITACION' %}
+                                selected
+                            {% endif %}
+                        >
+                            Capacitación específica
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <hr class="my-6">
+
+            <h2 class="text-xl font-bold mb-4">
+                Capacitación Técnica (si aplica)
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="font-semibold">
+                        Tema
+                    </label>
+
+                    <input
+                        type="text"
+                        name="tema_capacitacion"
+                        value="{{ induccion.tema_capacitacion }}"
+                        class="w-full border rounded px-3 py-2"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-semibold">
+                        Facilitador
+                    </label>
+
+                    <input
+                        type="text"
+                        name="facilitador"
+                        value="{{ induccion.facilitador }}"
+                        class="w-full border rounded px-3 py-2"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-semibold">
+                        Duración (Horas)
+                    </label>
+
+                    <input
+                        type="number"
+                        name="duracion_horas"
+                        value="{{ induccion.duracion_horas }}"
+                        class="w-full border rounded px-3 py-2"
+                    >
+                </div>
+
+            </div>
+
+            <div class="mt-8 flex gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                >
+                    💾 Guardar cambios
+                </button>
+
+                <a
+                    href="{% url 'inducciones_empleado' induccion.empleado.id %}"
+                    class="bg-gray-600 text-white px-5 py-2 rounded hover:bg-gray-700"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

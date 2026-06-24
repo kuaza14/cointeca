@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    Crear retiro de cesantías
+</h1>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <!-- Tipo de retiro -->
+    <div class="mb-4">
+
+        <label class="font-semibold">
+            Tipo de retiro
+        </label>
+
+        <select
+            name="tipo_retiro"
+            id="tipo_retiro"
+            class="border rounded p-2 w-full">
+
+            <option value="">
+                Seleccione
+            </option>
+
+            <option value="VIVIENDA">
+                Vivienda
+            </option>
+
+            <option value="EDUCACION">
+                Educación
+            </option>
+
+            <option value="DEFINITIVO">
+                Retiro definitivo
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- CAMPOS GENERALES -->
+
+    <div class="mb-4">
+
+        <label class="font-semibold">
+            Fondo de cesantías
+        </label>
+
+        <input
+            type="text"
+            name="fondo_cesantias"
+            value="Protección"
+            class="border rounded p-2 w-full">
+
+    </div>
+
+
+    <div class="mb-4">
+
+        <label class="font-semibold">
+            Fecha solicitud
+        </label>
+
+        <input
+            type="date"
+            name="fecha_solicitud"
+            class="border rounded p-2 w-full">
+
+    </div>
+
+
+    <div class="mb-4">
+
+        <label class="font-semibold">
+            Valor retiro
+        </label>
+
+        <input
+            type="number"
+            name="valor_retiro"
+            class="border rounded p-2 w-full">
+
+    </div>
+
+
+    <!-- VIVIENDA -->
+
+    <div id="campos_vivienda" style="display:none;">
+
+        <div class="mb-4">
+
+            <label class="font-semibold">
+                Dirección vivienda
+            </label>
+
+            <input
+                type="text"
+                name="direccion_vivienda"
+                class="border rounded p-2 w-full">
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <label class="font-semibold">
+                Descripción vivienda
+            </label>
+
+            <textarea
+                name="descripcion_vivienda"
+                class="border rounded p-2 w-full"></textarea>
+
+        </div>
+
+    </div>
+
+
+    <!-- EDUCACIÓN -->
+
+    <div id="campos_educacion" style="display:none;">
+
+        <div class="mb-4">
+
+            <label class="font-semibold">
+                Institución educativa
+            </label>
+
+            <input
+                type="text"
+                name="institucion_educativa"
+                class="border rounded p-2 w-full">
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <label class="font-semibold">
+                Programa estudio
+            </label>
+
+            <input
+                type="text"
+                name="programa_estudio"
+                class="border rounded p-2 w-full">
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <label class="font-semibold">
+                Beneficiario
+            </label>
+
+            <input
+                type="text"
+                name="beneficiario"
+                class="border rounded p-2 w-full">
+
+        </div>
+
+    </div>
+
+
+    <!-- RETIRO DEFINITIVO -->
+
+    <div id="campos_definitivo" style="display:none;">
+
+        <div class="mb-4">
+
+            <label class="font-semibold">
+                Fecha retiro definitivo
+            </label>
+
+            <input
+                type="date"
+                name="fecha_retiro_definitivo"
+                class="border rounded p-2 w-full">
+
+        </div>
+
+    </div>
+
+
+    <!-- OBSERVACIONES -->
+
+    <div class="mb-4">
+
+        <label class="font-semibold">
+            Observaciones
+        </label>
+
+        <textarea
+            name="observaciones"
+            class="border rounded p-2 w-full"></textarea>
+
+    </div>
+
+
+    <button
+        type="submit"
+        class="bg-green-600 text-white px-4 py-2 rounded">
+
+        Guardar
+
+    </button>
+
+</form>
+
+
+<script>
+
+const tipo = document.getElementById('tipo_retiro');
+
+tipo.addEventListener('change', function(){
+
+    document.getElementById('campos_vivienda').style.display = 'none';
+    document.getElementById('campos_educacion').style.display = 'none';
+    document.getElementById('campos_definitivo').style.display = 'none';
+
+    if(this.value === 'VIVIENDA'){
+        document.getElementById('campos_vivienda').style.display = 'block';
+    }
+
+    if(this.value === 'EDUCACION'){
+        document.getElementById('campos_educacion').style.display = 'block';
+    }
+
+    if(this.value === 'DEFINITIVO'){
+        document.getElementById('campos_definitivo').style.display = 'block';
+    }
+
+});
+
+</script>
+
+{% endblock %}

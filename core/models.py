@@ -598,3 +598,118 @@ class CitacionDescargo(models.Model):
     fecha_registro = models.DateTimeField(
         auto_now_add=True
     )
+
+class RetiroCesantias(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    tipo_retiro = models.CharField(
+        max_length=20
+    )
+
+    fecha_solicitud = models.DateField()
+
+    fondo_cesantias = models.CharField(
+        max_length=100,
+        default='Protección'
+    )
+
+    valor_retiro = models.DecimalField(
+        max_digits=15,
+        decimal_places=2
+    )
+
+    direccion_vivienda = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    descripcion_vivienda = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    institucion_educativa = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    programa_estudio = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    beneficiario = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    fecha_retiro_definitivo = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+class InduccionCapacitacion(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha = models.DateField()
+
+    TIPO_EVENTO = [
+        ('INDUCCION', 'Inducción'),
+        ('REINDUCCION', 'Reinducción'),
+        ('CAPACITACION', 'Capacitación específica'),
+    ]
+
+    tipo_evento = models.CharField(
+        max_length=20,
+        choices=TIPO_EVENTO
+    )
+
+    # Sección 3 del formato (solo si aplica)
+    tema_capacitacion = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    facilitador = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    duracion_horas = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f'{self.empleado.nombre_completo} - '
+            f'{self.get_tipo_evento_display()}'
+        )

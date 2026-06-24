@@ -84,6 +84,21 @@ from core.views.rrhh.descargos import (
     editar_descargo
 
 )
+from core.views.rrhh.cesantias import (
+    crear_retiro_cesantias,
+    editar_retiro_cesantias,
+    eliminar_retiro_cesantias,
+    retiros_cesantias_empleado,
+    generar_retiro_cesantias
+)
+
+from core.views.rrhh.induccion_capacitacion import (
+    inducciones_empleado,
+    crear_induccion,
+    editar_induccion,
+    eliminar_induccion,
+    generar_induccion
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -177,6 +192,20 @@ urlpatterns = [
     path('rrhh/empleados/citacion/<int:id>/editar/', editar_citacion_descargo, name='editar_citacion_descargo'),
     path('rrhh/empleados/descargo/<int:id>/editar/', editar_descargo, name='editar_descargo'),
     path('rrhh/empleados/descargo/<int:id>/eliminar/', eliminar_descargo, name='eliminar_descargo'),
+
+    # CESANTÍAS
+    path('rrhh/empleados/<int:id>/cesantias/', retiros_cesantias_empleado, name='retiros_cesantias_empleado'),
+    path('rrhh/empleados/<int:id>/cesantias/crear/', crear_retiro_cesantias, name='crear_retiro_cesantias'),
+    path('rrhh/cesantias/<int:id>/editar/', editar_retiro_cesantias, name='editar_retiro_cesantias'),
+    path('rrhh/cesantias/<int:id>/eliminar/', eliminar_retiro_cesantias, name='eliminar_retiro_cesantias'),
+    path('rrhh/cesantias/<int:id>/descargar/', generar_retiro_cesantias, name='generar_retiro_cesantias'),
+
+    # INDUCCION Y CAPACITACION
+    path('rrhh/empleados/<int:id>/induccion_capacitacion/', inducciones_empleado, name='inducciones_empleado'),
+    path('rrhh/inducciones/<int:id>/', crear_induccion, name='crear_induccion'),
+    path('rrhh/inducciones/<int:id>/editar/', editar_induccion, name='editar_induccion'),
+    path('rrhh/inducciones/<int:id>/eliminar/', eliminar_induccion, name='eliminar_induccion'),
+    path('rrhh/inducciones/<int:id>/descargar/', generar_induccion, name='generar_induccion'),
 ]
 
 # =========================

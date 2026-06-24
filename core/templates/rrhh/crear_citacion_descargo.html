@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+
+    <h1 class="text-2xl font-bold mb-6">
+        Citación a Descargos
+    </h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="grid grid-cols-2 gap-4">
+
+            <div>
+                <label class="block font-semibold mb-1">
+                    Fecha de la diligencia
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha_diligencia"
+                    required
+                    class="w-full border rounded px-3 py-2"
+                >
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1">
+                    Hora
+                </label>
+
+                <input
+                    type="time"
+                    name="hora_diligencia"
+                    required
+                    class="w-full border rounded px-3 py-2"
+                >
+            </div>
+
+            <div class="col-span-2">
+
+                <label class="block font-semibold mb-1">
+                    Lugar / Plataforma
+                </label>
+
+                <input
+                    type="text"
+                    name="lugar_diligencia"
+                    value="Oficina de RRHH"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+            <div class="col-span-2">
+
+                <label class="block font-semibold mb-1">
+                    Descripción de los hechos
+                </label>
+
+                <textarea
+                    name="descripcion_hechos"
+                    rows="4"
+                    required
+                    class="w-full border rounded px-3 py-2"
+                ></textarea>
+
+            </div>
+
+            <div>
+
+                <label class="block font-semibold mb-1">
+                    Cláusula del contrato
+                </label>
+
+                <input
+                    type="text"
+                    name="clausula_contrato"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+            <div>
+
+                <label class="block font-semibold mb-1">
+                    Artículo del reglamento
+                </label>
+
+                <input
+                    type="text"
+                    name="articulo_reglamento"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+            <div class="col-span-2">
+
+                <label class="block font-semibold mb-1">
+                    Norma Código Sustantivo del Trabajo
+                </label>
+
+                <input
+                    type="text"
+                    name="norma_cst"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+        </div>
+
+        <div class="mt-6 flex gap-3">
+
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            >
+                Guardar citación
+            </button>
+
+            <a
+                href="{% url 'descargos_empleado' empleado.id %}"
+                class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

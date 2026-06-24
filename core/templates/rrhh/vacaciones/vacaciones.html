@@ -2,94 +2,406 @@
 
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-6">
-    🏖️ Control de Vacaciones
-</h1>
+    <h1 class="text-3xl font-bold mb-6">
+        🏖️ Control de Vacaciones
+    </h1>
 
-<div class="flex justify-between mb-6">
-    <a
-        href="/rrhh/vacaciones/crear/"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+    <div class="flex justify-between mb-6">
+        <a
+            href="/rrhh/vacaciones/crear/"
+            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+            + Registrar vacaciones
+        </a>
+        <a href="/rrhh/" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+            Volver a RRHH
+        </a>
+    </div>
+
+    <!-- BOTÓN PARA ABRIR MODAL DE SALDO INICIAL -->
+    <div class="mb-6">
+        <button
+            onclick="abrirSaldoInicial()"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+            💰 Registrar Saldo Inicial
+        </button>
+    </div>
+
+    <!-- TABLA DE VACACIONES -->
+    <div class="overflow-x-auto shadow rounded">
+        <table class="w-full min-w-max border shadow">
+
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="p-2">Empleado</th>
+                    <th class="p-2">Ingreso</th>
+                    <th class="p-2">Años</th>
+                    <th class="p-2">Acumulados</th>
+                    <th class="p-2">Tomados total</th>
+                    <th class="p-2">Pendientes</th>
+                    <th class="p-2">Inicio</th>
+                    <th class="p-2">Fin</th>
+                    <th class="p-2">Regreso</th>
+                    <th class="p-2">Periodo</th>
+                    <th class="p-2">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for v in vacaciones %}
+
+                <tr class="border-b">
+
+                    <td class="p-2">
+                        {{ v.empleado.nombre_completo }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.empleado.fecha_ingreso }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.anios_trabajados }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.dias_acumulados }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.total_tomados }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.total_pendientes }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.fecha_inicio }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.fecha_fin }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.fecha_regreso }}
+                    </td>
+
+                    <td class="p-2">
+                        {{ v.periodo }}
+                    </td>
+
+                    <td class="p-2">
+
+                        <button
+                            onclick="abrirEditar(
+                                '{{ v.id }}',
+                                '{{ v.periodo }}',
+                                '{{ v.fecha_inicio|date:'Y-m-d' }}',
+                                '{{ v.dias_tomados }}',
+                                '{{ v.observaciones }}'
+                            )"
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" >
+                            Editar
+                        </button>
+
+                        <button
+                            onclick="abrirEliminar('{{ v.id }}')"
+                            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" >
+                            Eliminar
+                        </button>
+
+                        <a
+                            href="/rrhh/vacaciones/{{ v.empleado.id }}/solicitud/"
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                        >
+                            📄 Solicitud
+                        </a>
+
+                    </td>
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="11" class="text-center p-4">
+                        No hay vacaciones registradas
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- MODAL SALDO INICIAL -->
+    <div
+        id="modalSaldoInicial"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
     >
-        + Registrar vacaciones
-    </a>
-    <a href="/rrhh/" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-        Volver a RRHH
-    </a>
-</div>
 
-<table class="w-full border shadow">
+        <div class="bg-white p-6 rounded shadow w-[500px]">
 
-    <thead class="bg-gray-800 text-white">
-        <tr>
-            <th class="p-2">Empleado</th>
-            <th class="p-2">Periodo</th>
-            <th class="p-2">Inicio</th>
-            <th class="p-2">Fin</th>
-            <th class="p-2">Tomados</th>
-            <th class="p-2">Pendientes</th>
-            <th class="p-2">Acciones</th>
-        </tr>
-    </thead>
+            <h2 class="text-2xl font-bold mb-4">
+                💰 Registrar Saldo Inicial de Vacaciones
+            </h2>
 
-    <tbody>
+            <p class="text-gray-600 mb-4 text-sm">
+                Usa esto para registrar las vacaciones que el empleado ya tomó en años anteriores.
+            </p>
 
-        {% for v in vacaciones %}
+            <form
+                id="formSaldoInicial"
+                method="POST"
+                action="/rrhh/vacaciones/registrar-saldo-inicial/"
+            >
 
-        <tr class="border-b">
+                {% csrf_token %}
 
-            <td class="p-2">
-                {{ v.empleado.nombre_completo }}
-            </td>
+                <div class="mb-4">
+                    <label class="block font-semibold mb-2">Empleado</label>
 
-            <td class="p-2">
-                {{ v.periodo }}
-            </td>
-
-            <td class="p-2">
-                {{ v.fecha_inicio }}
-            </td>
-
-            <td class="p-2">
-                {{ v.fecha_fin }}
-            </td>
-
-            <td class="p-2">
-                {{ v.dias_tomados }}
-            </td>
-
-            <td class="p-2">
-                {{ v.dias_pendientes }}
-            </td>
-
-            <td class="p-2">
-                <a href="/rrhh/vacaciones/{{ v.id }}/editar/" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Editar
-                </a>
-                <a href="/rrhh/vacaciones/{{ v.id }}/eliminar/" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                    Eliminar
-                </a>
-                <a
-                    href="/rrhh/vacaciones/{{ v.empleado.id }}/solicitud/"
-                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    <select
+                        id="empleado_saldo"
+                        name="empleado"
+                        required
+                        class="border p-2 rounded w-full"
                     >
-                    📄 Solicitud
-                </a>
-            </td>
-        </tr>
+                        <option value="">-- Selecciona un empleado --</option>
+                        {% for emp in empleados %}
+                            <option value="{{ emp.id }}">
+                                {{ emp.nombre_completo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        {% empty %}
+                <div class="mb-4">
+                    <label class="block font-semibold mb-2">Días tomados en años anteriores</label>
 
-        <tr>
-            <td colspan="7" class="text-center p-4">
-                No hay vacaciones registradas
-            </td>
-        </tr>
+                    <input
+                        type="number"
+                        id="dias_tomados_anteriores"
+                        name="dias_tomados_anteriores"
+                        min="0"
+                        required
+                        placeholder="Ej: 20"
+                        class="border p-2 rounded w-full"
+                    >
+                    <small class="text-gray-500">
+                        Total de días que ya tomó en años anteriores
+                    </small>
+                </div>
 
-        {% endfor %}
+                <div class="mb-4">
+                    <label class="block font-semibold mb-2">Notas (opcional)</label>
 
-    </tbody>
+                    <textarea
+                        id="notas_saldo"
+                        name="notas"
+                        rows="3"
+                        placeholder="Ej: Tomó 10 días en 2023 y 10 en 2024"
+                        class="border p-2 rounded w-full"
+                    ></textarea>
+                </div>
 
-</table>
+                <div class="flex gap-3">
+
+                    <button
+                        type="submit"
+                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex-1"
+                    >
+                        Registrar Saldo
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="cerrarSaldoInicial()"
+                        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 flex-1"
+                    >
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL EDITAR -->
+    <div
+        id="modalEditar"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+    >
+
+        <div class="bg-white p-6 rounded shadow w-[500px]">
+
+            <h2 class="text-2xl font-bold mb-4">
+                Editar Vacaciones
+            </h2>
+
+            <form
+                id="formEditar"
+                method="POST" >
+
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label>Periodo</label>
+
+                    <input
+                        id="periodo"
+                        name="periodo"
+                        class="border p-2 rounded w-full" >
+                </div>
+
+                <div class="mb-4">
+                    <label>Fecha inicio</label>
+
+                    <input
+                        type="date"
+                        id="fecha_inicio"
+                        name="fecha_inicio"
+                        class="border p-2 rounded w-full" >
+                </div>
+
+                <div class="mb-4">
+                    <label>Días tomados</label>
+
+                    <input
+                        type="number"
+                        id="dias_tomados"
+                        name="dias_tomados"
+                        class="border p-2 rounded w-full">
+                </div>
+
+                <div class="mb-4">
+                    <label>Observaciones</label>
+
+                    <textarea
+                        id="observaciones"
+                        name="observaciones"
+                        rows="4"
+                        class="border p-2 rounded w-full"
+                    ></textarea>
+                </div>
+
+                <div class="flex gap-3">
+
+                    <button
+                        class="bg-green-600 text-white px-4 py-2 rounded"
+                    >
+                        Guardar
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="cerrarEditar()"
+                        class="bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL ELIMINAR -->
+    <div
+        id="modalEliminar"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+    >
+
+        <div class="bg-white p-6 rounded shadow">
+
+            <h2 class="text-2xl font-bold mb-4">
+                ¿Eliminar vacaciones?
+            </h2>
+
+            <form
+                id="formEliminar"
+                method="POST"
+            >
+
+                {% csrf_token %}
+
+                <div class="flex gap-3">
+
+                    <button
+                        class="bg-red-600 text-white px-4 py-2 rounded"
+                    >
+                        Sí, eliminar
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="cerrarEliminar()"
+                        class="bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // SALDO INICIAL
+        function abrirSaldoInicial(){
+            document.getElementById("modalSaldoInicial").classList.remove("hidden");
+        }
+
+        function cerrarSaldoInicial(){
+            document.getElementById("modalSaldoInicial").classList.add("hidden");
+        }
+
+        // EDITAR
+        function abrirEditar(id, periodo, fecha_inicio, dias, observaciones){
+
+            document.getElementById("modalEditar").classList.remove("hidden");
+
+            document.getElementById("periodo").value = periodo;
+            document.getElementById("fecha_inicio").value = fecha_inicio;
+            document.getElementById("dias_tomados").value = dias;
+            document.getElementById("observaciones").value = observaciones;
+
+            document.getElementById("formEditar").action = "/rrhh/vacaciones/" + id + "/editar/";
+
+        }
+
+        function cerrarEditar(){
+            document.getElementById("modalEditar").classList.add("hidden");
+        }
+
+        // ELIMINAR
+        function abrirEliminar(id){
+
+            document.getElementById("modalEliminar").classList.remove("hidden");
+
+            document.getElementById("formEliminar").action = "/rrhh/vacaciones/" + id + "/eliminar/";
+
+        }
+
+        function cerrarEliminar(){
+            document.getElementById("modalEliminar").classList.add("hidden");
+        }
+
+    </script>
 
 {% endblock %}

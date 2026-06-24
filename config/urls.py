@@ -60,7 +60,45 @@ from core.views.rrhh.equipos import asignar_equipo, eliminar_equipo, editar_equi
 
 from core.views.rrhh.contratos import generar_contrato
 
-from core.views.rrhh.vacaciones import solicitud_vacaciones, vacaciones_home, vacaciones, crear_vacacion, vacaciones_empleado
+from core.views.rrhh.vacaciones import (
+    solicitud_vacaciones,
+    vacaciones_home,
+    vacaciones,
+    crear_vacacion,
+    vacaciones_empleado,
+    crear_vacacion_empleado,
+    editar_vacacion,
+    eliminar_vacacion,
+    registrar_saldo_inicial,
+)
+
+from core.views.rrhh.descargos import (
+    empleado_descargo, 
+    crear_descargo,
+    descargos_empleado,
+    crear_citacion_descargo,
+    generar_citacion_descargo,
+    editar_citacion_descargo,
+    eliminar_citacion_descargo,
+    eliminar_descargo,
+    editar_descargo
+
+)
+from core.views.rrhh.cesantias import (
+    crear_retiro_cesantias,
+    editar_retiro_cesantias,
+    eliminar_retiro_cesantias,
+    retiros_cesantias_empleado,
+    generar_retiro_cesantias
+)
+
+from core.views.rrhh.induccion_capacitacion import (
+    inducciones_empleado,
+    crear_induccion,
+    editar_induccion,
+    eliminar_induccion,
+    generar_induccion
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -129,6 +167,7 @@ urlpatterns = [
     path('rrhh/empleados/<int:id>/contrato/', generar_contrato, name='generar_contrato'),
     path('rrhh/empleados/<int:id>/certificacion/', certificacion_laboral, name='certificacion_laboral'),
 
+
     # PERMISOS
     path('rrhh/<int:id>/permiso/', permiso_laboral, name='permiso_laboral'),
 
@@ -138,6 +177,35 @@ urlpatterns = [
     path('rrhh/vacaciones/crear/', crear_vacacion, name='crear_vacacion'),
     path('rrhh/empleados/<int:id>/vacaciones/crear/', crear_vacacion, name='crear_vacacion_empleado'),
     path('rrhh/vacaciones/<int:id>/solicitud/', solicitud_vacaciones, name='solicitud_vacaciones'),
+    path('rrhh/vacaciones/<int:id>/editar/', editar_vacacion, name='editar_vacacion'),
+    path('rrhh/vacaciones/<int:id>/eliminar/', eliminar_vacacion, name='eliminar_vacacion'),
+    path('rrhh/vacaciones/registrar-saldo-inicial/', registrar_saldo_inicial, name='registrar_saldo_inicial'),
+
+    #DESCARGOS
+    path('rrhh/empleados/<int:id>/descargo/', empleado_descargo, name='empleado_descargo'),
+    path('rrhh/empleados/<int:id>/crear-descargo/', crear_descargo, name='crear_descargo'),
+    path('rrhh/empleados/<int:id>/descargos/', descargos_empleado, name='descargos_empleado'),
+    path('rrhh/empleados/<int:id>/diligencia_descargos/', empleado_descargo, name='empleado_descargo'),
+    path('rrhh/empleados/<int:id>/crear_citacion_descargo/', crear_citacion_descargo, name='crear_citacion_descargo'),
+    path('rrhh/citacion_descargo/<int:id>/', generar_citacion_descargo, name='generar_citacion_descargo'),
+    path('rrhh/empleados/citacion/<int:id>/eliminar/', eliminar_citacion_descargo, name='eliminar_citacion_descargo'),
+    path('rrhh/empleados/citacion/<int:id>/editar/', editar_citacion_descargo, name='editar_citacion_descargo'),
+    path('rrhh/empleados/descargo/<int:id>/editar/', editar_descargo, name='editar_descargo'),
+    path('rrhh/empleados/descargo/<int:id>/eliminar/', eliminar_descargo, name='eliminar_descargo'),
+
+    # CESANTÍAS
+    path('rrhh/empleados/<int:id>/cesantias/', retiros_cesantias_empleado, name='retiros_cesantias_empleado'),
+    path('rrhh/empleados/<int:id>/cesantias/crear/', crear_retiro_cesantias, name='crear_retiro_cesantias'),
+    path('rrhh/cesantias/<int:id>/editar/', editar_retiro_cesantias, name='editar_retiro_cesantias'),
+    path('rrhh/cesantias/<int:id>/eliminar/', eliminar_retiro_cesantias, name='eliminar_retiro_cesantias'),
+    path('rrhh/cesantias/<int:id>/descargar/', generar_retiro_cesantias, name='generar_retiro_cesantias'),
+
+    # INDUCCION Y CAPACITACION
+    path('rrhh/empleados/<int:id>/induccion_capacitacion/', inducciones_empleado, name='inducciones_empleado'),
+    path('rrhh/inducciones/<int:id>/', crear_induccion, name='crear_induccion'),
+    path('rrhh/inducciones/<int:id>/editar/', editar_induccion, name='editar_induccion'),
+    path('rrhh/inducciones/<int:id>/eliminar/', eliminar_induccion, name='eliminar_induccion'),
+    path('rrhh/inducciones/<int:id>/descargar/', generar_induccion, name='generar_induccion'),
 ]
 
 # =========================

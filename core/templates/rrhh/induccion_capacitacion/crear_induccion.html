@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto bg-white shadow rounded p-6">
+
+    <h1 class="text-3xl font-bold mb-6">
+        📚 Nueva Inducción / Capacitación
+    </h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="grid grid-cols-2 gap-4">
+
+            <div>
+                <label class="block font-semibold mb-2">
+                    Fecha
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha"
+                    required
+                    class="w-full border rounded px-3 py-2"
+                >
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-2">
+                    Tipo de evento
+                </label>
+
+                <select
+                    name="tipo_evento"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+                    <option value="INDUCCION">
+                        Inducción
+                    </option>
+
+                    <option value="REINDUCCION">
+                        Reinducción
+                    </option>
+
+                    <option value="CAPACITACION">
+                        Capacitación específica
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <hr class="my-6">
+
+        <h2 class="text-xl font-bold mb-4">
+            Capacitación técnica (si aplica)
+        </h2>
+
+        <div class="mb-4">
+
+            <label class="block font-semibold mb-2">
+                Tema
+            </label>
+
+            <input
+                type="text"
+                name="tema_capacitacion"
+                class="w-full border rounded px-3 py-2"
+            >
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+
+            <div>
+
+                <label class="block font-semibold mb-2">
+                    Facilitador
+                </label>
+
+                <input
+                    type="text"
+                    name="facilitador"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+            <div>
+
+                <label class="block font-semibold mb-2">
+                    Duración (horas)
+                </label>
+
+                <input
+                    type="number"
+                    name="duracion_horas"
+                    min="1"
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+        </div>
+
+        <div class="mt-6 flex gap-3">
+
+            <button
+                type="submit"
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+                Guardar
+            </button>
+
+            <a href="{% url 'inducciones_empleado' empleado.id %}"
+               class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

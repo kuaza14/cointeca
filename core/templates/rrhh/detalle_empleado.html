@@ -23,7 +23,7 @@
     </button>
 
     <div class="absolute hidden group-hover:block bg-gray-800 text-black">
-        <div class="bg-white shadow-lg rounded border w-56"></div>
+        <div class="bg-white shadow-lg rounded border w-56">
 
             <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
             class="block px-4 py-2 hover:bg-gray-100">
@@ -48,6 +48,21 @@
             <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
             class="block px-4 py-2 hover:bg-gray-100">
                 💻 Acta de Equipos
+            </a>
+
+            <a href="{% url 'descargos_empleado' empleado.id %}"
+            class="block px-4 py-2 hover:bg-gray-100">
+                ⚖️ Descargos disciplinarios
+            </a>
+
+            <a href="{% url 'retiros_cesantias_empleado' empleado.id %}"
+                class="block px-4 py-2 hover:bg-gray-100">
+                Cesantías
+            </a>
+
+            <a href="{% url 'inducciones_empleado' empleado.id %}"
+                class="block px-4 py-2 hover:bg-gray-100">
+                Inducción y Capacitación
             </a>
         </div>
 

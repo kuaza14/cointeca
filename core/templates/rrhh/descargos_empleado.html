@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    Descargos disciplinarios - {{ empleado.nombre_completo }}
+</h1>
+
+<div class="flex gap-3 mb-6">
+
+    <a href="{% url 'crear_descargo' empleado.id %}"
+       class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+       ➕ Crear diligencia
+    </a>
+
+    <a href="{% url 'crear_citacion_descargo' empleado.id %}"
+       class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+       ➕ Crear citación
+    </a>
+
+    <a href="{% url 'empleado_descargo' empleado.id %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+       📄 Descargar diligencia
+    </a>
+
+    <a href="{% url 'detalle_empleado' empleado.id %}"
+       class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+       Volver al empleado
+    </a>
+
+</div>
+
+<hr class="my-4">
+
+<h2 class="text-xl font-bold mb-4">
+    Citaciones a descargos
+</h2>
+
+<table class="w-full border mb-8">
+
+    <thead class="bg-blue-700">
+        <tr>
+            <th class="border p-2">Fecha audiencia</th>
+            <th class="border p-2">Hora</th>
+            <th class="border p-2">Motivo</th>
+            <th class="border p-2">Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for c in citaciones %}
+
+    <tr>
+        <td class="border p-2">{{ c.fecha_diligencia }}</td>
+        <td class="border p-2">{{ c.hora_diligencia }}</td>
+        <td class="border p-2">{{ c.descripcion_hechos }}</td>
+
+        <td class="border p-2 text-center">
+            <a href="{% url 'generar_citacion_descargo' c.id %}"
+                class="text-blue-600">
+                📄 
+            </a>
+
+            <a href="{% url 'editar_citacion_descargo' c.id %}">
+                ✏️
+            </a>
+
+            <a href="{% url 'eliminar_citacion_descargo' c.id %}"
+                onclick="return confirm('¿Está seguro de eliminar esta citación?')">
+                🗑️
+            </a>
+        </td>
+
+        
+    </tr>
+
+    {% empty %}
+
+    <tr>
+        <td colspan="4" class="text-center p-4">
+            No hay citaciones registradas
+        </td>
+    </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+<!-- TABLA -->
+<table class="w-full border">
+
+    <thead class="bg-blue-700">
+        <tr>
+            <th class="border p-2">Fecha</th>
+            <th class="border p-2">Hora</th>
+            <th class="border p-2">Testigo</th>
+            <th class="border p-2">Descripción</th>
+            <th class="border p-2">Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for d in descargos %}
+        <tr>
+            <td class="border p-2">{{ d.fecha_hechos }}</td>
+            <td class="border p-2">{{ d.hora_inicio }}</td>
+            <td class="border p-2">{{ d.testigo|default:"-" }}</td>
+            <td class="border p-2">{{ d.descripcion_falta }}</td>
+
+            <td class="border p-2 text-center">
+
+            <a href="{% url 'editar_descargo' d.id %}">
+                ✏️
+            </a>
+
+            <a href="{% url 'eliminar_descargo' d.id %}"
+            onclick="return confirm('¿Está seguro de eliminar este descargo?')">
+                🗑️
+            </a>
+
+        </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center p-4">
+                No hay descargos registrados
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+{% endblock %}

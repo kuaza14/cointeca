@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="bg-white shadow rounded-lg p-6">
+
+    <h1 class="text-3xl font-bold mb-6">
+        ✏️ Editar Compromiso
+    </h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div>
+
+                <label class="font-semibold">
+                    Número de Acta
+                </label>
+
+                <input
+                    type="text"
+                    name="numero_acta"
+                    value="{{ compromiso.numero_acta }}"
+                    required
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+            <div>
+
+                <label class="font-semibold">
+                    Fecha del Evento
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha_evento"
+                    value="{{ compromiso.fecha_evento|date:'Y-m-d' }}"
+                    required
+                    class="w-full border rounded px-3 py-2"
+                >
+
+            </div>
+
+        </div>
+
+        <div class="mt-4">
+
+            <label class="font-semibold">
+                Valor del Descuento
+            </label>
+
+            <input
+                type="number"
+                step="0.01"
+                name="valor_descuento"
+                value="{{ compromiso.valor_descuento }}"
+                required
+                class="w-full border rounded px-3 py-2"
+            >
+
+        </div>
+
+        <div class="mt-4">
+
+            <label class="font-semibold">
+                Descripción del Daño
+            </label>
+
+            <textarea
+                name="descripcion_dano"
+                rows="5"
+                required
+                class="w-full border rounded px-3 py-2"
+            >{{ compromiso.descripcion_dano }}</textarea>
+
+        </div>
+
+        <div class="mt-8 flex gap-3">
+
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
+                💾 Guardar cambios
+            </button>
+
+            <a
+                href="{% url 'compromisos_empleado' compromiso.empleado.id %}"
+                class="bg-gray-600 text-white px-5 py-2 rounded hover:bg-gray-700">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

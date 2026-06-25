@@ -100,6 +100,13 @@ from core.views.rrhh.induccion_capacitacion import (
     generar_induccion
 )
 
+from core.views.rrhh.compromisos import (
+    compromisos_empleado,
+    crear_compromiso,
+    editar_compromiso,
+    eliminar_compromiso,
+    generar_compromiso
+)
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -206,6 +213,14 @@ urlpatterns = [
     path('rrhh/inducciones/<int:id>/editar/', editar_induccion, name='editar_induccion'),
     path('rrhh/inducciones/<int:id>/eliminar/', eliminar_induccion, name='eliminar_induccion'),
     path('rrhh/inducciones/<int:id>/descargar/', generar_induccion, name='generar_induccion'),
+    
+    #compromiso pago a daños 
+    path('rrhh/compromisos/<int:id>/', compromisos_empleado, name='compromisos_empleado'),
+    path('rrhh/compromisos/<int:id>/crear/', crear_compromiso, name='crear_compromiso'),
+    path('rrhh/compromisos/<int:id>/editar/', editar_compromiso, name='editar_compromiso'),
+    path('rrhh/compromisos/<int:id>/eliminar/', eliminar_compromiso, name='eliminar_compromiso'),
+    path('rrhh/compromisos/<int:id>/descargar/', generar_compromiso, name='generar_compromiso'),
+    
 ]
 
 # =========================

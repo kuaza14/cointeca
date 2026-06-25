@@ -713,3 +713,34 @@ class InduccionCapacitacion(models.Model):
             f'{self.empleado.nombre_completo} - '
             f'{self.get_tipo_evento_display()}'
         )
+
+class CompromisoPagoDano(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    numero_acta = models.CharField(
+        max_length=20
+    )
+
+    valor_descuento = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    descripcion_dano = models.TextField()
+
+    fecha_evento = models.DateField()
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f'{self.empleado.nombre_completo} - '
+            f'Acta {self.numero_acta}'
+        )

@@ -22,7 +22,7 @@
         📂 RRHH
     </button>
 
-    <div class="absolute hidden group-hover:block bg-gray-800 text-black">
+    <div class="flex absolute hidden group-hover:block bg-gray-800 text-black">
         <div class="bg-white shadow-lg rounded border w-56">
 
             <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
@@ -63,6 +63,11 @@
             <a href="{% url 'inducciones_empleado' empleado.id %}"
                 class="block px-4 py-2 hover:bg-gray-100">
                 Inducción y Capacitación
+            </a>
+
+            <a href="{% url 'compromisos_empleado' empleado.id %}"
+                class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                💰 Compromiso daños a terceros
             </a>
         </div>
 

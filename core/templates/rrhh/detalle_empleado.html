@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'rrhh/empleado/base_empleado.html' %}
 
 {% load filtros %}
 
-{% block content %}
+{% block empleado_content %}
 
 <h1 class="text-3xl font-bold mb-6">📄 Ficha Técnica del Trabajador</h1>
 
@@ -15,65 +15,6 @@
         ← Volver
     </a>
 
-<div class="relative inline-block group">
-
-    <button
-        class="bg-blue-600 text-white px-4 py-2 rounded">
-        📂 RRHH
-    </button>
-
-    <div class="flex absolute hidden group-hover:block bg-gray-800 text-black">
-        <div class="bg-white shadow-lg rounded border w-56">
-
-            <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
-            class="block px-4 py-2 hover:bg-gray-100">
-                📄 Certificación Laboral
-            </a>
-
-            <a href="/rrhh/empleados/{{ empleado.id }}/contrato/"
-            class="block px-4 py-2 hover:bg-gray-100">
-                📑 Contrato
-            </a>
-
-            <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/"
-            class="block px-4 py-2 hover:bg-gray-100">
-                🌴 Vacaciones
-            </a>
-
-            <a href="/rrhh/{{ empleado.id }}/permiso/"
-            class="block px-4 py-2 hover:bg-gray-100">
-                📝 Permisos
-            </a>
-
-            <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
-            class="block px-4 py-2 hover:bg-gray-100">
-                💻 Acta de Equipos
-            </a>
-
-            <a href="{% url 'descargos_empleado' empleado.id %}"
-            class="block px-4 py-2 hover:bg-gray-100">
-                ⚖️ Descargos disciplinarios
-            </a>
-
-            <a href="{% url 'retiros_cesantias_empleado' empleado.id %}"
-                class="block px-4 py-2 hover:bg-gray-100">
-                Cesantías
-            </a>
-
-            <a href="{% url 'inducciones_empleado' empleado.id %}"
-                class="block px-4 py-2 hover:bg-gray-100">
-                Inducción y Capacitación
-            </a>
-
-            <a href="{% url 'compromisos_empleado' empleado.id %}"
-                class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
-                💰 Compromiso daños a terceros
-            </a>
-        </div>
-
-    </div>
-
-</div>
 </div>
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex">
+
+    <!-- Menú lateral -->
+    <div class="fixed left-3 top-1/2 -translate-y-1/2 z-50">
+
+        <a
+            href="{% url 'detalle_empleado' empleado.id %}"
+            class="w-14 h-14 rounded-lg bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-2xl"
+            title="Información general"
+        >
+            👤
+        </a>
+
+        <div class="relative group inline-block">
+
+            <button id="btnRRHH"
+                class="w-14 h-14 rounded-lg bg-green-600 hover:bg-green-700 flex items-center justify-center text-2xl">
+                📂
+            </button>
+
+            <!-- Submenú -->
+            <div id="menuRRHH"
+                class="hidden fixed left-20 top-1 bottom-2 w-[420px]
+                    overflow-y-auto
+                    bg-white
+                    shadow-xl
+                    rounded-lg
+                    border
+                    z-50">
+                <div class="bg-gray-800 text-white px-4 py-3 rounded-t-lg font-bold">
+                    Recursos Humanos
+                </div>
+
+                <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
+                    class="block px-4 py-2 hover:bg-gray-100 text-white">
+                    📄 Certificación Laboral
+                </a>
+
+                <a href="/rrhh/empleados/{{ empleado.id }}/contrato/"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    📑 Contrato
+                </a>
+
+                <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    🌴 Vacaciones
+                </a>
+
+                <a href="/rrhh/{{ empleado.id }}/permiso/"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    📝 Permisos
+                </a>
+
+                <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    💻 Acta Equipos
+                </a>
+
+                <a href="{% url 'descargos_empleado' empleado.id %}"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    ⚖️ Descargos
+                </a>
+
+                <a href="{% url 'retiros_cesantias_empleado' empleado.id %}"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    💰 Cesantías
+                </a>
+
+                <a href="{% url 'inducciones_empleado' empleado.id %}"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    📚 Inducción y Capacitación
+                </a>
+
+                <a href="{% url 'compromisos_empleado' empleado.id %}"
+                    class="block px-4 py-2 hover:bg-gray-100">
+                    🚗 Compromiso daños a terceros
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Contenido -->
+    <main class="flex-1 p-8">
+
+        {% block empleado_content %}
+        {% endblock %}
+
+    </main>
+
+</div>
+
+<script>
+
+const boton = document.getElementById("btnRRHH");
+const menu = document.getElementById("menuRRHH");
+
+boton.addEventListener("click", function(e){
+
+    e.stopPropagation();
+
+    menu.classList.toggle("hidden");
+
+});
+
+document.addEventListener("click", function(){
+
+    menu.classList.add("hidden");
+
+});
+
+menu.addEventListener("click", function(e){
+
+    e.stopPropagation();
+
+});
+
+</script>
+
+{% endblock %}

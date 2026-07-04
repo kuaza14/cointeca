@@ -744,3 +744,30 @@ class CompromisoPagoDano(models.Model):
             f'{self.empleado.nombre_completo} - '
             f'Acta {self.numero_acta}'
         )
+
+class RetiroEmpleado(models.Model):
+
+    empleado = models.OneToOneField(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha_retiro = models.DateField()
+
+    motivo = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.empleado.nombre_completo

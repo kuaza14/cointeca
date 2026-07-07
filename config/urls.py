@@ -9,6 +9,7 @@ from django.conf.urls.static import static
 from core.views import (
     inicio,
     login_view,
+    logout_view,
     dashboard,
     caja_menor,
     detalle_caja,
@@ -114,6 +115,7 @@ urlpatterns = [
     path('', inicio),
     path('login/', login_view, name='login'),
     path('dashboard/', dashboard, name='dashboard'),
+    path('logout/', logout_view, name='logout'),
 
     # CAJA MENOR
     path('caja-menor/', caja_menor, name='caja_menor'),

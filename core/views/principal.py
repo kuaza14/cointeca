@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.db.models import Avg, Count, Sum
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from core.models import (
     CajaMenor, 
@@ -27,6 +27,9 @@ from django.conf import settings
 from docx import Document
 from datetime import date
 
+def logout_view(request):
+    logout(request)
+    return redirect("login")
 
 # Vista de inicio 
 def inicio(request):

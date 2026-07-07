@@ -1,7 +1,5 @@
 from django.db import models
 
-
-
 class CajaMenor(models.Model):
     fecha_tramite = models.DateField()
     fecha_cierre = models.DateField(null=True, blank=True)

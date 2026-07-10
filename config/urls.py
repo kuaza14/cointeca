@@ -108,6 +108,14 @@ from core.views.rrhh.compromisos import (
     eliminar_compromiso,
     generar_compromiso
 )
+
+from core.views.rrhh.suspension_contrato import (
+    suspensiones_empleado,
+    crear_suspension,
+    editar_suspension,
+    eliminar_suspension,
+    generar_suspension
+)
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -222,6 +230,13 @@ urlpatterns = [
     path('rrhh/compromisos/<int:id>/editar/', editar_compromiso, name='editar_compromiso'),
     path('rrhh/compromisos/<int:id>/eliminar/', eliminar_compromiso, name='eliminar_compromiso'),
     path('rrhh/compromisos/<int:id>/descargar/', generar_compromiso, name='generar_compromiso'),
+
+    #suspensiones
+    path('rrhh/empleados/<int:id>/suspensiones/', suspensiones_empleado, name='suspensiones_empleado'),
+    path('rrhh/suspensiones/<int:id>/crear/', crear_suspension, name='crear_suspension'),
+    path('rrhh/suspensiones/<int:id>/editar/', editar_suspension,   name='editar_suspension'),
+    path('rrhh/suspensiones/<int:id>/eliminar/', eliminar_suspension, name='eliminar_suspension'),
+    path('rrhh/suspensiones/<int:id>/descargar/', generar_suspension, name='generar_suspension'),
     
 ]
 

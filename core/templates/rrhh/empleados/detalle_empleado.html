@@ -1,4 +1,4 @@
-{% extends 'rrhh/empleado/base_empleado.html' %}
+{% extends 'rrhh/empleados/base_empleado.html' %}
 
 {% load filtros %}
 
@@ -198,7 +198,7 @@
             </p>
             <p><strong>Salario:</strong> 
                 {% if editando %}
-                <input type="text" id="salario" name="salario" value="{{ empleado.salario }}" class="border p-1 rounded w-full moneda-col">
+                <input type="text" id="salario" name="salario" value="{{ empleado.salario|floatformat:0 }}" class="border p-1 rounded w-full moneda-col">
                 {% else %}
                 ${{ empleado.salario|pesos_colombianos }}
                 {% endif %}
@@ -677,6 +677,13 @@
 
 document.querySelectorAll('.moneda-col').forEach(campo => {
 
+    // Formatear al cargar la página
+    if (campo.value !== '') {
+        let valor = campo.value.replace(/\D/g, '');
+        campo.value = Number(valor).toLocaleString('es-CO');
+    }
+
+    // Formatear mientras escribe
     campo.addEventListener('input', function() {
 
         let valor = this.value.replace(/\D/g, '');

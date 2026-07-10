@@ -59,15 +59,20 @@ def crear_empleado(request):
                 contacto_emergencia=request.POST['contacto_emergencia'],
                 telefono_emergencia=request.POST['telefono_emergencia']
             )
+            messages.success(
+                request,
+                f'✅ El empleado {empleado.nombre_completo} fue registrado correctamente.'
+            )
 
             return redirect('/rrhh/empleados/')
 
         except IntegrityError:
-            return render(request, 'rrhh/crear_empleado.html', {
+            return render(request, 'rrhh/empleados/crear_empleado.html', {
                 'error': '⚠️ Ya existe un empleado con ese documento'
             })
+            
+    return render(request, 'rrhh/empleados/crear_empleado.html')
 
-    return render(request, 'rrhh/crear_empleado.html')
 
 @login_required
 def empleados(request):
@@ -86,13 +91,15 @@ def empleados(request):
     promedio_salario = lista.aggregate(Avg('salario'))['salario__avg']
     por_cargo = lista.values('cargo').annotate(total=Count('id'))
 
-    return render(request, 'rrhh/empleados.html', {
+    return render(request, 'rrhh/empleados/empleados.html', {
         'empleados': lista,
         'query': query,
         'total': total,
         'promedio_salario': promedio_salario,
         'por_cargo': por_cargo
     })
+
+    
 
 
 @login_required
@@ -129,10 +136,10 @@ def detalle_empleado(request, id):
         # VALIDAR DUPLICADO
         existe = Empleado.objects.filter(documento=documento).exclude(id=id).exists()
 
-        salario = request.POST['salario'].replace('.', '')
+        salario = request.POST['salario'].replace('.', '') .replace(',', '')
 
         if existe:
-            return render(request, 'rrhh/detalle_empleado.html', {
+            return render(request, 'rrhh/empleados/detalle_empleado.html', {
                 'empleado': empleado,
                 'salud': salud,
                 'dotaciones': dotaciones,
@@ -203,7 +210,7 @@ def detalle_empleado(request, id):
 
         return redirect(f'/rrhh/empleados/{id}/')
 
-    return render(request, 'rrhh/detalle_empleado.html', {
+    return render(request, 'rrhh/empleados/detalle_empleado.html', {
         'empleado': empleado,
         'salud': salud,
         'dotaciones': dotaciones,
@@ -235,7 +242,7 @@ def agregar_dotacion(request, id):
 
         return redirect('detalle_empleado', id=empleado.id)
 
-    return render(request, 'rrhh/agregar_dotacion.html', {'empleado': empleado})
+    return render(request, 'rrhh/empleados/agregar_dotacion.html', {'empleado': empleado})
 @login_required
 def subir_documento(request, id):
 
@@ -253,7 +260,7 @@ def subir_documento(request, id):
 
         return redirect(f'/rrhh/empleados/{id}/')
 
-    return render(request, 'rrhh/subir_documento.html', {
+    return render(request, 'rrhh/empleados/subir_documento.html', {
         'empleado': empleado
     })
 

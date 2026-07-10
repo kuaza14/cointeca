@@ -769,3 +769,66 @@ class RetiroEmpleado(models.Model):
 
     def __str__(self):
         return self.empleado.nombre_completo
+
+class SuspensionContrato(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha_inicio = models.DateField()
+
+    fecha_fin = models.DateField()
+
+    motivo = models.TextField(blank=True)
+
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+class InstitucionFormacion(models.Model):
+
+    nombre = models.CharField(max_length=200)
+
+    nit = models.CharField(max_length=50)
+
+    centro_formacion = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+class ContratoAprendizaje(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    institucion = models.ForeignKey(
+        InstitucionFormacion,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    especialidad = models.CharField(max_length=200)
+
+    numero_grupo = models.CharField(max_length=50)
+
+    modalidad = models.CharField(
+        max_length=30
+    )
+
+    fecha_inicio = models.DateField()
+
+    fecha_fin = models.DateField()
+
+    fecha_inicio_lectiva = models.DateField()
+
+    fecha_fin_lectiva = models.DateField()
+
+    fecha_inicio_practica = models.DateField()
+
+    fecha_fin_practica = models.DateField()
+
+    porcentaje_apoyo = models.IntegerField(
+        default=100
+    )

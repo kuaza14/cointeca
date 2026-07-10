@@ -128,7 +128,7 @@ def crear_descargo(request, id):
 
         return redirect('crear_descargo', id=empleado.id)
 
-    return render(request, 'rrhh/crear_descargo.html', {
+    return render(request, 'rrhh/descargos/crear_descargo.html', {
         'empleado': empleado,
         'descargos': descargos
     })
@@ -151,7 +151,7 @@ def descargos_empleado(request, id):
 
     return render(
         request,
-        'rrhh/descargos_empleado.html',
+        'rrhh/descargos/descargos_empleado.html',
         {
             'empleado': empleado,
             'descargos': descargos,
@@ -215,7 +215,7 @@ def crear_citacion_descargo(request, id):
 
     return render(
         request,
-        'rrhh/crear_citacion_descargo.html',
+        'rrhh/descargos/crear_citacion_descargo.html',
         {
             'empleado': empleado
         }
@@ -333,7 +333,7 @@ def editar_descargo(request, id):
 
     return render(
         request,
-        'rrhh/editar_descargo.html',
+        'rrhh/descargos/editar_descargo.html',
         {
             'descargo': descargo
         }
@@ -414,7 +414,7 @@ def editar_citacion_descargo(request, id):
 
     return render(
         request,
-        'rrhh/editar_citacion_descargo.html',
+        'rrhh/descargos/editar_citacion_descargo.html',
         {
             'citacion': citacion
         }

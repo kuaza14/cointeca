@@ -18,11 +18,8 @@ def generar_contrato(request, id):
 
     ruta_plantilla = os.path.join(
         settings.BASE_DIR,
-        "core",
-        "templates",
-        "rrhh",
-        "contratos",
-        "test.docx"
+        "plantillas_word",
+        "contrato.docx"
     )
 
     # ABRIR PLANTILLA

@@ -116,6 +116,16 @@ from core.views.rrhh.suspension_contrato import (
     eliminar_suspension,
     generar_suspension
 )
+
+from core.views.rrhh.contrato_aprendiz import (
+    contratos_aprendiz_empleado,
+    crear_contrato_aprendiz,
+    editar_contrato_aprendiz,
+    eliminar_contrato_aprendiz,
+    generar_contrato_aprendiz
+)
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -237,9 +247,16 @@ urlpatterns = [
     path('rrhh/suspensiones/<int:id>/editar/', editar_suspension,   name='editar_suspension'),
     path('rrhh/suspensiones/<int:id>/eliminar/', eliminar_suspension, name='eliminar_suspension'),
     path('rrhh/suspensiones/<int:id>/descargar/', generar_suspension, name='generar_suspension'),
-    
-]
 
+    #contrato de aprendiz
+    path("rrhh/empleados/<int:id>/contrato_aprendiz/", contratos_aprendiz_empleado, name="contratos_aprendiz_empleado"),
+    path("rrhh/contratos_aprendiz/<int:id>/crear/", crear_contrato_aprendiz, name="crear_contrato_aprendiz"),
+    path("rrhh/contratos_aprendiz/<int:id>/editar/", editar_contrato_aprendiz, name="editar_contrato_aprendiz"),
+    path("rrhh/contratos_aprendiz/<int:id>/eliminar/", eliminar_contrato_aprendiz, name="eliminar_contrato_aprendiz"),
+    path("rrhh/contratos_aprendiz/<int:id>/descargar/", generar_contrato_aprendiz, name="generar_contrato_aprendiz"),
+
+
+]
 # =========================
 # 📁 MEDIA FILES
 # =========================

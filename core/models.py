@@ -785,17 +785,6 @@ class SuspensionContrato(models.Model):
 
     fecha_registro = models.DateTimeField(auto_now_add=True)
 
-class InstitucionFormacion(models.Model):
-
-    nombre = models.CharField(max_length=200)
-
-    nit = models.CharField(max_length=50)
-
-    centro_formacion = models.CharField(
-        max_length=200,
-        blank=True
-    )
-
 class ContratoAprendizaje(models.Model):
 
     empleado = models.ForeignKey(
@@ -803,10 +792,8 @@ class ContratoAprendizaje(models.Model):
         on_delete=models.CASCADE
     )
 
-    institucion = models.ForeignKey(
-        InstitucionFormacion,
-        on_delete=models.SET_NULL,
-        null=True
+    institucion = models.CharField(
+        max_length=200
     )
 
     especialidad = models.CharField(max_length=200)

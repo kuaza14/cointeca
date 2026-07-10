@@ -1,0 +1,154 @@
+{% extends 'rrhh/empleados/base_empleado.html' %}
+
+{% block empleado_content %}
+
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow p-8">
+
+    <h2 class="text-2xl font-bold mb-6">
+
+        Nuevo Contrato de Aprendizaje
+
+    </h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="grid grid-cols-2 gap-6">
+
+            <div>
+
+                <label class="font-semibold" >Institución</label>
+
+                <input
+                    type="text"
+                    name="institucion"
+                    class="border rounded w-full p-2"
+                    placeholder="Ej: SENA"
+                    required>
+
+            </div>
+
+            <div>
+
+                <label>Especialidad</label>
+
+                <input type="text" name="especialidad" class="border rounded w-full p-2" required>
+
+            </div>
+
+            <div>
+
+                <label>Número Grupo</label>
+
+                <input type="text" name="numero_grupo" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Modalidad</label>
+
+                <select name="modalidad" class="border rounded w-full p-2">
+
+                    <option value="Lectiva">
+
+                        Lectiva
+
+                    </option>
+
+                    <option value="Productiva">
+
+                        Productiva
+
+                    </option>
+
+                    <option value="Mixta">
+
+                        Mixta
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>Fecha Inicio Contrato</label>
+
+                <input type="date" name="fecha_inicio" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Fecha Fin Contrato</label>
+
+                <input type="date" name="fecha_fin" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Inicio Etapa Lectiva</label>
+
+                <input type="date" name="fecha_inicio_lectiva" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Fin Etapa Lectiva</label>
+
+                <input type="date" name="fecha_fin_lectiva" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Inicio Etapa Productiva</label>
+
+                <input type="date" name="fecha_inicio_practica" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Fin Etapa Productiva</label>
+
+                <input type="date" name="fecha_fin_practica" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label>Porcentaje apoyo</label>
+
+                <input type="number" name="porcentaje_apoyo" value="100" class="border rounded w-full p-2">
+
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex justify-end gap-4">
+
+            <a href="javascript:history.back()" class="bg-gray-300 px-4 py-2 rounded">
+
+                Cancelar
+
+            </a>
+
+            <button class="bg-blue-600 text-white px-5 py-2 rounded">
+
+                Guardar
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

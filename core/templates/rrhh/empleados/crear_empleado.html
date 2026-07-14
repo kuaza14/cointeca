@@ -17,33 +17,47 @@
 {% endif %}
 
 
-<form method="POST" class="bg-white p-6 rounded shadow space-y-6">
+<form method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded shadow space-y-6">
     {% csrf_token %}
 
     <!-- 1. INFORMACIÓN PERSONAL -->
     <h2 class="text-xl font-semibold border-b pb-2">1. Información Personal</h2>
 
-    <input name="nombre_completo" placeholder="Nombre completo" class="w-full border p-2 rounded" required>
-    <input name="documento" placeholder="Documento" class="w-full border p-2 rounded" required>
-    <input name="ciudad_expedicion" placeholder="Lugar expedición" class="w-full border p-2 rounded">
+    <div>
+        <label class="block font-semibold mb-1">
+            Foto del empleado
+        </label>
+
+        <input type="file"
+            name="foto"
+            accept="image/*"
+            class="border p-2 rounded w-full">
+    </div>
+
+    <input name="nombre_completo" placeholder="Nombre completo" class="w-full border p-2 rounded">
+    <input name="documento" placeholder="Documento"  class="w-full border p-2 rounded">
+    <input name="ciudad_expedicion" placeholder="Lugar expedición"  class="w-full border p-2 rounded">
 
     <label class="block font-medium mb-1">
         Fecha de nacimiento
     </label>
-    <input type="date" name="fecha_nacimiento" class="w-full border p-2 rounded">
+    <input type="date" name="fecha_nacimiento"  class="w-full border p-2 rounded">
     <input name="nacionalidad" value="Colombiano" class="w-full border p-2 rounded">
 
     <input name="direccion" placeholder="Dirección" class="w-full border p-2 rounded">
-    <input name="telefono" placeholder="Teléfono" class="w-full border p-2 rounded">
-    <input name="correo" placeholder="Correo" class="w-full border p-2 rounded">
+    <input name="barrio" placeholder="Barrio" class="w-full border p-2 rounded">
+    <input name="ciudad_residencia" placeholder="Ciudad"  class="w-full border p-2 rounded">
+    <input name="estrato" name="estrato" placeholder="Estrato" min="1" max="6"  class="w-full border p-2 rounded">
+    <input name="telefono" placeholder="Teléfono"  class="w-full border p-2 rounded">
+    <input name="correo" name="correo" placeholder="Correo" class="w-full border p-2 rounded">
 
     <!-- 2. PERFIL -->
     <h2 class="text-xl font-semibold border-b pb-2">2. Perfil Profesional</h2>
 
-    <input name="cargo" placeholder="Cargo" class="w-full border p-2 rounded">
+    <input name="cargo" placeholder="Cargo"  class="w-full border p-2 rounded">
     <input name="area" placeholder="Área" class="w-full border p-2 rounded">
     <input name="nivel_academico" placeholder="Nivel académico" class="w-full border p-2 rounded">
-    <input name="profesion" placeholder="Profesión" class="w-full border p-2 rounded">
+    <input name="profesion" placeholder="Profesión"  class="w-full border p-2 rounded">
 
     <textarea name="habilidades" placeholder="Habilidades" class="w-full border p-2 rounded"></textarea>
     <input name="idiomas" value="Español" class="w-full border p-2 rounded">

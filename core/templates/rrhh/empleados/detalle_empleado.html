@@ -24,16 +24,35 @@
 
 <div class="bg-white shadow rounded p-6 space-y-6">
     {% if editando %}
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {% endif %}
-        {% csrf_token %}
+
+       {% if editando %}
+            <div class="mb-4">
+                <label class="block font-semibold mb-2">
+                    Cambiar foto del empleado
+                </label>
+
+                <input type="file"
+                    name="foto"
+                    accept="image/*"
+                    class="border p-2 rounded">
+
+                {% if empleado.foto %}
+                    <label class="flex items-center gap-2 mt-3">
+                        <input type="checkbox" name="eliminar_foto">
+                        Eliminar foto actual
+                    </label>
+                {% endif %}
+            </div>
+        {% endif %}
 
     <!-- 1. INFORMACION PERSONAL -->
     <div>
         <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">1. Información Personal</h2>
             <div class="grid grid-cols-2 gap-4 mt-3">
-
+                
                 <p>
                 <strong>Nombre:</strong>
                 {% if editando %}
@@ -90,6 +109,24 @@
                 </p>
 
                 <p>
+                <strong>Barrio:</strong>
+                {% if editando %}
+                <input type="text" name="barrio" value="{{ empleado.barrio|default_if_none:'' }}" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.barrio }}
+                {% endif %}
+                </p>
+
+                <p>
+                <strong>Estrato:</strong>
+                {% if editando %}
+                <input type="number" name="estrato" value="{{ empleado.estrato }}" min="1" max="6" class="border p-1 rounded w-full">
+                {% else %}
+                {{ empleado.estrato }}
+                {% endif %}
+                </p>
+
+                <p>
                 <strong>Ciudad de Residencia:</strong>
 
                 {% if editando %}
@@ -111,7 +148,7 @@
                 <p>
                 <strong>Correo:</strong>
                 {% if editando %}
-                <input type="email" name="correo" value="{{ empleado.correo }}" class="border p-1 rounded w-full">
+                <input type="email" name="correo" value="{{ empleado.correo }}"  class="border p-1 rounded w-full">
                 {% else %}
                 {{ empleado.correo }}
                 {% endif %}
@@ -126,21 +163,21 @@
         <div class="grid grid-cols-2 gap-4 mt-3">
             <p><strong>Cargo:</strong>
                 {% if editando %}
-                <input type="text" name="cargo" value="{{ empleado.cargo }}" class="border p-1 rounded w-full">
+                <input type="text" name="cargo" value="{{ empleado.cargo }}"  class="border p-1 rounded w-full">
                 {% else %}
                 {{ empleado.cargo }}
                 {% endif %}
             </p>
             <p><strong>Área:</strong>
                 {% if editando %}
-                <input type="text" name="area" value="{{ empleado.area }}" class="border p-1 rounded w-full">
+                <input type="text" name="area" value="{{ empleado.area }}"  class="border p-1 rounded w-full">
                 {% else %}
                 {{ empleado.area }}
                 {% endif %}
             </p>
             <p><strong>Nivel:</strong>
                 {% if editando %}
-                <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}" class="border p-1 rounded w-full">
+                <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}"   class="border p-1 rounded w-full">
                 {% else %}
                 {{ empleado.nivel_academico }}
                 {% endif %}
@@ -175,7 +212,7 @@
         <div class="grid grid-cols-2 gap-4 mt-3">
             <p><strong>Ingreso:</strong>
                 {% if editando %}
-                <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" class="border p-1 rounded w-full">
+                <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" required class="border p-1 rounded w-full">
                 {% else %}
                 {{ empleado.fecha_ingreso }}
                 {% endif %}
@@ -282,7 +319,7 @@
                     value="{{ empleado.contacto_emergencia }}"
                     class="border p-1 rounded w-full">
                 {% else %}
-                {{ salud.contacto_emergencia }}
+                    {{ empleado.contacto_emergencia }}
                 {% endif %}
             </p>
 
@@ -295,7 +332,7 @@
                     value="{{ empleado.telefono_emergencia }}"
                     class="border p-1 rounded w-full">
                 {% else %}
-                {{ salud.telefono_emergencia }}
+                    {{ empleado.telefono_emergencia }}
                 {% endif %}
             </p>
 
@@ -324,54 +361,119 @@
         </div>
     </div>
 
-<!-- 5. DOTACION -->
-<div class="mt-6">
-    <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
-        <span>
-            8. Elementos entregados para obra labor
-        </span>
-        <a
-            href="/rrhh/empleados/{{ empleado.id }}/dotacion/"
-            class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
-        >
-            + Agregar elemento
-        </a>
+<!-- TABLA -->
+<table class="w-full border shadow">
+    <thead class="bg-gray-800 text-white">
+        <tr>
+            <th class="p-2 text-center">
+                Elemento
+            </th>
 
-    </div>
-    <!-- TABLA -->
-    <table class="w-full border shadow">
-        <thead class="bg-gray-800 text-white">
-            <tr>
-                <th class="p-2 text-center">
-                    Elemento
-                </th>
+            <th class="p-2 text-center">
+                Descripción / Serial
+            </th>
 
-                <th class="p-2 text-center">
-                    Descripción / Serial
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for d in dotaciones %}
-            <tr class="border-b hover:bg-gray-50">
-                <td class="p-2">
+            <th class="p-2 text-center">
+                Acciones
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for d in dotaciones %}
+        <tr class="border-b hover:bg-gray-50">
+
+            <td class="p-2">
+                <span id="elemento-texto-{{ d.id }}">
                     {{ d.elemento }}
-                </td>
-                <td class="p-2">
-                    {{ d.descripcion }}
-                </td>
-            </tr>
+                </span>
 
-            {% empty %}
-            <tr>
-                <td colspan="2" class="text-center p-4 text-gray-500">
-                    No hay elementos registrados
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                <input
+                    type="text"
+                    id="elemento-input-{{ d.id }}"
+                    value="{{ d.elemento }}"
+                    class="hidden border p-2 rounded w-full"
+                    form="form-editar-{{ d.id }}"
+                    name="elemento"
+                >
+            </td>
+
+            <td class="p-2">
+                <span id="descripcion-texto-{{ d.id }}">
+                    {{ d.descripcion }}
+                </span>
+
+                <input
+                    type="text"
+                    id="descripcion-input-{{ d.id }}"
+                    value="{{ d.descripcion }}"
+                    class="hidden border p-2 rounded w-full"
+                    form="form-editar-{{ d.id }}"
+                    name="descripcion"
+                >
+            </td>
+
+            <td class="p-2">
+                <div class="flex justify-center gap-2">
+
+                    <!-- FORMULARIO EDITAR -->
+                    <form
+                        id="form-editar-{{ d.id }}"
+                        method="POST"
+                        action="{% url 'editar_dotacion_empleado' d.id %}"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="button"
+                            id="boton-editar-{{ d.id }}"
+                            onclick="editarDotacion('{{ d.id }}')"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                        >
+                            ✏️ Editar
+                        </button>
+
+                        <button
+                            type="submit"
+                            id="boton-guardar-{{ d.id }}"
+                            class="hidden bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                        >
+                            💾 Guardar
+                        </button>
+                    </form>
+
+                    <!-- FORMULARIO ELIMINAR -->
+                    <form
+                        method="POST"
+                        action="{% url 'eliminar_dotacion_empleado' d.id %}"
+                        onsubmit="return confirm('¿Seguro que deseas eliminar esta dotación?');"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                        >
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+
+                </div>
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="3" class="text-center p-4 text-gray-500">
+                No hay elementos registrados
+            </td>
+        </tr>
+
+        {% endfor %}
+    </tbody>
+</table>
 <!-- 6. EQUIPOS -->
 <div>
     <div>
@@ -697,6 +799,40 @@ document.querySelectorAll('.moneda-col').forEach(campo => {
     });
 
 });
+
+function editarDotacion(id) {
+    // Ocultar los textos
+    document.getElementById(
+        'elemento-texto-' + id
+    ).classList.add('hidden');
+
+    document.getElementById(
+        'descripcion-texto-' + id
+    ).classList.add('hidden');
+
+
+    // Mostrar los campos para editar
+    document.getElementById(
+        'elemento-input-' + id
+    ).classList.remove('hidden');
+
+    document.getElementById(
+        'descripcion-input-' + id
+    ).classList.remove('hidden');
+
+
+    // Ocultar botón Editar
+    document.getElementById(
+        'boton-editar-' + id
+    ).classList.add('hidden');
+
+
+    // Mostrar botón Guardar
+    document.getElementById(
+        'boton-guardar-' + id
+    ).classList.remove('hidden');
+}
+
 
 </script>
 

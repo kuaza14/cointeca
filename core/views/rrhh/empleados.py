@@ -10,7 +10,6 @@ from core.models import (
     DotacionEmpleado,
     DocumentoEmpleado,
     AsignacionEquipo,
-
 )
 
 @login_required
@@ -20,18 +19,27 @@ def rrhh_home(request):
 @login_required
 def crear_empleado(request):
     if request.method == 'POST':
+
+        print("ARCHIVOS RECIBIDOS:", request.FILES)
+        print("FOTO:", request.FILES.get('foto'))
         try:
 
-            salario = request.POST['salario'].replace('.', '')
+            salario = request.POST.get('salario', '').replace('.', '').replace(',', '')
+
+            if not salario:
+                salario = 0
 
             empleado = Empleado.objects.create(
+                foto=request.FILES.get('foto'),
                 nombre_completo=request.POST['nombre_completo'],
                 documento=request.POST['documento'],
                 ciudad_expedicion=request.POST.get('ciudad_expedicion', ''),
-                fecha_nacimiento=request.POST['fecha_nacimiento'],
+                fecha_nacimiento=request.POST.get('fecha_nacimiento') or None,
                 nacionalidad=request.POST['nacionalidad'],
                 direccion=request.POST['direccion'],
                 ciudad_residencia=request.POST.get('ciudad_residencia', ''),
+                barrio=request.POST.get('barrio', ''),
+                estrato=request.POST.get('estrato')or None,
                 telefono=request.POST['telefono'],
                 correo=request.POST['correo'],
                 cargo=request.POST['cargo'],
@@ -40,8 +48,8 @@ def crear_empleado(request):
                 profesion=request.POST.get('profesion', ''),
                 habilidades=request.POST.get('habilidades', ''),
                 idiomas=request.POST['idiomas'],
-                fecha_ingreso=request.POST['fecha_ingreso'],
-                fecha_finalizacion=request.POST['fecha_finalizacion'],
+                fecha_ingreso=request.POST.get('fecha_ingreso') or None,
+                fecha_finalizacion=request.POST.get('fecha_finalizacion') or None,
                 tipo_contrato=request.POST['tipo_contrato'],
                 salario=int(salario),
                 jornada=request.POST['jornada'],
@@ -99,9 +107,6 @@ def empleados(request):
         'por_cargo': por_cargo
     })
 
-    
-
-
 @login_required
 def eliminar_empleado(request, id):
     empleado = get_object_or_404(Empleado, id=id)
@@ -131,12 +136,40 @@ def detalle_empleado(request, id):
     editando = request.GET.get('edit')
 
     if request.method == 'POST':
+
+    # VALIDAR CAMPOS OBLIGATORIOS
+        campos_obligatorios = {
+            'nombre_completo': 'Nombre completo',
+            'documento': 'Documento',
+            'estrato': 'Estrato',
+            'salario': 'Salario',
+        }
+
+        campos_faltantes = []
+
+        for campo, nombre in campos_obligatorios.items():
+            if not request.POST.get(campo, '').strip():
+                campos_faltantes.append(nombre)
+
+        # Si hay campos vacíos, mostrar mensaje y regresar a editar
+        if campos_faltantes:
+            messages.error(
+                request,
+                '⚠️ Debes completar: ' + ', '.join(campos_faltantes)
+            )
+
+            return redirect(f'/rrhh/empleados/{id}/?edit=1')
+
+
+        # TU CÓDIGO CONTINÚA NORMALMENTE DESDE AQUÍ
         documento = request.POST['documento']
 
         # VALIDAR DUPLICADO
-        existe = Empleado.objects.filter(documento=documento).exclude(id=id).exists()
+        existe = Empleado.objects.filter(
+            documento=documento
+        ).exclude(id=id).exists()
 
-        salario = request.POST['salario'].replace('.', '') .replace(',', '')
+        salario = request.POST['salario'].replace('.', '').replace(',', '')
 
         if existe:
             return render(request, 'rrhh/empleados/detalle_empleado.html', {
@@ -156,6 +189,8 @@ def detalle_empleado(request, id):
         empleado.fecha_nacimiento = request.POST['fecha_nacimiento']
         empleado.nacionalidad = request.POST['nacionalidad']
         empleado.direccion = request.POST['direccion']
+        empleado.barrio = request.POST.get('barrio', '')
+        empleado.estrato = int(request.POST['estrato'])
         empleado.ciudad_residencia = request.POST['ciudad_residencia']
         empleado.telefono = request.POST['telefono']
         empleado.correo = request.POST['correo']
@@ -175,12 +210,24 @@ def detalle_empleado(request, id):
         empleado.jefe = request.POST['jefe']
 
         # CONTACTO EMERGENCIA
-        empleado.contacto_emergencia = request.POST.get('contacto_emergencia')
-        empleado.telefono_emergencia = request.POST.get('telefono_emergencia')
-        empleado.parentesco_emergencia = request.POST.get('parentesco_emergencia')
+        empleado.contacto_emergencia = request.POST.get('contacto_emergencia', "")
+        empleado.telefono_emergencia = request.POST.get('telefono_emergencia', "")
+        empleado.parentesco_emergencia = request.POST.get('parentesco_emergencia', "")
 
         # OBSERVACIONES
-        empleado.observaciones = request.POST.get('observaciones')
+        empleado.observaciones = request.POST.get('observaciones', "")
+
+        # FOTO DEL EMPLEADO
+        if request.POST.get('eliminar_foto'):
+            empleado.foto.delete(save=False)
+            empleado.foto = None
+
+        elif request.FILES.get('foto'):
+            # Elimina la foto anterior antes de guardar la nueva
+            if empleado.foto:
+                empleado.foto.delete(save=False)
+
+            empleado.foto = request.FILES['foto']
 
         empleado.save()
 
@@ -191,8 +238,6 @@ def detalle_empleado(request, id):
             salud.pension = request.POST.get('salud_pension', '')
             salud.arl = request.POST.get('salud_arl', '')
             salud.alergias = request.POST.get('salud_alergias', '')
-            salud.contacto_emergencia = request.POST.get('salud_contacto_emergencia', '')
-            salud.telefono_emergencia = request.POST.get('salud_telefono_emergencia', '')
             salud.save()
         else:
             SaludEmpleado.objects.create(
@@ -243,6 +288,37 @@ def agregar_dotacion(request, id):
         return redirect('detalle_empleado', id=empleado.id)
 
     return render(request, 'rrhh/empleados/agregar_dotacion.html', {'empleado': empleado})
+
+@login_required
+def editar_dotacion_empleado(request, id):
+    dotacion = get_object_or_404(DotacionEmpleado, id=id)
+
+    if request.method == 'POST':
+        dotacion.elemento = request.POST.get('elemento', '')
+        dotacion.descripcion = request.POST.get('descripcion', '')
+        dotacion.save()
+
+        messages.success(
+            request,
+            '✅ Dotación actualizada correctamente.'
+        )
+
+    return redirect(f'/rrhh/empleados/{dotacion.empleado.id}/')
+
+@login_required
+def eliminar_dotacion_empleado(request, id):
+    dotacion = get_object_or_404(DotacionEmpleado, id=id)
+
+    empleado_id = dotacion.empleado.id
+
+    if request.method == 'POST':
+        dotacion.delete()
+        messages.success(
+            request,
+            '✅ Dotación eliminada correctamente.'
+        )
+
+    return redirect(f'/rrhh/empleados/{empleado_id}/')
 @login_required
 def subir_documento(request, id):
 

@@ -13,6 +13,18 @@
                 {{ empleado.nombre_completo }}
             </h2>
 
+            <div class="flex justify-center my-4">
+                {% if empleado.foto %}
+                    <img src="{{ empleado.foto.url }}"
+                        alt="Foto de {{ empleado.nombre_completo }}"
+                        class="w-36 h-36 object-cover rounded-full border-4 border-blue-500 shadow">
+                {% else %}
+                    <div class="w-28 h-28 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 text-sm">
+                        Sin foto
+                    </div>
+                {% endif %}
+            </div>
+
             <a href="{% url 'detalle_empleado' empleado.id %}"
                class="block px-4 py-3 rounded hover:bg-gray-700 mb-2">
                 👤 Información General

@@ -3,6 +3,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 # =========================
 # 🔵 VIEWS PRINCIPALES
 # =========================
@@ -45,6 +46,8 @@ from core.views.rrhh.empleados import (
     detalle_empleado,
     eliminar_empleado,
     agregar_dotacion,
+    eliminar_dotacion_empleado,
+    editar_dotacion_empleado,
     subir_documento,
     eliminar_documento,
 )
@@ -179,6 +182,8 @@ urlpatterns = [
     path('rrhh/equipos/<int:id>/eliminar/', eliminar_equipo, name='eliminar_equipo'),
     path('rrhh/equipos/<int:id>/editar/', editar_equipo, name='editar_equipo'),
     path('rrhh/empleados/<int:id>/acta_equipos/', acta_entrega_equipos, name='acta_entrega_equipos'),
+    path('rrhh/dotacion/<int:id>/eliminar/', eliminar_dotacion_empleado, name='eliminar_dotacion_empleado'),
+    path('rrhh/dotacion/<int:id>/editar/', editar_dotacion_empleado, name='editar_dotacion_empleado'),
 
     # INVENTARIO
     path('rrhh/inventario/', inventario_equipos, name='inventario_equipos'),
@@ -264,3 +269,9 @@ urlpatterns += static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT
 )
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

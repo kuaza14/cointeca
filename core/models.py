@@ -157,6 +157,12 @@ class Empleado(models.Model):
     # =========================================================
     # 1. INFORMACIÓN PERSONAL
     # =========================================================
+
+    foto = models.ImageField(
+        upload_to='empleados/fotos/',
+        blank=True,
+        null=True
+    )
     nombre_completo = models.CharField(max_length=200)
 
     documento = models.CharField(
@@ -170,7 +176,11 @@ class Empleado(models.Model):
         blank=True
     )
 
-    fecha_nacimiento = models.DateField()
+    fecha_nacimiento = models.DateField(
+        max_length=10,
+        blank=True,
+        null=True
+    )
 
     nacionalidad = models.CharField(
         max_length=50,
@@ -181,6 +191,16 @@ class Empleado(models.Model):
 
     ciudad_residencia = models.CharField(
         max_length=100,
+        blank=True
+    )
+
+    barrio = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    estrato = models.PositiveSmallIntegerField(
+        null=True,
         blank=True
     )
 
@@ -217,8 +237,10 @@ class Empleado(models.Model):
     # =========================================================
     # 3. INFORMACIÓN CONTRACTUAL
     # =========================================================
-    fecha_ingreso = models.DateField()
-
+    fecha_ingreso = models.DateField(
+        null=True,
+        blank=True
+    )
     fecha_finalizacion = models.DateField(blank=True, null=True)
 
     TIPO_CONTRATO = [
@@ -794,6 +816,16 @@ class ContratoAprendizaje(models.Model):
 
     institucion = models.CharField(
         max_length=200
+    )
+
+    nit_institucion = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    centro_formacion = models.CharField(
+        max_length=200,
+        blank=True
     )
 
     especialidad = models.CharField(max_length=200)

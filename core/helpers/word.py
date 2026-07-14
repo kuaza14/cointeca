@@ -2,6 +2,8 @@ from django.http import FileResponse
 from django.conf import settings
 from docxtpl import DocxTemplate
 import os
+import re
+
 
 def limpiar_nombre_archivo(nombre):
     return re.sub(

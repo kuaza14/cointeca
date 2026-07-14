@@ -1,0 +1,65 @@
+{% extends 'rrhh/empleados/base_empleado.html' %}
+
+{% block empleado_content %}
+
+<div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-8">
+
+    <h2 class="text-2xl font-bold mb-6">
+
+        Nueva Suspensión del Contrato
+
+    </h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="grid grid-cols-2 gap-6">
+
+            <div>
+
+                <label class="font-semibold">
+
+                    Fecha inicio
+
+                </label>
+
+                <input type="date" name="fecha_inicio" class="border rounded w-full p-2" required>
+
+            </div>
+
+            <div>
+
+                <label class="font-semibold">
+
+                    Fecha fin
+
+                </label>
+
+                <input type="date" name="fecha_fin" class="border rounded w-full p-2" required>
+
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex justify-end gap-4">
+
+            <a href="javascript:history.back()" class="bg-gray-300 px-4 py-2 rounded">
+
+                Cancelar
+
+            </a>
+
+            <button class="bg-blue-600 text-white px-5 py-2 rounded">
+
+                Guardar
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

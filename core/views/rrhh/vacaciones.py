@@ -9,9 +9,7 @@ from django.contrib import messages
 from docxtpl import DocxTemplate
 from datetime import timedelta, date
 import holidays
-
 from django.conf import settings
-
 from core.models import Empleado, Vacacion, SolicitudVacaciones
 
 @login_required

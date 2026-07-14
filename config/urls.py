@@ -3,12 +3,14 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 # =========================
 # 🔵 VIEWS PRINCIPALES
 # =========================
 from core.views import (
     inicio,
     login_view,
+    logout_view,
     dashboard,
     caja_menor,
     detalle_caja,
@@ -44,6 +46,8 @@ from core.views.rrhh.empleados import (
     detalle_empleado,
     eliminar_empleado,
     agregar_dotacion,
+    eliminar_dotacion_empleado,
+    editar_dotacion_empleado,
     subir_documento,
     eliminar_documento,
 )
@@ -100,6 +104,31 @@ from core.views.rrhh.induccion_capacitacion import (
     generar_induccion
 )
 
+from core.views.rrhh.compromisos import (
+    compromisos_empleado,
+    crear_compromiso,
+    editar_compromiso,
+    eliminar_compromiso,
+    generar_compromiso
+)
+
+from core.views.rrhh.suspension_contrato import (
+    suspensiones_empleado,
+    crear_suspension,
+    editar_suspension,
+    eliminar_suspension,
+    generar_suspension
+)
+
+from core.views.rrhh.contrato_aprendiz import (
+    contratos_aprendiz_empleado,
+    crear_contrato_aprendiz,
+    editar_contrato_aprendiz,
+    eliminar_contrato_aprendiz,
+    generar_contrato_aprendiz
+)
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -107,6 +136,7 @@ urlpatterns = [
     path('', inicio),
     path('login/', login_view, name='login'),
     path('dashboard/', dashboard, name='dashboard'),
+    path('logout/', logout_view, name='logout'),
 
     # CAJA MENOR
     path('caja-menor/', caja_menor, name='caja_menor'),
@@ -152,6 +182,8 @@ urlpatterns = [
     path('rrhh/equipos/<int:id>/eliminar/', eliminar_equipo, name='eliminar_equipo'),
     path('rrhh/equipos/<int:id>/editar/', editar_equipo, name='editar_equipo'),
     path('rrhh/empleados/<int:id>/acta_equipos/', acta_entrega_equipos, name='acta_entrega_equipos'),
+    path('rrhh/dotacion/<int:id>/eliminar/', eliminar_dotacion_empleado, name='eliminar_dotacion_empleado'),
+    path('rrhh/dotacion/<int:id>/editar/', editar_dotacion_empleado, name='editar_dotacion_empleado'),
 
     # INVENTARIO
     path('rrhh/inventario/', inventario_equipos, name='inventario_equipos'),
@@ -206,8 +238,30 @@ urlpatterns = [
     path('rrhh/inducciones/<int:id>/editar/', editar_induccion, name='editar_induccion'),
     path('rrhh/inducciones/<int:id>/eliminar/', eliminar_induccion, name='eliminar_induccion'),
     path('rrhh/inducciones/<int:id>/descargar/', generar_induccion, name='generar_induccion'),
-]
+    
+    #compromiso pago a daños 
+    path('rrhh/compromisos/<int:id>/', compromisos_empleado, name='compromisos_empleado'),
+    path('rrhh/compromisos/<int:id>/crear/', crear_compromiso, name='crear_compromiso'),
+    path('rrhh/compromisos/<int:id>/editar/', editar_compromiso, name='editar_compromiso'),
+    path('rrhh/compromisos/<int:id>/eliminar/', eliminar_compromiso, name='eliminar_compromiso'),
+    path('rrhh/compromisos/<int:id>/descargar/', generar_compromiso, name='generar_compromiso'),
 
+    #suspensiones
+    path('rrhh/empleados/<int:id>/suspensiones/', suspensiones_empleado, name='suspensiones_empleado'),
+    path('rrhh/suspensiones/<int:id>/crear/', crear_suspension, name='crear_suspension'),
+    path('rrhh/suspensiones/<int:id>/editar/', editar_suspension,   name='editar_suspension'),
+    path('rrhh/suspensiones/<int:id>/eliminar/', eliminar_suspension, name='eliminar_suspension'),
+    path('rrhh/suspensiones/<int:id>/descargar/', generar_suspension, name='generar_suspension'),
+
+    #contrato de aprendiz
+    path("rrhh/empleados/<int:id>/contrato_aprendiz/", contratos_aprendiz_empleado, name="contratos_aprendiz_empleado"),
+    path("rrhh/contratos_aprendiz/<int:id>/crear/", crear_contrato_aprendiz, name="crear_contrato_aprendiz"),
+    path("rrhh/contratos_aprendiz/<int:id>/editar/", editar_contrato_aprendiz, name="editar_contrato_aprendiz"),
+    path("rrhh/contratos_aprendiz/<int:id>/eliminar/", eliminar_contrato_aprendiz, name="eliminar_contrato_aprendiz"),
+    path("rrhh/contratos_aprendiz/<int:id>/descargar/", generar_contrato_aprendiz, name="generar_contrato_aprendiz"),
+
+
+]
 # =========================
 # 📁 MEDIA FILES
 # =========================
@@ -215,3 +269,9 @@ urlpatterns += static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT
 )
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

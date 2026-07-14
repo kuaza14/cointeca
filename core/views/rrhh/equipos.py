@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import FileResponse
+from django.contrib import messages
 
 from docxtpl import DocxTemplate
 
@@ -42,7 +43,7 @@ def asignar_equipo(request, id):
 
         return redirect(f'/rrhh/empleados/{id}/')
 
-    return render(request, 'rrhh/asignar_equipo.html', {
+    return render(request, 'rrhh/equipos/asignar_equipo.html', {
         'empleado': empleado,
         'equipos': equipos
     })
@@ -74,7 +75,7 @@ def editar_equipo(request, id):
 
         if existe_serial:
 
-            return render(request, 'editar_equipo.html', {
+            return render(request, 'rrhh/equipos/editar_equipo.html', {
                 'empleado': empleado,
                 'equipo': equipo,
                 'error': '⚠️ Este serial ya está asignado a otro empleado'
@@ -90,7 +91,7 @@ def editar_equipo(request, id):
 
         return redirect(f'/rrhh/empleados/{empleado.id}/')
 
-    return render(request, 'editar_equipo.html', {
+    return render(request, 'rrhh/equipos/editar_equipo.html', {
         'empleado': empleado,
         'equipo': equipo
     })
@@ -101,14 +102,18 @@ def acta_entrega_equipos(request, id):
     empleado = get_object_or_404(Empleado, id=id)
     equipos = AsignacionEquipo.objects.filter(empleado=empleado)
 
+    if not equipos.exists():
+        messages.warning(
+            request,
+            "Primero debe asignar un equipo al empleado."
+        )
+        return redirect(f"/rrhh/empleados/{empleado.id}/")
+
     ruta_plantilla = os.path.join(
         settings.BASE_DIR,
-        "core",
-        "templates",
-        "rrhh",
-        "contratos",
-        "acta_entrega.docx"
-    )
+        "plantillas_word",
+        "asignacion_equipos.docx"
+    )    
 
     doc = DocxTemplate(ruta_plantilla)
 
@@ -119,10 +124,16 @@ def acta_entrega_equipos(request, id):
             "cargo": empleado.cargo.upper(),
         },
 
-        "equipos": equipos,
+        "e": equipos.first(),
 
         "fecha_actual": date.today().strftime("%d/%m/%Y"),
     }
+
+    print("Empleado:", empleado.nombre_completo)
+    print("Cantidad equipos:", equipos.count())
+
+    for x in equipos:
+        print(x.id, x.equipo_inventario.equipo)
 
     doc.render(contexto)
 
@@ -158,7 +169,7 @@ def inventario_equipos(request):
 
         e.save()
 
-    return render(request, 'rrhh/inventario_equipos.html', {
+    return render(request, 'rrhh/equipos/inventario_equipos.html', {
         'equipos': equipos
     })
 
@@ -180,7 +191,7 @@ def crear_equipo_inventario(request):
 
         return redirect('inventario_equipos')
 
-    return render(request, 'rrhh/crear_equipo_inventario.html')
+    return render(request, 'rrhh/equipos/crear_equipo_inventario.html')
 
 @login_required
 def editar_equipo_inventario(request, id):
@@ -207,7 +218,7 @@ def editar_equipo_inventario(request, id):
 
     return render(
         request,
-        'rrhh/editar_equipo_inventario.html',
+        'rrhh/equipos/editar_equipo_inventario.html',
         contexto
     )
 

@@ -1,0 +1,143 @@
+{% extends 'rrhh/empleados/base_empleado.html' %}
+
+{% block empleado_content %}
+
+<h2 class="text-3xl font-bold text-gray-800">
+    📄 Contrato de Aprendizaje
+</h2>
+
+<div class="flex gap-3 mb-6">
+
+    <a href="{% url 'crear_contrato_aprendiz' empleado.id %}"
+       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow">
+
+        + Nuevo Contrato
+
+    </a>
+
+    <a href="{% url 'detalle_empleado' empleado.id %}"
+       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow">
+
+        Volver
+
+    </a>
+
+</div>
+
+<table class="min-w-full">
+
+    <thead class="bg-blue-600 text-white">
+
+        <tr>
+
+            <th class="px-4 py-3 text-left">
+                Institución
+            </th>
+
+            <th class="px-4 py-3 text-left">
+                Especialidad
+            </th>
+
+            <th class="px-4 py-3 text-left">
+                Inicio
+            </th>
+
+            <th class="px-4 py-3 text-left">
+                Fin
+            </th>
+
+            <th class="px-4 py-3 text-center">
+                Acciones
+            </th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for contrato in contratos %}
+
+        <tr class="border-b hover:bg-gray-50">
+
+            <td class="px-4 py-3">
+
+                {{ contrato.institucion }}
+
+            </td>
+
+            <td class="px-4 py-3">
+
+                {{ contrato.especialidad }}
+
+            </td>
+
+            <td class="px-4 py-3">
+
+                {{ contrato.fecha_inicio }}
+
+            </td>
+
+            <td class="px-4 py-3">
+
+                {{ contrato.fecha_fin }}
+
+            </td>
+
+            <td class="px-4 py-3">
+
+                <div class="flex justify-center gap-2">
+
+                    <a href="{% url 'editar_contrato_aprendiz' contrato.id %}"
+                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm">
+
+                        Editar
+
+                    </a>
+
+                    <a href="{% url 'generar_contrato_aprendiz' contrato.id %}"
+                       class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+
+                        Word
+
+                    </a>
+
+                    <form method="POST"
+                          action="{% url 'eliminar_contrato_aprendiz' contrato.id %}"
+                          onsubmit="return confirm('¿Eliminar este contrato?')">
+
+                        {% csrf_token %}
+
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+
+                            Eliminar
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    {% empty %}
+
+        <tr>
+
+            <td colspan="5" class="text-center py-6 text-gray-500">
+
+                No existen contratos registrados.
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

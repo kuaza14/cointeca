@@ -10,6 +10,7 @@ from django.conf import settings
 from docxtpl import DocxTemplate
 from django.http import FileResponse
 import re
+from core.utils import limpiar_nombre_archivo
 
 @login_required
 def inducciones_empleado(request, id):
@@ -164,6 +165,85 @@ def eliminar_induccion(request, id):
 
 @login_required
 def generar_induccion(request, id):
-    return HttpResponse(
-        "Pendiente generar word"
+
+    induccion = get_object_or_404(
+        InduccionCapacitacion,
+        id=id
+    )
+
+    empleado = induccion.empleado
+
+    ruta_plantilla = os.path.join(
+        settings.BASE_DIR,
+        'plantillas_word',
+        'induccion_capacitacion.docx'
+    )
+
+    doc = DocxTemplate(
+        ruta_plantilla
+    )
+
+    contexto = {
+
+        'fecha': induccion.fecha.strftime(
+            '%d/%m/%Y'
+        ),
+
+        'nombre_completo': empleado.nombre_completo,
+
+        'cedula': empleado.documento,
+
+        'cargo': empleado.cargo,
+
+        'area': empleado.area,
+
+        'fecha_ingreso': empleado.fecha_ingreso.strftime(
+            '%d/%m/%Y'
+        ),
+
+        'tema_capacitacion': (
+            induccion.tema_capacitacion
+            or ''
+        ),
+
+        'facilitador': (
+            induccion.facilitador
+            or ''
+        ),
+
+        'duracion_horas': (
+            induccion.duracion_horas
+            or ''
+        ),
+
+    }
+
+    doc.render(
+        contexto
+    )
+
+    nombre_limpio = limpiar_nombre_archivo(
+        empleado.nombre_completo
+    )
+
+    nombre_archivo = (
+        f"Induccion_{nombre_limpio}.docx"
+    )
+
+    ruta_salida = os.path.join(
+        settings.MEDIA_ROOT,
+        nombre_archivo
+    )
+
+    doc.save(
+        ruta_salida
+    )
+
+    return FileResponse(
+        open(
+            ruta_salida,
+            'rb'
+        ),
+        as_attachment=True,
+        filename=nombre_archivo
     )

@@ -1,7 +1,5 @@
 from django.db import models
 
-
-
 class CajaMenor(models.Model):
     fecha_tramite = models.DateField()
     fecha_cierre = models.DateField(null=True, blank=True)
@@ -159,6 +157,12 @@ class Empleado(models.Model):
     # =========================================================
     # 1. INFORMACIÓN PERSONAL
     # =========================================================
+
+    foto = models.ImageField(
+        upload_to='empleados/fotos/',
+        blank=True,
+        null=True
+    )
     nombre_completo = models.CharField(max_length=200)
 
     documento = models.CharField(
@@ -172,7 +176,11 @@ class Empleado(models.Model):
         blank=True
     )
 
-    fecha_nacimiento = models.DateField()
+    fecha_nacimiento = models.DateField(
+        max_length=10,
+        blank=True,
+        null=True
+    )
 
     nacionalidad = models.CharField(
         max_length=50,
@@ -183,6 +191,16 @@ class Empleado(models.Model):
 
     ciudad_residencia = models.CharField(
         max_length=100,
+        blank=True
+    )
+
+    barrio = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    estrato = models.PositiveSmallIntegerField(
+        null=True,
         blank=True
     )
 
@@ -219,8 +237,10 @@ class Empleado(models.Model):
     # =========================================================
     # 3. INFORMACIÓN CONTRACTUAL
     # =========================================================
-    fecha_ingreso = models.DateField()
-
+    fecha_ingreso = models.DateField(
+        null=True,
+        blank=True
+    )
     fecha_finalizacion = models.DateField(blank=True, null=True)
 
     TIPO_CONTRATO = [
@@ -713,3 +733,121 @@ class InduccionCapacitacion(models.Model):
             f'{self.empleado.nombre_completo} - '
             f'{self.get_tipo_evento_display()}'
         )
+
+class CompromisoPagoDano(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    numero_acta = models.CharField(
+        max_length=20
+    )
+
+    valor_descuento = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    descripcion_dano = models.TextField()
+
+    fecha_evento = models.DateField()
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f'{self.empleado.nombre_completo} - '
+            f'Acta {self.numero_acta}'
+        )
+
+class RetiroEmpleado(models.Model):
+
+    empleado = models.OneToOneField(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha_retiro = models.DateField()
+
+    motivo = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.empleado.nombre_completo
+
+class SuspensionContrato(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    fecha_inicio = models.DateField()
+
+    fecha_fin = models.DateField()
+
+    motivo = models.TextField(blank=True)
+
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+class ContratoAprendizaje(models.Model):
+
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE
+    )
+
+    institucion = models.CharField(
+        max_length=200
+    )
+
+    nit_institucion = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    centro_formacion = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    especialidad = models.CharField(max_length=200)
+
+    numero_grupo = models.CharField(max_length=50)
+
+    modalidad = models.CharField(
+        max_length=30
+    )
+
+    fecha_inicio = models.DateField()
+
+    fecha_fin = models.DateField()
+
+    fecha_inicio_lectiva = models.DateField()
+
+    fecha_fin_lectiva = models.DateField()
+
+    fecha_inicio_practica = models.DateField()
+
+    fecha_fin_practica = models.DateField()
+
+    porcentaje_apoyo = models.IntegerField(
+        default=100
+    )

@@ -41,6 +41,23 @@ def solicitud_vacaciones(request, id):
     # Cargar la plantilla
     doc = DocxTemplate(ruta_plantilla)
 
+    anios_trabajados = (
+        date.today() - empleado.fecha_ingreso
+    ).days // 365
+
+    dias_acumulados = anios_trabajados * 15
+
+    dias_tomados_total = (
+        Vacacion.objects.filter(
+            empleado=empleado
+        ).aggregate(
+            total=Sum('dias_tomados')
+        )['total']
+        or 0
+    )
+
+    dias_disponibles = dias_acumulados - dias_tomados_total
+
     # Preparar el contexto con los datos de la vacación
     contexto = {
         'empleado': empleado,           # Objeto completo - puedes usar {{ empleado.nombre_completo }}, etc
@@ -59,7 +76,7 @@ def solicitud_vacaciones(request, id):
         'vacaciones_desde': vacacion.fecha_inicio.strftime('%d/%m/%Y'),
         'vacaciones_hasta': vacacion.fecha_fin.strftime('%d/%m/%Y'),
         
-        'dias_disponibles': vacacion.dias_disponibles,
+        'dias_disponibles': dias_disponibles,
         
         'nombre_rrhh': 'Gestión RRHH',  # Cambiar según corresponda
     }
@@ -98,40 +115,45 @@ def vacaciones_home(request):
 @login_required
 def vacaciones(request):
 
-    vacaciones = Vacacion.objects.select_related(
-        'empleado'
-    ).all()
     empleados = Empleado.objects.all()
 
-    for v in vacaciones:
+    for empleado in empleados:
 
         anios_trabajados = (
-            date.today() - v.empleado.fecha_ingreso
+            date.today() - empleado.fecha_ingreso
         ).days // 365
 
         dias_acumulados = anios_trabajados * 15
 
         dias_tomados_total = (
             Vacacion.objects.filter(
-                empleado=v.empleado
+                empleado=empleado
             ).aggregate(
                 total=Sum('dias_tomados')
             )['total']
             or 0
         )
 
-        dias_pendientes = dias_acumulados - dias_tomados_total
+        dias_disponibles = dias_acumulados - dias_tomados_total
 
-        v.anios_trabajados = anios_trabajados
-        v.dias_acumulados = dias_acumulados
-        v.total_tomados = dias_tomados_total
-        v.total_pendientes = dias_pendientes
+        empleado.anios_trabajados = anios_trabajados
+        empleado.dias_acumulados = dias_acumulados
+        empleado.total_tomados = dias_tomados_total
+        empleado.total_pendientes = dias_disponibles
+
+        # Última solicitud de vacaciones
+        empleado.ultima_vacacion = (
+            Vacacion.objects.filter(
+                empleado=empleado
+            )
+            .order_by('-fecha_inicio')
+            .first()
+        )
 
     return render(
         request,
         'rrhh/vacaciones/vacaciones.html',
         {
-            'vacaciones': vacaciones,
             'empleados': empleados
         }
     )
@@ -313,6 +335,11 @@ def vacaciones_empleado(request, id):
 
     dias_disponibles = dias_acumulados - dias_tomados_total
 
+    empleado.anios_trabajados = anios_trabajados
+    empleado.dias_acumulados = dias_acumulados
+    empleado.total_tomados = dias_tomados_total
+    empleado.total_pendientes = dias_disponibles
+
     return render(
         request,
         'rrhh/vacaciones/vacaciones_empleado.html',
@@ -445,64 +472,6 @@ def eliminar_vacacion(request, id):
             'Las vacaciones fueron eliminadas correctamente.'
         )
 
-    return redirect('vacaciones')
-
-@login_required
-def registrar_saldo_inicial(request):
-    """
-    Registra el saldo inicial de vacaciones (históricas)
-    """
-    
-    if request.method == 'POST':
-        
-        empleado_id = request.POST.get('empleado')
-        dias_tomados_anteriores = int(request.POST.get('dias_tomados_anteriores', 0))
-        notas = request.POST.get('notas', '')
-        
-        empleado = get_object_or_404(Empleado, id=empleado_id)
-        
-        # Verificar si ya existe
-        ya_existe = Vacacion.objects.filter(
-            empleado=empleado,
-            periodo='Histórico'
-        ).exists()
-        
-        if ya_existe:
-            messages.warning(
-                request,
-                f'{empleado.nombre_completo} ya tiene registrado un saldo histórico.'
-            )
-            return redirect('vacaciones')
-        
-        # Calcular
-        anios_trabajados = (
-            date.today() - empleado.fecha_ingreso
-        ).days // 365
-        
-        dias_acumulados = anios_trabajados * 15
-        dias_pendientes = dias_acumulados - dias_tomados_anteriores
-        
-        # Crear
-        Vacacion.objects.create(
-            empleado=empleado,
-            periodo='Histórico',
-            fecha_inicio=empleado.fecha_ingreso,
-            fecha_fin=empleado.fecha_ingreso,
-            fecha_regreso=date.today(),
-            dias_tomados=dias_tomados_anteriores,
-            dias_pendientes=dias_pendientes,
-            observaciones=f'Saldo histórico registrado. {notas}'
-        )
-        
-        messages.success(
-            request,
-            f'✅ Saldo registrado para {empleado.nombre_completo}. '
-            f'Acumulados: {dias_acumulados} | Tomados: {dias_tomados_anteriores} | '
-            f'Pendientes: {dias_pendientes}'
-        )
-        
-        return redirect('vacaciones')
-    
     return redirect('vacaciones')
 
 

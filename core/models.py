@@ -851,3 +851,42 @@ class ContratoAprendizaje(models.Model):
     porcentaje_apoyo = models.IntegerField(
         default=100
     )
+
+class SuspensionDisciplinaria(models.Model):
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE,
+        related_name='suspensiones_disciplinarias'
+    )
+
+    # Motivo de la suspensión
+    motivo_suspension = models.TextField()
+
+    # Fecha en que ocurrió la falta
+    fecha_falta = models.DateField()
+
+    # Uno o varios artículos, incluyendo su descripción
+    articulos_infringidos = models.TextField()
+
+    # Periodo de suspensión
+    fecha_inicio_suspension = models.DateField()
+    fecha_fin_suspension = models.DateField()
+
+    # Fecha en que debe regresar a trabajar
+    fecha_reincorporacion = models.DateField()
+
+    # Opcionales, porque pueden variar según el caso
+    responsabilidad_pecuniaria = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    consecuencia_reincidencia = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.empleado.nombre_completo} - {self.fecha_falta}"

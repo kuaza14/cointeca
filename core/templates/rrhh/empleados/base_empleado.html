@@ -91,6 +91,31 @@
                 📄 Contrato Aprendiz
             </a>
 
+            <a href="{% url 'generar_no_prorroga_contrato' empleado.id %}"
+               class="block px-4 py-2 hover:bg-gray-700 rounded">
+                📄No Prorroga Contrato
+            </a>
+
+            <a href="{% url 'generar_no_superacion_periodo_prueba' empleado.id %}"
+               class="block px-4 py-2 hover:bg-gray-700 rounded">
+                📄No Superación Periodo de Prueba
+            </a>
+
+            <a href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}"
+               class="block px-4 py-2 hover:bg-gray-700 rounded">
+                ⚠️ Suspensión disciplinaria
+            </a>
+
+            <a href="{% url 'generar_historia_clinica_laboral' empleado.id %}"
+            class="block px-4 py-2 hover:bg-gray-700 rounded">
+                📄 Historia Clínica Laboral
+            </a>
+
+            <a href="{% url 'generar_acuerdo_responsabilidad' empleado.id %}"
+            class="block px-4 py-2 hover:bg-gray-700 rounded">
+                📄 Acuerdo de Responsabilida
+            </a>
+
         </div>
 
     </aside>

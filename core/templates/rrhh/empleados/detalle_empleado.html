@@ -16,11 +16,12 @@
     </a>
 
 </div>
-    {% if error %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ error }}
-    </div>
-    {% endif %}
+
+{% if error %}
+<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ error }}
+</div>
+{% endif %}
 
 <div class="bg-white shadow rounded p-6 space-y-6">
     {% if editando %}
@@ -28,29 +29,30 @@
     {% csrf_token %}
     {% endif %}
 
-       {% if editando %}
-            <div class="mb-4">
-                <label class="block font-semibold mb-2">
-                    Cambiar foto del empleado
+        <!-- FOTO DEL EMPLEADO -->
+        {% if editando %}
+        <div class="mb-4">
+            <label class="block font-semibold mb-2">
+                Cambiar foto del empleado
+            </label>
+
+            <input type="file"
+                name="foto"
+                accept="image/*"
+                class="border p-2 rounded">
+
+            {% if empleado.foto %}
+                <label class="flex items-center gap-2 mt-3">
+                    <input type="checkbox" name="eliminar_foto">
+                    Eliminar foto actual
                 </label>
-
-                <input type="file"
-                    name="foto"
-                    accept="image/*"
-                    class="border p-2 rounded">
-
-                {% if empleado.foto %}
-                    <label class="flex items-center gap-2 mt-3">
-                        <input type="checkbox" name="eliminar_foto">
-                        Eliminar foto actual
-                    </label>
-                {% endif %}
-            </div>
+            {% endif %}
+        </div>
         {% endif %}
 
-    <!-- 1. INFORMACION PERSONAL -->
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">1. Información Personal</h2>
+        <!-- 1. INFORMACIÓN PERSONAL -->
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">1. Información Personal</h2>
             <div class="grid grid-cols-2 gap-4 mt-3">
                 
                 <p>
@@ -71,7 +73,6 @@
                 {% endif %}
                 </p>
 
-                <!-- la cedula de que ciudad ? -->
                 <p>
                 <strong>Ciudad de Expedición:</strong>
                 {% if editando %}
@@ -128,7 +129,6 @@
 
                 <p>
                 <strong>Ciudad de Residencia:</strong>
-
                 {% if editando %}
                 <input type="text" name="ciudad_residencia" value="{{ empleado.ciudad_residencia }}" class="border p-1 rounded w-full">
                 {% else %}
@@ -155,595 +155,589 @@
                 </p>
 
             </div>
-    </div>
-
-    <!-- 2. PERFIL -->
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">2. Perfil Profesional</h2>
-        <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>Cargo:</strong>
-                {% if editando %}
-                <input type="text" name="cargo" value="{{ empleado.cargo }}"  class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.cargo }}
-                {% endif %}
-            </p>
-            <p><strong>Área:</strong>
-                {% if editando %}
-                <input type="text" name="area" value="{{ empleado.area }}"  class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.area }}
-                {% endif %}
-            </p>
-            <p><strong>Nivel:</strong>
-                {% if editando %}
-                <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}"   class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.nivel_academico }}
-                {% endif %}
-            </p>
-            <p><strong>Profesión:</strong>
-                {% if editando %}
-                <input type="text" name="profesion" value="{{ empleado.profesion }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.profesion }}
-                {% endif %}
-            </p>
-            <p><strong>Habilidades:</strong>
-                {% if editando %}
-                <input type="text" name="habilidades" value="{{ empleado.habilidades }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.habilidades }}
-                {% endif %}
-            </p>
-            <p><strong>Idiomas:</strong>
-                {% if editando %}
-                <input type="text" name="idiomas" value="{{ empleado.idiomas }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.idiomas }}
-                {% endif %}
-            </p>
         </div>
-    </div>
 
-    <!-- 3. CONTRATO -->
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">3. Información Contractual</h2>
-        <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>Ingreso:</strong>
-                {% if editando %}
-                <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" required class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.fecha_ingreso }}
-                {% endif %}
-            </p>
-
-            <p><strong>Finaliza:</strong>
-                {% if editando %}
-                <input type="date" name="fecha_finalizacion" value="{{ empleado.fecha_finalizacion|date:'Y-m-d' }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.fecha_finalizacion }}
-                {% endif %}
-            </p>
-
-            <p><strong>Contrato:</strong> 
-                {% if editando %}
-                <input type="text" name="tipo_contrato" value="{{ empleado.tipo_contrato }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.tipo_contrato }}
-                {% endif %}
-            </p>
-            <p><strong>Salario:</strong> 
-                {% if editando %}
-                <input type="text" id="salario" name="salario" value="{{ empleado.salario|floatformat:0 }}" class="border p-1 rounded w-full moneda-col">
-                {% else %}
-                ${{ empleado.salario|pesos_colombianos }}
-                {% endif %}
-            </p>
-            <p><strong>Jornada:</strong> 
-                {% if editando %}
-                <input type="text" name="jornada" value="{{ empleado.jornada }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.jornada }}
-                {% endif %}
-            </p>
-            <p><strong>Jefe:</strong> 
-                {% if editando %}
-                <input type="text" name="jefe" value="{{ empleado.jefe }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.jefe }}
-                {% endif %}
-            </p>
+        <!-- 2. PERFIL PROFESIONAL -->
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">2. Perfil Profesional</h2>
+            <div class="grid grid-cols-2 gap-4 mt-3">
+                <p><strong>Cargo:</strong>
+                    {% if editando %}
+                    <input type="text" name="cargo" value="{{ empleado.cargo }}"  class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.cargo }}
+                    {% endif %}
+                </p>
+                <p><strong>Área:</strong>
+                    {% if editando %}
+                    <input type="text" name="area" value="{{ empleado.area }}"  class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.area }}
+                    {% endif %}
+                </p>
+                <p><strong>Nivel:</strong>
+                    {% if editando %}
+                    <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}"   class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.nivel_academico }}
+                    {% endif %}
+                </p>
+                <p><strong>Profesión:</strong>
+                    {% if editando %}
+                    <input type="text" name="profesion" value="{{ empleado.profesion }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.profesion }}
+                    {% endif %}
+                </p>
+                <p><strong>Habilidades:</strong>
+                    {% if editando %}
+                    <input type="text" name="habilidades" value="{{ empleado.habilidades }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.habilidades }}
+                    {% endif %}
+                </p>
+                <p><strong>Idiomas:</strong>
+                    {% if editando %}
+                    <input type="text" name="idiomas" value="{{ empleado.idiomas }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.idiomas }}
+                    {% endif %}
+                </p>
+            </div>
         </div>
-    </div>
 
-    <!-- 4. SALUD -->
-    {% if salud %}
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">4. Seguridad y Salud</h2>
-        <div class="grid grid-cols-2 gap-4 mt-3">
-            <p><strong>RH:</strong>
-                {% if editando %}
-                <input type="text" name="salud_grupo_sanguineo" value="{{ salud.grupo_sanguineo }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.grupo_sanguineo }}
-                {% endif %}
-            </p>
-            <p><strong>EPS:</strong>
-                {% if editando %}
-                <input type="text" name="salud_eps" value="{{ salud.eps }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.eps }}
-                {% endif %}
-            </p>
-            <p><strong>Pensión:</strong>
-                {% if editando %}
-                <input type="text" name="salud_pension" value="{{ salud.pension }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.pension }}
-                {% endif %}
-            </p>
-            <p><strong>ARL:</strong>
-                {% if editando %}
-                <input type="text" name="salud_arl" value="{{ salud.arl }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.arl }}
-                {% endif %}
-            </p>
-            <p><strong>Alergias:</strong>
-                {% if editando %}
-                <input type="text" name="salud_alergias" value="{{ salud.alergias }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ salud.alergias }}
-                {% endif %}
-            </p>
-            
+        <!-- 3. INFORMACIÓN CONTRACTUAL -->
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">3. Información Contractual</h2>
+            <div class="grid grid-cols-2 gap-4 mt-3">
+                <p><strong>Ingreso:</strong>
+                    {% if editando %}
+                    <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" required class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.fecha_ingreso }}
+                    {% endif %}
+                </p>
+
+                <p><strong>Finaliza:</strong>
+                    {% if editando %}
+                    <input type="date" name="fecha_finalizacion" value="{{ empleado.fecha_finalizacion|date:'Y-m-d' }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.fecha_finalizacion }}
+                    {% endif %}
+                </p>
+
+                <p><strong>Contrato:</strong> 
+                    {% if editando %}
+                    <input type="text" name="tipo_contrato" value="{{ empleado.tipo_contrato }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.tipo_contrato }}
+                    {% endif %}
+                </p>
+                <p><strong>Salario:</strong> 
+                    {% if editando %}
+                    <input type="text" id="salario" name="salario" value="{{ empleado.salario|floatformat:0 }}" class="border p-1 rounded w-full moneda-col">
+                    {% else %}
+                    ${{ empleado.salario|pesos_colombianos }}
+                    {% endif %}
+                </p>
+                <p><strong>Jornada:</strong> 
+                    {% if editando %}
+                    <input type="text" name="jornada" value="{{ empleado.jornada }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.jornada }}
+                    {% endif %}
+                </p>
+                <p><strong>Jefe:</strong> 
+                    {% if editando %}
+                    <input type="text" name="jefe" value="{{ empleado.jefe }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ empleado.jefe }}
+                    {% endif %}
+                </p>
+            </div>
         </div>
-    </div>
-    {% endif %}
 
-    <!-- 5. CONTACTO EMERGENCIA -->
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
-            5. Contacto de Emergencia
-        </h2>
+        <!-- 4. SEGURIDAD Y SALUD -->
+        {% if salud %}
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">4. Seguridad y Salud</h2>
+            <div class="grid grid-cols-2 gap-4 mt-3">
+                <p><strong>RH:</strong>
+                    {% if editando %}
+                    <input type="text" name="salud_grupo_sanguineo" value="{{ salud.grupo_sanguineo }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ salud.grupo_sanguineo }}
+                    {% endif %}
+                </p>
+                <p><strong>EPS:</strong>
+                    {% if editando %}
+                    <input type="text" name="salud_eps" value="{{ salud.eps }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ salud.eps }}
+                    {% endif %}
+                </p>
+                <p><strong>Pensión:</strong>
+                    {% if editando %}
+                    <input type="text" name="salud_pension" value="{{ salud.pension }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ salud.pension }}
+                    {% endif %}
+                </p>
+                <p><strong>ARL:</strong>
+                    {% if editando %}
+                    <input type="text" name="salud_arl" value="{{ salud.arl }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ salud.arl }}
+                    {% endif %}
+                </p>
+                <p><strong>Alergias:</strong>
+                    {% if editando %}
+                    <input type="text" name="salud_alergias" value="{{ salud.alergias }}" class="border p-1 rounded w-full">
+                    {% else %}
+                    {{ salud.alergias }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
 
-        <div class="grid grid-cols-2 gap-4 mt-3">
+        <!-- 5. CONTACTO EMERGENCIA -->
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">5. Contacto de Emergencia</h2>
 
-            <p>
-                <strong>Nombre contacto:</strong>
+            <div class="grid grid-cols-2 gap-4 mt-3">
+
+                <p>
+                    <strong>Nombre contacto:</strong>
+
+                    {% if editando %}
+                    <input type="text"
+                        name="contacto_emergencia"
+                        value="{{ empleado.contacto_emergencia }}"
+                        class="border p-1 rounded w-full">
+                    {% else %}
+                        {{ empleado.contacto_emergencia }}
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Parentesco:</strong>
+
+                    {% if editando %}
+                    <input type="text"
+                        name="parentesco_emergencia"
+                        value="{{ empleado.parentesco_emergencia }}"
+                        class="border p-1 rounded w-full">
+                    {% else %}
+                        {{ empleado.parentesco_emergencia }}
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Teléfono:</strong>
+
+                    {% if editando %}
+                    <input type="text"
+                        name="telefono_emergencia"
+                        value="{{ empleado.telefono_emergencia }}"
+                        class="border p-1 rounded w-full">
+                    {% else %}
+                        {{ empleado.telefono_emergencia }}
+                    {% endif %}
+                </p>
+
+            </div>
+        </div>
+
+        <!-- 6. OBSERVACIONES -->
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">6. Observaciones</h2>
+
+            <div class="mt-3">
 
                 {% if editando %}
-                <input type="text"
-                    name="contacto_emergencia"
-                    value="{{ empleado.contacto_emergencia }}"
-                    class="border p-1 rounded w-full">
+                <textarea
+                    name="observaciones"
+                    rows="4"
+                    class="border p-2 rounded w-full"
+                >{{ empleado.observaciones }}</textarea>
+
                 {% else %}
-                    {{ empleado.contacto_emergencia }}
+                <p>{{ empleado.observaciones }}</p>
                 {% endif %}
-            </p>
 
-            <p>
-                <strong>Teléfono:</strong>
-
-                {% if editando %}
-                <input type="text"
-                    name="telefono_emergencia"
-                    value="{{ empleado.telefono_emergencia }}"
-                    class="border p-1 rounded w-full">
-                {% else %}
-                    {{ empleado.telefono_emergencia }}
-                {% endif %}
-            </p>
-
+            </div>
         </div>
-    </div>
 
-        <!-- 7. OBSERVACIONES -->
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
-            7. Observaciones
-        </h2>
+        <!-- 7. DOTACIÓN -->
+        <div>
+            <div class="mb-4 flex justify-end">
+                <a href="{% url 'agregar_dotacion' empleado.id %}"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                    ➕ Agregar dotación
+                </a>
+            </div>
 
-        <div class="mt-3">
+            <table class="w-full border shadow">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-2 text-center">Elemento</th>
+                        <th class="p-2 text-center">Descripción / Serial</th>
+                        <th class="p-2 text-center">Acciones</th>
+                    </tr>
+                </thead>
 
-            {% if editando %}
-            <textarea
-                name="observaciones"
-                rows="4"
-                class="border p-2 rounded w-full"
-            >{{ empleado.observaciones }}</textarea>
-
-            {% else %}
-            <p>{{ empleado.observaciones }}</p>
-            {% endif %}
-
-        </div>
-    </div>
-
-<!-- TABLA -->
-<table class="w-full border shadow">
-    <thead class="bg-gray-800 text-white">
-        <tr>
-            <th class="p-2 text-center">
-                Elemento
-            </th>
-
-            <th class="p-2 text-center">
-                Descripción / Serial
-            </th>
-
-            <th class="p-2 text-center">
-                Acciones
-            </th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for d in dotaciones %}
-        <tr class="border-b hover:bg-gray-50">
-
-            <td class="p-2">
-                <span id="elemento-texto-{{ d.id }}">
-                    {{ d.elemento }}
-                </span>
-
-                <input
-                    type="text"
-                    id="elemento-input-{{ d.id }}"
-                    value="{{ d.elemento }}"
-                    class="hidden border p-2 rounded w-full"
-                    form="form-editar-{{ d.id }}"
-                    name="elemento"
-                >
-            </td>
-
-            <td class="p-2">
-                <span id="descripcion-texto-{{ d.id }}">
-                    {{ d.descripcion }}
-                </span>
-
-                <input
-                    type="text"
-                    id="descripcion-input-{{ d.id }}"
-                    value="{{ d.descripcion }}"
-                    class="hidden border p-2 rounded w-full"
-                    form="form-editar-{{ d.id }}"
-                    name="descripcion"
-                >
-            </td>
-
-            <td class="p-2">
-                <div class="flex justify-center gap-2">
-
-                    <!-- FORMULARIO EDITAR -->
-                    <form
-                        id="form-editar-{{ d.id }}"
-                        method="POST"
-                        action="{% url 'editar_dotacion_empleado' d.id %}"
-                    >
-                        {% csrf_token %}
-
-                        <button
-                            type="button"
-                            id="boton-editar-{{ d.id }}"
-                            onclick="editarDotacion('{{ d.id }}')"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                        >
-                            ✏️ Editar
-                        </button>
-
-                        <button
-                            type="submit"
-                            id="boton-guardar-{{ d.id }}"
-                            class="hidden bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-                        >
-                            💾 Guardar
-                        </button>
-                    </form>
-
-                    <!-- FORMULARIO ELIMINAR -->
-                    <form
-                        method="POST"
-                        action="{% url 'eliminar_dotacion_empleado' d.id %}"
-                        onsubmit="return confirm('¿Seguro que deseas eliminar esta dotación?');"
-                    >
-                        {% csrf_token %}
-
-                        <button
-                            type="submit"
-                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                        >
-                            🗑️ Eliminar
-                        </button>
-                    </form>
-
-                </div>
-            </td>
-
-        </tr>
-
-        {% empty %}
-
-        <tr>
-            <td colspan="3" class="text-center p-4 text-gray-500">
-                No hay elementos registrados
-            </td>
-        </tr>
-
-        {% endfor %}
-    </tbody>
-</table>
-<!-- 6. EQUIPOS -->
-<div>
-    <div>
-        <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">
-            9. Equipos Tecnológicos            
-        </h2>
-
-    </div>
-        <a
-            href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/"
-            class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 mt-3 inline-block">
-            + Asignar equipo
-        </a>
-        <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
-            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-3 inline-block">
-            📄 Acta Equipos
-        </a>
-    
-
-    {% with request.GET.edit_equipo as edit_equipo %}
-
-    <table class="w-full border mt-3 rounded overflow-hidden shadow">
-        <thead class="bg-gray-800 text-white mt-3">
-            <tr>
-                <th class="p-2 text-center">Equipo</th>
-                <th class="p-2 text-center">Referencia</th>
-                <th class="p-2 text-center">Serial</th>
-                <th class="p-2 w-32 text-center">Fecha entrega</th>
-                <th class="p-2 text-center">Observaciones</th>
-                <th class="p-2 w-52 text-center">Acciones</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for e in equipos %}
-                {% if edit_equipo == e.id|stringformat:"s" %}
-                <form method="POST" action="/rrhh/equipos/{{ e.id }}/editar/">
-                    {% csrf_token %}
-
-                    <tr class="border-b">
+                <tbody>
+                    {% for d in dotaciones %}
+                    <tr class="border-b hover:bg-gray-50">
 
                         <td class="p-2">
+                            <span id="elemento-texto-{{ d.id }}">
+                                {{ d.elemento }}
+                            </span>
+
                             <input
                                 type="text"
-                                name="equipo"
-                                value="{{ e.equipo }}"
-                                class="border p-1 rounded w-full"
+                                id="elemento-input-{{ d.id }}"
+                                value="{{ d.elemento }}"
+                                class="hidden border p-2 rounded w-full"
+                                form="form-editar-{{ d.id }}"
+                                name="elemento"
                             >
                         </td>
 
                         <td class="p-2">
+                            <span id="descripcion-texto-{{ d.id }}">
+                                {{ d.descripcion }}
+                            </span>
+
                             <input
                                 type="text"
-                                value="{{ e.equipo_inventario.referencia }}"
-                                class="border p-1 rounded w-full bg-gray-100"
-                                readonly
+                                id="descripcion-input-{{ d.id }}"
+                                value="{{ d.descripcion }}"
+                                class="hidden border p-2 rounded w-full"
+                                form="form-editar-{{ d.id }}"
+                                name="descripcion"
                             >
                         </td>
 
                         <td class="p-2">
-                            <input
-                                type="text"
-                                value="{{ e.equipo_inventario.serial }}"
-                                class="border p-1 rounded w-full bg-gray-100"
-                                readonly
-                            >
-                        </td>
+                            <div class="flex justify-center gap-2">
 
-                        <td class="p-2">
-                            <input
-                                type="date"
-                                name="fecha_entrega"
-                                value="{{ e.fecha_entrega|date:'Y-m-d' }}"
-                                class="border p-1 rounded w-full"
-                            >
-                        </td>
-
-                        <td class="p-2">
-                            <input
-                                type="text"
-                                name="observaciones"
-                                value="{{ e.observaciones }}"
-                                class="border p-1 rounded w-full"
-                            >
-                        </td>
-
-                        <td class="p-2">
-                            <div class="flex gap-2">
-
-                                <button
-                                    type="submit"
-                                    class="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                <!-- FORMULARIO EDITAR DOTACIÓN -->
+                                <form
+                                    id="form-editar-{{ d.id }}"
+                                    method="POST"
+                                    action="{% url 'editar_dotacion_empleado' d.id %}"
                                 >
-                                    Guardar
-                                </button>
+                                    {% csrf_token %}
 
-                                <a
-                                    href="/rrhh/empleados/{{ empleado.id }}/"
-                                    class="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                                    <button
+                                        type="button"
+                                        id="boton-editar-{{ d.id }}"
+                                        onclick="editarDotacion('{{ d.id }}')"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                                    >
+                                        ✏️ Editar
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        id="boton-guardar-{{ d.id }}"
+                                        class="hidden bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                                    >
+                                        💾 Guardar
+                                    </button>
+                                </form>
+
+                                <!-- FORMULARIO ELIMINAR DOTACIÓN -->
+                                <form
+                                    method="POST"
+                                    action="{% url 'eliminar_dotacion_empleado' d.id %}"
+                                    onsubmit="return confirm('¿Seguro que deseas eliminar esta dotación?');"
                                 >
-                                    Cancelar
-                                </a>
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                                    >
+                                        🗑️ Eliminar
+                                    </button>
+                                </form>
 
                             </div>
                         </td>
 
                     </tr>
 
-                </form>
+                    {% empty %}
 
-                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center p-4 text-gray-500">
+                            No hay elementos registrados
+                        </td>
+                    </tr>
 
-                <tr class="border-b">
-
-                    <td class="p-2">
-                        {{ e.equipo_inventario.equipo }}
-                    </td>
-
-                    <td class="p-2">
-                        {{ e.equipo_inventario.referencia }}
-                    </td>
-
-                    <td class="p-2">
-                        {{ e.equipo_inventario.serial }}
-                    </td>
-
-                    <td class="p-2">
-                        {{ e.fecha_entrega }}
-                    </td>
-
-                    <td class="p-2">
-                        {{ e.observaciones }}
-                    </td>
-
-                    <td class="p-2">
-
-                        <div class="flex gap-2">
-
-                            <a
-                                href="?edit_equipo={{ e.id }}"
-                                class="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
-                            >
-                                Editar
-                            </a>
-
-                            <a
-                                href="/rrhh/equipos/{{ e.id }}/eliminar/"
-                                class="bg-red-600 text-white px-3 py-1 rounded text-sm"
-                            >
-                                Eliminar
-                            </a>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endif %}
-
-            {% empty %}
-
-            <tr>
-                <td colspan="6" class="text-center p-4 text-gray-500">
-                    No hay equipos asignados
-                </td>
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-    </table>
-
-        <!-- 10. DOCUMENTOS -->
-    <div class="mt-6">
-
-        <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
-
-            <span>
-                10. Contratos y Documentos
-            </span>
-
-            <a
-                href="/rrhh/empleados/{{ empleado.id }}/subir-documento/"
-                class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
-            >
-                + Subir documento
-            </a>
-
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-        <table class="w-full border shadow">
+        <!-- 8. EQUIPOS TECNOLÓGICOS -->
+        <div>
+            <h2 class="bg-blue-700 text-white px-3 py-2 font-bold">8. Equipos Tecnológicos</h2>
 
-            <thead class="bg-gray-800 text-white">
+            <div class="mt-3 mb-3 flex gap-2">
+                <a
+                    href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/"
+                    class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">
+                    + Asignar equipo
+                </a>
+                <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    📄 Acta Equipos
+                </a>
+            </div>
 
-                <tr>
-                    <th class="p-2 text-center">
-                        Documento
-                    </th>
+            {% with request.GET.edit_equipo as edit_equipo %}
 
-                    <th class="p-2 text-center">
-                        Fecha
-                    </th>
+            <table class="w-full border mt-3 rounded overflow-hidden shadow">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-2 text-center">Equipo</th>
+                        <th class="p-2 text-center">Referencia</th>
+                        <th class="p-2 text-center">Serial</th>
+                        <th class="p-2 text-center">Fecha entrega</th>
+                        <th class="p-2 text-center">Observaciones</th>
+                        <th class="p-2 text-center">Acciones</th>
+                    </tr>
+                </thead>
 
-                    <th class="p-2 text-center">
-                        Archivo
-                    </th>
+                <tbody>
+                    {% for e in equipos %}
+                        {% if edit_equipo == e.id|stringformat:"s" %}
+                        <form method="POST" action="/rrhh/equipos/{{ e.id }}/editar/">
+                            {% csrf_token %}
 
-                    <th class="p-2 text-center">
-                        Acciones
-                    </th>
-                </tr>
+                            <tr class="border-b">
 
-            </thead>
+                                <td class="p-2">
+                                    <input
+                                        type="text"
+                                        name="equipo"
+                                        value="{{ e.equipo }}"
+                                        class="border p-1 rounded w-full"
+                                    >
+                                </td>
 
-            <tbody>
+                                <td class="p-2">
+                                    <input
+                                        type="text"
+                                        value="{{ e.equipo_inventario.referencia }}"
+                                        class="border p-1 rounded w-full bg-gray-100"
+                                        readonly
+                                    >
+                                </td>
 
-                {% for d in documentos %}
+                                <td class="p-2">
+                                    <input
+                                        type="text"
+                                        value="{{ e.equipo_inventario.serial }}"
+                                        class="border p-1 rounded w-full bg-gray-100"
+                                        readonly
+                                    >
+                                </td>
 
-                <tr class="border-b hover:bg-gray-50">
+                                <td class="p-2">
+                                    <input
+                                        type="date"
+                                        name="fecha_entrega"
+                                        value="{{ e.fecha_entrega|date:'Y-m-d' }}"
+                                        class="border p-1 rounded w-full"
+                                    >
+                                </td>
 
-                    <td class="p-2">
-                        {{ d.nombre }}
-                    </td>
+                                <td class="p-2">
+                                    <input
+                                        type="text"
+                                        name="observaciones"
+                                        value="{{ e.observaciones }}"
+                                        class="border p-1 rounded w-full"
+                                    >
+                                </td>
 
-                    <td class="p-2 text-center">
-                        {{ d.fecha }}
-                    </td>
+                                <td class="p-2">
+                                    <div class="flex gap-2">
 
-                    <td class="p-2 text-center">
+                                        <button
+                                            type="submit"
+                                            class="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                        >
+                                            Guardar
+                                        </button>
 
-                        <a href="{{ d.archivo.url }}"target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                        >Ver documento
-                        </a>
-                    </td>
-                    <td class="p-2 text-center">
-                        <a href="/rrhh/documentos/{{ d.id }}/eliminar/" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                        >Eliminar
-                        </a>
-                    </td>
+                                        <a
+                                            href="/rrhh/empleados/{{ empleado.id }}/"
+                                            class="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                                        >
+                                            Cancelar
+                                        </a>
 
-                    </td>
-                    
-                </tr>
+                                    </div>
+                                </td>
 
-                {% empty %}
+                            </tr>
 
-                <tr>
+                        </form>
 
-                    <td colspan="4" class="text-center p-4 text-gray-500">
-                        No hay documentos cargados
-                    </td>
+                        {% else %}
 
-                </tr>
+                        <tr class="border-b">
 
-                {% endfor %}
+                            <td class="p-2">
+                                {{ e.equipo_inventario.equipo }}
+                            </td>
 
-            </tbody>
+                            <td class="p-2">
+                                {{ e.equipo_inventario.referencia }}
+                            </td>
 
+                            <td class="p-2">
+                                {{ e.equipo_inventario.serial }}
+                            </td>
 
-        </table>
+                            <td class="p-2">
+                                {{ e.fecha_entrega }}
+                            </td>
 
-        <!--11. VACACIONES -->
+                            <td class="p-2">
+                                {{ e.observaciones }}
+                            </td>
+
+                            <td class="p-2">
+
+                                <div class="flex gap-2">
+
+                                    <a
+                                        href="?edit_equipo={{ e.id }}"
+                                        class="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+                                    >
+                                        Editar
+                                    </a>
+
+                                    <a
+                                        href="/rrhh/equipos/{{ e.id }}/eliminar/"
+                                        class="bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                    >
+                                        Eliminar
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endif %}
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6" class="text-center p-4 text-gray-500">
+                            No hay equipos asignados
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+            {% endwith %}
+        </div>
+
+        <!-- 9. DOCUMENTOS -->
         <div class="mt-6">
 
             <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
 
-                <span>
-                    11. Vacaciones
-                </span>
+                <span>9. Contratos y Documentos</span>
+
+                <a
+                    href="/rrhh/empleados/{{ empleado.id }}/subir-documento/"
+                    class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+                >
+                    + Subir documento
+                </a>
+
+            </div>
+
+            <table class="w-full border shadow">
+
+                <thead class="bg-gray-800 text-white">
+
+                    <tr>
+                        <th class="p-2 text-center">Documento</th>
+                        <th class="p-2 text-center">Fecha</th>
+                        <th class="p-2 text-center">Archivo</th>
+                        <th class="p-2 text-center">Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for d in documentos %}
+
+                    <tr class="border-b hover:bg-gray-50">
+
+                        <td class="p-2">
+                            {{ d.nombre }}
+                        </td>
+
+                        <td class="p-2 text-center">
+                            {{ d.fecha }}
+                        </td>
+
+                        <td class="p-2 text-center">
+
+                            <a href="{{ d.archivo.url }}"target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                            >Ver documento
+                            </a>
+                        </td>
+                        <td class="p-2 text-center">
+                            <a href="/rrhh/documentos/{{ d.id }}/eliminar/" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                            >Eliminar
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="4" class="text-center p-4 text-gray-500">
+                            No hay documentos cargados
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- 10. VACACIONES -->
+        <div class="mt-6">
+
+            <div class="bg-blue-700 text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
+
+                <span>10. Vacaciones</span>
 
                 <a
                     href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
@@ -754,20 +748,13 @@
 
             </div>
 
-            <!-- aquí iría la tabla -->
+            <!-- Aquí va el contenido de vacaciones -->
+
         </div>
-</div>
-        
 
-    </div>
-
-    {% endwith %}
-
-</div>
-
-</div>
     {% if editando %}
-    <button class="bg-blue-600 text-white px-4 py-2 rounded mt-4">
+    <button type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700">
         💾 Guardar cambios
     </button>
     </form>
@@ -832,7 +819,6 @@ function editarDotacion(id) {
         'boton-guardar-' + id
     ).classList.remove('hidden');
 }
-
 
 </script>
 

@@ -6,22 +6,59 @@
     🌴 Vacaciones de {{ empleado.nombre_completo }}
 </h1>
 
-<div class="mb-6 flex justify-between">
+<div class="bg-white shadow rounded p-5 mb-6">
 
-    <div class="bg-green-100 px-4 py-3 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">
+        👤 {{ empleado.nombre_completo }}
+    </h2>
 
-        <strong>Días disponibles:</strong>
-        {{ dias_disponibles }}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <div class="bg-gray-100 p-3 rounded">
+            <strong>Fecha ingreso</strong><br>
+            {{ empleado.fecha_ingreso }}
+        </div>
+
+        <div class="bg-blue-100 p-3 rounded">
+            <strong>Años trabajados</strong><br>
+            {{ empleado.anios_trabajados }}
+        </div>
+
+        <div class="bg-green-100 p-3 rounded">
+            <strong>Días acumulados</strong><br>
+            {{ empleado.dias_acumulados }}
+        </div>
+
+        <div class="bg-yellow-100 p-3 rounded">
+            <strong>Días tomados</strong><br>
+            {{ empleado.total_tomados }}
+        </div>
+
+        <div class="bg-red-100 p-3 rounded">
+            <strong>Días pendientes</strong><br>
+            {{ empleado.total_pendientes }}
+        </div>
 
     </div>
 
+</div>
+
+<div class="flex gap-3 mb-5">
     <a
         href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-    >
-        + Registrar vacaciones
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+
+        ➕ Registrar vacaciones
+
     </a>
 
+    <a
+        href="/rrhh/vacaciones/"
+        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+
+        ← Volver
+
+    </a>
 </div>
 
 <table class="w-full border shadow">
@@ -33,8 +70,8 @@
             <th class="p-2">Inicio</th>
             <th class="p-2">Fin</th>
             <th class="p-2">Regreso</th>
-            <th class="p-2">Días tomados</th>
-            <th class="p-2">Pendientes</th>
+            <th class="p-2">Días</th>
+            <th class="p-2">Acciones</th>
         </tr>
 
     </thead>
@@ -45,12 +82,53 @@
 
         <tr class="border-b">
 
-            <td class="p-2">{{ v.periodo }}</td>
-            <td class="p-2">{{ v.fecha_inicio }}</td>
-            <td class="p-2">{{ v.fecha_fin }}</td>
-            <td class="p-2">{{ v.fecha_regreso }}</td>
-            <td class="p-2">{{ v.dias_tomados }}</td>
-            <td class="p-2">{{ v.dias_pendientes }}</td>
+            <td class="p-2">
+                {{ v.periodo }}
+            </td>
+
+            <td class="p-2">
+                {{ v.fecha_inicio }}
+            </td>
+
+            <td class="p-2">
+                {{ v.fecha_fin }}
+            </td>
+
+            <td class="p-2">
+                {{ v.fecha_regreso }}
+            </td>
+
+            <td class="p-2 text-center">
+                {{ v.dias_tomados }}
+            </td>
+
+            <td class="p-2">
+
+                <button
+                    onclick="abrirEditar(
+                        '{{ v.id }}',
+                        '{{ v.periodo }}',
+                        '{{ v.fecha_inicio|date:"Y-m-d" }}',
+                        '{{ v.dias_tomados }}',
+                        '{{ v.observaciones }}'
+                    )"
+                    class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                    Editar
+                </button>
+
+                <button
+                    onclick="abrirEliminar('{{ v.id }}')"
+                    class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                    Eliminar
+                </button>
+
+                <a
+                    href="/rrhh/vacaciones/{{ empleado.id }}/solicitud/"
+                    class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                    📄 Solicitud
+                </a>
+
+            </td>
 
         </tr>
 
@@ -66,8 +144,25 @@
 
         {% endfor %}
 
-    </tbody>
+        </tbody>
 
 </table>
 
+<script>
+    function abrirEditar(id, periodo, fecha_inicio, dias_tomados, observaciones) {
+        // Aquí puedes implementar la lógica para abrir un modal o redirigir a una página de edición
+        alert(`Editar vacaciones:\nID: ${id}\nPeriodo: ${periodo}\nInicio: ${fecha_inicio}\nDías tomados: ${dias_tomados}\nObservaciones: ${observaciones}`);
+    }
+
+    function abrirEliminar(id) {
+        // Aquí puedes implementar la lógica para abrir un modal de confirmación o redirigir a una página de eliminación
+        if (confirm(`¿Estás seguro de que deseas eliminar las vacaciones con ID: ${id}?`)) {
+            // Redirigir a la URL de eliminación
+            window.location.href = `/rrhh/vacaciones/${id}/eliminar/`;
+        }
+    }
+
+</script>
+
 {% endblock %}
+

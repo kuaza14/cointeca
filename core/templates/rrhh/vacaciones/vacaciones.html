@@ -6,6 +6,35 @@
         🏖️ estado de Vacaciones
     </h1>
 
+    <div class="flex flex-wrap gap-3 mb-6">
+
+        <a href="{% url 'vacaciones' %}"
+        class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+            📋 Todas
+        </a>
+
+        <a href="{% url 'vacaciones' %}?tipo=curso"
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            🟢 En vacaciones
+        </a>
+
+        <a href="{% url 'vacaciones' %}?tipo=proximas"
+        class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+            🟡 Próximas
+        </a>
+
+        <a href="{% url 'vacaciones' %}?tipo=pendientes"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            🔵 Días pendientes
+        </a>
+
+        <a href="{% url 'vacaciones' %}?tipo=aniversario"
+        class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            🎉 Cumplen un año
+        </a>
+
+    </div>
+
     <div class="flex justify-between mb-6">
         <a
             href="/rrhh/vacaciones/crear/"
@@ -54,17 +83,17 @@
 
                 <tr class="border-b">
 
-                    <td class="p-2 text-center">{{ empleado.nombre_completo }}</td>
+                    <td class="p-2 ">{{ empleado.nombre_completo }}</td>
 
-                    <td class="p-2">{{ empleado.fecha_ingreso }}</td>
+                    <td class="p-2 ">{{ empleado.fecha_ingreso }}</td>
 
-                    <td class="p-2">{{ empleado.anios_trabajados }}</td>
+                    <td class="p-2 text-center">{{ empleado.anios_trabajados }}</td>
 
-                    <td class="p-2">{{ empleado.dias_acumulados }}</td>
+                    <td class="p-2 text-center">{{ empleado.dias_acumulados }}</td>
 
-                    <td class="p-2">{{ empleado.total_tomados }}</td>
+                    <td class="p-2 text-center">{{ empleado.total_tomados }}</td>
 
-                    <td class="p-2 font-semibold">{{ empleado.total_pendientes }}</td>
+                    <td class="p-2 font-semibold text-center">{{ empleado.total_pendientes }}</td>
 
                     <td class="p-2 text-center">
                     {% if empleado.ultima_vacacion %}
@@ -103,12 +132,8 @@
                             <a
                                 href="{% url 'vacaciones_empleado' empleado.id %}"
                                 class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                                👁 Ver historial
+                                 Ver historial
                             </a>
-                            <span class="text-gray-400">
-                                Sin historial
-                            </span>                       
-
                     </td>
                 </tr>
 

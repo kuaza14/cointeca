@@ -115,7 +115,11 @@ def vacaciones_home(request):
 @login_required
 def vacaciones(request):
 
+    tipo = request.GET.get("tipo")
+
     empleados = Empleado.objects.all()
+
+    lista = []
 
     for empleado in empleados:
 
@@ -141,6 +145,8 @@ def vacaciones(request):
         empleado.total_tomados = dias_tomados_total
         empleado.total_pendientes = dias_disponibles
 
+        lista.append(empleado)
+
         # Última solicitud de vacaciones
         empleado.ultima_vacacion = (
             Vacacion.objects.filter(
@@ -150,11 +156,50 @@ def vacaciones(request):
             .first()
         )
 
+    hoy = date.today()
+
+    if tipo == "curso":
+
+        lista = [
+            e for e in lista
+            if e.ultima_vacacion
+            and e.ultima_vacacion.fecha_inicio <= hoy
+            and e.ultima_vacacion.fecha_regreso > hoy
+        ]
+
+    elif tipo == "proximas":
+
+        limite = hoy + timedelta(days=15)
+
+        lista = [
+            e for e in lista
+            if e.ultima_vacacion
+            and hoy < e.ultima_vacacion.fecha_inicio <= limite
+        ]
+
+    elif tipo == "pendientes":
+
+        lista = [
+            e for e in lista
+            if e.total_pendientes > 0
+        ]
+
+    elif tipo == "aniversario":
+
+        lista = [
+            e for e in lista
+            if (
+                e.fecha_ingreso.month == hoy.month
+                and e.fecha_ingreso.day >= hoy.day
+            )
+        ]
+
     return render(
         request,
-        'rrhh/vacaciones/vacaciones.html',
+        "rrhh/vacaciones/vacaciones.html",
         {
-            'empleados': empleados
+            "empleados": lista,
+            "tipo": tipo
         }
     )
 

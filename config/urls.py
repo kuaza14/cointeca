@@ -73,7 +73,6 @@ from core.views.rrhh.vacaciones import (
     crear_vacacion_empleado,
     editar_vacacion,
     eliminar_vacacion,
-    registrar_saldo_inicial,
 )
 
 from core.views.rrhh.descargos import (
@@ -127,6 +126,27 @@ from core.views.rrhh.contrato_aprendiz import (
     eliminar_contrato_aprendiz,
     generar_contrato_aprendiz
 )
+
+from core.views.rrhh.no_prorroga_contrato import generar_no_prorroga_contrato
+
+from core.views.rrhh.no_superacion_periodo_prueba import generar_no_superacion_periodo_prueba
+
+from core.views.rrhh.suspension_disciplinaria import (
+    crear_suspension_disciplinaria,
+    detalle_suspension_disciplinaria,
+    generar_suspension_disciplinaria,
+    suspensiones_disciplinarias_empleado
+)
+
+from core.views.rrhh.historial_clinico import generar_historia_clinica_laboral
+
+from core.views.rrhh.acuerdo_responsabilidad import generar_acuerdo_responsabilidad
+
+from core.views.logistica import (
+    logistica_home,
+    dotacion_home,
+)
+
 
 
 urlpatterns = [
@@ -211,7 +231,6 @@ urlpatterns = [
     path('rrhh/vacaciones/<int:id>/solicitud/', solicitud_vacaciones, name='solicitud_vacaciones'),
     path('rrhh/vacaciones/<int:id>/editar/', editar_vacacion, name='editar_vacacion'),
     path('rrhh/vacaciones/<int:id>/eliminar/', eliminar_vacacion, name='eliminar_vacacion'),
-    path('rrhh/vacaciones/registrar-saldo-inicial/', registrar_saldo_inicial, name='registrar_saldo_inicial'),
 
     #DESCARGOS
     path('rrhh/empleados/<int:id>/descargo/', empleado_descargo, name='empleado_descargo'),
@@ -260,7 +279,27 @@ urlpatterns = [
     path("rrhh/contratos_aprendiz/<int:id>/eliminar/", eliminar_contrato_aprendiz, name="eliminar_contrato_aprendiz"),
     path("rrhh/contratos_aprendiz/<int:id>/descargar/", generar_contrato_aprendiz, name="generar_contrato_aprendiz"),
 
+    # NO PRORROGA DE CONTRATO
+    path('rrhh/empleados/<int:id>/no_prorroga_contrato/', generar_no_prorroga_contrato, name='generar_no_prorroga_contrato'),
 
+    # NO SUPERACION DE PERIODO DE PRUEBA
+    path('rrhh/empleados/<int:id>/no_superacion_periodo_prueba/', generar_no_superacion_periodo_prueba, name='generar_no_superacion_periodo_prueba'),
+
+    # SUSPENSION DISCIPLINARIA
+    path("rrhh/empleados/<int:id>/suspension_disciplinaria/", suspensiones_disciplinarias_empleado, name="suspensiones_disciplinarias_empleado"),
+    path("rrhh/suspensiones_disciplinarias/<int:id>/crear/", crear_suspension_disciplinaria, name="crear_suspension_disciplinaria"),
+    path("rrhh/suspensiones_disciplinarias/<int:id>/generar/", generar_suspension_disciplinaria, name="generar_suspension_disciplinaria"),
+    path("rrhh/suspensiones_disciplinarias/<int:id>/", detalle_suspension_disciplinaria, name="detalle_suspension_disciplinaria"),
+
+    #historia clinica laboral
+    path('rrhh/empleados/<int:id>/historia_clinica_laboral/', generar_historia_clinica_laboral, name='generar_historia_clinica_laboral'),
+
+    # Acuerdo de Responsabilidad
+    path('rrhh/empleados/<int:id>/acuerdo_responsabilidad/', generar_acuerdo_responsabilidad, name='generar_acuerdo_responsabilidad'),
+
+    #Dotacion
+    path('logistica/', logistica_home, name='logistica_home'),
+    path("logistica/dotacion/<int:id>/dotacion_home/", dotacion_home, name="dotacion_home"),
 ]
 # =========================
 # 📁 MEDIA FILES

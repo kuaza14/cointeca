@@ -23,9 +23,169 @@
         <!-- Botones -->
         <div class="flex items-center gap-3">
 
+            <!-- CAMPANA -->
+            <div id="contenedorAlertas" class="relative">
+
+                <button onclick="toggleAlertas(event)"
+                        class="relative bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded">
+
+                    🔔
+
+                    {% if alertas %}
+                    <span class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-xs px-2">
+                        {{ alertas.vacaciones|length }}
+                    </span>
+                    {% endif %}
+
+                </button>
+
+                <div id="panelAlertas"
+                    class="hidden absolute right-0 mt-2 w-[450px] h-[420px] overflow-y-auto bg-white rounded-lg shadow-2xl border z-50">
+
+                   {% if vacaciones_actuales %}
+
+                    <div class="bg-green-100 px-4 py-2 font-bold text-green-800">
+                        🟢 Vacaciones en curso
+                    </div>
+
+                    {% for alerta in vacaciones_actuales %}
+
+                    <a href="{% url 'vacaciones_empleado' alerta.id %}"
+                    class="block border-b px-4 py-3 hover:bg-blue-50 transition">
+
+                        <div class="font-semibold text-black">
+                            👤 {{ alerta.empleado }}
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            📅 Salió:
+                            <strong>{{ alerta.inicio }}</strong>
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            ↩️ Regresa:
+                            <strong>{{ alerta.regreso }}</strong>
+                        </div>
+
+                        <div class="text-sm text-blue-600">
+                            ⏳ Faltan {{ alerta.dias_restantes }} día{{ alerta.dias_restantes|pluralize }}
+                        </div>
+
+                    </a>
+
+                    {% endfor %}
+
+                    {% endif %}
+
+
+                    {% if vacaciones_proximas %}
+
+                    <div class="bg-yellow-100 px-4 py-2 font-bold text-yellow-800">
+                        🟡 Próximas vacaciones
+                    </div>
+
+                    {% for alerta in vacaciones_proximas %}
+
+                    <div class="border-b px-4 py-3">
+
+                        <div class="font-semibold text-black">
+                            👤 {{ alerta.empleado }}
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            📅 Sale:
+                            <strong>{{ alerta.inicio }}</strong>
+                        </div>
+
+                        <div class="text-sm text-orange-600">
+                            ⏳ Sale dentro de {{ alerta.dias_para_salir }} día{{ alerta.dias_para_salir|pluralize }}
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                    {% endif %}
+
+
+                    {% if cumplen_anio %}
+
+                    <div class="bg-blue-100 px-4 py-2 font-bold text-blue-800">
+                        🔵 Programar vacaciones
+                    </div>
+
+                    {% for alerta in cumplen_anio %}
+
+                    <div class="border-b px-4 py-3 hover:bg-blue-50 cursor-pointer">
+
+                        <div class="font-semibold text-black">
+                            👤 {{ alerta.empleado }}
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            📅 Aniversario:
+                            <strong>{{ alerta.fecha }}</strong>
+                        </div>
+
+                        <div class="text-sm text-blue-600">
+                            ⏳ Faltan {{ alerta.dias }} día{{ alerta.dias|pluralize }}
+                        </div>
+
+                        <div class="text-sm text-red-600 font-semibold">
+                            🏖 Días pendientes:
+                            {{ alerta.pendientes }}
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                    {% endif %}
+
+                    {% if pendientes_programar %}
+
+                    <div class="bg-red-100 px-4 py-2 font-bold text-red-800">
+                        🔴 Vacaciones pendientes por programar
+                    </div>
+
+                    {% for alerta in pendientes_programar %}
+
+                    <div class="border-b px-4 py-3 hover:bg-red-50 cursor-pointer">
+
+                        <div class="font-semibold text-black">
+                            👤 {{ alerta.empleado }}
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            📅 Último aniversario:
+                            <strong>{{ alerta.fecha }}</strong>
+                        </div>
+
+                        <div class="text-sm text-red-600 font-semibold">
+                            🏖 Días pendientes:
+                            {{ alerta.pendientes }}
+                        </div>
+
+                        <div class="text-sm text-red-700">
+                            ⚠ Revisar programación de vacaciones.
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- BOTÓN CERRAR SESIÓN -->
             <a href="{% url 'logout' %}"
                 class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold">
+
                 Cerrar sesión
+
             </a>
 
         </div>
@@ -54,6 +214,39 @@
     {% block content %}
     {% endblock %}
 </div>
+
+<script>
+
+
+function toggleAlertas(){
+
+    if(event){
+        event.stopPropagation();
+    }
+
+    document
+        .getElementById("panelAlertas")
+        .classList.toggle("hidden");
+
+}
+
+document.addEventListener("click", function(event) {
+
+    const panel = document.getElementById("panelAlertas");
+
+    const boton = event.target.closest("button");
+
+    // Si dio clic fuera del panel y fuera de la campana
+    if (!event.target.closest("#panelAlertas") &&
+        !event.target.closest(".relative")) {
+
+        panel.classList.add("hidden");
+
+    }
+
+});
+
+</script>
 
 </body>
 </html>

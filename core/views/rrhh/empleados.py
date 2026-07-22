@@ -19,9 +19,6 @@ def rrhh_home(request):
 @login_required
 def crear_empleado(request):
     if request.method == 'POST':
-
-        print("ARCHIVOS RECIBIDOS:", request.FILES)
-        print("FOTO:", request.FILES.get('foto'))
         try:
 
             salario = request.POST.get('salario', '').replace('.', '').replace(',', '')
@@ -42,6 +39,9 @@ def crear_empleado(request):
                 estrato=request.POST.get('estrato')or None,
                 telefono=request.POST['telefono'],
                 correo=request.POST['correo'],
+                contacto_emergencia=request.POST.get('contacto_emergencia', ''),
+                telefono_emergencia=request.POST.get('telefono_emergencia', ''),
+                parentesco_emergencia=request.POST.get('parentesco_emergencia', ''),
                 cargo=request.POST['cargo'],
                 area=request.POST['area'],
                 nivel_academico=request.POST['nivel_academico'],
@@ -62,10 +62,7 @@ def crear_empleado(request):
                 eps=request.POST['eps'],
                 pension=request.POST['pension'],
                 cesantias=request.POST['cesantias'],
-                arl=request.POST['arl'],
-                alergias=request.POST.get('alergias', ''),
-                contacto_emergencia=request.POST['contacto_emergencia'],
-                telefono_emergencia=request.POST['telefono_emergencia']
+                arl=request.POST['arl']
             )
             messages.success(
                 request,
@@ -141,7 +138,6 @@ def detalle_empleado(request, id):
         campos_obligatorios = {
             'nombre_completo': 'Nombre completo',
             'documento': 'Documento',
-            'estrato': 'Estrato',
             'salario': 'Salario',
         }
 
@@ -190,7 +186,9 @@ def detalle_empleado(request, id):
         empleado.nacionalidad = request.POST['nacionalidad']
         empleado.direccion = request.POST['direccion']
         empleado.barrio = request.POST.get('barrio', '')
-        empleado.estrato = int(request.POST['estrato'])
+        estrato = request.POST.get('estrato', '').strip()
+        if estrato:
+            empleado.estrato = int(estrato)
         empleado.ciudad_residencia = request.POST['ciudad_residencia']
         empleado.telefono = request.POST['telefono']
         empleado.correo = request.POST['correo']
@@ -203,16 +201,26 @@ def detalle_empleado(request, id):
         empleado.idiomas = request.POST['idiomas']
 
         empleado.fecha_ingreso = request.POST['fecha_ingreso']
-        empleado.fecha_finalizacion = request.POST['fecha_finalizacion']
+        empleado.fecha_finalizacion = request.POST.get('fecha_finalizacion') or None
         empleado.tipo_contrato = request.POST['tipo_contrato']
         empleado.salario = int(salario)
         empleado.jornada = request.POST['jornada']
         empleado.jefe = request.POST['jefe']
 
         # CONTACTO EMERGENCIA
-        empleado.contacto_emergencia = request.POST.get('contacto_emergencia', "")
-        empleado.telefono_emergencia = request.POST.get('telefono_emergencia', "")
-        empleado.parentesco_emergencia = request.POST.get('parentesco_emergencia', "")
+        nuevo_contacto = request.POST.get('contacto_emergencia', '').strip()
+        nuevo_telefono = request.POST.get('telefono_emergencia', '').strip()
+        nuevo_parentesco = request.POST.get('parentesco_emergencia', '').strip()
+
+        if nuevo_contacto:
+            empleado.contacto_emergencia = nuevo_contacto
+
+        if nuevo_telefono:
+            empleado.telefono_emergencia = nuevo_telefono
+
+        if nuevo_parentesco:
+            empleado.parentesco_emergencia = nuevo_parentesco
+        
 
         # OBSERVACIONES
         empleado.observaciones = request.POST.get('observaciones', "")

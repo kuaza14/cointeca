@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .alertas import obtener_alertas_vacaciones
+from datetime import date, timedelta
+
+from core.models import Vacacion, Empleado
 
 def logout_view(request):
     logout(request)

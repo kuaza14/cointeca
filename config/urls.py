@@ -142,6 +142,13 @@ from core.views.rrhh.historial_clinico import generar_historia_clinica_laboral
 
 from core.views.rrhh.acuerdo_responsabilidad import generar_acuerdo_responsabilidad
 
+from core.views.logistica import (
+    logistica_home,
+    dotacion_home,
+)
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -289,6 +296,10 @@ urlpatterns = [
 
     # Acuerdo de Responsabilidad
     path('rrhh/empleados/<int:id>/acuerdo_responsabilidad/', generar_acuerdo_responsabilidad, name='generar_acuerdo_responsabilidad'),
+
+    #Dotacion
+    path('logistica/', logistica_home, name='logistica_home'),
+    path("logistica/dotacion/<int:id>/dotacion_home/", dotacion_home, name="dotacion_home"),
 ]
 # =========================
 # 📁 MEDIA FILES

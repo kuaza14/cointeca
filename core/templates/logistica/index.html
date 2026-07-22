@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="bg-white rounded-lg shadow p-6">
+
+    <h1 class="text-2xl font-bold mb-6">
+        📦 Entrega de Dotación
+    </h1>
+
+    <table class="min-w-full border border-gray-300">
+
+        <thead class="bg-gray-100">
+
+            <tr>
+
+                <th class="border px-4 py-2">Empleado</th>
+
+                <th class="border px-4 py-2">Documento</th>
+
+                <th class="border px-4 py-2">Cargo</th>
+
+                <th class="border px-4 py-2">Área</th>
+
+                <th class="border px-4 py-2">Acción</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for empleado in empleados %}
+
+            <tr class="hover:bg-gray-50">
+
+                <td class="border px-4 py-2">
+                    {{ empleado.nombre_completo }}
+                </td>
+
+                <td class="border px-4 py-2">
+                    {{ empleado.documento }}
+                </td>
+
+                <td class="border px-4 py-2">
+                    {{ empleado.cargo }}
+                </td>
+
+                <td class="border px-4 py-2">
+                    {{ empleado.area }}
+                </td>
+
+                <td class="border px-4 py-2 text-center">
+
+                    <button
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+
+                        📄 Generar
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

@@ -26,13 +26,20 @@ def obtener_alertas_vacaciones():
     for vacacion in vacaciones_actuales:
 
         actuales.append({
-            "empleado": vacacion.empleado.nombre_completo,
-            "inicio": vacacion.fecha_inicio,
-            "regreso": vacacion.fecha_regreso,
-            "dias_restantes": (
-                vacacion.fecha_regreso - hoy
-            ).days,
-        })
+
+                "id": vacacion.empleado.id,
+
+                "empleado": vacacion.empleado.nombre_completo,
+
+                "inicio": vacacion.fecha_inicio,
+
+                "regreso": vacacion.fecha_regreso,
+
+                "dias_restantes": (
+                    vacacion.fecha_regreso - hoy
+                ).days,
+
+            })
 
     # ==========================
     # PRÓXIMAS VACACIONES
@@ -52,8 +59,12 @@ def obtener_alertas_vacaciones():
     for vacacion in vacaciones_proximas:
 
         proximas.append({
+            "id": vacacion.empleado.id,
+
             "empleado": vacacion.empleado.nombre_completo,
+
             "inicio": vacacion.fecha_inicio,
+
             "dias_para_salir": (
                 vacacion.fecha_inicio - hoy
             ).days,
@@ -110,6 +121,8 @@ def obtener_alertas_vacaciones():
         if 0 <= dias_para_aniversario <= 30:
 
             cumplen_anio.append({
+
+                "id": empleado.id,
 
                 "empleado": empleado.nombre_completo,
 

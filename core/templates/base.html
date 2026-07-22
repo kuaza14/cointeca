@@ -24,9 +24,9 @@
         <div class="flex items-center gap-3">
 
             <!-- CAMPANA -->
-            <div class="relative">
+            <div id="contenedorAlertas" class="relative">
 
-                <button onclick="toggleAlertas()"
+                <button onclick="toggleAlertas(event)"
                         class="relative bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded">
 
                     🔔
@@ -50,7 +50,8 @@
 
                     {% for alerta in vacaciones_actuales %}
 
-                    <div class="border-b px-4 py-3">
+                    <a href="{% url 'vacaciones_empleado' alerta.id %}"
+                    class="block border-b px-4 py-3 hover:bg-blue-50 transition">
 
                         <div class="font-semibold text-black">
                             👤 {{ alerta.empleado }}
@@ -70,7 +71,7 @@
                             ⏳ Faltan {{ alerta.dias_restantes }} día{{ alerta.dias_restantes|pluralize }}
                         </div>
 
-                    </div>
+                    </a>
 
                     {% endfor %}
 
@@ -216,20 +217,34 @@
 
 <script>
 
-const boton = document.getElementById("btnAlertas");
-const panel = document.getElementById("panelAlertas");
-
-boton.addEventListener("click", function () {
-    panel.classList.toggle("hidden");
-});
 
 function toggleAlertas(){
+
+    if(event){
+        event.stopPropagation();
+    }
 
     document
         .getElementById("panelAlertas")
         .classList.toggle("hidden");
 
 }
+
+document.addEventListener("click", function(event) {
+
+    const panel = document.getElementById("panelAlertas");
+
+    const boton = event.target.closest("button");
+
+    // Si dio clic fuera del panel y fuera de la campana
+    if (!event.target.closest("#panelAlertas") &&
+        !event.target.closest(".relative")) {
+
+        panel.classList.add("hidden");
+
+    }
+
+});
 
 </script>
 

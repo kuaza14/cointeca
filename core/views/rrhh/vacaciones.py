@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.db.models import Sum
 from django.contrib import messages
 
+
 from docxtpl import DocxTemplate
 from datetime import timedelta, date
 import holidays

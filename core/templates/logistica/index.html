@@ -2,72 +2,48 @@
 
 {% block content %}
 
-<div class="bg-white rounded-lg shadow p-6">
+<h1 class="text-3xl font-bold mb-8">
+    🚚 Módulo de Logística
+</h1>
 
-    <h1 class="text-2xl font-bold mb-6">
-        📦 Entrega de Dotación
-    </h1>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-    <table class="min-w-full border border-gray-300">
+    <a href="{% url 'dotacion_home' %}"
+       class="bg-white rounded-lg shadow p-6 hover:shadow-lg hover:bg-blue-50 transition">
 
-        <thead class="bg-gray-100">
+        <h2 class="text-xl font-bold">
+            📦 Entrega de Dotación
+        </h2>
 
-            <tr>
+        <p class="text-gray-600 mt-2">
+            Gestión de entrega de dotación al personal.
+        </p>
 
-                <th class="border px-4 py-2">Empleado</th>
+    </a>
 
-                <th class="border px-4 py-2">Documento</th>
+    <div class="bg-gray-100 rounded-lg shadow p-6 opacity-60">
 
-                <th class="border px-4 py-2">Cargo</th>
+        <h2 class="text-xl font-bold">
+            🛠 Entrega de Herramientas
+        </h2>
 
-                <th class="border px-4 py-2">Área</th>
+        <p class="text-gray-600 mt-2">
+            Próximamente
+        </p>
 
-                <th class="border px-4 py-2">Acción</th>
+    </div>
 
-            </tr>
+    <div class="bg-gray-100 rounded-lg shadow p-6 opacity-60">
 
-        </thead>
+        <h2 class="text-xl font-bold">
+            📋 Control Activos Fijos
+        </h2>
 
-        <tbody>
+        <p class="text-gray-600 mt-2">
+            Próximamente
+        </p>
 
-            {% for empleado in empleados %}
-
-            <tr class="hover:bg-gray-50">
-
-                <td class="border px-4 py-2">
-                    {{ empleado.nombre_completo }}
-                </td>
-
-                <td class="border px-4 py-2">
-                    {{ empleado.documento }}
-                </td>
-
-                <td class="border px-4 py-2">
-                    {{ empleado.cargo }}
-                </td>
-
-                <td class="border px-4 py-2">
-                    {{ empleado.area }}
-                </td>
-
-                <td class="border px-4 py-2 text-center">
-
-                    <button
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
-
-                        📄 Generar
-
-                    </button>
-
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
+    </div>
 
 </div>
 

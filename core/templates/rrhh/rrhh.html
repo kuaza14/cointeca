@@ -4,6 +4,16 @@
 
 <h1 class="text-3xl font-bold mb-6">👥 RRHH</h1>
 
+<div class="mb-6">
+
+    <a
+        href="{% url 'dashboard' %}"
+        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+        ← Volver
+    </a>
+
+</div>
+
 <div class="grid grid-cols-3 gap-6">
 
     <!-- Empleados -->
@@ -44,11 +54,25 @@
     </div>
 
     <!-- Documentos -->
-    <div class="bg-white p-6 rounded shadow opacity-60">
-        <h2 class="text-xl font-bold">Documentos</h2>
-        <p class="text-gray-600">Formatos y archivos</p>
-    </div>
+    <div class="bg-white p-6 rounded shadow">
 
+        <h2 class="text-xl font-bold mb-2">
+            📄 Documentos
+        </h2>
+
+        <p class="text-gray-600 mb-4">
+            Generación de documentos institucionales y formatos de RRHH.
+        </p>
+
+        <a
+            href="{% url 'documentos_rrhh' %}"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+
+            Abrir documentos
+
+        </a>
+
+    </div>
 </div>
 
 {% endblock %}

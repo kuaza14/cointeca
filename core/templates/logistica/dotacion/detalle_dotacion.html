@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    📦 Entrega de Dotación
+</h1>
+
+<div class="grid grid-cols-2 gap-4">
+
+    <div>
+        <strong>Empleado:</strong><br>
+        {{ empleado.nombre_completo }}
+    </div>
+
+    <div>
+        <strong>Documento:</strong><br>
+        {{ empleado.documento }}
+    </div>
+
+    <div>
+        <strong>Cargo:</strong><br>
+        {{ empleado.cargo }}
+    </div>
+
+    <div>
+        <strong>Área:</strong><br>
+        {{ empleado.area }}
+    </div>
+
+</div>
+
+<div class="mt-6 mb-6">
+
+    <button
+        type="button"
+        onclick="nuevaDotacion()"
+        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+
+        ➕ Registrar nueva entrega
+
+    </button>
+
+</div>
+
+{% if ultima %}
+
+<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+
+    <h3 class="font-bold text-blue-800">
+        📅 Última entrega
+    </h3>
+
+    <p>
+        <strong>Fecha:</strong>
+        {{ ultima.fecha_entrega }}
+    </p>
+
+    <p class="mt-2">
+        <strong>Observación:</strong><br>
+        {{ ultima.observacion|linebreaksbr }}
+    </p>
+
+</div>
+
+{% else %}
+
+<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+
+    Aún no se ha registrado ninguna entrega de dotación.
+
+</div>
+
+{% endif %}
+
+<hr class="my-6">
+
+<h2 class="text-xl font-bold mb-4">
+    📋 Historial de Dotaciones
+</h2>
+
+<table class="min-w-full border border-gray-300">
+
+    <thead class="bg-gray-100">
+
+        <tr>
+
+            <th class="border px-3 py-2">
+                Fecha
+            </th>
+
+            <th class="border px-3 py-2">
+                Observación
+            </th>
+
+            <th class="border px-1 py-2">
+                Acción
+            </th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for registro in historial %}
+
+        <tr>
+
+            <td class="border px-3 py-2">
+                {{ registro.fecha_entrega }}
+            </td>
+
+            <td class="border px-3 py-2">
+                {{ registro.observacion|linebreaksbr }}
+            </td>
+
+            <td class="border px-3 py-2 text-center">
+
+                <button
+                    type="button"
+                    onclick="editarRegistro(
+                        {{ registro.id }},
+                        '{{ registro.fecha_entrega|date:"Y-m-d" }}',
+                        `{{ registro.observacion|escapejs }}`
+                    )"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+
+                    ✏️ Editar
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="eliminarRegistro({{ registro.id }})"
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                    🗑 Eliminar
+                </button>
+
+                <a
+                    href="{% url 'generar_dotacion' empleado.id %}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded">
+
+                    📄 Generar Excel
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="3"
+                class="text-center py-4">
+
+                No existen registros.
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<!-- ===================== MODAL ===================== -->
+
+<div
+    id="modalDotacion"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+
+        <h2 class="text-2xl font-bold mb-6">
+
+            ➕ Registrar nueva entrega
+
+        </h2>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <input
+            type="hidden"
+            name="registro_id"
+            id="registro_id">
+
+            <input
+            type="hidden"
+            name="accion"
+            id="accion"
+            value="registrar">
+
+            <input
+            type="hidden"
+            name="eliminar_id"
+            id="eliminar_id">
+
+            <div class="mb-4">
+
+                <label class="block font-bold mb-2">
+
+                    Fecha de entrega
+
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha_entrega"
+                    class="w-full border rounded-lg p-2"
+                    required>
+
+            </div>
+
+            <div class="mb-6">
+
+                <label class="block font-bold mb-2">
+
+                    Observación
+
+                </label>
+
+                <textarea
+                    name="observacion"
+                    rows="7"
+                    class="w-full border rounded-lg p-2"
+                    placeholder="Ejemplo:
+
+Se entregó:
+
+• Camisa talla M
+• Pantalón talla 32
+• Botas No.40"></textarea>
+
+            </div>
+
+            <div class="flex justify-end gap-3">
+
+                <button
+                    type="button"
+                    onclick="cerrarModalDotacion()"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+
+                    💾 Guardar
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+function abrirModalDotacion(){
+
+    const modal = document.getElementById("modalDotacion");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+}
+
+function cerrarModalDotacion() {
+
+    const modal = document.getElementById("modalDotacion");
+
+    modal.classList.remove("flex");
+    modal.classList.add("hidden");
+
+}
+
+function editarRegistro(id, fecha, observacion){
+
+    document.getElementById("registro_id").value = id;
+
+    document.getElementById("accion").value = "editar";
+
+    document.getElementsByName("fecha_entrega")[0].value = fecha;
+
+    document.getElementsByName("observacion")[0].value = observacion;
+
+    abrirModalDotacion();
+
+}
+
+function eliminarRegistro(id){
+
+    if(!confirm("¿Desea eliminar esta entrega de dotación?")){
+        return;
+    }
+
+    document.getElementById("accion").value = "eliminar";
+
+    document.getElementById("eliminar_id").value = id;
+
+    document.querySelector("form").submit();
+
+}
+
+</script>
+
+{% endblock %}

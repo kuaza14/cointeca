@@ -362,11 +362,25 @@ class SaludEmpleado(models.Model):
     telefono_emergencia = models.CharField(max_length=20)
 
 class DotacionEmpleado(models.Model):
-    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
 
-    elemento = models.CharField(max_length=100)
-    descripcion = models.CharField(max_length=200)
+    empleado = models.ForeignKey(
+        Empleado,
+        on_delete=models.CASCADE,
+        related_name="dotaciones"
+    )
+
     fecha_entrega = models.DateField()
+
+    observacion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        ordering = ["-fecha_entrega"]
+
+    def __str__(self):
+        return f"{self.empleado.nombre_completo} - {self.fecha_entrega}"
 
 class AsignacionEquipo(models.Model):
 
@@ -890,3 +904,54 @@ class SuspensionDisciplinaria(models.Model):
 
     def __str__(self):
         return f"{self.empleado.nombre_completo} - {self.fecha_falta}"
+
+####################################################
+#                  INGENIERÍA
+####################################################
+
+class Proyecto(models.Model):
+    numero_emcali = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="Número Proyecto EMCALI"
+    )
+
+    nombre = models.CharField(
+        max_length=150
+    )
+
+    cliente = models.CharField(
+        max_length=100
+    )
+
+    circuito = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    direccion = models.CharField(
+        max_length=200
+    )
+
+    fecha_inicio = models.DateField()
+
+    ESTADOS = [
+        ("Planeación", "Planeación"),
+        ("En ejecución", "En ejecución"),
+        ("Finalizado", "Finalizado"),
+        ("Cancelado", "Cancelado"),
+    ]
+
+    estado = models.CharField(
+        max_length=30,
+        choices=ESTADOS,
+        default="Planeación"
+    )
+
+    def __str__(self):
+        return f"{self.numero_emcali} - {self.nombre}"
+
+    class Meta:
+        verbose_name = "Proyecto"
+        verbose_name_plural = "Proyectos"

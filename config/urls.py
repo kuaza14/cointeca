@@ -145,6 +145,18 @@ from core.views.rrhh.acuerdo_responsabilidad import generar_acuerdo_responsabili
 from core.views.logistica import (
     logistica_home,
     dotacion_home,
+    detalle_dotacion,
+    generar_dotacion
+    
+)
+from core.views.rrhh import(
+    documentos_rrhh,
+    generar_tratamiento_datos_personales,
+    generar_procedimiento_induccion_capacitacion,
+    generar_procedimiento_nomina_prestaciones,
+    generar_procedimiento_disciplinario_interno,
+    generar_procedimiento_custodia_historia_clinicas_datos_sensibles,
+    generar_reglamento_trabajo_cointeca_sas
 )
 
 
@@ -299,7 +311,24 @@ urlpatterns = [
 
     #Dotacion
     path('logistica/', logistica_home, name='logistica_home'),
-    path("logistica/dotacion/<int:id>/dotacion_home/", dotacion_home, name="dotacion_home"),
+    path("logistica/dotacion/", dotacion_home, name="dotacion_home"),
+    path('logistica/dotacion/<int:id>/detalle_dotacion/', detalle_dotacion, name='detalle_dotacion'),
+    path("logistica/dotacion/<int:id>/generar/", generar_dotacion, name="generar_dotacion"),
+
+    #documentos
+    path("rrhh/documentos/", documentos_rrhh, name="documentos_rrhh"),
+    path("rrhh/documentos/tratamiento_datos_personales/", generar_tratamiento_datos_personales, name="generar_tratamiento_datos_personales"),
+    path("rrhh/documentos/procedimiento_induccion_capacitacion/", generar_procedimiento_induccion_capacitacion, name="generar_procedimiento_induccion_capacitacion"),
+    path("rrhh/documentos/procedimiento_nomina_prestaciones/", generar_procedimiento_nomina_prestaciones, name="generar_procedimiento_nomina_prestaciones"),
+    path("rrhh/documentos/procedimiento_disciplinario_interno/", generar_procedimiento_disciplinario_interno, name="generar_procedimiento_disciplinario_interno"),
+    path("rrhh/documentos/procedimiento_custodia_historia_clinicas_datos_sensibles/", generar_procedimiento_custodia_historia_clinicas_datos_sensibles, name="generar_procedimiento_custodia_historia_clinicas_datos_sensibles"),
+    path("rrhh/documentos/procedimiento_reglamento_trabajo_cointeca_sas", generar_reglamento_trabajo_cointeca_sas, name="generar_reglamento_trabajo_cointeca_sas"),
+
+
+
+
+
+
 ]
 # =========================
 # 📁 MEDIA FILES

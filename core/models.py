@@ -955,3 +955,202 @@ class Proyecto(models.Model):
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
+
+class PosteAPosteBajaTension(models.Model):
+
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="postes_baja_tension"
+    )
+
+    supervisor = models.ForeignKey(
+        Empleado,
+        on_delete=models.PROTECT,
+        related_name="supervisor_poste_baja_tension"
+    )
+
+    realizado_por = models.ForeignKey(
+        Empleado,
+        on_delete=models.PROTECT,
+        related_name="realizado_poste_baja_tension"
+    )
+
+    fecha = models.DateField()
+
+    aviso = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    numero_apoyos_programados = models.PositiveIntegerField(
+        default=0
+    )
+
+    numero_apoyos_realizados = models.PositiveIntegerField(
+        default=0
+    )
+
+    direccion = models.CharField(
+        max_length=250,
+        blank=True,
+        null=True
+    )
+
+    observacion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return f"{self.proyecto.numero_emcali}"
+
+    class Meta:
+        verbose_name = "Poste a Poste Baja Tensión"
+        verbose_name_plural = "Poste a Poste Baja Tensión"
+
+class Apoyo(models.Model):
+
+    poste_a_poste = models.ForeignKey(
+        PosteAPosteBajaTension,
+        on_delete=models.CASCADE,
+        related_name="apoyos"
+    )
+
+    numero_apoyo = models.PositiveIntegerField(
+        verbose_name="Número de apoyo"
+    )
+
+    nodo = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
+    observacion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    estado = models.CharField(
+        max_length=30,
+        choices=[
+            ("Pendiente", "Pendiente"),
+            ("En ejecución", "En ejecución"),
+            ("Finalizado", "Finalizado"),
+        ],
+        default="Pendiente"
+    )
+
+    class Meta:
+        verbose_name = "Apoyo"
+        verbose_name_plural = "Apoyos"
+        ordering = ["numero_apoyo"]
+
+    def __str__(self):
+        return f"Apoyo {self.numero_apoyo} - {self.poste_a_poste.proyecto.numero_emcali}"
+
+class Material(models.Model):
+
+    codigo = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    descripcion = models.CharField(
+        max_length=250
+    )
+
+    unidad = models.CharField(
+        max_length=20
+    )
+
+    activo = models.BooleanField(
+        default=True
+    )
+
+    class Meta:
+        verbose_name = "Material"
+        verbose_name_plural = "Materiales"
+        ordering = ["descripcion"]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion}"
+
+class ApoyoMaterial(models.Model):
+
+    apoyo = models.ForeignKey(
+        Apoyo,
+        on_delete=models.CASCADE,
+        related_name="materiales"
+    )
+
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.PROTECT,
+        related_name="apoyos"
+    )
+
+    cantidad_requerida = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    cantidad_instalada = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Cantidad instalada"
+    )
+
+    class Meta:
+        verbose_name = "Material por Apoyo"
+        verbose_name_plural = "Materiales por Apoyo"
+
+    def __str__(self):
+        return f"{self.material.descripcion} - Apoyo {self.apoyo.numero_apoyo}"
+
+class Presupuesto(models.Model):
+
+    proyecto = models.OneToOneField(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="presupuesto"
+    )
+
+    valor_materiales = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    valor_mano_obra = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    otros_costos = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    valor_total = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    fecha = models.DateField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Presupuesto"
+        verbose_name_plural = "Presupuestos"
+
+    def __str__(self):
+        return f"Presupuesto {self.proyecto.numero_emcali}"

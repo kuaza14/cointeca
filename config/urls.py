@@ -159,6 +159,10 @@ from core.views.rrhh import(
     generar_reglamento_trabajo_cointeca_sas
 )
 
+from core.views.ingenieria import(
+    ingenieria_inicio,
+    lista_proyectos
+)
 
 
 urlpatterns = [
@@ -324,7 +328,9 @@ urlpatterns = [
     path("rrhh/documentos/procedimiento_custodia_historia_clinicas_datos_sensibles/", generar_procedimiento_custodia_historia_clinicas_datos_sensibles, name="generar_procedimiento_custodia_historia_clinicas_datos_sensibles"),
     path("rrhh/documentos/procedimiento_reglamento_trabajo_cointeca_sas", generar_reglamento_trabajo_cointeca_sas, name="generar_reglamento_trabajo_cointeca_sas"),
 
-
+    #Ingenieria
+    path("ingenieria/", ingenieria_inicio, name="ingenieria_inicio"),
+    path("ingenieria/proyecto/", lista_proyectos, name="lista_proyectos"),
 
 
 

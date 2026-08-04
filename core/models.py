@@ -910,31 +910,24 @@ class SuspensionDisciplinaria(models.Model):
 ####################################################
 
 class Proyecto(models.Model):
+
+    TIPOS = [
+        ("BT", "Baja Tensión"),
+        ("AP", "Alumbrado Público"),
+        ("MT", "Media Tensión"),
+    ]
+
     numero_emcali = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name="Número Proyecto EMCALI"
+        verbose_name="Número Proyecto"
     )
 
-    nombre = models.CharField(
-        max_length=150
+    tipo = models.CharField(
+        max_length=2,
+        choices=TIPOS
     )
 
-    cliente = models.CharField(
-        max_length=100
-    )
-
-    circuito = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    direccion = models.CharField(
-        max_length=200
-    )
-
-    fecha_inicio = models.DateField()
 
     ESTADOS = [
         ("Planeación", "Planeación"),
@@ -949,73 +942,25 @@ class Proyecto(models.Model):
         default="Planeación"
     )
 
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True
+    )
+
     def __str__(self):
-        return f"{self.numero_emcali} - {self.nombre}"
+        return self.numero_emcali
 
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
 
-class PosteAPosteBajaTension(models.Model):
+class Apoyo(models.Model):
 
     proyecto = models.ForeignKey(
         Proyecto,
         on_delete=models.CASCADE,
-        related_name="postes_baja_tension"
-    )
-
-    supervisor = models.ForeignKey(
-        Empleado,
-        on_delete=models.PROTECT,
-        related_name="supervisor_poste_baja_tension"
-    )
-
-    realizado_por = models.ForeignKey(
-        Empleado,
-        on_delete=models.PROTECT,
-        related_name="realizado_poste_baja_tension"
-    )
-
-    fecha = models.DateField()
-
-    aviso = models.CharField(
-        max_length=100,
+        related_name="apoyos",
+        null=True,
         blank=True,
-        null=True
-    )
-
-    numero_apoyos_programados = models.PositiveIntegerField(
-        default=0
-    )
-
-    numero_apoyos_realizados = models.PositiveIntegerField(
-        default=0
-    )
-
-    direccion = models.CharField(
-        max_length=250,
-        blank=True,
-        null=True
-    )
-
-    observacion = models.TextField(
-        blank=True,
-        null=True
-    )
-
-    def __str__(self):
-        return f"{self.proyecto.numero_emcali}"
-
-    class Meta:
-        verbose_name = "Poste a Poste Baja Tensión"
-        verbose_name_plural = "Poste a Poste Baja Tensión"
-
-class Apoyo(models.Model):
-
-    poste_a_poste = models.ForeignKey(
-        PosteAPosteBajaTension,
-        on_delete=models.CASCADE,
-        related_name="apoyos"
     )
 
     numero_apoyo = models.PositiveIntegerField(
@@ -1049,7 +994,10 @@ class Apoyo(models.Model):
         ordering = ["numero_apoyo"]
 
     def __str__(self):
-        return f"Apoyo {self.numero_apoyo} - {self.poste_a_poste.proyecto.numero_emcali}"
+        if self.proyecto:
+            return f"Apoyo {self.numero_apoyo} - {self.proyecto.numero_emcali}"
+        return f"Apoyo {self.numero_apoyo}"
+
 
 class Material(models.Model):
 

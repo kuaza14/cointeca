@@ -161,7 +161,13 @@ from core.views.rrhh import(
 
 from core.views.ingenieria import(
     ingenieria_inicio,
-    lista_proyectos
+    lista_proyectos,
+    crear_proyecto,
+    detalle_proyecto,
+    lista_apoyos,
+    crear_apoyo,
+    detalle_apoyo
+
 )
 
 
@@ -330,9 +336,12 @@ urlpatterns = [
 
     #Ingenieria
     path("ingenieria/", ingenieria_inicio, name="ingenieria_inicio"),
-    path("ingenieria/proyecto/", lista_proyectos, name="lista_proyectos"),
-
-
+    path("ingenieria/proyectos/", lista_proyectos, name="lista_proyectos"),
+    path("ingenieria/proyectos/crear/", crear_proyecto, name="crear_proyecto"),
+    path("ingenieria/proyectos/<int:id>/", detalle_proyecto, name="detalle_proyecto"),
+    path("ingenieria/proyectos/<int:proyecto_id>/apoyos/", lista_apoyos, name="lista_apoyos"),
+    path("ingenieria/proyectos/<int:proyecto_id>/apoyos/crear/", crear_apoyo, name="crear_apoyo"),
+    path("ingenieria/apoyo/<int:apoyo_id>/", detalle_apoyo, name="detalle_apoyo"),
 
 
 ]

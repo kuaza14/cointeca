@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Apoyos{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-2">
+    Proyecto {{ proyecto.numero_emcali }}
+</h1>
+
+<p class="text-gray-600 mb-6">
+    {{ proyecto.get_tipo_display }}
+</p>
+
+<div class="flex justify-between mb-6">
+    <h2 class="text-2xl font-bold">
+        Apoyos
+    </h2>
+
+    <button id="btnNuevoApoyo" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+        + Nuevo apoyo
+    </button>
+
+</div>
+
+<table class="w-full">
+    <thead>
+        <tr class="bg-gray-100">
+            <th class="p-3">
+                Apoyo
+            </th>
+
+            <th class="p-3">
+                Nodo
+            </th>
+
+            <th class="p-3">
+                Estado
+            </th>
+
+            <th class="p-3">
+                Acciones
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for apoyo in apoyos %}
+        <tr>
+            <td class="p-3">
+                {{ apoyo.numero_apoyo }}
+            </td>
+
+            <td class="p-3">
+                {{ apoyo.nodo }}
+            </td>
+
+            <td class="p-3">
+                {{ apoyo.estado }}
+            </td>
+
+            <td class="p-3">
+                <a href="{% url 'detalle_apoyo' apoyo.id %}"
+                    class="text-blue-600 hover:underline">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="4" class="text-center py-8">
+                No existen apoyos registrados.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<!-- Modal Nuevo Apoyo -->
+<div id="modalApoyo" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center">
+
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+
+        <div class="flex justify-between items-center border-b px-6 py-4">
+
+            <h2 class="text-xl font-bold">
+                Nuevo apoyo
+            </h2>
+
+            <button id="cerrarModalApoyo">
+                &times;
+            </button>
+
+        </div>
+
+        <form method="POST" action="{% url 'crear_apoyo' proyecto.id %}">
+            {% csrf_token %}
+            <div class="p-6">
+                <label class="block mb-2 font-semibold">
+                    Número del apoyo
+                </label>
+
+                <input type="number" name="numero_apoyo" required class="w-full border rounded-lg px-3 py-2 mb-4">
+
+                    <label class="block mb-2 font-semibold">
+                        Nodo
+                    </label>
+
+                <input type="text" name="nodo" class="w-full border rounded-lg px-3 py-2">
+
+            </div>
+
+            <div class="flex justify-end gap-3 border-t px-6 py-4">
+
+                <button type="button" id="cancelarModalApoyo" class="px-4 py-2 bg-gray-200 rounded-lg">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                    Guardar
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+    const modal = document.getElementById("modalApoyo");
+
+    document.getElementById("btnNuevoApoyo").onclick = () => {
+        modal.classList.remove("hidden");
+    };
+
+    document.getElementById("cerrarModalApoyo").onclick = () => {
+        modal.classList.add("hidden");
+    };
+
+    document.getElementById("cancelarModalApoyo").onclick = () => {
+        modal.classList.add("hidden");
+    };
+
+    window.onclick = function (e) {
+        if (e.target === modal) {
+            modal.classList.add("hidden");
+        }
+    };
+
+</script>
+
+{% endblock %}

@@ -959,32 +959,205 @@ class Apoyo(models.Model):
         Proyecto,
         on_delete=models.CASCADE,
         related_name="apoyos",
-        null=True,
-        blank=True,
-    )
-
-    numero_apoyo = models.PositiveIntegerField(
-        verbose_name="Número de apoyo"
-    )
-
-    nodo = models.CharField(
-        max_length=50,
         blank=True,
         null=True
+    )
+
+    nombre_quien_ejecuta = models.CharField(max_length=100, blank=True)
+
+    nodo = models.CharField(max_length=100, blank=True, null=True)
+
+    numero_apoyo = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    potencia_instalada = models.CharField(max_length=50, blank=True)
+    # INSTALADO
+
+    brazo_inst = models.PositiveIntegerField(default=0)
+
+    codigo_lum_inst = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    fotocelda_inst = models.PositiveIntegerField(default=0)
+
+    grillete = models.PositiveIntegerField(default=0)
+
+    banda_diametro = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    banda_cantidad = models.PositiveIntegerField(default=0)
+    # PERCHA
+
+    percha = models.PositiveIntegerField(default=0)
+
+    aislador = models.PositiveIntegerField(default=0)
+
+    # CONC-LUM
+
+    conc_lum_resor = models.PositiveIntegerField(default=0)
+
+    conc_lum_perfo = models.PositiveIntegerField(default=0)
+
+    conc_lum_gel = models.PositiveIntegerField(default=0)
+
+    # CABLE
+
+    cable_6_alum = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    cable_tpx = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    cable_3x14 = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # KIT TIERRA
+
+    kit_tierra_spt = models.PositiveIntegerField(default=0)
+
+    kit_tierra_varilla = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # CINTA BANDIT
+    # ===========================
+
+    cinta_bandit_cm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    hebilla_adicional = models.PositiveIntegerField(default=0)
+
+
+    # ===========================
+    # CABLE SUBTERRÁNEO
+    # ===========================
+
+    cable_subterraneo_calibre = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
+
+    cable_subterraneo_metros = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+
+    # ===========================
+    # CORAZA
+    # ===========================
+
+    coraza_cm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # ===========================
+    # CIMENTACIÓN
+    # ===========================
+
+    cimentacion_zd = models.PositiveIntegerField(default=0)
+
+    cimentacion_zb = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # CAJA
+    # ===========================
+
+    caja_nueva = models.PositiveIntegerField(default=0)
+
+    caja_vieja = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # CONTRAMARCO
+    # ===========================
+
+    contramarco_si = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # TAPA
+    # ===========================
+
+    tapa_conc = models.PositiveIntegerField(default=0)
+
+    tapa_alfa = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # SOLDADURA
+    # ===========================
+
+    soldadura_cm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # ===========================
+    # TUBERÍA
+    # ===========================
+
+    tuberia_tipo = models.CharField(
+        max_length=50,
+        blank=True,
+        default=""
+    )
+
+    tuberia_pulgadas = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
+
+    tuberia_metros = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # ===========================
+    # EXCAVACIÓN
+    # ===========================
+
+    excavacion_metros = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
     )
 
     observacion = models.TextField(
         blank=True,
-        null=True
+        default=""
     )
 
+    ESTADOS = [
+        ("Pendiente", "Pendiente"),
+        ("En ejecución", "En ejecución"),
+        ("Finalizado", "Finalizado"),
+    ]
+
     estado = models.CharField(
-        max_length=30,
-        choices=[
-            ("Pendiente", "Pendiente"),
-            ("En ejecución", "En ejecución"),
-            ("Finalizado", "Finalizado"),
-        ],
+        max_length=20,
+        choices=ESTADOS,
         default="Pendiente"
     )
 
@@ -993,11 +1166,33 @@ class Apoyo(models.Model):
         verbose_name_plural = "Apoyos"
         ordering = ["numero_apoyo"]
 
-    def __str__(self):
-        if self.proyecto:
-            return f"Apoyo {self.numero_apoyo} - {self.proyecto.numero_emcali}"
-        return f"Apoyo {self.numero_apoyo}"
 
+    def __str__(self):
+        if self.nodo:
+            return f"{self.proyecto.numero_emcali} - Nodo {self.nodo}"
+        return f"{self.proyecto.numero_emcali} - Apoyo {self.numero_apoyo}"
+
+
+class Inventario(models.Model):
+
+    item = models.IntegerField(unique=True)
+
+    descripcion = models.CharField(max_length=250)
+
+    unidad = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True
+    )
+
+    cantidad = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    def __str__(self):
+        return self.descripcion
 
 class Material(models.Model):
 

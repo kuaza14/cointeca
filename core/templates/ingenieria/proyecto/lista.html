@@ -3,31 +3,32 @@
 {% block title %}Proyectos{% endblock %}
 
 {% block content %}
+<div class="flex justify-between items-end mb-6">
 
-<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">
+            Proyectos
+        </h1>
 
-    <h1 class="text-3xl font-bold text-gray-800">
-        Proyectos
-    </h1>
+        <button
+            id="btnNuevoProyecto"
+            class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+            + Nuevo Proyecto
+        </button>
+    </div>
 
-    <button
-        id="btnNuevoProyecto"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
-
-        + Nuevo Proyecto
-
-    </button>
+    <a
+        href="{% url 'ingenieria_inicio' %}"
+        class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-3 rounded-lg text-sm">
+        ← Volver
+    </a>
 
 </div>
 
 <div class="bg-white rounded-lg shadow overflow-hidden">
-
     <table class="w-full">
-
         <thead class="bg-gray-100">
-
             <tr>
-
                 <th class="p-3 text-left">
                     Proyecto
                 </th>
@@ -47,84 +48,56 @@
                 <th class="p-3 text-center">
                     Acciones
                 </th>
-
             </tr>
-
         </thead>
 
         <tbody>
-
         {% for proyecto in proyectos %}
-
             <tr class="border-b">
-
                 <td class="p-3 font-semibold">
-
                     {{ proyecto.numero_emcali }}
-
                 </td>
 
                 <td class="text-center">
-
                     {{ proyecto.get_tipo_display }}
-
                 </td>
 
                 <td class="text-center">
-
                     {{ proyecto.fecha_creacion|date:"d/m/Y" }}
-
                 </td>
 
                 <td class="text-center">
-
                     {{ proyecto.estado }}
-
                 </td>
 
                 <td class="text-center">
-
                     <a
                         href="{% url 'detalle_proyecto' proyecto.id %}"
                         class="text-blue-600 hover:underline">
-
                         Abrir
-
                     </a>
-
                 </td>
-
             </tr>
 
         {% empty %}
 
             <tr>
-
                 <td
                     colspan="6"
                     class="text-center py-8 text-gray-500">
-
                     No existen proyectos registrados.
-
                 </td>
-
             </tr>
-
         {% endfor %}
-
         </tbody>
-
     </table>
 
     <!-- Modal Nuevo Proyecto -->
 <div
     id="modalProyecto"
     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-
         <div class="flex justify-between items-center border-b px-6 py-4">
-
             <h2 class="text-xl font-bold">
                 Nuevo Proyecto
             </h2>
@@ -132,9 +105,7 @@
             <button
                 id="cerrarModal"
                 class="text-gray-500 hover:text-red-600 text-2xl">
-
                 &times;
-
             </button>
 
         </div>
@@ -146,7 +117,6 @@
             {% csrf_token %}
 
             <div class="p-6">
-
                 <label class="block mb-2 font-semibold">
                     Número Proyecto
                 </label>
@@ -192,17 +162,13 @@
                     type="button"
                     id="cancelarModal"
                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
-
                     Cancelar
-
                 </button>
 
                 <button
                     type="submit"
                     class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-
                     Guardar
-
                 </button>
 
             </div>

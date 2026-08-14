@@ -1172,17 +1172,38 @@ class Apoyo(models.Model):
             return f"{self.proyecto.numero_emcali} - Nodo {self.nodo}"
         return f"{self.proyecto.numero_emcali} - Apoyo {self.numero_apoyo}"
 
+class Material(models.Model):
 
-class Inventario(models.Model):
+    item = models.IntegerField(
+        unique=True
+    )
 
-    item = models.IntegerField(unique=True)
-
-    descripcion = models.CharField(max_length=250)
+    descripcion = models.CharField(
+        max_length=250
+    )
 
     unidad = models.CharField(
         max_length=20,
         blank=True,
         null=True
+    )
+
+    class Meta:
+        verbose_name = "Material"
+        verbose_name_plural = "Materiales"
+        ordering = ["item"]
+
+    def __str__(self):
+        return f"{self.item} - {self.descripcion}"
+
+class Inventario(models.Model):
+
+    material = models.OneToOneField(
+        Material,
+        on_delete=models.CASCADE,
+        related_name="inventario",
+        null=True,
+        blank=True
     )
 
     cantidad = models.DecimalField(
@@ -1192,34 +1213,7 @@ class Inventario(models.Model):
     )
 
     def __str__(self):
-        return self.descripcion
-
-class Material(models.Model):
-
-    codigo = models.CharField(
-        max_length=50,
-        unique=True
-    )
-
-    descripcion = models.CharField(
-        max_length=250
-    )
-
-    unidad = models.CharField(
-        max_length=20
-    )
-
-    activo = models.BooleanField(
-        default=True
-    )
-
-    class Meta:
-        verbose_name = "Material"
-        verbose_name_plural = "Materiales"
-        ordering = ["descripcion"]
-
-    def __str__(self):
-        return f"{self.codigo} - {self.descripcion}"
+        return f"{self.material.descripcion} - {self.cantidad}"
 
 class ApoyoMaterial(models.Model):
 

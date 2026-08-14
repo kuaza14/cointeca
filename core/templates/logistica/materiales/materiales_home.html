@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="p-6">
+
+    <h1 class="text-2xl font-bold mb-6">
+        Materiales
+    </h1>
+
+    <div class="overflow-x-auto">
+
+        <table class="min-w-full border border-gray-300">
+
+            <thead>
+                <tr>
+                    <th class="border px-4 py-2 text-left">
+                        ITEM
+                    </th>
+
+                    <th class="border px-4 py-2 text-left">
+                        DESCRIPCIÓN
+                    </th>
+
+                    <th class="border px-4 py-2 text-left">
+                        UNIDAD
+                    </th>
+
+                    <th class="border px-4 py-2 text-left">
+                        EXISTENCIA
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for material in materiales %}
+
+                <tr>
+
+                    <td class="border px-4 py-2">
+                        {{ material.item }}
+                    </td>
+
+                    <td class="border px-4 py-2">
+                        {{ material.descripcion }}
+                    </td>
+
+                    <td class="border px-4 py-2">
+                        {% if material.unidad %}
+                            {{ material.unidad }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <td class="border px-4 py-2">
+                        {{ material.inventario.cantidad }}
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="4" class="border px-4 py-4 text-center">
+                        No hay materiales registrados.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

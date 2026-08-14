@@ -910,31 +910,24 @@ class SuspensionDisciplinaria(models.Model):
 ####################################################
 
 class Proyecto(models.Model):
+
+    TIPOS = [
+        ("BT", "Baja Tensión"),
+        ("AP", "Alumbrado Público"),
+        ("MT", "Media Tensión"),
+    ]
+
     numero_emcali = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name="Número Proyecto EMCALI"
+        verbose_name="Número Proyecto"
     )
 
-    nombre = models.CharField(
-        max_length=150
+    tipo = models.CharField(
+        max_length=2,
+        choices=TIPOS
     )
 
-    cliente = models.CharField(
-        max_length=100
-    )
-
-    circuito = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    direccion = models.CharField(
-        max_length=200
-    )
-
-    fecha_inicio = models.DateField()
 
     ESTADOS = [
         ("Planeación", "Planeación"),
@@ -949,9 +942,352 @@ class Proyecto(models.Model):
         default="Planeación"
     )
 
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True
+    )
+
     def __str__(self):
-        return f"{self.numero_emcali} - {self.nombre}"
+        return self.numero_emcali
 
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
+
+class Apoyo(models.Model):
+
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="apoyos",
+        blank=True,
+        null=True
+    )
+
+    nombre_quien_ejecuta = models.CharField(max_length=100, blank=True)
+
+    nodo = models.CharField(max_length=100, blank=True, null=True)
+
+    numero_apoyo = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    potencia_instalada = models.CharField(max_length=50, blank=True)
+    # INSTALADO
+
+    brazo_inst = models.PositiveIntegerField(default=0)
+
+    codigo_lum_inst = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    fotocelda_inst = models.PositiveIntegerField(default=0)
+
+    grillete = models.PositiveIntegerField(default=0)
+
+    banda_diametro = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    banda_cantidad = models.PositiveIntegerField(default=0)
+    # PERCHA
+
+    percha = models.PositiveIntegerField(default=0)
+
+    aislador = models.PositiveIntegerField(default=0)
+
+    # CONC-LUM
+
+    conc_lum_resor = models.PositiveIntegerField(default=0)
+
+    conc_lum_perfo = models.PositiveIntegerField(default=0)
+
+    conc_lum_gel = models.PositiveIntegerField(default=0)
+
+    # CABLE
+
+    cable_6_alum = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    cable_tpx = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    cable_3x14 = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # KIT TIERRA
+
+    kit_tierra_spt = models.PositiveIntegerField(default=0)
+
+    kit_tierra_varilla = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # CINTA BANDIT
+    # ===========================
+
+    cinta_bandit_cm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    hebilla_adicional = models.PositiveIntegerField(default=0)
+
+
+    # ===========================
+    # CABLE SUBTERRÁNEO
+    # ===========================
+
+    cable_subterraneo_calibre = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
+
+    cable_subterraneo_metros = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+
+    # ===========================
+    # CORAZA
+    # ===========================
+
+    coraza_cm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # ===========================
+    # CIMENTACIÓN
+    # ===========================
+
+    cimentacion_zd = models.PositiveIntegerField(default=0)
+
+    cimentacion_zb = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # CAJA
+    # ===========================
+
+    caja_nueva = models.PositiveIntegerField(default=0)
+
+    caja_vieja = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # CONTRAMARCO
+    # ===========================
+
+    contramarco_si = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # TAPA
+    # ===========================
+
+    tapa_conc = models.PositiveIntegerField(default=0)
+
+    tapa_alfa = models.PositiveIntegerField(default=0)
+
+    # ===========================
+    # SOLDADURA
+    # ===========================
+
+    soldadura_cm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # ===========================
+    # TUBERÍA
+    # ===========================
+
+    tuberia_tipo = models.CharField(
+        max_length=50,
+        blank=True,
+        default=""
+    )
+
+    tuberia_pulgadas = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
+
+    tuberia_metros = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # ===========================
+    # EXCAVACIÓN
+    # ===========================
+
+    excavacion_metros = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    observacion = models.TextField(
+        blank=True,
+        default=""
+    )
+
+    ESTADOS = [
+        ("Pendiente", "Pendiente"),
+        ("En ejecución", "En ejecución"),
+        ("Finalizado", "Finalizado"),
+    ]
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default="Pendiente"
+    )
+
+    class Meta:
+        verbose_name = "Apoyo"
+        verbose_name_plural = "Apoyos"
+        ordering = ["numero_apoyo"]
+
+
+    def __str__(self):
+        if self.nodo:
+            return f"{self.proyecto.numero_emcali} - Nodo {self.nodo}"
+        return f"{self.proyecto.numero_emcali} - Apoyo {self.numero_apoyo}"
+
+class Material(models.Model):
+
+    item = models.IntegerField(
+        unique=True
+    )
+
+    descripcion = models.CharField(
+        max_length=250
+    )
+
+    unidad = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        verbose_name = "Material"
+        verbose_name_plural = "Materiales"
+        ordering = ["item"]
+
+    def __str__(self):
+        return f"{self.item} - {self.descripcion}"
+
+class Inventario(models.Model):
+
+    material = models.OneToOneField(
+        Material,
+        on_delete=models.CASCADE,
+        related_name="inventario",
+        null=True,
+        blank=True
+    )
+
+    cantidad = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    def __str__(self):
+        return f"{self.material.descripcion} - {self.cantidad}"
+
+class ApoyoMaterial(models.Model):
+
+    apoyo = models.ForeignKey(
+        Apoyo,
+        on_delete=models.CASCADE,
+        related_name="materiales"
+    )
+
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.PROTECT,
+        related_name="apoyos"
+    )
+
+    cantidad_requerida = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    cantidad_instalada = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Cantidad instalada"
+    )
+
+    class Meta:
+        verbose_name = "Material por Apoyo"
+        verbose_name_plural = "Materiales por Apoyo"
+
+    def __str__(self):
+        return f"{self.material.descripcion} - Apoyo {self.apoyo.numero_apoyo}"
+
+class Presupuesto(models.Model):
+
+    proyecto = models.OneToOneField(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="presupuesto"
+    )
+
+    valor_materiales = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    valor_mano_obra = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    otros_costos = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    valor_total = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0
+    )
+
+    fecha = models.DateField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Presupuesto"
+        verbose_name_plural = "Presupuestos"
+
+    def __str__(self):
+        return f"Presupuesto {self.proyecto.numero_emcali}"

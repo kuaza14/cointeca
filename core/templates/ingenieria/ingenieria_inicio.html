@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Ingeniería{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-8">
+    Ingeniería
+</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <a href="{% url 'lista_proyectos' %}"
+       class="bg-white rounded-xl shadow hover:shadow-lg p-6">
+
+        <div class="text-4xl mb-3">📁</div>
+
+        <h2 class="text-xl font-bold">
+            Proyectos
+        </h2>
+
+        <p class="text-gray-500 mt-2">
+            Administración de proyectos EMCALI
+        </p>
+
+    </a>
+
+    <a href="#"
+       class="bg-white rounded-xl shadow hover:shadow-lg p-6">
+
+        <div class="text-4xl mb-3">📝</div>
+
+        <h2 class="text-xl font-bold">
+            Actividades
+        </h2>
+
+    </a>
+
+    <a href="#"
+       class="bg-white rounded-xl shadow hover:shadow-lg p-6">
+
+        <div class="text-4xl mb-3">💰</div>
+
+        <h2 class="text-xl font-bold">
+            Presupuesto
+        </h2>
+
+    </a>
+
+</div>
+
+{% endblock %}

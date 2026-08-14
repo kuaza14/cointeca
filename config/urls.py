@@ -149,6 +149,10 @@ from core.views.logistica import (
     generar_dotacion
     
 )
+
+from core.views.logistica.materiales import materiales_home
+
+
 from core.views.rrhh import(
     documentos_rrhh,
     generar_tratamiento_datos_personales,
@@ -159,7 +163,16 @@ from core.views.rrhh import(
     generar_reglamento_trabajo_cointeca_sas
 )
 
+from core.views.ingenieria import(
+    ingenieria_inicio,
+    lista_proyectos,
+    crear_proyecto,
+    detalle_proyecto,
+    crear_apoyo,
+    detalle_apoyo,
+    eliminar_apoyo
 
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -315,6 +328,9 @@ urlpatterns = [
     path('logistica/dotacion/<int:id>/detalle_dotacion/', detalle_dotacion, name='detalle_dotacion'),
     path("logistica/dotacion/<int:id>/generar/", generar_dotacion, name="generar_dotacion"),
 
+    #Materiales
+    path("logistica/materiales/", materiales_home, name="materiales_home"),
+
     #documentos
     path("rrhh/documentos/", documentos_rrhh, name="documentos_rrhh"),
     path("rrhh/documentos/tratamiento_datos_personales/", generar_tratamiento_datos_personales, name="generar_tratamiento_datos_personales"),
@@ -324,9 +340,15 @@ urlpatterns = [
     path("rrhh/documentos/procedimiento_custodia_historia_clinicas_datos_sensibles/", generar_procedimiento_custodia_historia_clinicas_datos_sensibles, name="generar_procedimiento_custodia_historia_clinicas_datos_sensibles"),
     path("rrhh/documentos/procedimiento_reglamento_trabajo_cointeca_sas", generar_reglamento_trabajo_cointeca_sas, name="generar_reglamento_trabajo_cointeca_sas"),
 
-
-
-
+    #Ingenieria
+    path("ingenieria/", ingenieria_inicio, name="ingenieria_inicio"),
+    path("ingenieria/proyectos/", lista_proyectos, name="lista_proyectos"),
+    path("ingenieria/proyectos/crear/", crear_proyecto, name="crear_proyecto"),
+    path("ingenieria/proyectos/<int:id>/", detalle_proyecto, name="detalle_proyecto"),
+    path("ingenieria/proyectos/<int:proyecto_id>/apoyos/crear/", crear_apoyo, name="crear_apoyo"),
+    path("ingenieria/apoyo/<int:apoyo_id>/", detalle_apoyo, name="detalle_apoyo"),
+    path("ingenieria/apoyo/<int:apoyo_id>/eliminar/", eliminar_apoyo, name="eliminar_apoyo"),
+    
 
 
 ]

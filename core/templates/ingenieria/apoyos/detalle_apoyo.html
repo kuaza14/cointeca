@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+Apoyo {{ apoyo.numero_apoyo }}
+{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold">
+    Proyecto {{ apoyo.proyecto.numero_emcali }}
+</h1>
+
+<div class="bg-white rounded-xl shadow p-6 mt-6">
+    <h2 class="text-2xl font-bold">
+        Apoyo {{ apoyo.numero_apoyo }}
+    </h2>
+
+    <p>
+        Nodo:
+        <strong>{{ apoyo.nodo }}</strong>
+    </p>
+
+    <p>
+        Estado:
+        <strong>{{ apoyo.estado }}</strong>
+    </p>
+
+</div>
+
+{% endblock %}

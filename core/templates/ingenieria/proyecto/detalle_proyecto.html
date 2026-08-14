@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{%load static%}
+
+{% block title %}Proyecto {{ proyecto.numero_emcali }}{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    Proyecto {{ proyecto.numero_emcali }}
+</h1>
+
+<div class="overflow-x-auto">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <div class="flex items-center gap-4">
+
+            <div>
+                <h2 class="text-2xl font-bold">
+                    Apoyos
+                </h2>
+
+                <p class="text-gray-600">
+                    Proyecto {{ proyecto.numero_emcali }}
+                </p>
+            </div>
+
+            <button
+                id="btnNuevoApoyo"
+                type="button"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                + Nuevo apoyo
+            </button>
+
+        </div>
+
+        <a
+            href="{% url 'lista_proyectos' %}"
+            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+            Volver a proyectos
+        </a>
+
+    </div>    
+
+    
+    <table class="min-w-max border-collapse border border-gray-300 text-sm">
+
+        <thead>
+
+            <tr class="bg-gray-800 text-white">
+
+                <th class="border px-4 py-3">
+                    NODO
+                </th>
+
+                <th class="border px-4 py-3">
+                    POTENCIA INSTALADA
+                </th>
+
+                <th class="border px-4 py-3">
+                    BRAZO
+                </th>
+
+                <th class="border px-4 py-3">
+                    FOTOCELDA
+                </th>
+
+                <th class="border px-4 py-3">
+                    GRILLETE
+                </th>
+
+                <th class="border px-4 py-3">
+                    PERCHA
+                </th>
+
+                <th class="border px-4 py-3">
+                    AISLADOR
+                </th>
+
+                <th class="border px-4 py-3">
+                    ACCIONES
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for apoyo in apoyos %}
+
+            <tr class="hover:bg-gray-50">
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.nodo }}
+                </td>
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.potencia_instalada }}
+                </td>
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.brazo_inst }}
+                </td>
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.fotocelda_inst }}
+                </td>
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.grillete }}
+                </td>
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.percha }}
+                </td>
+
+                <td class="border px-4 py-3">
+                    {{ apoyo.aislador }}
+                </td>
+
+                <td class="border px-4 py-3">
+
+                <div class="flex gap-2">
+
+                    <a
+                        href="{% url 'detalle_apoyo' apoyo.id %}"
+                        class="bg-blue-600 text-white px-3 py-1 rounded"
+                    >
+                        Abrir
+                    </a>
+
+                    <form
+                        method="POST"
+                        action="{% url 'eliminar_apoyo' apoyo.id %}"
+                        onsubmit="return confirm('¿Está seguro de eliminar este apoyo?');">
+
+                        {% csrf_token %}
+
+                        <button type="submit"
+                            class="bg-red-600 text-white px-3 py-1 rounded">
+                            Eliminar
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="border px-4 py-8 text-center text-gray-500"
+                >
+                    No hay apoyos registrados en este proyecto.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <!-- MODAL NUEVO APOYO -->
+    <div
+        id="modalApoyo"
+        class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+    >
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+
+            <div class="flex justify-between items-center mb-6">
+
+                <h2 class="text-xl font-bold">
+                    Nuevo apoyo
+                </h2>
+
+                <button
+                    type="button"
+                    onclick="cerrarModalApoyo()"
+                    class="text-gray-500 hover:text-gray-800 text-2xl">
+                    &times;
+                </button>
+
+            </div>
+
+            <form
+                method="POST"
+                action="{% url 'crear_apoyo' proyecto.id %}"
+            >
+
+                {% csrf_token %}
+
+                <div class="mb-4">
+
+                    <label class="block text-sm font-medium mb-1">
+                        Nodo
+                    </label>
+
+                    <input
+                        type="text"
+                        name="nodo"
+                        class="w-full border rounded-lg px-3 py-2"
+                        placeholder="Ej: 6707556"
+                    >
+
+                </div>
+
+                <div class="mb-6">
+
+                    <label class="block text-sm font-medium mb-1">
+                        Número de apoyo
+                    </label>
+
+                    <input
+                        type="number"
+                        name="numero_apoyo"
+                        class="w-full border rounded-lg px-3 py-2"
+                        placeholder="Ej: 1"
+                    >
+
+                </div>
+
+                <div class="flex justify-end gap-3">
+
+                    <button
+                        type="button"
+                        onclick="cerrarModalApoyo()"
+                        class="px-4 py-2 rounded-lg border"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                    >
+                        Guardar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
+    Opciones del Proyecto
+</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Imprimir -->
+
+    <a href="#"
+       class="bg-white rounded-xl shadow hover:shadow-lg transition p-6">
+
+        <div class="text-4xl mb-3">
+            🖨️
+        </div>
+
+        <h3 class="font-bold text-lg">
+            Imprimir Formato
+        </h3>
+
+        <p class="text-gray-500 text-sm mt-2">
+            Generar el formato Poste a Poste para diligenciar en campo.
+        </p>
+
+    </a>
+
+</div>
+
+<script src="{% static 'js/ingenieria.js' %}"></script>
+
+{% endblock %}

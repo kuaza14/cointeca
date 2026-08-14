@@ -8,11 +8,27 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
+    <!-- Materiales -->
+    <a href="{% url 'materiales_home' %}"
+       class="bg-white rounded-lg shadow p-6 hover:shadow-lg hover:bg-blue-50 transition">
+
+        <h2 class="text-xl font-bold">
+            📦 Materiales
+        </h2>
+
+        <p class="text-gray-600 mt-2">
+            Consulta y gestión del catálogo de materiales e inventario.
+        </p>
+
+    </a>
+
+
+    <!-- Dotación -->
     <a href="{% url 'dotacion_home' %}"
        class="bg-white rounded-lg shadow p-6 hover:shadow-lg hover:bg-blue-50 transition">
 
         <h2 class="text-xl font-bold">
-            📦 Entrega de Dotación
+            👕 Entrega de Dotación
         </h2>
 
         <p class="text-gray-600 mt-2">
@@ -21,6 +37,8 @@
 
     </a>
 
+
+    <!-- Herramientas -->
     <div class="bg-gray-100 rounded-lg shadow p-6 opacity-60">
 
         <h2 class="text-xl font-bold">
@@ -33,10 +51,26 @@
 
     </div>
 
+
+    <!-- Activos -->
     <div class="bg-gray-100 rounded-lg shadow p-6 opacity-60">
 
         <h2 class="text-xl font-bold">
             📋 Control Activos Fijos
+        </h2>
+
+        <p class="text-gray-600 mt-2">
+            Próximamente
+        </p>
+
+    </div>
+
+
+    <!-- Vehículos -->
+    <div class="bg-gray-100 rounded-lg shadow p-6 opacity-60">
+
+        <h2 class="text-xl font-bold">
+            🚗 Gestión de Vehículos
         </h2>
 
         <p class="text-gray-600 mt-2">

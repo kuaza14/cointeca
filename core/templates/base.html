@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Cointeca S.A.S</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 
 <body class="bg-gray-100">
@@ -18,8 +18,7 @@
             alt="Cointeca S.A.S"
             class="h-12 w-auto">
         </a>
-
-
+        
         <!-- Botones -->
         <div class="flex items-center gap-3">
 
@@ -107,7 +106,6 @@
 
                     {% endif %}
 
-
                     {% if cumplen_anio %}
 
                     <div class="bg-blue-100 px-4 py-2 font-bold text-blue-800">
@@ -183,9 +181,7 @@
             <!-- BOTÓN CERRAR SESIÓN -->
             <a href="{% url 'logout' %}"
                 class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold">
-
                 Cerrar sesión
-
             </a>
 
         </div>

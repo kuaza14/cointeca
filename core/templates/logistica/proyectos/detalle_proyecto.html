@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+
+{% block title %}Control de Materiales - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <!-- Encabezado del Proyecto -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                    <a href="/dashboard/" class="hover:underline">Inicio</a>
+                    <span>/</span>
+                    <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                    <span>/</span>
+                    <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
+                    <span>/</span>
+                    <span class="text-gray-800 font-medium">{{ proyecto.numero_emcali }}</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                        Proyecto {{ proyecto.numero_emcali }}
+                    </h1>
+                    {% if proyecto.tipo == "AP" %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+                            💡 Alumbrado Público (AP)
+                        </span>
+                    {% elif proyecto.tipo == "BT" %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-blue-100 text-blue-800 border border-blue-200">
+                            ⚡ Baja Tensión (BT)
+                        </span>
+                    {% elif proyecto.tipo == "MT" %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+                            🔌 Media Tensión (MT)
+                        </span>
+                    {% endif %}
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">
+                        {{ proyecto.estado }}
+                    </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    Balance trifásico en tiempo real: Requerimiento Técnico vs Entradas de Proveedor vs Consumo de Supervisor en Obra.
+                </p>
+            </div>
+
+            <!-- Botones de Acción Rápida -->
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{% url 'registrar_entrada_material' proyecto.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                    <span>📥</span> Registrar Entrada (Remisión)
+                </a>
+
+                <a href="{% url 'registrar_consumo_material' proyecto.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                    <span>📋</span> Registrar Consumo (Supervisor)
+                </a>
+
+                <a href="{% url 'proyectos_logistica' %}"
+                   class="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
+                    ← Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores de Balance (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Requerido Ingeniería -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Requerido (Ingeniería)</span>
+                <span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-lg">📐</span>
+            </div>
+            <p class="text-2xl font-black text-gray-900 mt-2">{{ total_items_requeridos|floatformat:1 }}</p>
+            <p class="text-xs text-gray-500 mt-1">Suma según apoyos calculados</p>
+        </div>
+
+        <!-- Entradas Logística -->
+        <div class="bg-white rounded-xl shadow-sm border border-emerald-200 bg-emerald-50/20 p-5">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Entradas Asignadas</span>
+                <span class="p-2 bg-emerald-100 text-emerald-700 rounded-lg text-lg">📥</span>
+            </div>
+            <p class="text-2xl font-black text-emerald-700 mt-2">{{ total_items_entrados|floatformat:1 }}</p>
+            <p class="text-xs text-emerald-600 mt-1">{{ entradas|length }} remisión{{ entradas|length|pluralize:"es" }} recibida{{ entradas|length|pluralize }}</p>
+        </div>
+
+        <!-- Consumo Supervisor -->
+        <div class="bg-white rounded-xl shadow-sm border border-amber-200 bg-amber-50/20 p-5">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-800">Consumo Real (Supervisor)</span>
+                <span class="p-2 bg-amber-100 text-amber-700 rounded-lg text-lg">📋</span>
+            </div>
+            <p class="text-2xl font-black text-amber-700 mt-2">{{ total_items_consumidos|floatformat:1 }}</p>
+            <p class="text-xs text-amber-600 mt-1">{{ consumos|length }} reporte{{ consumos|length|pluralize:"s" }} de obra</p>
+        </div>
+
+        <!-- Saldo Disponible -->
+        <div class="bg-white rounded-xl shadow-sm border border-blue-200 bg-blue-50/20 p-5">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-800">Saldo en Obra / Terreno</span>
+                <span class="p-2 bg-blue-100 text-blue-700 rounded-lg text-lg">⚖️</span>
+            </div>
+            <p class="text-2xl font-black {% if saldo_total_items < 0 %}text-red-600{% else %}text-blue-700{% endif %} mt-2">
+                {{ saldo_total_items|floatformat:1 }}
+            </p>
+            <p class="text-xs text-blue-600 mt-1">Entradas − Consumido real</p>
+        </div>
+    </div>
+
+    <!-- Pestañas de Navegación del Proyecto -->
+    <div x-data="{ tab: 'balance' }" class="space-y-4">
+        <div class="flex border-b border-gray-200 bg-white rounded-t-xl px-4 pt-2">
+            <button @click="tab = 'balance'"
+                    :class="tab === 'balance' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500 hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+                <span>📊</span> Matriz de Balance y Liquidación
+                <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{{ balance_materiales|length }}</span>
+            </button>
+
+            <button @click="tab = 'entradas'"
+                    :class="tab === 'entradas' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-gray-500 hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+                <span>📥</span> Historial de Entradas (Remisiones)
+                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">{{ entradas|length }}</span>
+            </button>
+
+            <button @click="tab = 'consumos'"
+                    :class="tab === 'consumos' ? 'border-b-2 border-amber-600 text-amber-600 font-bold' : 'text-gray-500 hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+                <span>📋</span> Planillas de Consumo (Supervisor)
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">{{ consumos|length }}</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: MATRIZ DE BALANCE -->
+        <div x-show="tab === 'balance'" class="bg-white rounded-b-xl rounded-t-none shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-base">
+                        Conciliación de Materiales para el Proyecto {{ proyecto.numero_emcali }}
+                    </h3>
+                    <p class="text-xs text-gray-500">
+                        Compara lo estimado por Ingeniería, lo ingresado por compras y lo reportado en campo por el supervisor.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-green-50 text-green-700 border border-green-200">
+                        ● Saldo Favorable
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        ● Totalmente Usado
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-red-50 text-red-700 border border-red-200">
+                        ● Consumo > Entrada
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-5 py-3.5">Ítem</th>
+                            <th class="px-5 py-3.5">Descripción del Material</th>
+                            <th class="px-3 py-3.5 text-center">Unidad</th>
+                            <th class="px-4 py-3.5 text-right bg-indigo-50/50">Requerido (Ing.)</th>
+                            <th class="px-4 py-3.5 text-right bg-emerald-50/50">Entrada Total</th>
+                            <th class="px-4 py-3.5 text-right bg-amber-50/50">Consumo Real</th>
+                            <th class="px-4 py-3.5 text-right bg-blue-50/50">Saldo en Obra</th>
+                            <th class="px-5 py-3.5 text-center">Estado / Alerta</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        {% for fila in balance_materiales %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-5 py-3.5 font-semibold text-gray-600">
+                                {{ fila.material.item }}
+                            </td>
+
+                            <td class="px-5 py-3.5 font-medium text-gray-900">
+                                {{ fila.material.descripcion }}
+                            </td>
+
+                            <td class="px-3 py-3.5 text-center text-xs font-semibold text-gray-500">
+                                {{ fila.material.unidad|default:"UN" }}
+                            </td>
+
+                            <td class="px-4 py-3.5 text-right font-medium text-indigo-700 bg-indigo-50/20">
+                                {{ fila.requerido|floatformat:1 }}
+                            </td>
+
+                            <td class="px-4 py-3.5 text-right font-bold text-emerald-700 bg-emerald-50/20">
+                                {{ fila.entrada|floatformat:1 }}
+                            </td>
+
+                            <td class="px-4 py-3.5 text-right font-bold text-amber-700 bg-amber-50/20">
+                                {{ fila.consumo|floatformat:1 }}
+                            </td>
+
+                            <td class="px-4 py-3.5 text-right font-black {% if fila.saldo < 0 %}text-red-600 bg-red-50/30{% elif fila.saldo == 0 %}text-gray-500 bg-gray-50{% else %}text-blue-700 bg-blue-50/20{% endif %}">
+                                {{ fila.saldo|floatformat:1 }}
+                            </td>
+
+                            <td class="px-5 py-3.5 text-center">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ fila.badge_color }}">
+                                    {{ fila.badge_texto }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                                <div class="max-w-sm mx-auto">
+                                    <p class="text-base font-semibold text-gray-800">No hay movimientos registrados para este proyecto</p>
+                                    <p class="text-xs text-gray-500 mt-1">Registra una entrada de compra o el reporte de supervisor para generar el balance.</p>
+                                    <div class="mt-4 flex justify-center gap-3">
+                                        <a href="{% url 'registrar_entrada_material' proyecto.id %}"
+                                           class="px-3 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700">
+                                            + Registrar Primera Entrada
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORIAL DE ENTRADAS -->
+        <div x-show="tab === 'entradas'" style="display: none;" class="bg-white rounded-b-xl rounded-t-none shadow-sm border border-gray-200 p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-base">
+                        Remisiones y Entradas de Material al Proyecto
+                    </h3>
+                    <p class="text-xs text-gray-500">Historial de materiales recibidos y cargados a este proyecto</p>
+                </div>
+                <a href="{% url 'registrar_entrada_material' proyecto.id %}"
+                   class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm">
+                    + Nueva Entrada
+                </a>
+            </div>
+
+            {% for ent in entradas %}
+            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50/50 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md">
+                            📅 {{ ent.fecha|date:"d/m/Y" }}
+                        </span>
+                        {% if ent.numero_remision %}
+                        <span class="text-xs font-semibold text-gray-700">
+                            Remisión / Factura: <strong class="text-gray-900">{{ ent.numero_remision }}</strong>
+                        </span>
+                        {% endif %}
+                        {% if ent.proveedor %}
+                        <span class="text-xs text-gray-600">
+                            Proveedor: <strong class="text-gray-800">{{ ent.proveedor }}</strong>
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        {% if ent.recibido_por %}
+                        <span class="text-xs text-gray-500">
+                            Recibido por: <strong>{{ ent.recibido_por }}</strong>
+                        </span>
+                        {% endif %}
+                        <form method="POST" action="{% url 'eliminar_entrada_material' ent.id %}" onsubmit="return confirm('¿Estás seguro de eliminar esta entrada? Se recalculará el balance del proyecto.')">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded">
+                                🗑️ Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if ent.observaciones %}
+                <p class="text-xs text-gray-600 italic">"{{ ent.observaciones }}"</p>
+                {% endif %}
+
+                <!-- Detalle de Items de esta Entrada -->
+                <div class="bg-white border rounded-md overflow-hidden">
+                    <table class="min-w-full text-xs divide-y divide-gray-200">
+                        <thead class="bg-gray-100 text-gray-600">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Ítem</th>
+                                <th class="px-3 py-2 text-left">Material</th>
+                                <th class="px-3 py-2 text-center">Unidad</th>
+                                <th class="px-3 py-2 text-right">Cantidad Ingresada</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for det in ent.detalles.all %}
+                            <tr>
+                                <td class="px-3 py-1.5 text-gray-500">{{ det.material.item }}</td>
+                                <td class="px-3 py-1.5 font-medium text-gray-800">{{ det.material.descripcion }}</td>
+                                <td class="px-3 py-1.5 text-center text-gray-500">{{ det.material.unidad|default:"UN" }}</td>
+                                <td class="px-3 py-1.5 text-right font-bold text-emerald-700">{{ det.cantidad|floatformat:1 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8 text-gray-500">
+                <p class="text-sm">No se han registrado entradas de compras o remisiones para este proyecto.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- TAB 3: HISTORIAL DE CONSUMOS -->
+        <div x-show="tab === 'consumos'" style="display: none;" class="bg-white rounded-b-xl rounded-t-none shadow-sm border border-gray-200 p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-base">
+                        Reportes de Consumo Real en Terreno
+                    </h3>
+                    <p class="text-xs text-gray-500">Planillas y reportes físicos entregados por supervisores de obra</p>
+                </div>
+                <a href="{% url 'registrar_consumo_material' proyecto.id %}"
+                   class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm">
+                    + Registrar Planilla Supervisor
+                </a>
+            </div>
+
+            {% for con in consumos %}
+            <div class="border border-gray-200 rounded-lg p-4 bg-amber-50/20 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-bold rounded-md">
+                            📅 {{ con.fecha_reporte|date:"d/m/Y" }}
+                        </span>
+                        {% if con.supervisor %}
+                        <span class="text-xs font-semibold text-gray-800">
+                            Supervisor: <strong class="text-amber-800">{{ con.supervisor }}</strong>
+                        </span>
+                        {% endif %}
+                        {% if con.numero_planilla %}
+                        <span class="text-xs text-gray-600">
+                            Planilla / Acta N°: <strong class="text-gray-900">{{ con.numero_planilla }}</strong>
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <form method="POST" action="{% url 'eliminar_consumo_material' con.id %}" onsubmit="return confirm('¿Estás seguro de eliminar este reporte de consumo?')">
+                        {% csrf_token %}
+                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+                </div>
+
+                {% if con.observaciones %}
+                <p class="text-xs text-gray-600 italic">"{{ con.observaciones }}"</p>
+                {% endif %}
+
+                <!-- Detalle de Items de este Consumo -->
+                <div class="bg-white border rounded-md overflow-hidden">
+                    <table class="min-w-full text-xs divide-y divide-gray-200">
+                        <thead class="bg-gray-100 text-gray-600">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Ítem</th>
+                                <th class="px-3 py-2 text-left">Material</th>
+                                <th class="px-3 py-2 text-center">Unidad</th>
+                                <th class="px-3 py-2 text-right">Cantidad Utilizada</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for det in con.detalles.all %}
+                            <tr>
+                                <td class="px-3 py-1.5 text-gray-500">{{ det.material.item }}</td>
+                                <td class="px-3 py-1.5 font-medium text-gray-800">{{ det.material.descripcion }}</td>
+                                <td class="px-3 py-1.5 text-center text-gray-500">{{ det.material.unidad|default:"UN" }}</td>
+                                <td class="px-3 py-1.5 text-right font-bold text-amber-700">{{ det.cantidad|floatformat:1 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8 text-gray-500">
+                <p class="text-sm">No se han registrado reportes de consumo de supervisores para este proyecto.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Script simple para tabs si Alpine no está presente -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Fallback básico para tabs si no se usa Alpine
+        const tabButtons = document.querySelectorAll('[data-tab-target]');
+        if (tabButtons.length > 0) {
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const target = this.getAttribute('data-tab-target');
+                    document.querySelectorAll('[data-tab-content]').forEach(c => c.style.display = 'none');
+                    document.getElementById(target).style.display = 'block';
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

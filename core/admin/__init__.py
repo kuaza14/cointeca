@@ -14,3 +14,4 @@ from .cesantias import *
 from .inducciones import *
 from .compromisos import *
 from .retiros import *
+from .logistica_materiales import *

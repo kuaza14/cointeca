@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Consumo de Materiales - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto p-6 space-y-6">
+
+    <!-- Encabezado -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                <span>/</span>
+                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
+                <span>/</span>
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline">{{ proyecto.numero_emcali }}</a>
+                <span>/</span>
+                <span class="text-gray-800 font-medium">Registrar Planilla de Supervisor</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+                📋 Registrar Consumo Real de Obra
+            </h1>
+            <p class="text-sm text-gray-600 mt-1">
+                Digitalización del reporte físico/papel entregado por el supervisor para el <strong>Proyecto {{ proyecto.numero_emcali }}</strong>.
+            </p>
+        </div>
+
+        <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
+           class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
+            ← Cancelar y Volver
+        </a>
+    </div>
+
+    <!-- Formulario -->
+    <form method="POST" class="space-y-6" id="formConsumo">
+        {% csrf_token %}
+
+        <!-- Datos de la Planilla / Cabecera -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <h2 class="text-base font-bold text-gray-800 border-b pb-2 flex items-center gap-2">
+                <span>📑</span> Datos del Reporte de Terreno
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Fecha de la Planilla / Trabajo *</label>
+                    <input type="date" name="fecha_reporte" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                           id="campoFechaReporte">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Supervisor / Quien Reporta *</label>
+                    <input type="text" name="supervisor" required placeholder="Ej: Juan Pérez / Cuadrilla 1"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">N° Planilla / Acta de Campo</label>
+                    <input type="text" name="numero_planilla" placeholder="Ej: PLN-2026-081"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Observaciones / Notas de Obra</label>
+                <textarea name="observaciones" rows="2" placeholder="Detalles de la instalación, novedades en terreno o justificación de consumos."
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+            </div>
+        </div>
+
+        <!-- Tabla Dinámica de Materiales Utilizados -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b pb-2">
+                <div>
+                    <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                        <span>🔨</span> Materiales Utilizados según Reporte
+                    </h2>
+                    <p class="text-xs text-gray-500">Ingresa los materiales y cantidades exactas reportadas por el supervisor en la planilla.</p>
+                </div>
+
+                <button type="button" id="btnAgregarFilaConsumo"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold rounded-lg transition">
+                    + Agregar otra fila
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200" id="tablaConsumoMateriales">
+                    <thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
+                        <tr>
+                            <th class="px-4 py-3 text-left w-3/5">Material</th>
+                            <th class="px-4 py-3 text-left w-1/4">Cantidad Utilizada</th>
+                            <th class="px-4 py-3 text-center w-16">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100" id="filasConsumoMateriales">
+                        <!-- Fila 1 inicial -->
+                        <tr class="fila-material-consumo">
+                            <td class="px-4 py-3">
+                                <select name="material_id[]" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none select-material">
+                                    <option value="">-- Seleccione un material --</option>
+                                    {% for mat in materiales %}
+                                        <option value="{{ mat.id }}">
+                                            [{{ mat.item }}] {{ mat.descripcion }} {% if mat.unidad %}({{ mat.unidad }}){% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <input type="number" step="0.01" min="0.01" name="cantidad[]" required placeholder="0.00"
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            </td>
+
+                            <td class="px-4 py-3 text-center">
+                                <button type="button" class="btnEliminarFilaConsumo text-red-500 hover:text-red-700 text-sm font-bold p-1 rounded hover:bg-red-50" title="Eliminar fila">
+                                    ✕
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Botones de Guardar -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
+               class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-sm shadow-md transition flex items-center gap-2">
+                <span>💾</span> Guardar Reporte de Consumo
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<!-- Script para agregar/eliminar filas dinámicamente -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Poner fecha de hoy por defecto
+        const inputFecha = document.getElementById('campoFechaReporte');
+        if (inputFecha && !inputFecha.value) {
+            const hoy = new Date().toISOString().split('T')[0];
+            inputFecha.value = hoy;
+        }
+
+        const tbody = document.getElementById('filasConsumoMateriales');
+        const btnAgregar = document.getElementById('btnAgregarFilaConsumo');
+
+        btnAgregar.addEventListener('click', function () {
+            const primeraFila = tbody.querySelector('.fila-material-consumo');
+            if (primeraFila) {
+                const nuevaFila = primeraFila.cloneNode(true);
+                // Limpiar valores
+                const select = nuevaFila.querySelector('select');
+                if (select) select.selectedIndex = 0;
+                const inputCant = nuevaFila.querySelector('input[type="number"]');
+                if (inputCant) inputCant.value = '';
+                tbody.appendChild(nuevaFila);
+            }
+        });
+
+        tbody.addEventListener('click', function (e) {
+            if (e.target.classList.contains('btnEliminarFilaConsumo')) {
+                const filas = tbody.querySelectorAll('.fila-material-consumo');
+                if (filas.length > 1) {
+                    e.target.closest('.fila-material-consumo').remove();
+                } else {
+                    alert('Debe registrar al menos un material en el reporte de consumo.');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

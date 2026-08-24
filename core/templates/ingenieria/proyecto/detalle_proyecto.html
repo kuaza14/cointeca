@@ -1,286 +1,249 @@
 {% extends "base.html" %}
 
-{%load static%}
+{% load static %}
 
-{% block title %}Proyecto {{ proyecto.numero_emcali }}{% endblock %}
+{% block title %}Formato Poste a Poste - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
 
 {% block content %}
+<div class="max-w-[95rem] mx-auto p-4 sm:p-6 space-y-6">
 
-<h1 class="text-2xl font-bold mb-6">
-    Proyecto {{ proyecto.numero_emcali }}
-</h1>
-
-<div class="overflow-x-auto">
-
-    <div class="flex justify-between items-center mb-6">
-
-        <div class="flex items-center gap-4">
-
-            <div>
-                <h2 class="text-2xl font-bold">
-                    Apoyos
-                </h2>
-
-                <p class="text-gray-600">
-                    Proyecto {{ proyecto.numero_emcali }}
-                </p>
+    <!-- Encabezado de Navegación -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
+                <span>/</span>
+                <a href="{% url 'lista_proyectos' %}" class="hover:underline">Proyectos</a>
+                <span>/</span>
+                <span class="text-gray-800 font-medium">{{ proyecto.numero_emcali }}</span>
             </div>
-
-            <button
-                id="btnNuevoApoyo"
-                type="button"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                + Nuevo apoyo
-            </button>
-
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-3">
+                📊 Formato Poste a Poste — Proyecto {{ proyecto.numero_emcali }}
+            </h1>
+            <p class="text-sm text-gray-600 mt-1">
+                Matriz técnica tipo Excel: Apoyos/Nodos en filas y materiales asignados en columnas.
+            </p>
         </div>
 
-        <a
-            href="{% url 'lista_proyectos' %}"
-            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
-            Volver a proyectos
-        </a>
-
-    </div>    
-
-    
-    <table class="min-w-max border-collapse border border-gray-300 text-sm">
-
-        <thead>
-
-            <tr class="bg-gray-800 text-white">
-
-                <th class="border px-4 py-3">
-                    NODO
-                </th>
-
-                <th class="border px-4 py-3">
-                    POTENCIA INSTALADA
-                </th>
-
-                <th class="border px-4 py-3">
-                    BRAZO
-                </th>
-
-                <th class="border px-4 py-3">
-                    FOTOCELDA
-                </th>
-
-                <th class="border px-4 py-3">
-                    GRILLETE
-                </th>
-
-                <th class="border px-4 py-3">
-                    PERCHA
-                </th>
-
-                <th class="border px-4 py-3">
-                    AISLADOR
-                </th>
-
-                <th class="border px-4 py-3">
-                    ACCIONES
-                </th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            {% for apoyo in apoyos %}
-
-            <tr class="hover:bg-gray-50">
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.nodo }}
-                </td>
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.potencia_instalada }}
-                </td>
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.brazo_inst }}
-                </td>
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.fotocelda_inst }}
-                </td>
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.grillete }}
-                </td>
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.percha }}
-                </td>
-
-                <td class="border px-4 py-3">
-                    {{ apoyo.aislador }}
-                </td>
-
-                <td class="border px-4 py-3">
-
-                <div class="flex gap-2">
-
-                    <a
-                        href="{% url 'detalle_apoyo' apoyo.id %}"
-                        class="bg-blue-600 text-white px-3 py-1 rounded"
-                    >
-                        Abrir
-                    </a>
-
-                    <form
-                        method="POST"
-                        action="{% url 'eliminar_apoyo' apoyo.id %}"
-                        onsubmit="return confirm('¿Está seguro de eliminar este apoyo?');">
-
-                        {% csrf_token %}
-
-                        <button type="submit"
-                            class="bg-red-600 text-white px-3 py-1 rounded">
-                            Eliminar
-                        </button>
-
-                    </form>
-
-                </div>
-
-            </td>
-
-            </tr>
-
-            {% empty %}
-
-            <tr>
-
-                <td
-                    colspan="8"
-                    class="border px-4 py-8 text-center text-gray-500"
-                >
-                    No hay apoyos registrados en este proyecto.
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-
-    <!-- MODAL NUEVO APOYO -->
-    <div
-        id="modalApoyo"
-        class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
-    >
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-
-            <div class="flex justify-between items-center mb-6">
-
-                <h2 class="text-xl font-bold">
-                    Nuevo apoyo
-                </h2>
-
-                <button
-                    type="button"
-                    onclick="cerrarModalApoyo()"
-                    class="text-gray-500 hover:text-gray-800 text-2xl">
-                    &times;
-                </button>
-
-            </div>
-
-            <form
-                method="POST"
-                action="{% url 'crear_apoyo' proyecto.id %}"
-            >
-
-                {% csrf_token %}
-
-                <div class="mb-4">
-
-                    <label class="block text-sm font-medium mb-1">
-                        Nodo
-                    </label>
-
-                    <input
-                        type="text"
-                        name="nodo"
-                        class="w-full border rounded-lg px-3 py-2"
-                        placeholder="Ej: 6707556"
-                    >
-
-                </div>
-
-                <div class="mb-6">
-
-                    <label class="block text-sm font-medium mb-1">
-                        Número de apoyo
-                    </label>
-
-                    <input
-                        type="number"
-                        name="numero_apoyo"
-                        class="w-full border rounded-lg px-3 py-2"
-                        placeholder="Ej: 1"
-                    >
-
-                </div>
-
-                <div class="flex justify-end gap-3">
-
-                    <button
-                        type="button"
-                        onclick="cerrarModalApoyo()"
-                        class="px-4 py-2 rounded-lg border"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-                    >
-                        Guardar
-                    </button>
-
-                </div>
-
-            </form>
-
+        <div class="flex flex-wrap items-center gap-3">
+            <button id="btnNuevoApoyo" type="button"
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                <span>+</span> Nuevo Nodo / Poste
+            </button>
+            <button onclick="window.print()" type="button"
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                <span>🖨️</span> Imprimir Formato
+            </button>
+            <a href="{% url 'lista_proyectos' %}"
+               class="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
+                ← Volver
+            </a>
         </div>
     </div>
-</div>
 
-<h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
-    Opciones del Proyecto
-</h2>
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-    <!-- Imprimir -->
-
-    <a href="#"
-       class="bg-white rounded-xl shadow hover:shadow-lg transition p-6">
-
-        <div class="text-4xl mb-3">
-            🖨️
+    <!-- ENCABEZADO OFICIAL TIPO EXCEL (ING-FR-08) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-300 p-4 print:border-black">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-semibold uppercase text-gray-700">
+            <div class="border-b sm:border-b-0 sm:border-r border-gray-200 pb-2 sm:pb-0 pr-2">
+                <span class="text-gray-500 block text-[10px]">SUPERVISOR:</span>
+                <span class="text-gray-900 text-sm font-bold">_________________________</span>
+            </div>
+            <div class="border-b sm:border-b-0 sm:border-r border-gray-200 pb-2 sm:pb-0 pr-2">
+                <span class="text-gray-500 block text-[10px]">REALIZADO POR:</span>
+                <span class="text-gray-900 text-sm font-bold">_________________________</span>
+            </div>
+            <div class="border-b sm:border-b-0 sm:border-r border-gray-200 pb-2 sm:pb-0 pr-2">
+                <span class="text-gray-500 block text-[10px]">MICROPROYECTO:</span>
+                <span class="text-blue-700 text-sm font-extrabold">{{ proyecto.numero_emcali }}</span>
+            </div>
+            <div>
+                <span class="text-gray-500 block text-[10px]">FECHA DE TRABAJO:</span>
+                <span class="text-gray-900 text-sm font-bold">{% now "d/m/Y" %}</span>
+            </div>
         </div>
+    </div>
 
-        <h3 class="font-bold text-lg">
-            Imprimir Formato
-        </h3>
+    <!-- TABLA MATRIZ TIPO EXCEL (POSTE A POSTE) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
+        <div class="overflow-x-auto max-h-[70vh]">
+            <table class="min-w-full border-collapse text-left text-xs">
+                <!-- ENCABEZADO DE LA MATRIZ -->
+                <thead class="sticky top-0 z-20">
+                    <!-- Banda Superior -->
+                    <tr class="bg-sky-100 text-sky-900 font-extrabold text-center border-b border-sky-300 text-xs tracking-wider">
+                        <th colspan="3" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
+                            📍 IDENTIFICACIÓN DEL APOYO (POSTE)
+                        </th>
+                        <th colspan="{{ materiales_columnas|length|default:1 }}" class="px-4 py-2 border-r border-sky-300 bg-sky-100">
+                            📦 MATERIALES E INSTALACIONES TÉCNICAS REQUERIDAS
+                        </th>
+                        <th class="px-4 py-2 bg-sky-200/90">
+                            ⚙️ ACCIONES
+                        </th>
+                    </tr>
 
-        <p class="text-gray-500 text-sm mt-2">
-            Generar el formato Poste a Poste para diligenciar en campo.
-        </p>
+                    <!-- Nombres de Columnas / Materiales Arriba -->
+                    <tr class="bg-gray-800 text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                        <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap">
+                            NODO / POSTE
+                        </th>
+                        <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-20">
+                            N° APOYO
+                        </th>
+                        <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-28">
+                            ESTADO
+                        </th>
 
-    </a>
+                        <!-- Columnas Dinámicas de Cada Material -->
+                        {% for mat in materiales_columnas %}
+                        <th class="px-3 py-3 border-r border-gray-700 text-center min-w-[140px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
+                            <div class="truncate font-semibold text-white">{{ mat.descripcion }}</div>
+                            <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] {% if mat.unidad == 'M' %}bg-purple-300 text-purple-900{% else %}bg-amber-300 text-amber-900{% endif %} font-bold">
+                                {% if mat.unidad == 'M' %}M (Metros){% else %}U (Unidad){% endif %}
+                            </span>
+                        </th>
+                        {% empty %}
+                        <th class="px-4 py-3 border-r border-gray-700 text-center text-gray-300 italic font-normal">
+                            (Aún no hay materiales en las columnas del proyecto)
+                        </th>
+                        {% endfor %}
+
+                        <th class="px-4 py-3 text-center whitespace-nowrap w-36 bg-gray-800">
+                            ACCIONES
+                        </th>
+                    </tr>
+                </thead>
+
+                <!-- FILAS: CADA FILA ES UN NODO/POSTE -->
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    {% for fila in filas_matriz %}
+                    <tr class="hover:bg-yellow-50/50 transition">
+                        <!-- Nodo / Poste -->
+                        <td class="px-4 py-2.5 font-bold text-gray-900 border-r border-gray-200 whitespace-nowrap bg-gray-50/60 font-mono">
+                            <span class="text-blue-700">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
+                        </td>
+
+                        <!-- Número de apoyo -->
+                        <td class="px-3 py-2.5 text-center font-semibold text-gray-700 border-r border-gray-200">
+                            {{ fila.apoyo.numero_apoyo|default:"—" }}
+                        </td>
+
+                        <!-- Estado -->
+                        <td class="px-3 py-2.5 text-center border-r border-gray-200">
+                            {% if fila.apoyo.estado == "Finalizado" %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800">🟢 Finalizado</span>
+                            {% elif fila.apoyo.estado == "En ejecución" %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">🔵 En Ejecución</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">🟡 Pendiente</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Celdas Numéricas de Cantidad para Cada Material -->
+                        {% for celda in fila.celdas %}
+                        <td class="px-3 py-2.5 text-center border-r border-gray-200 font-bold {% if celda.cantidad > 0 %}text-gray-900 bg-blue-50/20{% else %}text-gray-300{% endif %}">
+                            {% if celda.cantidad > 0 %}
+                                {{ celda.cantidad|floatformat:1 }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+                        {% empty %}
+                        <td class="px-4 py-2.5 text-center text-gray-400 italic border-r border-gray-200" colspan="1">
+                            Sin materiales configurados
+                        </td>
+                        {% endfor %}
+
+                        <!-- Acciones por Fila -->
+                        <td class="px-3 py-2.5 text-center space-x-1 whitespace-nowrap">
+                            <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
+                               class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded text-xs shadow-sm transition" title="Asignar o editar materiales">
+                                ✏️ Abrir
+                            </a>
+
+                            <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}" class="inline"
+                                  onsubmit="return confirm('¿Eliminar este apoyo/nodo?');">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded text-xs border border-red-200 transition" title="Eliminar apoyo">
+                                    🗑️
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ materiales_columnas|length|add:4 }}" class="px-6 py-12 text-center text-gray-500">
+                            <p class="text-base font-semibold text-gray-800">No hay apoyos o postes registrados en este proyecto.</p>
+                            <p class="text-xs text-gray-400 mt-1">Haz clic en "+ Nuevo Nodo / Poste" para empezar a cargar los apoyos del plano.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                <!-- FILA FINAL DE TOTALES POR MATERIAL (SUMA HACIA ABAJO) -->
+                {% if filas_matriz and materiales_columnas %}
+                <tfoot class="bg-gray-100 border-t-2 border-gray-400 font-extrabold text-gray-900 sticky bottom-0 z-10 shadow-inner">
+                    <tr>
+                        <td colspan="3" class="px-4 py-3 text-right uppercase tracking-wider text-xs border-r border-gray-300 bg-gray-200">
+                            ⚡ TOTALES REQUERIDOS DEL PROYECTO:
+                        </td>
+
+                        {% for tot in fila_totales %}
+                        <td class="px-3 py-3 text-center border-r border-gray-300 text-blue-900 text-sm font-black bg-blue-100/80">
+                            {{ tot.total|floatformat:1 }}
+                        </td>
+                        {% endfor %}
+
+                        <td class="px-3 py-3 text-center bg-gray-200 text-gray-700 text-[11px]">
+                            {{ apoyos|length }} POSTES
+                        </td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO APOYO -->
+    <div id="modalApoyo" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h2 class="text-lg font-bold text-gray-900">
+                    ➕ Nuevo Nodo / Poste
+                </h2>
+                <button type="button" onclick="cerrarModalApoyo()" class="text-gray-400 hover:text-gray-700 text-2xl font-bold">
+                    &times;
+                </button>
+            </div>
+
+            <form method="POST" action="{% url 'crear_apoyo' proyecto.id %}" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">NODO / Identificador *</label>
+                    <input type="text" name="nodo" required placeholder="Ej: 29924, 6707556 o POSTE 8M FIBRA"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Número de Apoyo (Opcional)</label>
+                    <input type="number" name="numero_apoyo" placeholder="Ej: 1, 2, 3..."
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="cerrarModalApoyo()" class="px-4 py-2 text-sm text-gray-700 border rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm">
+                        Guardar Poste
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </div>
 
 <script src="{% static 'js/ingenieria.js' %}"></script>
-
 {% endblock %}

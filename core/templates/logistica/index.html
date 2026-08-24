@@ -8,19 +8,34 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
+    <!-- Control de Materiales por Proyecto -->
+    <a href="{% url 'proyectos_logistica' %}"
+       class="bg-white rounded-lg shadow p-6 hover:shadow-lg hover:bg-blue-50 transition border-l-4 border-blue-600">
+
+        <h2 class="text-xl font-bold flex items-center gap-2">
+            🏗️ Materiales por Proyecto
+        </h2>
+
+        <p class="text-gray-600 mt-2 text-sm">
+            Entradas directas a obra, reporte de consumo de supervisores y balance trifásico con ingeniería.
+        </p>
+
+    </a>
+
     <!-- Materiales -->
     <a href="{% url 'materiales_home' %}"
        class="bg-white rounded-lg shadow p-6 hover:shadow-lg hover:bg-blue-50 transition">
 
         <h2 class="text-xl font-bold">
-            📦 Materiales
+            📦 Catálogo de Materiales
         </h2>
 
-        <p class="text-gray-600 mt-2">
-            Consulta y gestión del catálogo de materiales e inventario.
+        <p class="text-gray-600 mt-2 text-sm">
+            Consulta y gestión del catálogo general de materiales.
         </p>
 
     </a>
+
 
 
     <!-- Dotación -->

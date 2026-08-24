@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Logística - Control de Materiales por Proyecto{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <!-- Encabezado y Navegación -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                <a href="/dashboard/" class="hover:underline">Inicio</a>
+                <span>/</span>
+                <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                <span>/</span>
+                <span class="text-gray-800 font-medium">Control de Materiales</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+                🏗️ Control de Materiales por Proyecto
+            </h1>
+            <p class="text-sm text-gray-600 mt-1">
+                Gestión de entradas directas asignadas a obra y registro de consumo real reportado por supervisores.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'logistica_home' %}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition shadow-sm">
+                ← Volver a Logística
+            </a>
+            <a href="{% url 'materiales_home' %}"
+               class="inline-flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium rounded-lg transition border border-blue-200">
+                📦 Catálogo de Materiales
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas Resumen -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
+            <div class="p-3 bg-blue-100 text-blue-600 rounded-lg text-2xl">
+                📁
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Proyectos</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_proyectos }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
+            <div class="p-3 bg-green-100 text-green-600 rounded-lg text-2xl">
+                📥
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Flujo de Entrada</p>
+                <p class="text-sm font-medium text-gray-700">Directo a Proyecto</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
+            <div class="p-3 bg-amber-100 text-amber-600 rounded-lg text-2xl">
+                📋
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Consumo Real</p>
+                <p class="text-sm font-medium text-gray-700">Reporte de Supervisor</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado de Proyectos -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <span>📋</span> Proyectos Activos
+            </h2>
+            <span class="text-xs font-medium text-gray-500 bg-white px-2.5 py-1 rounded-full border">
+                {{ resumen_proyectos|length }} registrados
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold">
+                    <tr>
+                        <th class="px-6 py-3.5">Proyecto EMCALI</th>
+                        <th class="px-6 py-3.5">Tipo de Red</th>
+                        <th class="px-6 py-3.5">Estado</th>
+                        <th class="px-6 py-3.5 text-center">Entradas (Remisiones)</th>
+                        <th class="px-6 py-3.5 text-center">Reportes Supervisor</th>
+                        <th class="px-6 py-3.5 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    {% for item in resumen_proyectos %}
+                    <tr class="hover:bg-blue-50/50 transition">
+                        <td class="px-6 py-4 font-bold text-gray-900">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                                <span class="text-base">{{ item.proyecto.numero_emcali }}</span>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-gray-700">
+                            {% if item.proyecto.tipo == "AP" %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800">
+                                    💡 Alumbrado Público (AP)
+                                </span>
+                            {% elif item.proyecto.tipo == "BT" %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
+                                    ⚡ Baja Tensión (BT)
+                                </span>
+                            {% elif item.proyecto.tipo == "MT" %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-800">
+                                    🔌 Media Tensión (MT)
+                                </span>
+                            {% else %}
+                                <span class="text-gray-600">{{ item.proyecto.tipo }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {% if item.proyecto.estado == "En ejecución" %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                    🟢 En Ejecución
+                                </span>
+                            {% elif item.proyecto.estado == "Planeación" or item.proyecto.estado == "Planeacin" %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                    🔵 Planeación
+                                </span>
+                            {% elif item.proyecto.estado == "Finalizado" %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                                    🏁 Finalizado
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                    {{ item.proyecto.estado }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                📥 {{ item.num_entradas }} entrada{{ item.num_entradas|pluralize }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                📋 {{ item.num_consumos }} reporte{{ item.num_consumos|pluralize }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <a href="{% url 'detalle_proyecto_logistica' item.proyecto.id %}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                                📊 Control & Saldo
+                            </a>
+                            <a href="{% url 'registrar_entrada_material' item.proyecto.id %}"
+                               title="Registrar Entrada"
+                               class="inline-flex items-center px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition">
+                                + Entrada
+                            </a>
+                            <a href="{% url 'registrar_consumo_material' item.proyecto.id %}"
+                               title="Registrar Reporte Supervisor"
+                               class="inline-flex items-center px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition">
+                                + Consumo
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <p class="text-base font-medium">No hay proyectos registrados en el sistema.</p>
+                            <p class="text-xs text-gray-400 mt-1">Crea proyectos desde el módulo de Ingeniería o Facturación para comenzar.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

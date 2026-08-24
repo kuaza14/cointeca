@@ -146,11 +146,16 @@ from core.views.logistica import (
     logistica_home,
     dotacion_home,
     detalle_dotacion,
-    generar_dotacion
-    
+    generar_dotacion,
+    materiales_home,
+    proyectos_logistica,
+    detalle_proyecto_logistica,
+    registrar_entrada_material,
+    eliminar_entrada_material,
+    registrar_consumo_material,
+    eliminar_consumo_material,
 )
 
-from core.views.logistica.materiales import materiales_home
 
 
 from core.views.rrhh import(
@@ -328,8 +333,17 @@ urlpatterns = [
     path('logistica/dotacion/<int:id>/detalle_dotacion/', detalle_dotacion, name='detalle_dotacion'),
     path("logistica/dotacion/<int:id>/generar/", generar_dotacion, name="generar_dotacion"),
 
-    #Materiales
+    #Materiales e Inventario General
     path("logistica/materiales/", materiales_home, name="materiales_home"),
+
+    #Logística - Proyectos, Entradas y Consumos de Obra
+    path("logistica/proyectos/", proyectos_logistica, name="proyectos_logistica"),
+    path("logistica/proyectos/<int:proyecto_id>/", detalle_proyecto_logistica, name="detalle_proyecto_logistica"),
+    path("logistica/proyectos/<int:proyecto_id>/entradas/crear/", registrar_entrada_material, name="registrar_entrada_material"),
+    path("logistica/entradas/<int:entrada_id>/eliminar/", eliminar_entrada_material, name="eliminar_entrada_material"),
+    path("logistica/proyectos/<int:proyecto_id>/consumos/crear/", registrar_consumo_material, name="registrar_consumo_material"),
+    path("logistica/consumos/<int:consumo_id>/eliminar/", eliminar_consumo_material, name="eliminar_consumo_material"),
+
 
     #documentos
     path("rrhh/documentos/", documentos_rrhh, name="documentos_rrhh"),

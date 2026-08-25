@@ -956,6 +956,28 @@ class Apoyo(models.Model):
             return f"{self.proyecto.numero_emcali if self.proyecto else 'Sin Proyecto'} - Nodo {self.nodo}"
         return f"{self.proyecto.numero_emcali if self.proyecto else 'Sin Proyecto'} - Apoyo {self.numero_apoyo}"
 
+class ApoyoLuminaria(models.Model):
+    apoyo = models.ForeignKey(
+        Apoyo,
+        on_delete=models.CASCADE,
+        related_name="luminarias"
+    )
+
+    potencia = models.CharField(
+        max_length=50
+    )
+
+    codigo = models.CharField(
+        max_length=100
+    )
+
+    class Meta:
+        verbose_name = "Luminaria por Apoyo"
+        verbose_name_plural = "Luminarias por Apoyo"
+
+    def __str__(self):
+        return f"{self.potencia} - {self.codigo} ({self.apoyo.nodo})"
+
 class Material(models.Model):
     item = models.IntegerField(unique=True)
     descripcion = models.CharField(max_length=250)

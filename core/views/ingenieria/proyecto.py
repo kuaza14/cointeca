@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
 from django.db.models import Sum
-from core.models import Proyecto, Apoyo, Material, ApoyoMaterial
+from core.models import Proyecto, Apoyo, Material, ApoyoMaterial, ApoyoLuminaria
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
@@ -38,10 +38,12 @@ def crear_proyecto(request):
 def detalle_proyecto(request, id):
     proyecto = get_object_or_404(Proyecto, id=id)
 
-    apoyos = Apoyo.objects.filter(
-        proyecto=proyecto
-    ).order_by("numero_apoyo", "id")
-
+    apoyos = (
+        Apoyo.objects
+        .filter(proyecto=proyecto)
+        .prefetch_related("luminarias")   
+        .order_by("numero_apoyo", "id")
+        )
     # 1. Obtener todos los materiales únicos asignados a los apoyos de este proyecto
     apoyo_materiales = ApoyoMaterial.objects.filter(
         apoyo__proyecto=proyecto
@@ -104,16 +106,29 @@ def crear_apoyo(request, proyecto_id):
         numero_apoyo_val = request.POST.get("numero_apoyo")
         numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
 
-        Apoyo.objects.create(
+        apoyo = Apoyo.objects.create(
             proyecto=proyecto,
             numero_apoyo=numero_apoyo,
             nodo=request.POST.get("nodo", "").strip(),
             estado="Pendiente"
         )
 
+        potencias = request.POST.getlist("potencia[]")
+        codigos = request.POST.getlist("codigo_luminaria[]")
+
+        for potencia, codigo in zip(potencias, codigos):
+
+            if potencia.strip() or codigo.strip():
+
+                ApoyoLuminaria.objects.create(
+                    apoyo=apoyo,
+                    potencia=potencia.strip(),
+                    codigo=codigo.strip()
+                )
+
     return redirect(
         "detalle_proyecto",
-        id=proyecto.id
+        id=proyecto.id        
     )
 
 
@@ -130,11 +145,33 @@ def detalle_apoyo(request, apoyo_id):
 
     if request.method == "POST":
 
+        accion = request.POST.get("accion")
+        # ==========================================
+        # EDITAR MATERIAL
+        # ==========================================
+        if accion == "editar_material":
+            item_id = request.POST.get("item_id")
+            cantidad = request.POST.get("cantidad")
+
+            try:
+                cant_decimal = Decimal(cantidad)
+
+                if item_id and cant_decimal > 0:
+                    ApoyoMaterial.objects.filter(
+                        id=item_id,
+                        apoyo=apoyo
+                    ).update(
+                        cantidad_requerida=cant_decimal
+                    )
+
+            except (ValueError, TypeError, ArithmeticError):
+                pass
+
+            return redirect("detalle_apoyo", apoyo_id=apoyo.id)
+
         # ==========================================
         # ELIMINAR MATERIAL
         # ==========================================
-        accion = request.POST.get("accion")
-
         if accion == "eliminar_material":
             item_id = request.POST.get("item_id")
 

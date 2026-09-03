@@ -152,11 +152,9 @@ from core.views.logistica import (
     detalle_proyecto_logistica,
     registrar_entrada_material,
     eliminar_entrada_material,
-    registrar_consumo_material,
-    eliminar_consumo_material,
+    materiales_requeridos_proyecto,
+    editar_entrada_material
 )
-
-
 
 from core.views.rrhh import(
     documentos_rrhh,
@@ -176,7 +174,6 @@ from core.views.ingenieria import(
     crear_apoyo,
     detalle_apoyo,
     eliminar_apoyo
-
 )
 
 urlpatterns = [
@@ -336,13 +333,13 @@ urlpatterns = [
     #Materiales e Inventario General
     path("logistica/materiales/", materiales_home, name="materiales_home"),
 
-    #Logística - Proyectos, Entradas y Consumos de Obra
+    #Logística - Proyectos y Entradas de Material
     path("logistica/proyectos/", proyectos_logistica, name="proyectos_logistica"),
     path("logistica/proyectos/<int:proyecto_id>/", detalle_proyecto_logistica, name="detalle_proyecto_logistica"),
     path("logistica/proyectos/<int:proyecto_id>/entradas/crear/", registrar_entrada_material, name="registrar_entrada_material"),
     path("logistica/entradas/<int:entrada_id>/eliminar/", eliminar_entrada_material, name="eliminar_entrada_material"),
-    path("logistica/proyectos/<int:proyecto_id>/consumos/crear/", registrar_consumo_material, name="registrar_consumo_material"),
-    path("logistica/consumos/<int:consumo_id>/eliminar/", eliminar_consumo_material, name="eliminar_consumo_material"),
+    path("logistica/proyectos/<int:proyecto_id>/requeridos/", materiales_requeridos_proyecto, name="materiales_requeridos_proyecto"),
+    path("logistica/entradas/<int:entrada_id>/editar/", editar_entrada_material, name="editar_entrada_material"),
 
 
     #documentos

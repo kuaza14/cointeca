@@ -1,9 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
 from django.db.models import Sum
-from core.models import Proyecto, Apoyo, Material, ApoyoMaterial, ApoyoLuminaria
+from django.utils import timezone
+from core.models import (
+    Proyecto,
+    Apoyo,
+    Material,
+    ApoyoMaterial,
+    ApoyoLuminaria,
+    Empleado,
+    Inventario,
+    EntradaMaterialProyecto,
+    DetalleEntradaMaterial,
+)
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+
 
 
 @login_required
@@ -41,9 +53,11 @@ def detalle_proyecto(request, id):
     apoyos = (
         Apoyo.objects
         .filter(proyecto=proyecto)
+        .select_related("quien_ejecuta")
         .prefetch_related("luminarias")   
         .order_by("numero_apoyo", "id")
-        )
+    )
+
     # 1. Obtener todos los materiales únicos asignados a los apoyos de este proyecto
     apoyo_materiales = ApoyoMaterial.objects.filter(
         apoyo__proyecto=proyecto
@@ -141,15 +155,71 @@ def detalle_apoyo(request, apoyo_id):
         apoyo=apoyo
     ).select_related("material")
 
-    materiales_catalogo = Material.objects.all().order_by("descripcion")
+    materiales_catalogo = Material.objects.select_related("inventario").order_by("descripcion")
+
+    empleados = Empleado.objects.filter(
+        estado="activo"
+    ).order_by("nombre_completo")
 
     if request.method == "POST":
 
         accion = request.POST.get("accion")
+
         # ==========================================
-        # EDITAR MATERIAL
+        # 1. DESPACHAR DIRECTO DESDE BODEGA CENTRAL
+        # ==========================================
+        if accion == "despachar_bodega":
+            material_id = request.POST.get("material_id")
+            cantidad_str = request.POST.get("cantidad", "0")
+
+            if material_id:
+                try:
+                    cant = Decimal(cantidad_str.strip())
+                    if cant > 0:
+                        material = get_object_or_404(Material, id=material_id)
+                        inventario, _ = Inventario.objects.get_or_create(material=material)
+
+                        # Descontar del inventario general de bodega
+                        inventario.cantidad = max(Decimal("0"), inventario.cantidad - cant)
+                        inventario.save()
+
+                        # Registrar la entrada al proyecto desde bodega
+                        fecha_hoy = timezone.now().date()
+                        nodo_label = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
+                        entrada = EntradaMaterialProyecto.objects.create(
+                            proyecto=apoyo.proyecto,
+                            fecha=fecha_hoy,
+                            proveedor="Bodega Central (Despacho)",
+                            numero_remision=f"DESP-BOD-NODO-{nodo_label}",
+                            recibido_por=apoyo.quien_ejecuta.nombre_completo if apoyo.quien_ejecuta else "Técnico en Terreno",
+                            observaciones=f"Material despachado desde bodega central para el Nodo {nodo_label}"
+                        )
+                        DetalleEntradaMaterial.objects.create(
+                            entrada=entrada,
+                            material=material,
+                            cantidad=cant
+                        )
+
+                        # Asignar / sumar el material a este apoyo en la obra
+                        apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
+                            apoyo=apoyo,
+                            material=material,
+                            defaults={"cantidad_requerida": cant}
+                        )
+                        if not created:
+                            apoyo_mat.cantidad_requerida += cant
+                            apoyo_mat.save()
+
+                except (ValueError, TypeError):
+                    pass
+
+            return redirect("detalle_apoyo", apoyo_id=apoyo.id)
+
+        # ==========================================
+        # 2. EDITAR MATERIAL ASIGNADO
         # ==========================================
         if accion == "editar_material":
+
             item_id = request.POST.get("item_id")
             cantidad = request.POST.get("cantidad")
 
@@ -169,9 +239,7 @@ def detalle_apoyo(request, apoyo_id):
 
             return redirect("detalle_apoyo", apoyo_id=apoyo.id)
 
-        # ==========================================
         # ELIMINAR MATERIAL
-        # ==========================================
         if accion == "eliminar_material":
             item_id = request.POST.get("item_id")
 
@@ -183,9 +251,7 @@ def detalle_apoyo(request, apoyo_id):
 
             return redirect("detalle_apoyo", apoyo_id=apoyo.id)
 
-        # ==========================================
         # GUARDAR DATOS DEL APOYO
-        # ==========================================
         apoyo.nodo = request.POST.get("nodo", "").strip()
 
         numero_apoyo = request.POST.get("numero_apoyo")
@@ -200,10 +266,13 @@ def detalle_apoyo(request, apoyo_id):
             apoyo.estado
         )
 
-        apoyo.nombre_quien_ejecuta = request.POST.get(
-            "nombre_quien_ejecuta",
-            ""
-        ).strip()
+        empleado_id = request.POST.get("quien_ejecuta")
+
+        if empleado_id and str(empleado_id).strip().isdigit():
+            apoyo.quien_ejecuta_id = int(str(empleado_id).strip())
+        else:
+            apoyo.quien_ejecuta = None
+
 
         apoyo.observacion = request.POST.get(
             "observacion",
@@ -212,10 +281,7 @@ def detalle_apoyo(request, apoyo_id):
 
         apoyo.save()
 
-        # ==========================================
         # GUARDAR MATERIALES
-        # ==========================================
-
         materiales_ids = request.POST.getlist("material_id[]")
         cantidades = request.POST.getlist("cantidad[]")
 
@@ -244,10 +310,7 @@ def detalle_apoyo(request, apoyo_id):
             except (ValueError, TypeError, ArithmeticError):
                 continue
 
-        # ==========================================
         # DECIDIR A DÓNDE VOLVER
-        # ==========================================
-
         if "guardar_y_volver" in request.POST:
             return redirect(
                 "detalle_proyecto",
@@ -266,6 +329,7 @@ def detalle_apoyo(request, apoyo_id):
             "apoyo": apoyo,
             "materiales_asociados": materiales_asociados,
             "materiales_catalogo": materiales_catalogo,
+            "empleados": empleados,
         }
     )
 

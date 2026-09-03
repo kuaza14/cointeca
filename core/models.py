@@ -940,7 +940,13 @@ class Apoyo(models.Model):
         FINALIZADO = "Finalizado", "Finalizado"
 
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name="apoyos", blank=True, null=True)
-    nombre_quien_ejecuta = models.CharField(max_length=100, blank=True)
+    quien_ejecuta = models.ForeignKey(
+        Empleado,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="apoyos_ejecutados"
+    )
     nodo = models.CharField(max_length=100, blank=True, null=True)
     numero_apoyo = models.PositiveIntegerField(null=True, blank=True)
     observacion = models.TextField(blank=True, default="")
@@ -1198,3 +1204,28 @@ class DetalleConsumoMaterial(models.Model):
 
     def __str__(self):
         return f"{self.material.descripcion}: {self.cantidad}"
+
+class MaterialRequeridoProyecto(models.Model):
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="materiales_requeridos"
+    )
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.PROTECT,
+        related_name="requerimientos_proyecto"
+    )
+    cantidad_requerida = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    class Meta:
+        verbose_name = "Material Requerido por Proyecto"
+        verbose_name_plural = "Materiales Requeridos por Proyecto"
+        unique_together = ("proyecto", "material")
+
+    def __str__(self):
+        return f"{self.material.descripcion} - {self.cantidad_requerida}"

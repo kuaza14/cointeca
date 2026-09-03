@@ -19,7 +19,7 @@
                 🏗️ Control de Materiales por Proyecto
             </h1>
             <p class="text-sm text-gray-600 mt-1">
-                Gestión de entradas directas asignadas a obra y registro de consumo real reportado por supervisores.
+                Gestión de entradas directas a obra, despachos de bodega y conciliación con los apoyos de ingeniería.
             </p>
         </div>
 
@@ -48,22 +48,22 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
-            <div class="p-3 bg-green-100 text-green-600 rounded-lg text-2xl">
+            <div class="p-3 bg-emerald-100 text-emerald-600 rounded-lg text-2xl">
                 📥
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Flujo de Entrada</p>
-                <p class="text-sm font-medium text-gray-700">Directo a Proyecto</p>
+                <p class="text-sm font-medium text-gray-700">Compras & Despachos Bodega</p>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
-            <div class="p-3 bg-amber-100 text-amber-600 rounded-lg text-2xl">
-                📋
+            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg text-2xl">
+                📍
             </div>
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Consumo Real</p>
-                <p class="text-sm font-medium text-gray-700">Reporte de Supervisor</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Consumo Real en Obra</p>
+                <p class="text-sm font-medium text-gray-700">Postes y Apoyos Ingeniería</p>
             </div>
         </div>
     </div>
@@ -87,7 +87,7 @@
                         <th class="px-6 py-3.5">Tipo de Red</th>
                         <th class="px-6 py-3.5">Estado</th>
                         <th class="px-6 py-3.5 text-center">Entradas (Remisiones)</th>
-                        <th class="px-6 py-3.5 text-center">Reportes Supervisor</th>
+                        <th class="px-6 py-3.5 text-center">Postes / Apoyos</th>
                         <th class="px-6 py-3.5 text-right">Acciones</th>
                     </tr>
                 </thead>
@@ -147,7 +147,7 @@
 
                         <td class="px-6 py-4 text-center">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                📋 {{ item.num_consumos }} reporte{{ item.num_consumos|pluralize }}
+                                📍 {{ item.num_apoyos }} poste{{ item.num_apoyos|pluralize }}
                             </span>
                         </td>
 
@@ -161,10 +161,10 @@
                                class="inline-flex items-center px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition">
                                 + Entrada
                             </a>
-                            <a href="{% url 'registrar_consumo_material' item.proyecto.id %}"
-                               title="Registrar Reporte Supervisor"
-                               class="inline-flex items-center px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition">
-                                + Consumo
+                            <a href="{% url 'detalle_proyecto' item.proyecto.id %}"
+                               title="Ver Apoyos en Ingeniería"
+                               class="inline-flex items-center px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition">
+                                📍 Apoyos
                             </a>
                         </td>
                     </tr>

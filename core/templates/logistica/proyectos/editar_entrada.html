@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto p-6 space-y-6">
+
+    <!-- ENCABEZADO -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                <a href="{% url 'logistica_home' %}" class="hover:underline">
+                    Logística
+                </a>
+
+                <span>/</span>
+                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">
+                    Proyectos
+                </a>
+
+                <span>/</span>
+
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline">
+                    {{ proyecto.numero_emcali }}
+                </a>
+
+                <span>/</span>
+
+                <span class="text-gray-800 font-medium">
+                    Editar Entrada
+                </span>
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                ✏️ Editar Entrada de Materiales
+            </h1>
+
+            <p class="text-sm text-gray-600 mt-1">
+                Modifica la información de la entrada y sus materiales.
+            </p>
+
+        </div>
+
+        <a href="{% url 'registrar_entrada_material' proyecto.id %}"
+            class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
+            ← Cancelar y volver
+        </a>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        <!-- DATOS DE LA ENTRADA -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <h2 class="text-base font-bold text-gray-800 border-b pb-2">
+                📄 Información de la Entrada
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- FECHA -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+
+                        Fecha de ingreso
+
+                    </label>
+
+                    <input type="date" name="fecha" value="{{ entrada.fecha|date:'Y-m-d' }}" required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+
+                <!-- REMISIÓN -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                        N° Remisión / Factura
+                    </label>
+
+                    <input type="text" name="numero_remision" value="{{ entrada.numero_remision }}"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+
+                <!-- PROVEEDOR -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                        Proveedor / Fabricante
+                    </label>
+
+                    <input type="text" name="proveedor" value="{{ entrada.proveedor }}"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+
+                <!-- RECIBIDO POR -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                        Recibido por
+                    </label>
+
+                    <input type="text" name="recibido_por" value="{{ entrada.recibido_por }}"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <!-- OBSERVACIONES -->
+            <div>
+                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    Observaciones
+                </label>
+
+                <textarea name="observaciones" rows="3"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ entrada.observaciones }}
+                </textarea>
+            </div>
+        </div>
+
+        <!-- MATERIALES -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h2 class="text-base font-bold text-gray-800">
+                    📦 Materiales de esta entrada
+                </h2>
+            </div>
+
+            <div id="materiales-container" class="space-y-3">
+                {% for detalle in detalles %}
+                <div class="material-row border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+
+                        <!-- MATERIAL -->
+                        <div class="md:col-span-7">
+                            <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                                Material
+                            </label>
+
+                            <select name="material_id[]"
+                                class="material-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                                required>
+
+                                {% for material in materiales %}
+                                    <option value="{{ material.id }}"
+                                        {% if material.id == detalle.material.id %}selected{% endif %}>
+                                        {{ material.item }} - {{ material.descripcion }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- CANTIDAD -->
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                                Cantidad
+                            </label>
+
+                            <input type="number" name="cantidad[]" value="{{ detalle.cantidad|stringformat:'f' }}" step="0.01" min="0.01"
+                                required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold">
+                            
+                        </div>
+
+                        <!-- ELIMINAR -->
+                        <div class="md:col-span-2">
+                            <button type="button" onclick="eliminarMaterial(this)"
+                                class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-semibold">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- AGREGAR MATERIAL -->
+            <div class="mt-4">
+                <button type="button" onclick="agregarMaterial()"
+                    class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-sm font-semibold">
+                    ➕ Agregar material
+                </button>
+            </div>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="flex justify-end gap-3">
+            <a href="{% url 'registrar_entrada_material' proyecto.id %}"
+                class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm">
+                💾 Guardar cambios
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+
+function eliminarMaterial(boton) {
+    const fila = boton.closest(".material-row");
+    if (!fila) {
+        return;
+    }
+    fila.remove();
+}
+
+
+function agregarMaterial() {
+    const container = document.getElementById(
+        "materiales-container"
+    );
+
+    const fila = document.createElement("div");
+    fila.className =
+        "material-row border border-gray-200 rounded-lg p-4";
+
+    fila.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+
+            <!-- MATERIAL -->
+            <div class="md:col-span-7">
+                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    Material
+                </label>
+
+                <select name="material_id[]"
+                        class="material-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        required>
+
+                    <option value="">
+                        Seleccionar material...
+                    </option>
+
+                    {% for material in materiales %}
+                        <option value="{{ material.id }}">
+                            {{ material.item }} - {{ material.descripcion }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- CANTIDAD -->
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    Cantidad
+                </label>
+
+                <input type="number"
+                       name="cantidad[]"
+                       step="0.01"
+                       min="0.01"
+                       required
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold">
+            </div>
+
+            <!-- ELIMINAR -->
+            <div class="md:col-span-2">
+                <button type="button"
+                        onclick="eliminarMaterial(this)"
+                        class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-semibold">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        </div>
+    `;
+    container.appendChild(fila);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('input[name="cantidad[]"]').forEach(function (input) {
+        if (input.value) {
+            input.value = parseFloat(input.value);
+        }
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

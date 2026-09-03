@@ -8,3 +8,10 @@ def pesos_colombianos(valor):
         return f"{int(valor):,}".replace(",", ".")
     except:
         return valor
+
+@register.filter
+def cantidad(valor):
+    if valor is None:
+        return ""
+
+    return f"{valor:g}"

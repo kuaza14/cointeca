@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}Apoyo {{ apoyo.nodo|default:apoyo.numero_apoyo }} - Proyecto {{ apoyo.proyecto.numero_emcali }}{% endblock %}
 
 {% block content %}
@@ -31,6 +33,51 @@
                 ← Volver al Proyecto
             </a>
         </div>
+    </div>
+
+    <!-- SECCIÓN RÁPIDA: DESPACHAR DIRECTO DESDE BODEGA CENTRAL -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200 pb-2">
+            <div>
+                <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
+                    <span>📦</span> Sacar / Despachar Material desde Bodega Central
+                </h3>
+                <p class="text-xs text-amber-700">
+                    Saca existencias disponibles de tu inventario de bodega: se descuenta del stock general y se asigna directamente a este apoyo.
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="despachar_bodega">
+
+            <div class="sm:col-span-7">
+                <label class="block text-xs font-semibold uppercase text-amber-900 mb-1">Seleccionar Material de Bodega</label>
+                <select name="material_id" required
+                        class="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <option value="">-- Seleccione material a despachar --</option>
+                    {% for mat in materiales_catalogo %}
+                        <option value="{{ mat.id }}">
+                            [{{ mat.item }}] {{ mat.descripcion }} [Stock Bodega: {{ mat.inventario.cantidad|floatformat:1 }} {{ mat.unidad|default:'U' }}]
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold uppercase text-amber-900 mb-1">Cantidad</label>
+                <input type="number" step="0.01" min="0.01" name="cantidad" required placeholder="0.00"
+                       class="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+
+            <div class="sm:col-span-3">
+                <button type="submit"
+                        class="w-full px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 h-[38px]">
+                    <span>📤</span> Despachar al Poste
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- FORMULARIO PRINCIPAL -->
@@ -70,10 +117,49 @@
                     </select>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Quien Ejecuta / Cuadrilla</label>
-                    <input type="text" name="nombre_quien_ejecuta" value="{{ apoyo.nombre_quien_ejecuta|default:'' }}" placeholder="Técnico / Supervisor"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <div class="relative">
+                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1 flex justify-between items-center">
+                        <span>Quién Ejecuta </span>
+                        {% if apoyo.quien_ejecuta %}
+                            <span class="text-green-600 font-bold normal-case text-[11px]">● {{ apoyo.quien_ejecuta.nombre_completo }}</span>
+                        {% endif %}
+                    </label>
+
+                    <!-- Nombre que ve el usuario -->
+                    <input
+                        type="text"
+                        id="buscarEmpleado"
+                        value="{% if apoyo.quien_ejecuta %}{{ apoyo.quien_ejecuta.nombre_completo }}{% endif %}"
+                        placeholder="🔍 Buscar empleado..."
+                        autocomplete="off"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+
+                    <!-- ID del empleado que realmente se envía al servidor -->
+                    <input
+                        type="hidden"
+                        id="empleadoSeleccionado"
+                        name="quien_ejecuta"
+                        value="{% if apoyo.quien_ejecuta %}{{ apoyo.quien_ejecuta.id }}{% endif %}">
+
+                    <!-- Resultados -->
+                    <div id="resultadosEmpleados"
+                        class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                        {% for empleado in empleados %}
+                            <button
+                                type="button"
+                                class="empleado-opcion w-full text-left px-3 py-2 hover:bg-blue-50 text-sm border-b last:border-b-0 cursor-pointer"
+                                data-id="{{ empleado.id }}"
+                                data-nombre="{{ empleado.nombre_completo }}">
+                                <div class="font-semibold text-gray-800">
+                                    {{ empleado.nombre_completo }}
+                                </div>
+
+                                <div class="text-xs text-gray-500">
+                                    {{ empleado.cargo }} · {{ empleado.documento }}
+                                </div>
+                            </button>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
@@ -141,7 +227,7 @@
                                     value="{{ item.cantidad_requerida }}"
                                     class="inputEditarCantidad hidden w-24 border border-blue-300 rounded px-2 py-1 text-center text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </td>
-                            <td class="px-4 py-3 text-center whitespace-nowrap">
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
 
                                 <button
                                     type="button"
@@ -156,6 +242,13 @@
                                     title="Guardar cambios"
                                     data-item-id="{{ item.id }}">
                                     💾
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btnCancelarEdicion hidden text-gray-500 hover:text-gray-700 text-sm p-1.5 rounded hover:bg-gray-100"
+                                    title="Cancelar edición">
+                                    ↩️
                                 </button>
 
                                 <button type="submit"
@@ -228,17 +321,15 @@
 
                             <td class="px-4 py-3">
                                 <select name="unidad[]"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 select-unidad focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                     <option value="U">U (Unidad)</option>
                                     <option value="M">M (Metros)</option>
-                                    <option value="KG">KG (Kilos)</option>
-                                    <option value="JGO">JGO (Juego)</option>
                                 </select>
                             </td>
 
                             <td class="px-4 py-3 text-center">
-                                <button type="button" class="btnEliminarFila text-red-500 hover:text-red-700 text-sm font-bold p-1 rounded hover:bg-red-50" title="Eliminar fila">
-                                    ✕
+                                <button type="button" class="btnEliminarFila text-red-500 hover:text-red-700 font-bold text-lg">
+                                    &times;
                                 </button>
                             </td>
                         </tr>
@@ -264,127 +355,43 @@
         </div>
     </form>
 
+    <!-- FORMULARIOS OCULTOS PARA ELIMINAR Y EDITAR -->
     {% for item in materiales_asociados %}
-    <form method="POST"
-        id="eliminar-material-{{ item.id }}"
-        class="hidden">
+    <form method="POST" id="eliminar-material-{{ item.id }}" class="hidden">
         {% csrf_token %}
         <input type="hidden" name="accion" value="eliminar_material">
         <input type="hidden" name="item_id" value="{{ item.id }}">
     </form>
     {% endfor %}
 
+    <form method="POST" id="formEdicionMaterial" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="accion" value="editar_material">
+        <input type="hidden" name="item_id" id="editItemId">
+        <input type="hidden" name="cantidad" id="editCantidad">
+    </form>
+
 </div>
 
-<!-- SCRIPT PARA AGREGAR FILAS DINÁMICAS -->
+<script src="{% static 'js/componentes/buscador.js' %}"></script>
+<script src="{% static 'js/componentes/materiales.js' %}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const tbody = document.getElementById('filasNuevosMateriales');
-        const btnAgregar = document.getElementById('btnAgregarFilaMaterial');
+    // Conectar guardado de edición rápida en la tabla
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.btnGuardarEdicion').forEach(function(boton) {
+            boton.addEventListener('click', function() {
+                const fila = boton.closest('tr');
+                const input = fila.querySelector('.inputEditarCantidad');
+                const itemId = boton.dataset.itemId;
+                const cantidad = input.value;
 
-        btnAgregar.addEventListener('click', function () {
-            const primeraFila = tbody.querySelector('.fila-nuevo-material');
-            if (primeraFila) {
-                const nuevaFila = primeraFila.cloneNode(true);
-                // Limpiar valores
-                const select = nuevaFila.querySelector('select[name="material_id[]"]');
-                if (select) select.selectedIndex = 0;
-                const inputCant = nuevaFila.querySelector('input[name="cantidad[]"]');
-                if (inputCant) inputCant.value = '';
-                const selectUnidad = nuevaFila.querySelector('select[name="unidad[]"]');
-                if (selectUnidad) selectUnidad.selectedIndex = 0;
-
-                tbody.appendChild(nuevaFila);
-            }
-        });
-
-        tbody.addEventListener('click', function (e) {
-            if (e.target.classList.contains('btnEliminarFila')) {
-                const filas = tbody.querySelectorAll('.fila-nuevo-material');
-                if (filas.length > 1) {
-                    e.target.closest('.fila-nuevo-material').remove();
-                } else {
-                    // Si es la única, solo limpiar
-                    const fila = e.target.closest('.fila-nuevo-material');
-                    fila.querySelector('select[name="material_id[]"]').selectedIndex = 0;
-                    fila.querySelector('input[name="cantidad[]"]').value = '';
+                if (itemId && cantidad) {
+                    document.getElementById('editItemId').value = itemId;
+                    document.getElementById('editCantidad').value = cantidad;
+                    document.getElementById('formEdicionMaterial').submit();
                 }
-            }
+            });
         });
-
-        // Cambiar unidad automáticamente si el material seleccionado tiene unidad configurada
-        tbody.addEventListener('change', function(e) {
-            if (e.target.name === 'material_id[]') {
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const unidad = selectedOption.getAttribute('data-unidad');
-                const row = e.target.closest('.fila-nuevo-material');
-                const selectUnidad = row.querySelector('select[name="unidad[]"]');
-
-                if (unidad && selectUnidad) {
-                    if (unidad.toUpperCase().startsWith('M')) {
-                        selectUnidad.value = 'M';
-                    } else if (unidad.toUpperCase().startsWith('U')) {
-                        selectUnidad.value = 'U';
-                    } else {
-                        selectUnidad.value = 'U';
-                    }
-                }
-            }
-        });
-    });
-
-    document.querySelectorAll('.btnEditarMaterial').forEach(function(boton) {
-
-        boton.addEventListener('click', function() {
-
-            const fila = boton.closest('tr');
-
-            const textoCantidad = fila.querySelector('.cantidadTexto');
-            const inputCantidad = fila.querySelector('.inputEditarCantidad');
-            const btnGuardar = fila.querySelector('.btnGuardarEdicion');
-
-            textoCantidad.classList.add('hidden');
-            inputCantidad.classList.remove('hidden');
-
-            boton.classList.add('hidden');
-            btnGuardar.classList.remove('hidden');
-
-            inputCantidad.focus();
-        });
-
-    });
-
-
-    document.querySelectorAll('.btnGuardarEdicion').forEach(function(boton) {
-
-        boton.addEventListener('click', function() {
-
-            const fila = boton.closest('tr');
-            const inputCantidad = fila.querySelector('.inputEditarCantidad');
-
-            const itemId = boton.dataset.itemId;
-            const nuevaCantidad = inputCantidad.value;
-
-            // Crear un formulario para enviar la edición
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '';
-
-            // CSRF
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            form.innerHTML = `
-                <input type="hidden" name="accion" value="editar_material">
-                <input type="hidden" name="item_id" value="${itemId}">
-                <input type="hidden" name="cantidad" value="${nuevaCantidad}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-            `;
-
-            document.body.appendChild(form);
-            form.submit();
-
-        });
-
     });
 </script>
 {% endblock %}

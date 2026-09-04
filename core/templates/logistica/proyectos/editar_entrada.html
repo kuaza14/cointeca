@@ -3,6 +3,7 @@
 {% block title %}
 Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
 {% endblock %}
+{% load filtros %}
 
 {% block content %}
 
@@ -142,6 +143,7 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
                                     <option value="{{ material.id }}"
                                         {% if material.id == detalle.material.id %}selected{% endif %}>
                                         {{ material.item }} - {{ material.descripcion }}
+                                        {{ material.unidad }}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -153,7 +155,7 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
                                 Cantidad
                             </label>
 
-                            <input type="number" name="cantidad[]" value="{{ detalle.cantidad|stringformat:'f' }}" step="0.01" min="0.01"
+                            <input type="number" name="cantidad[]" value="{{ detalle.cantidad|cantidad }}" step="0.01" min="0.01"
                                 required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold">
                             
                         </div>

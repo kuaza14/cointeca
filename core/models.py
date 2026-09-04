@@ -906,9 +906,8 @@ class SuspensionDisciplinaria(models.Model):
         return f"{self.empleado.nombre_completo} - {self.fecha_falta}"
 
 ####################################################
-#                  INGENIERÍA
+#                 INGENIERÍA
 ####################################################
-
 class Proyecto(models.Model):
     class Tipos(models.TextChoices):
         BT = "BT", "Baja Tensión"

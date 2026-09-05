@@ -4,6 +4,19 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Carga el .env de la raiz si existe. Lo que ya venga en el entorno manda,
+# asi docker compose sigue imponiendo sus propios valores.
+#
+# El import es opcional a proposito: si actualizas el codigo pero todavia no
+# instalaste las dependencias nuevas, el proyecto arranca igual usando las
+# variables de entorno y los valores por defecto.
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    pass
+else:
+    load_dotenv(BASE_DIR / '.env', override=False)
+
 SECRET_KEY = (
     os.environ.get('DJANGO_SECRET_KEY')
     or 'django-insecure-f(s^*^neoun*u#m@qjah1#bigoa5hvfs6$ayn+_(_a#nivau7$'
@@ -64,9 +77,11 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRES_DB', 'cointeca_db'),
         'USER': os.environ.get('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'admin'),
-        # Dentro de Docker el host es 'db'; fuera, localhost en el puerto 5433
+        # Valores estandar para una instalacion local de PostgreSQL.
+        # docker compose los sobrescribe (host 'db'); si en tu maquina el
+        # 5432 esta ocupado, ponlo en un .env con POSTGRES_PORT.
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5433'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
 

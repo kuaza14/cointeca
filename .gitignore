@@ -6,3 +6,11 @@ media/
 .env
 .vscode/
 ~$*.docx
+# Skills instaladas con `npx skills add` (contenido pesado y regenerable)
+.agents/
+.claude/skills/
+skills-lock.json
+
+# Volcados de base de datos generados al migrar
+respaldo-*.sql
+*.dump

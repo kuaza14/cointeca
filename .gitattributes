@@ -1,0 +1,7 @@
+# Los scripts que corren dentro de contenedores Linux deben conservar
+# finales de linea LF; con CRLF el shebang falla ("no such file or directory").
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+.dockerignore text eol=lf

@@ -1,0 +1,17 @@
+.git
+.gitignore
+venv/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+.env
+.vscode/
+~$*.docx
+media/
+Dockerfile
+docker-compose.yml
+.dockerignore
+borrado.css.txt
+C3947C60

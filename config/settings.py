@@ -1,13 +1,21 @@
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-f(s^*^neoun*u#m@qjah1#bigoa5hvfs6$ayn+_(_a#nivau7$'
+SECRET_KEY = (
+    os.environ.get('DJANGO_SECRET_KEY')
+    or 'django-insecure-f(s^*^neoun*u#m@qjah1#bigoa5hvfs6$ayn+_(_a#nivau7$'
+)
 
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+    if h.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,11 +61,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cointeca_db',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('POSTGRES_DB', 'cointeca_db'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'admin'),
+        # Dentro de Docker el host es 'db'; fuera, localhost en el puerto 5433
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5433'),
     }
 }
 

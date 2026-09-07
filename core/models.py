@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 
 class CajaMenor(models.Model):
     fecha_tramite = models.DateField()

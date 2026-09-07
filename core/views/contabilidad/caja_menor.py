@@ -17,7 +17,7 @@ def detalle_caja(request, id):
     caja = CajaMenor.objects.get(id=id)
     movimientos = caja.movimientocajamenor_set.all()
 
-    return render(request, 'contabilidad/caja_menor/detalle_caja.html', {
+    return render(request, 'contabilidad/detalle_caja.html', {
         'caja': caja,
         'movimientos': movimientos
     })
@@ -39,7 +39,7 @@ def agregar_movimiento(request, id):
 
         return redirect(f'/caja-menor/{id}/')
 
-    return render(request, 'contabilidad/caja_menor/agregar_movimiento.html', {'caja': caja})
+    return render(request, 'contabilidad/agregar_movimiento.html', {'caja': caja})
 
 @login_required
 def eliminar_movimiento(request, id):
@@ -67,4 +67,4 @@ def editar_movimiento(request, id):
 
         return redirect(f'/caja-menor/{movimiento.caja.id}/')
 
-    return render(request, 'contabilidad/caja_menor/editar_movimiento.html', {'m': movimiento})
+    return render(request, 'contabilidad/editar_movimiento.html', {'m': movimiento})

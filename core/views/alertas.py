@@ -158,4 +158,12 @@ def obtener_alertas_vacaciones():
 
         "pendientes_programar": pendientes_programar,
 
+        # Lo consume el contador de la campana en base.html
+        "total_alertas": (
+            len(actuales)
+            + len(proximas)
+            + len(cumplen_anio)
+            + len(pendientes_programar)
+        ),
+
     }

@@ -6,7 +6,7 @@
     Detalle de suspensión disciplinaria
 </h1>
 
-<div class="bg-white shadow rounded p-6 space-y-5">
+<div class="bg-card shadow rounded p-6 space-y-5">
 
     <p>
         <strong>Empleado:</strong>
@@ -26,7 +26,7 @@
     <div>
         <strong>Motivo de la suspensión:</strong>
 
-        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-gray-50">
+        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-muted">
             {{ suspension.motivo_suspension }}
         </div>
     </div>
@@ -34,7 +34,7 @@
     <div>
         <strong>Artículos infringidos:</strong>
 
-        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-gray-50">
+        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-muted">
             {{ suspension.articulos_infringidos }}
         </div>
     </div>
@@ -58,7 +58,7 @@
     <div>
         <strong>Responsabilidad pecuniaria:</strong>
 
-        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-gray-50">
+        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-muted">
             {{ suspension.responsabilidad_pecuniaria }}
         </div>
     </div>
@@ -68,7 +68,7 @@
     <div>
         <strong>Consecuencia por reincidencia:</strong>
 
-        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-gray-50">
+        <div class="mt-2 whitespace-pre-line border rounded p-3 bg-muted">
             {{ suspension.consecuencia_reincidencia }}
         </div>
     </div>
@@ -80,21 +80,21 @@
 
     <a
         href="{% url 'generar_suspension_disciplinaria' suspension.id %}"
-        class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded"
+        class="bg-success hover:bg-success-hover text-white px-5 py-2 rounded"
     >
-        📄 Generar Word
+        Generar Word
     </a>
 
     <a
         href="{% url 'detalle_empleado' suspension.empleado.id %}"
-        class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded"
+        class="bg-neutral hover:bg-neutral-hover text-white px-5 py-2 rounded"
     >
         Volver al empleado
     </a>
 
     <a
         href="{% url 'suspensiones_disciplinarias_empleado' suspension.empleado.id %}"
-        class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded"
+        class="bg-neutral hover:bg-neutral-hover text-white px-5 py-2 rounded"
     >
         Volver a suspensiones disciplinarias
     </a>

@@ -7,7 +7,7 @@
 <div class="max-w-7xl mx-auto px-4">
 
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">👥 Empleados</h1>
+        <h1 class="text-3xl font-bold text-foreground">Empleados</h1>
 
         <div class="grid grid-cols-3 gap-4 mb-6">
 
@@ -16,7 +16,7 @@
             <p class="text-2xl font-bold">{{ total }}</p>
         </div>
 
-        <div class="bg-green-500 text-white p-4 rounded shadow">
+        <div class="bg-success text-white p-4 rounded shadow">
             <p>Promedio salario</p>
                 ${{ promedio_salario|default:0|floatformat:0 }}
             </p>
@@ -25,12 +25,12 @@
     </div>
 
         <a href="/rrhh/empleados/crear/" 
-           class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition">
+           class="bg-success text-white px-4 py-2 rounded-lg shadow hover:bg-success-hover transition">
            + Agregar Empleado
         </a>
         <a href="/rrhh/" 
-        class="inline-block mb-6 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
-        ← Volver 
+        class="inline-block mb-6 bg-neutral text-white px-4 py-2 rounded-lg hover:bg-neutral-hover transition">
+        Volver 
         </a>
     </div>    
 
@@ -42,14 +42,15 @@
             name="q" 
             placeholder="Buscar por cédula o nombre" 
             value="{{ query|default:'' }}"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            class="w-full border border-border-strong rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
     </div>
 
-    <div class="bg-white shadow-lg rounded-xl overflow-hidden bg-gray-100 text-gray-600">
-        <table class="min-w-full text-sm text-gray-700">
+    <div class="bg-card shadow-lg rounded-xl overflow-hidden bg-muted text-muted-foreground">
+        <div class="overflow-x-auto">
+<table class="min-w-full text-sm text-foreground">
 
             <!-- HEADER -->
-            <thead class="bg-blue-600 text-white uppercase text-xs tracking-wider">
+            <thead class="bg-primary text-white uppercase text-xs tracking-wider">
                 <tr >
                     <th class="px-6 py-3 text-left">Nombre</th>
                     <th class="px-6 py-3 text-left">Documento</th>
@@ -61,8 +62,8 @@
 
             <!-- BODY -->
                 {% for e in empleados %}
-                <tr class="fila-empleado hover:bg-gray-50 transition">
-                    <td class=" uppercase px-6 py-4 font-medium text-gray-900">
+                <tr class="fila-empleado hover:bg-muted transition">
+                    <td class=" uppercase px-6 py-4 font-medium text-foreground">
                         {{ e.nombre_completo }}
                     </td>
                     <td class="px-6 py-4">
@@ -71,13 +72,13 @@
                     <td class=" uppercase px-6 py-4">
                         {{ e.cargo }}
                     </td>
-                    <td class="px-6 py-4 font-semibold text-green-600">
+                    <td class="px-6 py-4 font-semibold text-success">
                         ${{ e.salario|pesos_colombianos }}
                     </td>
                     <td class="px-4 py-2 flex gap-2 justify-center">
                     <!-- VER -->
                     <a href="/rrhh/empleados/{{ e.id }}/"
-                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs">
+                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-primary-hover text-xs">
                     Ver
                     </a>
 
@@ -85,7 +86,7 @@
                     <form action="/rrhh/empleados/{{ e.id }}/eliminar/" method="POST"
                         onsubmit="return confirm('¿Seguro que quieres eliminar este empleado?')">
                         {% csrf_token %}
-                        <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs">
+                        <button class="bg-destructive text-white px-3 py-1 rounded hover:bg-destructive-hover text-xs">
                             Eliminar
                         </button>
                     </form>
@@ -94,6 +95,7 @@
             </tbody>
 
         </table>
+</div>
 
     </div>
 

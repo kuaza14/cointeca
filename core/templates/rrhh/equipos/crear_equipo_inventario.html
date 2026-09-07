@@ -8,20 +8,20 @@
     <div class="flex justify-between items-center mb-6">
 
         <h1 class="text-3xl font-bold">
-            ➕ Crear Equipo Inventario
+            Crear Equipo Inventario
         </h1>
 
         <a
             href="/rrhh/inventario/"
-            class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+            class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover"
         >
-            ← Volver
+            Volver
         </a>
 
     </div>
 
     <!-- FORMULARIO -->
-    <div class="bg-white p-6 rounded shadow">
+    <div class="bg-card p-6 rounded shadow">
 
         <form method="POST">
 
@@ -31,11 +31,11 @@
 
                 <!-- Equipo -->
                 <div>
-                    <label class="block font-bold mb-1">
+                    <label class="block font-bold mb-1" for="campo-equipo">
                         Equipo
                     </label>
 
-                    <input
+                    <input id="campo-equipo"
                         type="text"
                         name="equipo"
                         required
@@ -46,11 +46,11 @@
 
                 <!-- Referencia -->
                 <div>
-                    <label class="block font-bold mb-1">
+                    <label class="block font-bold mb-1" for="campo-referencia">
                         Referencia
                     </label>
 
-                    <input
+                    <input id="campo-referencia"
                         type="text"
                         name="referencia"
                         class="w-full border p-2 rounded"
@@ -60,11 +60,11 @@
 
                 <!-- Serial -->
                 <div>
-                    <label class="block font-bold mb-1">
+                    <label class="block font-bold mb-1" for="campo-serial">
                         Serial
                     </label>
 
-                    <input
+                    <input id="campo-serial"
                         type="text"
                         name="serial"
                         required
@@ -74,11 +74,11 @@
 
                 <!-- Marca -->
                 <div>
-                    <label class="block font-bold mb-1">
+                    <label class="block font-bold mb-1" for="campo-marca">
                         Marca
                     </label>
 
-                    <input
+                    <input id="campo-marca"
                         type="text"
                         name="marca"
                         class="w-full border p-2 rounded"
@@ -88,11 +88,11 @@
 
                 <!-- Fecha compra -->
                 <div>
-                    <label class="block font-bold mb-1">
+                    <label class="block font-bold mb-1" for="campo-fecha_compra">
                         Fecha de compra
                     </label>
 
-                    <input
+                    <input id="campo-fecha_compra"
                         type="date"
                         name="fecha_compra"
                         class="w-full border p-2 rounded"
@@ -101,11 +101,11 @@
 
                 <!-- Estado -->
                 <div>
-                    <label class="block font-bold mb-1">
+                    <label class="block font-bold mb-1" for="campo-estado">
                         Estado
                     </label>
 
-                    <select
+                    <select id="campo-estado"
                         name="estado"
                         class="w-full border p-2 rounded"
                     >
@@ -132,11 +132,11 @@
             <!-- Observaciones -->
             <div class="mt-4">
 
-                <label class="block font-bold mb-1">
+                <label class="block font-bold mb-1" for="campo-observaciones">
                     Observaciones
                 </label>
 
-                <textarea
+                <textarea id="campo-observaciones"
                     name="observaciones"
                     rows="4"
                     class="w-full border p-2 rounded"
@@ -150,14 +150,14 @@
 
                 <button
                     type="submit"
-                    class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                    class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-hover"
                 >
                     Guardar Equipo
                 </button>
 
                 <a
                     href="/rrhh/inventario/"
-                    class="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
+                    class="bg-neutral text-white px-5 py-2 rounded hover:bg-neutral-hover"
                 >
                     Cancelar
                 </a>

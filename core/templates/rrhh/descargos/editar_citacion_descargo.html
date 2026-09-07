@@ -11,9 +11,9 @@
     {% csrf_token %}
 
     <div class="mb-4">
-        <label>Fecha de diligencia</label>
+        <label for="campo-fecha_diligencia">Fecha de diligencia</label>
 
-        <input
+        <input id="campo-fecha_diligencia"
             type="date"
             name="fecha_diligencia"
             value="{{ citacion.fecha_diligencia|date:'Y-m-d' }}"
@@ -23,9 +23,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Hora de diligencia</label>
+        <label for="campo-hora_diligencia">Hora de diligencia</label>
 
-        <input
+        <input id="campo-hora_diligencia"
             type="time"
             name="hora_diligencia"
             value="{{ citacion.hora_diligencia|time:'H:i' }}"
@@ -35,9 +35,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Lugar de diligencia</label>
+        <label for="campo-lugar_diligencia">Lugar de diligencia</label>
 
-        <input
+        <input id="campo-lugar_diligencia"
             type="text"
             name="lugar_diligencia"
             value="{{ citacion.lugar_diligencia }}"
@@ -46,9 +46,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Descripción de los hechos</label>
+        <label for="campo-descripcion_hechos">Descripción de los hechos</label>
 
-        <textarea
+        <textarea id="campo-descripcion_hechos"
             name="descripcion_hechos"
             class="border p-2 w-full"
             rows="5"
@@ -56,9 +56,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Cláusula del contrato</label>
+        <label for="campo-clausula_contrato">Cláusula del contrato</label>
 
-        <input
+        <input id="campo-clausula_contrato"
             type="text"
             name="clausula_contrato"
             value="{{ citacion.clausula_contrato }}"
@@ -67,9 +67,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Artículo del reglamento</label>
+        <label for="campo-articulo_reglamento">Artículo del reglamento</label>
 
-        <input
+        <input id="campo-articulo_reglamento"
             type="text"
             name="articulo_reglamento"
             value="{{ citacion.articulo_reglamento }}"
@@ -78,9 +78,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Norma CST</label>
+        <label for="campo-norma_cst">Norma CST</label>
 
-        <input
+        <input id="campo-norma_cst"
             type="text"
             name="norma_cst"
             value="{{ citacion.norma_cst }}"
@@ -90,7 +90,7 @@
 
     <button
         type="submit"
-        class="bg-blue-600 text-white px-4 py-2 rounded"
+        class="bg-primary text-white px-4 py-2 rounded"
     >
         Guardar cambios
     </button>

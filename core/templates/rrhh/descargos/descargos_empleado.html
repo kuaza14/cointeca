@@ -9,22 +9,22 @@
 <div class="flex gap-3 mb-6">
 
     <a href="{% url 'crear_descargo' empleado.id %}"
-       class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-       ➕ Crear diligencia
+       class="bg-destructive text-white px-4 py-2 rounded hover:bg-destructive-hover">
+       Crear diligencia
     </a>
 
     <a href="{% url 'crear_citacion_descargo' empleado.id %}"
        class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
-       ➕ Crear citación
+       Crear citación
     </a>
 
     <a href="{% url 'empleado_descargo' empleado.id %}"
-       class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-       📄 Descargar diligencia
+       class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover">
+       Descargar diligencia
     </a>
 
     <a href="{% url 'detalle_empleado' empleado.id %}"
-       class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+       class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
        Volver al empleado
     </a>
 
@@ -36,9 +36,10 @@
     Citaciones a descargos
 </h2>
 
+<div class="overflow-x-auto">
 <table class="w-full border mb-8">
 
-    <thead class="bg-blue-700">
+    <thead class="bg-primary">
         <tr>
             <th class="border p-2">Fecha audiencia</th>
             <th class="border p-2">Hora</th>
@@ -58,18 +59,12 @@
 
         <td class="border p-2 text-center">
             <a href="{% url 'generar_citacion_descargo' c.id %}"
-                class="text-blue-600">
-                📄 
-            </a>
+                class="text-primary"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg><span class="sr-only">Ver documento</span></a>
 
-            <a href="{% url 'editar_citacion_descargo' c.id %}">
-                ✏️
-            </a>
+            <a href="{% url 'editar_citacion_descargo' c.id %}"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg><span class="sr-only">Editar</span></a>
 
             <a href="{% url 'eliminar_citacion_descargo' c.id %}"
-                onclick="return confirm('¿Está seguro de eliminar esta citación?')">
-                🗑️
-            </a>
+                onclick="return confirm('¿Está seguro de eliminar esta citación?')"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg><span class="sr-only">Eliminar</span></a>
         </td>
 
         
@@ -88,11 +83,13 @@
     </tbody>
 
 </table>
+</div>
 
 <!-- TABLA -->
+<div class="overflow-x-auto">
 <table class="w-full border">
 
-    <thead class="bg-blue-700">
+    <thead class="bg-primary">
         <tr>
             <th class="border p-2">Fecha</th>
             <th class="border p-2">Hora</th>
@@ -112,14 +109,10 @@
 
             <td class="border p-2 text-center">
 
-            <a href="{% url 'editar_descargo' d.id %}">
-                ✏️
-            </a>
+            <a href="{% url 'editar_descargo' d.id %}"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg><span class="sr-only">Editar</span></a>
 
             <a href="{% url 'eliminar_descargo' d.id %}"
-            onclick="return confirm('¿Está seguro de eliminar este descargo?')">
-                🗑️
-            </a>
+            onclick="return confirm('¿Está seguro de eliminar este descargo?')"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg><span class="sr-only">Eliminar</span></a>
 
         </td>
         </tr>
@@ -133,5 +126,6 @@
     </tbody>
 
 </table>
+</div>
 
 {% endblock %}

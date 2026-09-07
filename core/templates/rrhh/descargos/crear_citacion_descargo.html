@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+<div class="max-w-4xl mx-auto bg-card shadow rounded-lg p-6">
 
     <h1 class="text-2xl font-bold mb-6">
         Citación a Descargos
@@ -15,11 +15,11 @@
         <div class="grid grid-cols-2 gap-4">
 
             <div>
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-fecha_diligencia">
                     Fecha de la diligencia
                 </label>
 
-                <input
+                <input id="campo-fecha_diligencia"
                     type="date"
                     name="fecha_diligencia"
                     required
@@ -28,11 +28,11 @@
             </div>
 
             <div>
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-hora_diligencia">
                     Hora
                 </label>
 
-                <input
+                <input id="campo-hora_diligencia"
                     type="time"
                     name="hora_diligencia"
                     required
@@ -42,11 +42,11 @@
 
             <div class="col-span-2">
 
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-lugar_diligencia">
                     Lugar / Plataforma
                 </label>
 
-                <input
+                <input id="campo-lugar_diligencia"
                     type="text"
                     name="lugar_diligencia"
                     value="Oficina de RRHH"
@@ -57,11 +57,11 @@
 
             <div class="col-span-2">
 
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-descripcion_hechos">
                     Descripción de los hechos
                 </label>
 
-                <textarea
+                <textarea id="campo-descripcion_hechos"
                     name="descripcion_hechos"
                     rows="4"
                     required
@@ -72,11 +72,11 @@
 
             <div>
 
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-clausula_contrato">
                     Cláusula del contrato
                 </label>
 
-                <input
+                <input id="campo-clausula_contrato"
                     type="text"
                     name="clausula_contrato"
                     class="w-full border rounded px-3 py-2"
@@ -86,11 +86,11 @@
 
             <div>
 
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-articulo_reglamento">
                     Artículo del reglamento
                 </label>
 
-                <input
+                <input id="campo-articulo_reglamento"
                     type="text"
                     name="articulo_reglamento"
                     class="w-full border rounded px-3 py-2"
@@ -100,11 +100,11 @@
 
             <div class="col-span-2">
 
-                <label class="block font-semibold mb-1">
+                <label class="block font-semibold mb-1" for="campo-norma_cst">
                     Norma Código Sustantivo del Trabajo
                 </label>
 
-                <input
+                <input id="campo-norma_cst"
                     type="text"
                     name="norma_cst"
                     class="w-full border rounded px-3 py-2"
@@ -118,14 +118,14 @@
 
             <button
                 type="submit"
-                class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                class="bg-primary text-white px-6 py-2 rounded hover:bg-primary-hover"
             >
                 Guardar citación
             </button>
 
             <a
                 href="{% url 'descargos_empleado' empleado.id %}"
-                class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
+                class="bg-neutral text-white px-6 py-2 rounded hover:bg-neutral-hover"
             >
                 Cancelar
             </a>

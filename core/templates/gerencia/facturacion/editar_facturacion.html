@@ -2,16 +2,16 @@
 
 {% block content %}
 
-<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+<div class="max-w-2xl mx-auto bg-card p-6 rounded shadow">
 
-    <h1 class="text-2xl font-bold mb-6">✏️ Editar Facturación</h1>
+    <h1 class="text-2xl font-bold mb-6">Editar Facturación</h1>
 
     <form method="POST" class="space-y-4">
         {% csrf_token %}
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Proyecto</label>
-            <select name="proyecto" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-semibold mb-1" for="campo-proyecto">Proyecto</label>
+            <select id="campo-proyecto" name="proyecto" class="w-full border rounded px-3 py-2">
                 {% for p in proyectos %}
                 <option value="{{ p.id }}" 
                     {% if p.id == seguimiento.proyecto.id %}selected{% endif %}>
@@ -22,8 +22,8 @@
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Mes</label>
-            <select name="mes" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-semibold mb-1" for="campo-mes">Mes</label>
+            <select id="campo-mes" name="mes" class="w-full border rounded px-3 py-2">
                 {% for valor, label in seguimiento.MES_CHOICES %}
                 <option value="{{ valor }}"
                     {% if seguimiento.mes == valor %}selected{% endif %}>
@@ -34,32 +34,32 @@
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Año</label>
-            <input type="number" name="anio" value="{{ seguimiento.anio }}" required
+            <label class="block text-sm font-semibold mb-1" for="campo-anio">Año</label>
+            <input id="campo-anio" type="number" name="anio" value="{{ seguimiento.anio }}" required
                 class="w-full border rounded px-3 py-2">
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Meta de Facturación</label>
-            <input type="text" name="meta_facturacion" 
+            <label class="block text-sm font-semibold mb-1" for="campo-meta_facturacion">Meta de Facturación</label>
+            <input id="campo-meta_facturacion" type="text" name="meta_facturacion" 
                 value="{{ seguimiento.meta_facturacion }}" required
                 class="w-full border rounded px-3 py-2">
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Facturación Real</label>
-            <input type="text" name="facturacion_real" 
+            <label class="block text-sm font-semibold mb-1" for="campo-facturacion_real">Facturación Real</label>
+            <input id="campo-facturacion_real" type="text" name="facturacion_real" 
                 value="{{ seguimiento.facturacion_real }}" required
                 class="w-full border rounded px-3 py-2">
         </div>
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover">
                 Guardar cambios
             </button>
             <a href="/facturacion/"
-                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
                 Cancelar
             </a>
         </div>

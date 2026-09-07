@@ -1,226 +1,158 @@
 {% extends "base.html" %}
 
-{% block title %}Proyectos{% endblock %}
+{% block titulo %}Proyectos | Cointeca S.A.S{% endblock %}
+{% block encabezado %}Ingeniería{% endblock %}
 
 {% block content %}
-<div class="flex justify-between items-end mb-6">
 
+<div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-        <h1 class="text-3xl font-bold text-gray-800">
-            Proyectos
-        </h1>
-
-        <button
-            id="btnNuevoProyecto"
-            class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
-            + Nuevo Proyecto
-        </button>
+        <h1 class="titulo-pagina">Proyectos</h1>
+        <p class="subtitulo-pagina">Proyectos EMCALI registrados.</p>
     </div>
 
-    <a
-        href="{% url 'ingenieria_inicio' %}"
-        class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-3 rounded-lg text-sm">
-        ← Volver
-    </a>
+    <div class="flex flex-wrap gap-3">
+        <button type="button" id="btnNuevoProyecto" class="btn btn-primario">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            Nuevo proyecto
+        </button>
 
+        <a href="{% url 'ingenieria_inicio' %}" class="btn btn-secundario">Volver</a>
+    </div>
 </div>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full">
-        <thead class="bg-gray-100">
+<div class="tabla-caja mt-6">
+    <table class="tabla">
+        <thead>
             <tr>
-                <th class="p-3 text-left">
-                    Proyecto
-                </th>
-
-                <th class="p-3 text-center">
-                    Tipo
-                </th>
-
-                <th class="p-3 text-center">
-                    Fecha Creación
-                </th>
-
-                <th class="p-3 text-center">
-                    Estado
-                </th>
-
-                <th class="p-3 text-center">
-                    Acciones
-                </th>
+                <th scope="col">Proyecto</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Fecha creación</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
-
         <tbody>
-        {% for proyecto in proyectos %}
-            <tr class="border-b">
-                <td class="p-3 font-semibold">
-                    {{ proyecto.numero_emcali }}
-                </td>
-
-                <td class="text-center">
-                    {{ proyecto.get_tipo_display }}
-                </td>
-
-                <td class="text-center">
-                    {{ proyecto.fecha_creacion|date:"d/m/Y" }}
-                </td>
-
-                <td class="text-center">
-                    {{ proyecto.estado }}
-                </td>
-
-                <td class="text-center">
-                    <a
-                        href="{% url 'detalle_proyecto' proyecto.id %}"
-                        class="text-blue-600 hover:underline">
-                        Abrir
-                    </a>
-                </td>
-            </tr>
-
-        {% empty %}
-
-            <tr>
-                <td
-                    colspan="6"
-                    class="text-center py-8 text-gray-500">
-                    No existen proyectos registrados.
-                </td>
-            </tr>
-        {% endfor %}
+            {% for proyecto in proyectos %}
+                <tr>
+                    <td class="font-semibold tabular">{{ proyecto.numero_emcali }}</td>
+                    <td>{{ proyecto.get_tipo_display }}</td>
+                    <td class="tabular whitespace-nowrap">{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td>
+                        <span class="etiqueta etiqueta-info">{{ proyecto.estado }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'detalle_proyecto' proyecto.id %}" class="enlace-tabla">
+                            Abrir
+                            <span class="sr-only">el proyecto {{ proyecto.numero_emcali }}</span>
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="estado-vacio">
+                        No existen proyectos registrados. Usa «Nuevo proyecto» para crear el primero.
+                    </td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
-
-    <!-- Modal Nuevo Proyecto -->
-<div
-    id="modalProyecto"
-    class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div class="flex justify-between items-center border-b px-6 py-4">
-            <h2 class="text-xl font-bold">
-                Nuevo Proyecto
-            </h2>
-
-            <button
-                id="cerrarModal"
-                class="text-gray-500 hover:text-red-600 text-2xl">
-                &times;
-            </button>
-
-        </div>
-
-        <form
-            method="POST"
-            action="{% url 'crear_proyecto' %}">
-
-            {% csrf_token %}
-
-            <div class="p-6">
-                <label class="block mb-2 font-semibold">
-                    Número Proyecto
-                </label>
-
-                <input
-                    type="text"
-                    name="numero_emcali"
-                    required
-                    class="w-full border rounded-lg px-3 py-2 mb-4 focus:ring-2 focus:ring-blue-500">
-
-                <label class="block mb-2 font-semibold">
-                    Tipo de Proyecto
-                </label>
-
-                <select
-                    name="tipo"
-                    required
-                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-
-                    <option value="">
-                        Seleccione...
-                    </option>
-
-                    <option value="BT">
-                        Baja Tensión
-                    </option>
-
-                    <option value="AP">
-                        Alumbrado Público
-                    </option>
-
-                    <option value="MT">
-                        Media Tensión
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div class="flex justify-end gap-3 border-t px-6 py-4">
-
-                <button
-                    type="button"
-                    id="cancelarModal"
-                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
-                    Cancelar
-                </button>
-
-                <button
-                    type="submit"
-                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-                    Guardar
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
 </div>
 
+<!-- ======================================================================
+     MODAL: NUEVO PROYECTO
+     Fuera del contenedor de la tabla, para que el scroll horizontal de la
+     tabla no lo recorte.
+     ====================================================================== -->
+<div id="modalProyecto"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="tituloModalProyecto">
+
+    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl">
+
+        <div class="flex items-center justify-between border-b border-border px-6 py-4">
+            <h2 id="tituloModalProyecto" class="text-lg font-bold text-primary">
+                Nuevo proyecto
+            </h2>
+
+            <button type="button" id="cerrarModal"
+                    class="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-destructive">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span class="sr-only">Cerrar</span>
+            </button>
+        </div>
+
+        <form method="POST" action="{% url 'crear_proyecto' %}">
+            {% csrf_token %}
+
+            <div class="space-y-5 p-6">
+                <div>
+                    <label for="numero_emcali" class="campo campo-req">Número de proyecto</label>
+                    <input type="text" id="numero_emcali" name="numero_emcali" required class="entrada tabular">
+                </div>
+
+                <div>
+                    <label for="tipo" class="campo campo-req">Tipo de proyecto</label>
+                    <select id="tipo" name="tipo" required class="seleccion">
+                        <option value="">Seleccione…</option>
+                        <option value="BT">Baja tensión</option>
+                        <option value="AP">Alumbrado público</option>
+                        <option value="MT">Media tensión</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-border px-6 py-4">
+                <button type="button" id="cancelarModal" class="btn btn-secundario">Cancelar</button>
+                <button type="submit" class="btn btn-primario">Guardar</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
+(function () {
+    const modal = document.getElementById("modalProyecto");
+    const btnNuevo = document.getElementById("btnNuevoProyecto");
+    const btnCerrar = document.getElementById("cerrarModal");
+    const btnCancelar = document.getElementById("cancelarModal");
+    const primerCampo = document.getElementById("numero_emcali");
 
-const modal = document.getElementById("modalProyecto");
-
-const btnNuevo = document.getElementById("btnNuevoProyecto");
-
-const cerrar = document.getElementById("cerrarModal");
-
-const cancelar = document.getElementById("cancelarModal");
-
-btnNuevo.addEventListener("click", () => {
-
-    modal.classList.remove("hidden");
-
-    modal.classList.add("flex");
-
-});
-
-function cerrarVentana(){
-
-    modal.classList.remove("flex");
-
-    modal.classList.add("hidden");
-
-}
-
-cerrar.addEventListener("click", cerrarVentana);
-
-cancelar.addEventListener("click", cerrarVentana);
-
-modal.addEventListener("click", function(e){
-
-    if(e.target === modal){
-
-        cerrarVentana();
-
+    function abrir() {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        primerCampo.focus();
     }
 
-});
+    function cerrar() {
+        modal.classList.remove("flex");
+        modal.classList.add("hidden");
+        btnNuevo.focus();
+    }
 
+    btnNuevo.addEventListener("click", abrir);
+    btnCerrar.addEventListener("click", cerrar);
+    btnCancelar.addEventListener("click", cerrar);
+
+    // Clic en el fondo oscuro, no dentro de la ventana
+    modal.addEventListener("click", function (evento) {
+        if (evento.target === modal) {
+            cerrar();
+        }
+    });
+
+    document.addEventListener("keydown", function (evento) {
+        if (evento.key === "Escape" && !modal.classList.contains("hidden")) {
+            cerrar();
+        }
+    });
+})();
 </script>
 
 {% endblock %}

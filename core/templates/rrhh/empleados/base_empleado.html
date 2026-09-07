@@ -5,7 +5,7 @@
 <div class="flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-72 bg-gray-800 text-white min-h-screen overflow-y-auto">
+    <aside class="w-72 bg-neutral text-white min-h-screen overflow-y-auto">
 
         <div class="p-5">
 
@@ -19,15 +19,15 @@
                         alt="Foto de {{ empleado.nombre_completo }}"
                         class="w-36 h-36 object-cover rounded-full border-4 border-blue-500 shadow">
                 {% else %}
-                    <div class="w-28 h-28 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 text-sm">
+                    <div class="w-28 h-28 rounded-full bg-neutral flex items-center justify-center text-gray-300 text-sm">
                         Sin foto
                     </div>
                 {% endif %}
             </div>
 
             <a href="{% url 'detalle_empleado' empleado.id %}"
-               class="block px-4 py-3 rounded hover:bg-gray-700 mb-2">
-                👤 Información General
+               class="block px-4 py-3 rounded hover:bg-neutral-hover mb-2">
+                Información General
             </a>
 
             <hr class="my-4 border-gray-600">
@@ -37,83 +37,83 @@
             </h3>
 
             <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📄 Certificación Laboral
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Certificación Laboral
             </a>
 
             <a href="/rrhh/empleados/{{ empleado.id }}/contrato/"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📑 Contrato
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Contrato
             </a>
 
             <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                🌴 Vacaciones
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Vacaciones
             </a>
 
             <a href="/rrhh/{{ empleado.id }}/permiso/"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📝 Permisos
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Permisos
             </a>
 
             <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                💻 Acta Equipos
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Acta Equipos
             </a>
 
             <a href="{% url 'descargos_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                ⚖️ Descargos
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Descargos
             </a>
 
             <a href="{% url 'retiros_cesantias_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                💰 Cesantías
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Cesantías
             </a>
 
             <a href="{% url 'inducciones_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📚 Inducciones
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Inducciones
             </a>
 
             <a href="{% url 'compromisos_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                🚗 Compromiso daños
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Compromiso daños
             </a>
 
             <a href="{% url 'suspensiones_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                ⏸️ Suspensiones
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Suspensiones
             </a>
 
             <a href="{% url 'contratos_aprendiz_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📄 Contrato Aprendiz
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Contrato Aprendiz
             </a>
 
             <a href="{% url 'generar_no_prorroga_contrato' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📄No Prorroga Contrato
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                No Prorroga Contrato
             </a>
 
             <a href="{% url 'generar_no_superacion_periodo_prueba' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📄No Superación Periodo de Prueba
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                No Superación Periodo de Prueba
             </a>
 
             <a href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-gray-700 rounded">
-                ⚠️ Suspensión disciplinaria
+               class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Suspensión disciplinaria
             </a>
 
             <a href="{% url 'generar_historia_clinica_laboral' empleado.id %}"
-            class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📄 Historia Clínica Laboral
+            class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Historia Clínica Laboral
             </a>
 
             <a href="{% url 'generar_acuerdo_responsabilidad' empleado.id %}"
-            class="block px-4 py-2 hover:bg-gray-700 rounded">
-                📄 Acuerdo de Responsabilida
+            class="block px-4 py-2 hover:bg-neutral-hover rounded">
+                Acuerdo de Responsabilida
             </a>
 
         </div>

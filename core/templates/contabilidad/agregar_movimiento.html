@@ -1,74 +1,72 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Agregar gasto | Cointeca S.A.S{% endblock %}
+{% block encabezado %}Contabilidad{% endblock %}
+
 {% block content %}
 
-<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+<div class="mx-auto max-w-2xl">
 
-    <h1 class="text-2xl font-bold mb-4">
-        ➕ Agregar gasto
-    </h1>
+    <h1 class="titulo-pagina">Agregar gasto</h1>
+    <p class="subtitulo-pagina">
+        Los campos marcados con <span class="text-destructive">*</span> son obligatorios.
+    </p>
 
-    <form method="POST" class="space-y-4">
-        {% csrf_token %}
+    <div class="tarjeta tarjeta-cuerpo mt-6">
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
 
-        <div>
-            <label class="block text-sm font-semibold">Fecha</label>
-            <input type="date" name="fecha" required
-                class="w-full border rounded px-3 py-2">
-        </div>
+            <div>
+                <label for="fecha" class="campo campo-req">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required class="entrada">
+            </div>
 
-        <div>
-            <label class="block text-sm font-semibold">Número de factura</label>
-            <input type="text" name="numero_factura" required
-                class="w-full border rounded px-3 py-2">
-        </div>
+            <div>
+                <label for="numero_factura" class="campo campo-req">Número de factura</label>
+                <input type="text" id="numero_factura" name="numero_factura" required class="entrada">
+            </div>
 
-        <div>
-            <label class="block text-sm font-semibold">NIT</label>
-            <input type="text" name="nit"
-                class="w-full border rounded px-3 py-2">
-        </div>
+            <div>
+                <label for="nit" class="campo">NIT</label>
+                <input type="text" id="nit" name="nit" class="entrada">
+            </div>
 
-        <div>
-            <label class="block text-sm font-semibold">Pagado a</label>
-            <input type="text" name="pagado_a" required
-                class="w-full border rounded px-3 py-2">
-        </div>
+            <div>
+                <label for="pagado_a" class="campo campo-req">Pagado a</label>
+                <input type="text" id="pagado_a" name="pagado_a" required class="entrada">
+            </div>
 
-        <div>
-            <label class="block text-sm font-semibold">Concepto</label>
-            <textarea name="concepto" required
-                class="w-full border rounded px-3 py-2"></textarea>
-        </div>
+            <div>
+                <label for="concepto" class="campo campo-req">Concepto</label>
+                <textarea id="concepto" name="concepto" required class="area-texto"></textarea>
+            </div>
 
-        <div>
-            <label class="block text-sm font-semibold">Valor</label>
-            <input type="text" id="valor" name="valor" required
-                placeholder="Ej: 50,000"
-                class="w-full border rounded px-3 py-2">
-        </div>
+            <div>
+                <label for="valor" class="campo campo-req">Valor</label>
+                <input type="text" id="valor" name="valor" required
+                       inputmode="numeric"
+                       aria-describedby="ayuda-valor"
+                       class="entrada tabular">
+                <p id="ayuda-valor" class="ayuda-campo">
+                    Se separa en miles automáticamente. Ejemplo: 50.000
+                </p>
+            </div>
 
-        <script>
-        document.getElementById('valor').addEventListener('input', function(e) {
-            let valor = e.target.value.replace(/\D/g, '');
-            e.target.value = new Intl.NumberFormat('es-CO').format(valor);
-        });
-        </script>
-
-        <div class="flex gap-3 mt-4">
-            <button type="submit"
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                Guardar
-            </button>
-
-            <a href="/caja-menor/{{ caja.id }}/"
-                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                Cancelar
-            </a>
-        </div>
-
-    </form>
-
+            <div class="flex flex-wrap gap-3 pt-2">
+                <button type="submit" class="btn btn-primario">Guardar gasto</button>
+                <a href="{% url 'detalle_caja' caja.id %}" class="btn btn-secundario">Cancelar</a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script>
+document.getElementById("valor").addEventListener("input", function (evento) {
+    const soloDigitos = evento.target.value.replace(/\D/g, "");
+    evento.target.value = soloDigitos
+        ? new Intl.NumberFormat("es-CO").format(soloDigitos)
+        : "";
+});
+</script>
 
 {% endblock %}

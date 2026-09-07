@@ -2,14 +2,14 @@
 
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-6">👥 RRHH</h1>
+<h1 class="text-3xl font-bold mb-6">RRHH</h1>
 
 <div class="mb-6">
 
     <a
         href="{% url 'dashboard' %}"
-        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
-        ← Volver
+        class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded">
+        Volver
     </a>
 
 </div>
@@ -17,56 +17,56 @@
 <div class="grid grid-cols-3 gap-6">
 
     <!-- Empleados -->
-    <div class="bg-white p-6 rounded shadow hover:shadow-lg">
+    <div class="bg-card p-6 rounded shadow hover:shadow-lg">
         <h2 class="text-xl font-bold">Empleados</h2>
-        <p class="text-gray-600">Gestión del personal</p>
+        <p class="text-muted-foreground">Gestión del personal</p>
 
-        <a href="/rrhh/empleados/" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded">
+        <a href="/rrhh/empleados/" class="mt-4 inline-block bg-success text-white px-4 py-2 rounded">
             Entrar
         </a>
     </div>
 
     <!-- Inventario Equipos -->
-    <div class="bg-white p-6 rounded shadow hover:shadow-lg">
+    <div class="bg-card p-6 rounded shadow hover:shadow-lg">
         <h2 class="text-xl font-bold">Inventario Equipos</h2>
-        <p class="text-gray-600">Control de equipos tecnológicos</p>
+        <p class="text-muted-foreground">Control de equipos tecnológicos</p>
 
-        <a href="/rrhh/inventario/" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded">
+        <a href="/rrhh/inventario/" class="mt-4 inline-block bg-success text-white px-4 py-2 rounded">
             Entrar
         </a>
     </div>
 
         <!-- Vacaciones -->
-    <div class="bg-white p-6 rounded shadow hover:shadow-lg">
+    <div class="bg-card p-6 rounded shadow hover:shadow-lg">
         <h2 class="text-xl font-bold">Vacaciones</h2>
-        <p class="text-gray-600">Control de vacaciones</p>
+        <p class="text-muted-foreground">Control de vacaciones</p>
 
         <a href="/rrhh/vacaciones/" 
-        class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded">
+        class="mt-4 inline-block bg-success text-white px-4 py-2 rounded">
             Entrar </a>
         
     </div>
 
     <!-- Nómina -->
-    <div class="bg-white p-6 rounded shadow opacity-60">
+    <div class="bg-card p-6 rounded shadow opacity-60">
         <h2 class="text-xl font-bold">Nómina</h2>
-        <p class="text-gray-600">Próximamente</p>
+        <p class="text-muted-foreground">Próximamente</p>
     </div>
 
     <!-- Documentos -->
-    <div class="bg-white p-6 rounded shadow">
+    <div class="bg-card p-6 rounded shadow">
 
         <h2 class="text-xl font-bold mb-2">
-            📄 Documentos
+            Documentos
         </h2>
 
-        <p class="text-gray-600 mb-4">
+        <p class="text-muted-foreground mb-4">
             Generación de documentos institucionales y formatos de RRHH.
         </p>
 
         <a
             href="{% url 'documentos_rrhh' %}"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+            class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded">
 
             Abrir documentos
 

@@ -3,32 +3,32 @@
 {% block rrhh_content %}
 
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">👤 Ficha Técnica del Trabajador</h1>
+    <h1 class="text-3xl font-bold">Ficha Técnica del Trabajador</h1>
 
     
-        <a href="{% url 'empleados' %}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+        <a href="{% url 'empleados' %}" class="bg-neutral text-white px-6 py-2 rounded hover:bg-neutral-hover">
             Volver
         </a>
 </div>
 {% if error %}
-<div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+<div class="bg-red-100 text-destructive p-3 rounded mb-4">
     {{ error }}
 </div>
 {% endif %}
 
 
-<form method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded shadow space-y-6">
+<form method="POST" enctype="multipart/form-data" class="bg-card p-6 rounded shadow space-y-6">
     {% csrf_token %}
 
     <!-- 1. INFORMACIÓN PERSONAL -->
     <h2 class="text-xl font-semibold border-b pb-2">1. Información Personal</h2>
 
     <div>
-        <label class="block font-semibold mb-1">
+        <label class="block font-semibold mb-1" for="campo-foto">
             Foto del empleado
         </label>
 
-        <input type="file"
+        <input id="campo-foto" type="file"
             name="foto"
             accept="image/*"
             class="border p-2 rounded w-full">
@@ -38,10 +38,10 @@
     <input name="documento" placeholder="Documento"  class="w-full border p-2 rounded">
     <input name="ciudad_expedicion" placeholder="Lugar expedición"  class="w-full border p-2 rounded">
 
-    <label class="block font-medium mb-1">
+    <label class="block font-medium mb-1" for="campo-fecha_nacimiento">
         Fecha de nacimiento
     </label>
-    <input type="date" name="fecha_nacimiento"  class="w-full border p-2 rounded">
+    <input id="campo-fecha_nacimiento" type="date" name="fecha_nacimiento"  class="w-full border p-2 rounded">
     <input name="nacionalidad" value="Colombiano" class="w-full border p-2 rounded">
 
     <input name="direccion" placeholder="Dirección" class="w-full border p-2 rounded">
@@ -65,10 +65,10 @@
     <!-- 3. CONTRATO -->
     <h2 class="text-xl font-semibold border-b pb-2">3. Información Contractual</h2>
 
-    <label class="block font-medium mb-1">
+    <label class="block font-medium mb-1" for="campo-fecha_ingreso">
         Fecha de ingreso
     </label>
-    <input type="date" name="fecha_ingreso" class="w-full border p-2 rounded">
+    <input id="campo-fecha_ingreso" type="date" name="fecha_ingreso" class="w-full border p-2 rounded">
 
     <select name="tipo_contrato" class="w-full border p-2 rounded">
         <option value="fijo">Fijo</option>
@@ -76,10 +76,10 @@
         <option value="obra">Obra o labor</option>
     </select>
 
-    <label class="block font-medium mb-1">
+    <label class="block font-medium mb-1" for="campo-fecha_finalizacion">
         Fecha finalización del contrato
     </label>
-    <input type="date" name="fecha_finalizacion" class="w-full border p-2 rounded" placeholder="Solo para contratos a término fijo">
+    <input id="campo-fecha_finalizacion" type="date" name="fecha_finalizacion" class="w-full border p-2 rounded" placeholder="Solo para contratos a término fijo">
 
     <input
     id="salario"
@@ -110,11 +110,11 @@
     <input name="parentesco_emergencia" placeholder="Parentesco emergencia" class="w-full border p-2 rounded">
 
     <!-- BOTÓN -->
-    <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+    <button class="bg-primary text-white px-6 py-2 rounded hover:bg-primary-hover">
         Guardar empleado
     </button>
     <!--Boton volver-->
-    <a href="{% url 'empleados' %}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+    <a href="{% url 'empleados' %}" class="bg-neutral text-white px-6 py-2 rounded hover:bg-neutral-hover">
         Volver
     </a>
 </form>

@@ -2,21 +2,21 @@
 
 {% block empleado_content %}
 
-<h2 class="text-3xl font-bold text-gray-800">
-    📄 Contrato de Aprendizaje
+<h2 class="text-3xl font-bold text-foreground">
+    Contrato de Aprendizaje
 </h2>
 
 <div class="flex gap-3 mb-6">
 
     <a href="{% url 'crear_contrato_aprendiz' empleado.id %}"
-       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow">
+       class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded-lg shadow">
 
         + Nuevo Contrato
 
     </a>
 
     <a href="{% url 'detalle_empleado' empleado.id %}"
-       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow">
+       class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow">
 
         Volver
 
@@ -24,9 +24,10 @@
 
 </div>
 
+<div class="overflow-x-auto">
 <table class="min-w-full">
 
-    <thead class="bg-blue-600 text-white">
+    <thead class="bg-primary text-white">
 
         <tr>
 
@@ -58,7 +59,7 @@
 
     {% for contrato in contratos %}
 
-        <tr class="border-b hover:bg-gray-50">
+        <tr class="border-b hover:bg-muted">
 
             <td class="px-4 py-3">
 
@@ -96,7 +97,7 @@
                     </a>
 
                     <a href="{% url 'generar_contrato_aprendiz' contrato.id %}"
-                       class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                       class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded text-sm">
 
                         Word
 
@@ -108,7 +109,7 @@
 
                         {% csrf_token %}
 
-                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                        <button class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-sm">
 
                             Eliminar
 
@@ -126,7 +127,7 @@
 
         <tr>
 
-            <td colspan="5" class="text-center py-6 text-gray-500">
+            <td colspan="5" class="text-center py-6 text-muted-foreground">
 
                 No existen contratos registrados.
 
@@ -139,5 +140,6 @@
     </tbody>
 
 </table>
+</div>
 
 {% endblock %}

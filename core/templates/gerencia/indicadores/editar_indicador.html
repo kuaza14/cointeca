@@ -2,16 +2,16 @@
 
 {% block content %}
 
-<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+<div class="max-w-2xl mx-auto bg-card p-6 rounded shadow">
 
-    <h1 class="text-2xl font-bold mb-6">📊 Editar indicador Estratégico</h1>
+    <h1 class="text-2xl font-bold mb-6">Editar indicador Estratégico</h1>
 
     <form method="POST" class="space-y-4">
         {% csrf_token %}
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Perspectiva</label>
-            <select name="perspectiva" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-semibold mb-1" for="campo-perspectiva">Perspectiva</label>
+            <select id="campo-perspectiva" name="perspectiva" class="w-full border rounded px-3 py-2">
                 <option value="financiera" {% if indicador.perspectiva == 'financiera' %}selected{% endif %}>Financiera</option>
                 <option value="comercial" {% if indicador.perspectiva == 'comercial' %}selected{% endif %}>Comercial</option>
                 <option value="operativa" {% if indicador.perspectiva == 'operativa' %}selected{% endif %}>Operativa</option>
@@ -22,8 +22,8 @@
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Nombre del indicadoricador (KPI)</label>
-            <input type="text" name="nombre" required
+            <label class="block text-sm font-semibold mb-1" for="campo-nombre">Nombre del indicadoricador (KPI)</label>
+            <input id="campo-nombre" type="text" name="nombre" required
                 value="{{ indicador.nombre }}"
                 class="w-full border rounded px-3 py-2">
         </div>
@@ -34,15 +34,15 @@
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Meta Anual</label>
-            <input type="text" name="meta_anual" required
+            <label class="block text-sm font-semibold mb-1" for="campo-meta_anual">Meta Anual</label>
+            <input id="campo-meta_anual" type="text" name="meta_anual" required
                 value="{{ indicador.meta_anual }}"
                 class="w-full border rounded px-3 py-2">
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Frecuencia de Medición</label>
-            <select name="frecuencia" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-semibold mb-1" for="campo-frecuencia">Frecuencia de Medición</label>
+            <select id="campo-frecuencia" name="frecuencia" class="w-full border rounded px-3 py-2">
                 <option value="mensual" {% if indicador.frecuencia == 'mensual' %}selected{% endif %}>Mensual</option>
                 <option value="trimestral" {% if indicador.frecuencia == 'trimestral' %}selected{% endif %}>Trimestral</option>
                 <option value="semestral" {% if indicador.frecuencia == 'semestral' %}selected{% endif %}>Semestral</option>
@@ -53,11 +53,11 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover">
                 Guardar
             </button>
             <a href="/indicadores/"
-                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
                 Cancelar
             </a>
         </div>

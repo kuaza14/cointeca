@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
+<div class="max-w-5xl mx-auto bg-card p-6 rounded shadow">
 
     <h1 class="text-2xl font-bold mb-6">
         Nueva suspensión disciplinaria
@@ -19,8 +19,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div class="md:col-span-2">
-                <label class="font-semibold">Motivo de la suspensión</label>
-                <textarea
+                <label class="font-semibold" for="campo-motivo_suspension">Motivo de la suspensión</label>
+                <textarea id="campo-motivo_suspension"
                     name="motivo_suspension"
                     rows="4"
                     required
@@ -29,8 +29,8 @@
             </div>
 
             <div>
-                <label class="font-semibold">Fecha de la falta</label>
-                <input
+                <label class="font-semibold" for="campo-fecha_falta">Fecha de la falta</label>
+                <input id="campo-fecha_falta"
                     type="date"
                     name="fecha_falta"
                     required
@@ -39,11 +39,11 @@
             </div>
 
             <div class="md:col-span-2">
-                <label class="font-semibold">
+                <label class="font-semibold" for="campo-articulos_infringidos">
                     Artículos infringidos
                 </label>
 
-                <textarea
+                <textarea id="campo-articulos_infringidos"
                     name="articulos_infringidos"
                     rows="6"
                     required
@@ -53,8 +53,8 @@
             </div>
 
             <div>
-                <label class="font-semibold">Inicio de suspensión</label>
-                <input
+                <label class="font-semibold" for="campo-fecha_inicio_suspension">Inicio de suspensión</label>
+                <input id="campo-fecha_inicio_suspension"
                     type="date"
                     name="fecha_inicio_suspension"
                     required
@@ -63,8 +63,8 @@
             </div>
 
             <div>
-                <label class="font-semibold">Fin de suspensión</label>
-                <input
+                <label class="font-semibold" for="campo-fecha_fin_suspension">Fin de suspensión</label>
+                <input id="campo-fecha_fin_suspension"
                     type="date"
                     name="fecha_fin_suspension"
                     required
@@ -73,8 +73,8 @@
             </div>
 
             <div>
-                <label class="font-semibold">Fecha de reincorporación</label>
-                <input
+                <label class="font-semibold" for="campo-fecha_reincorporacion">Fecha de reincorporación</label>
+                <input id="campo-fecha_reincorporacion"
                     type="date"
                     name="fecha_reincorporacion"
                     required
@@ -83,11 +83,11 @@
             </div>
 
             <div class="md:col-span-2">
-                <label class="font-semibold">
+                <label class="font-semibold" for="campo-responsabilidad_pecuniaria">
                     Responsabilidad pecuniaria
                 </label>
 
-                <textarea
+                <textarea id="campo-responsabilidad_pecuniaria"
                     name="responsabilidad_pecuniaria"
                     rows="4"
                     class="w-full border p-2 rounded"
@@ -95,11 +95,11 @@
             </div>
 
             <div class="md:col-span-2">
-                <label class="font-semibold">
+                <label class="font-semibold" for="campo-consecuencia_reincidencia">
                     Consecuencia por reincidencia
                 </label>
 
-                <textarea
+                <textarea id="campo-consecuencia_reincidencia"
                     name="consecuencia_reincidencia"
                     rows="4"
                     class="w-full border p-2 rounded"
@@ -111,14 +111,14 @@
         <div class="flex gap-3 mt-6">
             <button
                 type="submit"
-                class="bg-blue-600 text-white px-5 py-2 rounded"
+                class="bg-primary text-white px-5 py-2 rounded"
             >
                 Guardar suspensión
             </button>
 
             <a
                 href="{% url 'detalle_empleado' empleado.id %}"
-                class="bg-gray-500 text-white px-5 py-2 rounded"
+                class="bg-neutral text-white px-5 py-2 rounded"
             >
                 Cancelar
             </a>

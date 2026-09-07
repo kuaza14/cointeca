@@ -2,27 +2,27 @@
 
 {% block content %}
 
-<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+<div class="max-w-2xl mx-auto bg-card p-6 rounded shadow">
 
-    <h1 class="text-2xl font-bold mb-6">🏗️ Crear Proyecto</h1>
+    <h1 class="text-2xl font-bold mb-6">Crear Proyecto</h1>
 
     <form method="POST" class="space-y-4">
         {% csrf_token %}
 
         <div>
-            <label class="block text-sm font-semibold mb-1">Nombre del Proyecto</label>
-            <input type="text" name="nombre" required
+            <label class="block text-sm font-semibold mb-1" for="campo-nombre">Nombre del Proyecto</label>
+            <input id="campo-nombre" type="text" name="nombre" required
                 placeholder="Ej: Power Networks"
                 class="w-full border rounded px-3 py-2">
         </div>
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-primary-hover">
                 Guardar
             </button>
             <a href="/facturacion/"
-                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
                 Cancelar
             </a>
         </div>

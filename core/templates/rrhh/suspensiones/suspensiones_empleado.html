@@ -4,27 +4,28 @@
 
 <div class="flex justify-between items-center mb-6">
 
-    <h2 class="text-3xl font-bold text-gray-800">
-        ⏸️ Suspensiones del Contrato
+    <h2 class="text-3xl font-bold text-foreground">
+        Suspensiones del Contrato
     </h2>
 
     <a href="{% url 'crear_suspension' empleado.id %}"
-       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow">
+       class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded-lg shadow">
         + Nueva Suspensión
     </a>
 
     <a href="{% url 'detalle_empleado' empleado.id %}"
-       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow">
+       class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow">
         Volver
     </a>
 
 </div>
 
-<div class="bg-white rounded-xl shadow overflow-hidden">
+<div class="bg-card rounded-xl shadow overflow-hidden">
 
-    <table class="min-w-full">
+    <div class="overflow-x-auto">
+<table class="min-w-full">
 
-        <thead class="bg-blue-600 text-white">
+        <thead class="bg-primary text-white">
 
             <tr>
                 <th class="px-4 py-3 text-left">Fecha Inicio</th>
@@ -38,7 +39,7 @@
 
         {% for suspension in suspensiones %}
 
-            <tr class="border-b hover:bg-gray-50">
+            <tr class="border-b hover:bg-muted">
 
                 <td class="px-4 py-3">
                     {{ suspension.fecha_inicio }}
@@ -58,7 +59,7 @@
                         </a>
 
                         <a href="{% url 'generar_suspension' suspension.id %}"
-                           class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                           class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded text-sm">
                             Word
                         </a>
 
@@ -68,7 +69,7 @@
 
                             {% csrf_token %}
 
-                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                            <button class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-sm">
                                 Eliminar
                             </button>
 
@@ -84,7 +85,7 @@
 
             <tr>
 
-                <td colspan="3" class="text-center py-6 text-gray-500">
+                <td colspan="3" class="text-center py-6 text-muted-foreground">
                     No existen suspensiones registradas.
                 </td>
 
@@ -95,6 +96,7 @@
         </tbody>
 
     </table>
+</div>
 
 </div>
 

@@ -11,9 +11,9 @@
     {% csrf_token %}
 
     <div class="mb-4">
-        <label>Testigo</label>
+        <label for="campo-testigo">Testigo</label>
 
-        <input
+        <input id="campo-testigo"
             type="text"
             name="testigo"
             value="{{ descargo.testigo }}"
@@ -22,9 +22,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Fecha de los hechos</label>
+        <label for="campo-fecha_hechos">Fecha de los hechos</label>
 
-        <input
+        <input id="campo-fecha_hechos"
             type="date"
             name="fecha_hechos"
             value="{{ descargo.fecha_hechos|date:'Y-m-d' }}"
@@ -34,9 +34,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Hora inicio</label>
+        <label for="campo-hora_inicio">Hora inicio</label>
 
-        <input
+        <input id="campo-hora_inicio"
             type="time"
             name="hora_inicio"
             value="{{ descargo.hora_inicio|time:'H:i' }}"
@@ -46,9 +46,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Hora cierre</label>
+        <label for="campo-hora_cierre">Hora cierre</label>
 
-        <input
+        <input id="campo-hora_cierre"
             type="time"
             name="hora_cierre"
             value="{{ descargo.hora_cierre|time:'H:i' }}"
@@ -57,9 +57,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Descripción de la falta</label>
+        <label for="campo-descripcion_falta">Descripción de la falta</label>
 
-        <textarea
+        <textarea id="campo-descripcion_falta"
             name="descripcion_falta"
             rows="5"
             class="border p-2 w-full"
@@ -67,9 +67,9 @@
     </div>
 
     <div class="mb-4">
-        <label>Observaciones finales</label>
+        <label for="campo-observaciones_finales">Observaciones finales</label>
 
-        <textarea
+        <textarea id="campo-observaciones_finales"
             name="observaciones_finales"
             rows="5"
             class="border p-2 w-full"
@@ -78,7 +78,7 @@
 
     <button
         type="submit"
-        class="bg-blue-600 text-white px-4 py-2 rounded"
+        class="bg-primary text-white px-4 py-2 rounded"
     >
         Guardar cambios
     </button>

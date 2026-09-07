@@ -1,120 +1,98 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Detalle de caja | Cointeca S.A.S{% endblock %}
+{% block encabezado %}Contabilidad{% endblock %}
+
 {% block content %}
 
-<!-- TITULO -->
-<div class="mb-6 border-b pb-3">
-    <h1 class="text-3xl font-bold text-gray-800">
-        📊 Detalle de Caja
-    </h1>
-    <p class="text-gray-500 text-sm mt-1">
-        Movimientos registrados de la caja menor
-    </p>
-</div>
+<h1 class="titulo-pagina">Detalle de caja</h1>
+<p class="subtitulo-pagina">Movimientos registrados de la caja menor.</p>
 
 <!-- RESUMEN -->
-<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-    <div class="bg-white p-4 rounded shadow">
-        <p class="text-gray-500 text-sm">Valor Inicial</p>
-        <h2 class="text-xl font-bold">
+    <div class="tarjeta tarjeta-cuerpo">
+        <p class="text-sm text-muted-foreground">Valor inicial</p>
+        <p class="mt-1 text-xl font-bold tabular">
             ${{ caja.valor_inicial|floatformat:0 }}
-        </h2>
+        </p>
     </div>
 
-    <div class="bg-white p-4 rounded shadow">
-        <p class="text-gray-500 text-sm">Total Gastado</p>
-        <h2 class="text-xl font-bold text-red-500">
+    <div class="tarjeta tarjeta-cuerpo">
+        <p class="text-sm text-muted-foreground">Total gastado</p>
+        <p class="mt-1 text-xl font-bold tabular text-destructive">
             ${{ caja.total_gastado|floatformat:0 }}
-        </h2>
+        </p>
     </div>
 
-    <div class="bg-white p-4 rounded shadow">
-        <p class="text-gray-500 text-sm">Restante</p>
-        <h2 class="text-xl font-bold text-green-600">
+    <div class="tarjeta tarjeta-cuerpo">
+        <p class="text-sm text-muted-foreground">Restante</p>
+        <p class="mt-1 text-xl font-bold tabular text-success">
             ${{ caja.valor_restante|floatformat:0 }}
-        </h2>
+        </p>
     </div>
 
 </div>
 
-<!-- BOTÓN -->
-<div class="mb-4">
-    <a href="/caja-menor/{{ caja.id }}/agregar/" 
-       class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-       + Agregar gasto
+<div class="mt-6">
+    <a href="{% url 'agregar_movimiento' caja.id %}" class="btn btn-primario">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+        Agregar gasto
     </a>
 </div>
 
-<!-- TABLA -->
-<div class="bg-white shadow rounded-lg overflow-hidden">
-
-    <table class="min-w-full text-sm text-left">
-
-        <thead class="bg-gray-800 text-white">
+<!-- MOVIMIENTOS -->
+<div class="tabla-caja mt-4">
+    <table class="tabla">
+        <thead>
             <tr>
-                <th class="px-4 py-3">Fecha</th>
-                <th class="px-4 py-3">Factura</th>
-                <th class="px-4 py-3">Pagado a</th>
-                <th class="px-4 py-3">Concepto</th>
-                <th class="px-4 py-3">Valor</th>
-                <th class="px-4 py-3 text-center">Acciones</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Factura</th>
+                <th scope="col">Pagado a</th>
+                <th scope="col">Concepto</th>
+                <th scope="col" class="num">Valor</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
-
-        <tbody class="divide-y">
-
+        <tbody>
             {% for m in movimientos %}
-            <tr class="hover:bg-gray-100">
-
-                <td class="px-4 py-2">{{ m.fecha }}</td>
-                <td class="px-4 py-2">{{ m.numero_factura }}</td>
-                <td class="px-4 py-2">{{ m.pagado_a }}</td>
-                <td class="px-4 py-2">{{ m.concepto }}</td>
-                
-
-                <td class="px-4 py-2 text-red-500 font-semibold">
-                    ${{ m.valor|floatformat:0 }}
-                </td>
-
-                <td class="px-4 py-2 text-center space-x-2">
-
-                    <a href="/movimiento/{{ m.id }}/editar/" 
-                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-                    Editar
-                    </a>
-
-                    <a href="/movimiento/{{ m.id }}/eliminar/" 
-                    onclick="return confirm('¿Eliminar este gasto?')"
-                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">
-                    Eliminar
-                    </a>
-
-                </td>
-
-            </tr>
+                <tr>
+                    <td class="tabular whitespace-nowrap">{{ m.fecha }}</td>
+                    <td>{{ m.numero_factura }}</td>
+                    <td>{{ m.pagado_a }}</td>
+                    <td class="max-w-xs">{{ m.concepto }}</td>
+                    <td class="num text-destructive font-semibold">${{ m.valor|floatformat:0 }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'editar_movimiento' m.id %}"
+                               class="btn btn-secundario">
+                                Editar
+                                <span class="sr-only">el gasto del {{ m.fecha }}</span>
+                            </a>
+                            <a href="{% url 'eliminar_movimiento' m.id %}"
+                               onclick="return confirm('¿Eliminar este gasto? Esta acción no se puede deshacer.')"
+                               class="btn btn-peligro">
+                                Eliminar
+                                <span class="sr-only">el gasto del {{ m.fecha }}</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
             {% empty %}
-            <tr>
-                <td colspan="5" class="text-center py-4 text-gray-500">
-                    No hay movimientos
-                </td>
-            </tr>
+                <tr>
+                    <td colspan="6" class="estado-vacio">
+                        Esta caja todavía no tiene movimientos registrados.
+                    </td>
+                </tr>
             {% endfor %}
-
         </tbody>
-
     </table>
-
 </div>
 
-
-
-<!-- VOLVER -->
 <div class="mt-6">
-    <a href="/caja-menor/" 
-       class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
-       ← Volver
-    </a>
+    <a href="{% url 'caja_menor' %}" class="btn btn-secundario">Volver a caja menor</a>
 </div>
 
 {% endblock %}

@@ -7,9 +7,9 @@
 <div class="max-w-6xl mx-auto p-6 space-y-6">
 
 <!-- ENCABEZADO -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
     <div>
-        <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+        <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
             <span>/</span>
             <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
@@ -18,31 +18,31 @@
                 {{ proyecto.numero_emcali }}
             </a>
             <span>/</span>
-            <span class="text-gray-800 font-medium">Nueva Entrada</span>
+            <span class="text-foreground font-medium">Nueva Entrada</span>
         </div>
 
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-2">
-            📥 Registrar Entrada de Materiales
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
+            Registrar Entrada de Materiales
         </h1>
 
-        <p class="text-sm text-gray-600 mt-1">
+        <p class="text-sm text-muted-foreground mt-1">
             Registra únicamente los materiales que realmente llegaron al proyecto.
         </p>
     </div>
 
     <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-       class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
-        ← Cancelar y Volver
+       class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
+        Cancelar y Volver
     </a>
 </div>
         <!-- ENTRADAS ANTERIORES -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
             <div class="flex items-center justify-between border-b pb-3">
                 <div>
-                    <h2 class="text-base font-bold text-gray-800">
-                        📋 Entradas Registradas
+                    <h2 class="text-base font-bold text-foreground">
+                        Entradas Registradas
                     </h2>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-xs text-muted-foreground mt-1">
                         Materiales que ya han ingresado al proyecto.
                     </p>
                 </div>
@@ -51,18 +51,18 @@
             {% if entradas %}
             <div class="space-y-3">
                 {% for ent in entradas %}
-                <div class="border border-gray-200 rounded-lg p-4">
+                <div class="border border-border rounded-lg p-4">
                     <!-- CABECERA -->
                     
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                         <!-- INFORMACIÓN -->
                         <div class="flex flex-wrap items-center gap-3">
-                            <span class="text-xs font-bold text-gray-700">
-                                📅 {{ ent.fecha|date:"d/m/Y" }}
+                            <span class="text-xs font-bold text-foreground">
+                                {{ ent.fecha|date:"d/m/Y" }}
                             </span>
 
                             {% if ent.numero_remision %}
-                            <span class="text-xs text-gray-600">
+                            <span class="text-xs text-muted-foreground">
                                 Remisión:
                                 <strong>{{ ent.numero_remision }}</strong>
                             </span>
@@ -73,8 +73,8 @@
                         <div class="flex items-center gap-2">
                             <!-- EDITAR ENTRADA COMPLETA -->
                             <a href="{% url 'editar_entrada_material' ent.id %}"
-                            class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg">
-                                ✏️ Editar
+                            class="px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary text-xs font-semibold rounded-lg">
+                                Editar
                             </a>
 
                             <!-- ELIMINAR ENTRADA COMPLETA -->
@@ -84,8 +84,8 @@
 
                                 {% csrf_token %}
                                 <button type="submit"
-                                        class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-lg">
-                                    🗑️ Eliminar
+                                        class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-destructive text-xs font-semibold rounded-lg">
+                                    Eliminar
                                 </button>
                             </form>
                         </div>
@@ -99,10 +99,10 @@
 
                                 <!-- INFORMACIÓN DEL MATERIAL -->
                                 <div class="flex-1">
-                                    <span class="font-mono text-gray-500">
+                                    <span class="font-mono text-muted-foreground">
                                         {{ det.material.item }}
                                     </span>
-                                    <span class="font-medium text-gray-800 ml-2">
+                                    <span class="font-medium text-foreground ml-2">
                                         {{ det.material.descripcion }}
                                     </span>
                                 </div>
@@ -119,7 +119,7 @@
             </div>
             {% else %}
 
-            <div class="text-center py-6 text-gray-500">
+            <div class="text-center py-6 text-muted-foreground">
                 <p class="text-sm">
                     No hay entradas registradas todavía.
                 </p>
@@ -130,15 +130,14 @@
 <form method="POST" class="space-y-6" id="formEntrada">
     {% csrf_token %}
     <!-- DATOS DE LA REMISIÓN -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-        <h2 class="text-base font-bold text-gray-800 border-b pb-2 flex items-center gap-2">
-            <span>📄</span>
+    <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
+        <h2 class="text-base font-bold text-foreground border-b pb-2 flex items-center gap-2">
             Información de Recepción / Remisión
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campoFecha">
                     Fecha de Ingreso *
                 </label>
 
@@ -146,64 +145,63 @@
                        name="fecha"
                        required
                        id="campoFecha"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-numero_remision">
                     N° Remisión / Factura
                 </label>
 
-                <input type="text"
+                <input id="campo-numero_remision" type="text"
                        name="numero_remision"
                        placeholder="Ej: REM-84920"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
 
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-proveedor">
                     Proveedor / Fabricante
                 </label>
 
-                <input type="text"
+                <input id="campo-proveedor" type="text"
                        name="proveedor"
                        placeholder="Ej: Celsa / Prysmian"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-recibido_por">
                     Recibido por
                 </label>
 
-                <input type="text"
+                <input id="campo-recibido_por" type="text"
                        name="recibido_por"
                        placeholder="Nombre de quien recibe"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
         </div>
 
         <div>
-            <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-observaciones">
                 Observaciones
             </label>
-            <textarea name="observaciones"
+            <textarea id="campo-observaciones" name="observaciones"
                       rows="2"
                       placeholder="Observaciones adicionales..."
-                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                      class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
         <div class="flex items-center justify-between border-b pb-2">
             <div>
-                <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <span>📦</span>
+                <h2 class="text-base font-bold text-foreground flex items-center gap-2">
                     Materiales que Ingresan
                 </h2>
 
-                <p class="text-xs text-gray-500">
+                <p class="text-xs text-muted-foreground">
                     Coloca aquí únicamente las cantidades que realmente llegaron.
                 </p>
             </div>
@@ -218,7 +216,7 @@
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200"
                    id="tablaMateriales">
-                <thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
+                <thead class="bg-muted text-xs font-semibold text-muted-foreground uppercase">
                     <tr>
                         <th class="px-4 py-3 text-left">
                             Material
@@ -239,7 +237,7 @@
                         <td class="px-4 py-3">
                             <select name="material_id[]"
                                     required
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none select-material">
+                                    class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none select-material">
                                 <option value="">
                                     -- Seleccione un material --
                                 </option>
@@ -261,12 +259,12 @@
                                    name="cantidad[]"
                                    required
                                    placeholder="0.00"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none input-cantidad">
+                                   class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold text-foreground focus:ring-2 focus:ring-emerald-500 focus:outline-none input-cantidad">
                         </td>
                         <td class="px-4 py-3 text-center">
 
                             <button type="button"
-                                    class="btnEliminarFila text-red-500 hover:text-red-700 font-bold text-lg">
+                                    class="btnEliminarFila text-destructive hover:text-red-700 font-bold text-lg">
                                 &times;
                             </button>
                         </td>
@@ -278,13 +276,12 @@
 
     <div class="flex items-center justify-end gap-3 pt-2">
         <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-           class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition">
+           class="px-5 py-2.5 bg-muted hover:bg-gray-200 text-foreground font-medium rounded-lg text-sm transition">
             Cancelar
         </a>
 
         <button type="submit"
                 class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-sm shadow-md transition flex items-center gap-2">
-            <span>📥</span>
             Guardar Entrada de Materiales
         </button>
     </div>
@@ -373,7 +370,7 @@ function cargarTodosLosPendientes() {
             <td class="px-4 py-3">
                 <select name="material_id[]"
                         required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none select-material">
+                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none select-material">
 
                     <option value="">
                         -- Seleccione un material --
@@ -401,12 +398,12 @@ function cargarTodosLosPendientes() {
                        name="cantidad[]"
                        required
                        value="${item.cantidad}"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none input-cantidad">
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold text-foreground focus:ring-2 focus:ring-emerald-500 focus:outline-none input-cantidad">
             </td>
 
             <td class="px-4 py-3 text-center">
                 <button type="button"
-                        class="btnEliminarFila text-red-500 hover:text-red-700 font-bold text-lg">
+                        class="btnEliminarFila text-destructive hover:text-red-700 font-bold text-lg">
                     &times;
                 </button>
             </td>

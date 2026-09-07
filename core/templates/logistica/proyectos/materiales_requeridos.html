@@ -10,12 +10,12 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 
 ```
 <!-- ENCABEZADO -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+<div class="bg-card rounded-xl shadow-sm border border-border p-6">
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
         <div>
-            <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <a href="/dashboard/" class="hover:underline">
                     Inicio
                 </a>
@@ -34,23 +34,23 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 
                 <span>/</span>
 
-                <span class="text-gray-800 font-medium">
+                <span class="text-foreground font-medium">
                     {{ proyecto.numero_emcali }}
                 </span>
             </div>
 
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
                 Materiales Requeridos
             </h1>
 
-            <p class="text-sm text-gray-500 mt-1">
+            <p class="text-sm text-muted-foreground mt-1">
                 Proyecto {{ proyecto.numero_emcali }}
             </p>
         </div>
 
         <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-           class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-sm transition">
-            ← Volver al Proyecto
+           class="inline-flex items-center justify-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg text-sm transition">
+            Volver al Proyecto
         </a>
 
     </div>
@@ -59,17 +59,16 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 
 
 <!-- AGREGAR MATERIAL -->
-<div class="bg-white rounded-xl shadow-sm border border-blue-200 p-6">
+<div class="bg-card rounded-xl shadow-sm border border-blue-200 p-6">
 
-    <div class="flex items-center justify-between border-b border-gray-200 pb-3 mb-5">
+    <div class="flex items-center justify-between border-b border-border pb-3 mb-5">
 
         <div>
-            <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
-                <span>➕</span>
+            <h2 class="text-base font-bold text-foreground flex items-center gap-2">
                 Agregar Material Requerido
             </h2>
 
-            <p class="text-xs text-gray-500 mt-1">
+            <p class="text-xs text-muted-foreground mt-1">
                 Selecciona un material del catálogo y especifica la cantidad total requerida para este proyecto.
             </p>
         </div>
@@ -88,13 +87,13 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
             <!-- MATERIAL -->
             <div class="md:col-span-2">
 
-                <label class="block text-xs font-bold text-gray-700 mb-1">
+                <label class="block text-xs font-bold text-foreground mb-1" for="campo-material_id">
                     Material
                 </label>
 
-                <select name="material_id"
+                <select id="campo-material_id" name="material_id"
                         required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        class="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
 
                     <option value="">
                         -- Seleccionar material del catálogo --
@@ -114,22 +113,22 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
             <!-- CANTIDAD -->
             <div>
 
-                <label class="block text-xs font-bold text-gray-700 mb-1">
+                <label class="block text-xs font-bold text-foreground mb-1" for="campo-cantidad">
                     Cantidad requerida
                 </label>
 
                 <div class="flex gap-2">
 
-                    <input type="number"
+                    <input id="campo-cantidad" type="number"
                            name="cantidad"
                            step="0.01"
                            min="0.01"
                            required
                            placeholder="0.00"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                           class="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
 
                     <button type="submit"
-                            class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm shadow-sm transition whitespace-nowrap">
+                            class="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg text-sm shadow-sm transition whitespace-nowrap">
                         + Agregar
                     </button>
 
@@ -147,7 +146,7 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 <!-- RESUMEN -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-    <div class="bg-white rounded-xl shadow-sm border border-indigo-200 bg-indigo-50/20 p-5">
+    <div class="bg-card rounded-xl shadow-sm border border-indigo-200 bg-indigo-50/20 p-5">
 
         <div class="flex items-center justify-between">
 
@@ -155,11 +154,7 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                 Materiales Requeridos
             </span>
 
-            <span class="p-2 bg-indigo-100 text-indigo-700 rounded-lg text-lg">
-                📐
-            </span>
-
-        </div>
+            </div>
 
         <p class="text-2xl font-black text-indigo-900 mt-2">
             {{ materiales_requeridos|length }}
@@ -172,7 +167,7 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
     </div>
 
 
-    <div class="bg-white rounded-xl shadow-sm border border-blue-200 bg-blue-50/20 p-5">
+    <div class="bg-card rounded-xl shadow-sm border border-blue-200 bg-primary-soft/20 p-5">
 
         <div class="flex items-center justify-between">
 
@@ -180,17 +175,13 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                 Cantidad Total
             </span>
 
-            <span class="p-2 bg-blue-100 text-blue-700 rounded-lg text-lg">
-                📦
-            </span>
-
-        </div>
+            </div>
 
         <p class="text-2xl font-black text-blue-900 mt-2">
             {{ total_requerido|floatformat:2 }}
         </p>
 
-        <p class="text-xs text-blue-600 mt-1">
+        <p class="text-xs text-primary mt-1">
             Suma de cantidades requeridas
         </p>
 
@@ -200,16 +191,15 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 
 
 <!-- LISTA DE MATERIALES REQUERIDOS -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
 
-    <div class="p-5 bg-gray-50 border-b border-gray-200">
+    <div class="p-5 bg-muted border-b border-border">
 
-        <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
-            <span>📋</span>
+        <h2 class="text-base font-bold text-foreground flex items-center gap-2">
             Materiales Requeridos para este Proyecto
         </h2>
 
-        <p class="text-xs text-gray-500 mt-1">
+        <p class="text-xs text-muted-foreground mt-1">
             Estos son los materiales que posteriormente estarán disponibles para registrar las entradas.
         </p>
 
@@ -220,7 +210,7 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 
         <table class="min-w-full divide-y divide-gray-200 text-sm">
 
-            <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold">
+            <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
 
                 <tr>
 
@@ -249,21 +239,21 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
             </thead>
 
 
-            <tbody class="divide-y divide-gray-100 bg-white">
+            <tbody class="divide-y divide-gray-100 bg-card">
 
                 {% for requerido in materiales_requeridos %}
 
-                <tr class="hover:bg-gray-50 transition">
+                <tr class="hover:bg-muted transition">
 
-                    <td class="px-5 py-4 font-semibold text-gray-600">
+                    <td class="px-5 py-4 font-semibold text-muted-foreground">
                         {{ requerido.material.item }}
                     </td>
 
-                    <td class="px-5 py-4 font-medium text-gray-900">
+                    <td class="px-5 py-4 font-medium text-foreground">
                         {{ requerido.material.descripcion }}
                     </td>
 
-                    <td class="px-5 py-4 text-center text-xs font-semibold text-gray-500">
+                    <td class="px-5 py-4 text-center text-xs font-semibold text-muted-foreground">
                         {{ requerido.material.unidad|default:"U" }}
                     </td>
 
@@ -286,8 +276,8 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                                         '{{ requerido.material.descripcion|escapejs }}',
                                         '{{ requerido.cantidad_requerida }}'
                                     )"
-                                    class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition">
-                                ✏️ Editar
+                                    class="inline-flex items-center justify-center px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary border border-blue-200 rounded-lg text-xs font-semibold transition">
+                                Editar
                             </button>
 
 
@@ -306,8 +296,8 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                                        value="{{ requerido.id }}">
 
                                 <button type="submit"
-                                        class="inline-flex items-center justify-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-semibold transition">
-                                    🗑️ Eliminar
+                                        class="inline-flex items-center justify-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-destructive border border-red-200 rounded-lg text-xs font-semibold transition">
+                                    Eliminar
                                 </button>
 
                             </form>
@@ -323,19 +313,17 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                 <tr>
 
                     <td colspan="5"
-                        class="px-6 py-12 text-center text-gray-500">
+                        class="px-6 py-12 text-center text-muted-foreground">
 
                         <div class="max-w-md mx-auto">
 
-                            <div class="text-4xl mb-3">
-                                📦
-                            </div>
+                            <div class="mb-3 flex justify-center text-muted-foreground"><svg class="size-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg></div>
 
-                            <p class="text-base font-semibold text-gray-800">
+                            <p class="text-base font-semibold text-foreground">
                                 No hay materiales requeridos
                             </p>
 
-                            <p class="text-xs text-gray-500 mt-1">
+                            <p class="text-xs text-muted-foreground mt-1">
                                 Agrega los materiales que necesita este proyecto según los planos y cantidades definidas por Ingeniería.
                             </p>
 
@@ -360,18 +348,18 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
 <div id="modalEditar"
      class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
 
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+    <div class="bg-card rounded-xl shadow-xl w-full max-w-md p-6">
 
         <div class="flex items-center justify-between border-b pb-3 mb-5">
 
             <div>
 
-                <h3 class="text-lg font-bold text-gray-900">
-                    ✏️ Editar cantidad
+                <h3 class="text-lg font-bold text-foreground">
+                    Editar cantidad
                 </h3>
 
                 <p id="nombreMaterial"
-                   class="text-xs text-gray-500 mt-1">
+                   class="text-xs text-muted-foreground mt-1">
                 </p>
 
             </div>
@@ -398,7 +386,7 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                    id="editarRequeridoId">
 
 
-            <label class="block text-xs font-bold text-gray-700 mb-1">
+            <label class="block text-xs font-bold text-foreground mb-1" for="editarCantidad">
                 Nueva cantidad requerida
             </label>
 
@@ -408,20 +396,20 @@ Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
                    step="0.01"
                    min="0.01"
                    required
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                   class="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
 
 
             <div class="flex justify-end gap-2 mt-5">
 
                 <button type="button"
                         onclick="cerrarModal()"
-                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold">
+                        class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground rounded-lg text-sm font-semibold">
                     Cancelar
                 </button>
                 
                 <button type="submit"
-                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold">
-                    💾 Guardar Cambios
+                        class="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-semibold">
+                    Guardar Cambios
                 </button>
 
             </div>

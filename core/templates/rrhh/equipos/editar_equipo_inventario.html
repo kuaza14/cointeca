@@ -7,19 +7,19 @@
     <div class="flex justify-between items-center mb-6">
 
         <h1 class="text-3xl font-bold">
-            ✏️ Editar Equipo
+            Editar Equipo
         </h1>
 
         <a
             href="/rrhh/inventario/"
-            class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+            class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover"
         >
-            ← Volver
+            Volver
         </a>
 
     </div>
 
-    <div class="bg-white p-6 rounded shadow">
+    <div class="bg-card p-6 rounded shadow">
 
         <form method="POST">
 
@@ -28,11 +28,11 @@
             <div class="grid grid-cols-2 gap-4">
 
                 <div>
-                    <label class="font-bold block mb-1">
+                    <label class="font-bold block mb-1" for="campo-equipo">
                         Equipo
                     </label>
 
-                    <input
+                    <input id="campo-equipo"
                         type="text"
                         name="equipo"
                         value="{{ equipo.equipo }}"
@@ -41,11 +41,11 @@
                 </div>
 
                 <div>
-                    <label class="font-bold block mb-1">
+                    <label class="font-bold block mb-1" for="campo-referencia">
                         Referencia
                     </label>
 
-                    <input
+                    <input id="campo-referencia"
                         type="text"
                         name="referencia"
                         value="{{ equipo.referencia }}"
@@ -54,11 +54,11 @@
                 </div>
 
                 <div>
-                    <label class="font-bold block mb-1">
+                    <label class="font-bold block mb-1" for="campo-serial">
                         Serial
                     </label>
 
-                    <input
+                    <input id="campo-serial"
                         type="text"
                         name="serial"
                         value="{{ equipo.serial }}"
@@ -67,11 +67,11 @@
                 </div>
 
                 <div>
-                    <label class="font-bold block mb-1">
+                    <label class="font-bold block mb-1" for="campo-marca">
                         Marca
                     </label>
 
-                    <input
+                    <input id="campo-marca"
                         type="text"
                         name="marca"
                         value="{{ equipo.marca }}"
@@ -80,11 +80,11 @@
                 </div>
 
                 <div>
-                    <label class="font-bold block mb-1">
+                    <label class="font-bold block mb-1" for="campo-fecha_compra">
                         Fecha compra
                     </label>
 
-                    <input
+                    <input id="campo-fecha_compra"
                         type="date"
                         name="fecha_compra"
                         value="{{ equipo.fecha_compra|date:'Y-m-d' }}"
@@ -93,11 +93,11 @@
                 </div>
 
                 <div>
-                    <label class="font-bold block mb-1">
+                    <label class="font-bold block mb-1" for="campo-estado">
                         Estado
                     </label>
 
-                    <select
+                    <select id="campo-estado"
                         name="estado"
                         class="w-full border p-2 rounded"
                     >
@@ -133,7 +133,7 @@
                     <input
                         type="text"
                         value="{% if equipo.asignacionequipo_set.first %}{{ equipo.asignacionequipo_set.first.empleado.nombre_completo }}{% else %}No asignado{% endif %}"
-                        class="w-full border rounded p-2 bg-gray-100"
+                        class="w-full border rounded p-2 bg-muted"
                         readonly
                     >
                 </div>
@@ -142,11 +142,11 @@
 
             <div class="mt-4">
 
-                <label class="font-bold block mb-1">
+                <label class="font-bold block mb-1" for="campo-observaciones">
                     Observaciones
                 </label>
 
-                <textarea
+                <textarea id="campo-observaciones"
                     name="observaciones"
                     rows="4"
                     class="w-full border p-2 rounded"
@@ -158,14 +158,14 @@
 
                 <button
                     type="submit"
-                    class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                    class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-hover"
                 >
                     Guardar Cambios
                 </button>
 
                 <a
                     href="/rrhh/inventario/"
-                    class="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
+                    class="bg-neutral text-white px-5 py-2 rounded hover:bg-neutral-hover"
                 >
                     Cancelar
                 </a>

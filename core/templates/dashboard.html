@@ -1,104 +1,101 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Panel principal | Cointeca S.A.S{% endblock %}
+{% block encabezado %}Panel principal{% endblock %}
+
 {% block content %}
 
-<div class="flex">
+<h1 class="text-2xl font-bold text-primary">Panel principal</h1>
+<p class="mt-1 text-sm text-muted-foreground">
+    Selecciona un módulo para comenzar.
+</p>
 
-    <!-- Sidebar -->
-    <div class="w-64 h-screen bg-blue-600 text-white p-5">
-        
-        <ul>
-            <li class="mb-3">
-                <a href="/dashboard/" class="block p-2 rounded hover:bg-blue-700">🏠 Inicio</a>
-            </li>
-            <li class="mb-3">
-                <a href="/caja-menor/" class="block p-2 rounded hover:bg-blue-700">💰 Contabilidad</a>
-            </li>
-            <li class="mb-3">
-                <a href="/actas/" class="block p-2 rounded hover:bg-blue-700">📄 Actas de Junta</a>
-            </li>
-            <li class="mb-3">
-                <a href="/indicadores/" class="block p-2 rounded hover:bg-blue-700">📊 Indicadores</a>
-            </li>
-            <li class="mb-3">
-                <a href="/facturacion/" class="block p-2 rounded hover:bg-blue-700">💵 Facturación</a>
-            </li>
-            <li class="mb-3">
-                <span class="block p-2 text-gray-400">👥 RRHH</span>
-            </li>
-            <li class="mb-3">
-                <span class="block p-2 text-gray-400">🚚 Logística</span>
-            </li>
-        </ul>
-    </div>
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 
-    <!-- Contenido -->
-    <div class="flex-1 p-10 bg-gray-100 min-h-screen">
+    <!-- Gerencia -->
+    <a href="{% url 'actas' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">Gerencia</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Actas de junta directiva.</p>
+    </a>
 
-        <h1 class="text-3xl font-bold mb-6">Panel principal</h1>
+    <!-- Contabilidad -->
+    <a href="{% url 'caja_menor' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">Contabilidad</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Gestión de caja menor.</p>
+    </a>
 
-        <div class="grid grid-cols-3 gap-6">
+    <!-- Indicadores -->
+    <a href="{% url 'indicadores' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">Indicadores</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Tablero estratégico de KPIs.</p>
+    </a>
 
-            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
-                <h2 class="text-xl font-bold mb-2">📄 Gerencia</h2>
-                <p class="text-gray-600 mb-2">Actas de junta directiva</p>
-                <a href="/actas/" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Entrar</a>
-            </div>
+    <!-- Facturación -->
+    <a href="{% url 'facturacion' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">Facturación</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Seguimiento de facturación por proyecto.</p>
+    </a>
 
-            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
-                <h2 class="text-xl font-bold mb-2">💰 Contabilidad</h2>
-                <p class="text-gray-600 mb-2">Gestión de caja menor</p>
-                <a href="/caja-menor/" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Entrar</a>
-            </div>
+    <!-- RRHH -->
+    <a href="{% url 'rrhh' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">RRHH</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Empleados, contratos, vacaciones y documentos.</p>
+    </a>
 
-            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
-                <h2 class="text-xl font-bold mb-2">📊 Indicadores</h2>
-                <p class="text-gray-600 mb-2">Tablero estratégico de KPIs</p>
-                <a href="/indicadores/" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Entrar</a>
-            </div>
+    <!-- Logística -->
+    <a href="{% url 'logistica_home' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">Logística</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Formatos, dotación y catálogo de materiales.</p>
+    </a>
 
-            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
-                <h2 class="text-xl font-bold mb-2">💵 Facturación</h2>
-                <p class="text-gray-600 mb-2">Seguimiento de facturación</p>
-                <a href="/facturacion/" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Entrar</a>
-            </div>
+    <!-- Ingeniería -->
+    <a href="{% url 'ingenieria_inicio' %}"
+       class="group block rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md">
+        <span class="flex size-11 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/>
+            </svg>
+        </span>
+        <h2 class="mt-4 font-semibold text-primary group-hover:underline">Ingeniería</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Proyectos, poste a poste, materiales y presupuestos.</p>
+    </a>
 
-            <div class="bg-white p-6 rounded shadow hover:shadow-lg transition">
-                <h2 class="text-xl font-bold mb-2">RRHH</h2>
-            <a href="/rrhh/" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                Entrar
-            </a>
-
-
-            </div>
-
-            <a href="{% url 'logistica_home' %}"
-            class="block bg-white p-6 rounded shadow hover:shadow-lg hover:bg-blue-50 transition">
-                <h2 class="text-xl font-bold mb-2">
-                    🚚 Logística
-                </h2>
-                <p class="text-gray-600">
-                    Gestión de formatos y procesos logísticos.
-                </p>
-
-            </a>
-
-            <a href="{% url 'ingenieria_inicio' %}"
-            class="bg-white p-6 rounded shadow hover:shadow-lg transition block">
-
-                <h2 class="text-xl font-bold text-blue-700">
-                    Ingeniería
-                </h2>
-
-                <p class="text-gray-600 mt-2">
-                    Gestión de proyectos, poste a poste, materiales y presupuestos.
-                </p>
-
-            </a>
-            
-
-        </div>
-    </div>
 </div>
 
 {% endblock %}

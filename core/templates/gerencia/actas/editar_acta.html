@@ -4,7 +4,7 @@
 
 <h1 class="text-2xl font-bold mb-6">Editar Acta</h1>
 
-<form method="POST" class="bg-white p-6 rounded shadow space-y-4">
+<form method="POST" class="bg-card p-6 rounded shadow space-y-4">
     {% csrf_token %}
 
     <input type="text" name="numero_acta" value="{{ acta.numero_acta }}" class="w-full border p-2 rounded" required>
@@ -31,7 +31,7 @@
         <option value="anulada" {% if acta.estado == 'anulada' %}selected{% endif %}>Anulada</option>
     </select>
 
-    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-primary-hover">
         Guardar cambios
     </button>
 

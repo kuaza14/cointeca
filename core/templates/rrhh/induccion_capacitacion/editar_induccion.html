@@ -4,10 +4,10 @@
 
 <div class="max-w-4xl mx-auto">
 
-    <div class="bg-white shadow rounded-lg p-6">
+    <div class="bg-card shadow rounded-lg p-6">
 
         <h1 class="text-3xl font-bold mb-6">
-            ✏️ Editar Inducción / Capacitación
+            Editar Inducción / Capacitación
         </h1>
 
         <form method="POST">
@@ -17,11 +17,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
-                    <label class="font-semibold">
+                    <label class="font-semibold" for="campo-fecha">
                         Fecha
                     </label>
 
-                    <input
+                    <input id="campo-fecha"
                         type="date"
                         name="fecha"
                         value="{{ induccion.fecha|date:'Y-m-d' }}"
@@ -31,11 +31,11 @@
                 </div>
 
                 <div>
-                    <label class="font-semibold">
+                    <label class="font-semibold" for="campo-tipo_evento">
                         Tipo de evento
                     </label>
 
-                    <select
+                    <select id="campo-tipo_evento"
                         name="tipo_evento"
                         class="w-full border rounded px-3 py-2"
                         required
@@ -79,11 +79,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
-                    <label class="font-semibold">
+                    <label class="font-semibold" for="campo-tema_capacitacion">
                         Tema
                     </label>
 
-                    <input
+                    <input id="campo-tema_capacitacion"
                         type="text"
                         name="tema_capacitacion"
                         value="{{ induccion.tema_capacitacion }}"
@@ -92,11 +92,11 @@
                 </div>
 
                 <div>
-                    <label class="font-semibold">
+                    <label class="font-semibold" for="campo-facilitador">
                         Facilitador
                     </label>
 
-                    <input
+                    <input id="campo-facilitador"
                         type="text"
                         name="facilitador"
                         value="{{ induccion.facilitador }}"
@@ -105,11 +105,11 @@
                 </div>
 
                 <div>
-                    <label class="font-semibold">
+                    <label class="font-semibold" for="campo-duracion_horas">
                         Duración (Horas)
                     </label>
 
-                    <input
+                    <input id="campo-duracion_horas"
                         type="number"
                         name="duracion_horas"
                         value="{{ induccion.duracion_horas }}"
@@ -123,14 +123,14 @@
 
                 <button
                     type="submit"
-                    class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+                    class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-hover"
                 >
-                    💾 Guardar cambios
+                    Guardar cambios
                 </button>
 
                 <a
                     href="{% url 'inducciones_empleado' induccion.empleado.id %}"
-                    class="bg-gray-600 text-white px-5 py-2 rounded hover:bg-gray-700"
+                    class="bg-neutral text-white px-5 py-2 rounded hover:bg-neutral-hover"
                 >
                     Cancelar
                 </a>

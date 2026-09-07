@@ -3,23 +3,23 @@
 {% block content %}
 
 <h1 class="text-3xl font-bold mb-6">
-    🌴 Vacaciones de {{ empleado.nombre_completo }}
+    Vacaciones de {{ empleado.nombre_completo }}
 </h1>
 
-<div class="bg-white shadow rounded p-5 mb-6">
+<div class="bg-card shadow rounded p-5 mb-6">
 
     <h2 class="text-2xl font-bold mb-4">
-        👤 {{ empleado.nombre_completo }}
+        {{ empleado.nombre_completo }}
     </h2>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-        <div class="bg-gray-100 p-3 rounded">
+        <div class="bg-muted p-3 rounded">
             <strong>Fecha ingreso</strong><br>
             {{ empleado.fecha_ingreso }}
         </div>
 
-        <div class="bg-blue-100 p-3 rounded">
+        <div class="bg-primary-soft p-3 rounded">
             <strong>Años trabajados</strong><br>
             {{ empleado.anios_trabajados }}
         </div>
@@ -46,24 +46,25 @@
 <div class="flex gap-3 mb-5">
     <a
         href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover">
 
-        ➕ Registrar vacaciones
+        Registrar vacaciones
 
     </a>
 
     <a
         href="/rrhh/vacaciones/"
-        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
 
-        ← Volver
+        Volver
 
     </a>
 </div>
 
+<div class="overflow-x-auto">
 <table class="w-full border shadow">
 
-    <thead class="bg-gray-800 text-white">
+    <thead class="bg-neutral text-white">
 
         <tr>
             <th class="p-2">Periodo</th>
@@ -112,20 +113,20 @@
                         '{{ v.dias_tomados }}',
                         '{{ v.observaciones }}'
                     )"
-                    class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                    class="bg-primary text-white px-3 py-1 rounded hover:bg-primary-hover">
                     Editar
                 </button>
 
                 <button
                     onclick="abrirEliminar('{{ v.id }}')"
-                    class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                    class="bg-destructive text-white px-3 py-1 rounded hover:bg-destructive-hover">
                     Eliminar
                 </button>
 
                 <a
                     href="/rrhh/vacaciones/{{ empleado.id }}/solicitud/"
-                    class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
-                    📄 Solicitud
+                    class="bg-success text-white px-3 py-1 rounded hover:bg-success-hover">
+                    Solicitud
                 </a>
 
             </td>
@@ -147,6 +148,7 @@
         </tbody>
 
 </table>
+</div>
 
 <script>
     function abrirEditar(id, periodo, fecha_inicio, dias_tomados, observaciones) {

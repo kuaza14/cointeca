@@ -15,16 +15,17 @@
 
     <a
         href="{% url 'crear_suspension_disciplinaria' empleado.id %}"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded"
     >
-        ➕ Nueva suspensión
+        Nueva suspensión
     </a>
 
 </div>
 
+<div class="overflow-x-auto">
 <table class="w-full border shadow">
 
-    <thead class="bg-gray-800 text-white">
+    <thead class="bg-neutral text-white">
 
         <tr>
 
@@ -56,7 +57,7 @@
 
         {% for suspension in suspensiones %}
 
-        <tr class="border-b hover:bg-gray-50">
+        <tr class="border-b hover:bg-muted">
 
             <td class="p-2 text-center">
                 {{ suspension.fecha_falta }}
@@ -78,9 +79,9 @@
 
                 <a
                     href="{% url 'detalle_suspension_disciplinaria' suspension.id %}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                    class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded"
                 >
-                    👁 Ver
+                    Ver
                 </a>
 
             </td>
@@ -91,7 +92,7 @@
 
         <tr>
 
-            <td colspan="5" class="text-center p-5 text-gray-500">
+            <td colspan="5" class="text-center p-5 text-muted-foreground">
 
                 No hay suspensiones disciplinarias registradas.
 
@@ -104,14 +105,15 @@
     </tbody>
 
 </table>
+</div>
 
 <div class="mt-6">
 
     <a
         href="{% url 'detalle_empleado' empleado.id %}"
-        class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded"
+        class="bg-neutral hover:bg-neutral-hover text-white px-5 py-2 rounded"
     >
-        ← Volver al empleado
+        Volver al empleado
     </a>
 
 </div>

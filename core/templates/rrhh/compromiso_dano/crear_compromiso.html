@@ -3,10 +3,10 @@
 {% block content %}
 
 
-<div class="bg-white shadow rounded-lg p-6">
+<div class="bg-card shadow rounded-lg p-6">
 
     <h1 class="text-3xl font-bold mb-6">
-        💰 Nuevo Compromiso Pago Daños a Terceros
+        Nuevo Compromiso Pago Daños a Terceros
     </h1>
 
     <form method="POST">
@@ -17,11 +17,11 @@
 
             <div>
 
-                <label class="font-semibold">
+                <label class="font-semibold" for="campo-numero_acta">
                     Número de Acta
                 </label>
 
-                <input
+                <input id="campo-numero_acta"
                     type="text"
                     name="numero_acta"
                     required
@@ -32,11 +32,11 @@
 
             <div>
 
-                <label class="font-semibold">
+                <label class="font-semibold" for="campo-fecha_evento">
                     Fecha del Evento
                 </label>
 
-                <input
+                <input id="campo-fecha_evento"
                     type="date"
                     name="fecha_evento"
                     required
@@ -49,11 +49,11 @@
 
         <div class="mt-4">
 
-            <label class="font-semibold">
+            <label class="font-semibold" for="campo-valor_descuento">
                 Valor del Descuento
             </label>
 
-            <input
+            <input id="campo-valor_descuento"
                 type="number"
                 step="0.01"
                 name="valor_descuento"
@@ -65,11 +65,11 @@
 
         <div class="mt-4">
 
-            <label class="font-semibold">
+            <label class="font-semibold" for="campo-descripcion_dano">
                 Descripción del Daño
             </label>
 
-            <textarea
+            <textarea id="campo-descripcion_dano"
                 name="descripcion_dano"
                 rows="5"
                 required
@@ -82,13 +82,13 @@
 
             <button
                 type="submit"
-                class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
-                💾 Guardar
+                class="bg-success text-white px-5 py-2 rounded hover:bg-success-hover">
+                Guardar
             </button>
 
             <a
                 href="{% url 'compromisos_empleado' empleado.id %}"
-                class="bg-gray-600 text-white px-5 py-2 rounded hover:bg-gray-700">
+                class="bg-neutral text-white px-5 py-2 rounded hover:bg-neutral-hover">
                 Cancelar
             </a>
 

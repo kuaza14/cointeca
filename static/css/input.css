@@ -1,1 +1,350 @@
 @import "tailwindcss";
+
+/* =========================================================================
+   Sistema de diseño Cointeca
+   Estilo: Data-Dense Dashboard (interfaz interna, densa en datos y formularios)
+
+   Los tokens se declaran con @theme para que Tailwind genere las utilidades
+   semanticas (bg-primary, text-muted-foreground, border-border...). Usar
+   siempre el token y no el color crudo: bg-primary en lugar de bg-blue-700.
+   ========================================================================= */
+
+@theme {
+    /* --- Marca --- */
+    --color-primary: #1e40af;
+    --color-primary-hover: #1b3a9e;
+    --color-primary-soft: #eff4ff;
+    --color-on-primary: #ffffff;
+
+    --color-secondary: #3b82f6;
+    --color-on-secondary: #ffffff;
+
+    /* El acento ambar llega al 4.5:1 unicamente con texto oscuro */
+    --color-accent: #d97706;
+    --color-on-accent: #1c1300;
+
+    /* --- Superficies --- */
+    --color-background: #f8fafc;
+    --color-foreground: #0f172a;
+    --color-card: #ffffff;
+    --color-card-foreground: #0f172a;
+
+    --color-muted: #e9eef6;
+    --color-muted-foreground: #475569;
+
+    --color-border: #dbeafe;
+    --color-border-strong: #c3d9fd;
+
+    /* --- Barra lateral --- */
+    --color-sidebar: #1e3a8a;
+    --color-sidebar-hover: #1e40af;
+    --color-sidebar-foreground: #e8eefc;
+    --color-sidebar-active: #1d4ed8;
+
+    /* --- Estados. Todos cumplen 4.5:1 sobre blanco --- */
+    --color-success: #15803d;
+    --color-success-soft: #ecfdf3;
+    --color-warning: #b45309;
+    --color-warning-soft: #fffaeb;
+    --color-destructive: #c81e1e;
+    --color-destructive-soft: #fef2f2;
+    --color-on-destructive: #ffffff;
+    --color-info: #0369a1;
+    --color-info-soft: #f0f9ff;
+
+    /* Botones neutros ("Volver", "Cancelar") y estados hover */
+    --color-neutral: #475569;
+    --color-neutral-hover: #334155;
+    --color-success-hover: #166534;
+    --color-destructive-hover: #a81818;
+
+    --color-ring: #1e40af;
+
+    /* --- Tipografia --- */
+    --font-sans: "Fira Sans", ui-sans-serif, system-ui, -apple-system,
+        "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Fira Code", ui-monospace, "SFMono-Regular", "Cascadia Code",
+        Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+    html {
+        font-family: var(--font-sans);
+    }
+
+    body {
+        background-color: var(--color-background);
+        color: var(--color-foreground);
+    }
+
+    /* Anillo de foco visible y consistente para navegacion por teclado.
+       Nunca eliminar: es el unico indicador de posicion sin mouse. */
+    :focus-visible {
+        outline: 3px solid var(--color-ring);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    /* Las cifras en tablas se alinean por columna */
+    .tabular {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Respeta a quien configuro menos movimiento en su sistema operativo */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    /* Enlace de salto: invisible hasta recibir foco con Tab */
+    .skip-link {
+        position: absolute;
+        left: 0.75rem;
+        top: -100%;
+        z-index: 100;
+        border-radius: 0.5rem;
+        background-color: var(--color-primary);
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--color-on-primary);
+        transition: top 150ms ease;
+    }
+
+    .skip-link:focus {
+        top: 0.75rem;
+    }
+}
+
+/* =========================================================================
+   Componentes
+   Las mismas piezas se repiten en decenas de plantillas (listados, formularios
+   de crear/editar, fichas de detalle). Se definen una vez aqui para que la
+   plantilla describa la intencion y no el estilo.
+   ========================================================================= */
+
+@layer components {
+
+    /* ---------- Encabezado de pagina ---------- */
+    .titulo-pagina {
+        font-size: 1.5rem;
+        line-height: 2rem;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    .subtitulo-pagina {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--color-muted-foreground);
+    }
+
+    /* ---------- Tarjeta ---------- */
+    .tarjeta {
+        border-radius: 0.75rem;
+        border: 1px solid var(--color-border);
+        background-color: var(--color-card);
+        box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+    }
+
+    .tarjeta-cuerpo {
+        padding: 1.25rem;
+    }
+
+    /* ---------- Botones ----------
+       min-height 2.75rem = 44px, el minimo tactil recomendado */
+    .btn {
+        display: inline-flex;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid transparent;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 150ms ease, border-color 150ms ease,
+            color 150ms ease;
+    }
+
+    .btn-primario {
+        background-color: var(--color-primary);
+        color: var(--color-on-primary);
+    }
+
+    .btn-primario:hover {
+        background-color: var(--color-primary-hover);
+    }
+
+    .btn-secundario {
+        border-color: var(--color-border-strong);
+        background-color: var(--color-card);
+        color: var(--color-foreground);
+    }
+
+    .btn-secundario:hover {
+        background-color: var(--color-muted);
+    }
+
+    .btn-peligro {
+        background-color: var(--color-destructive);
+        color: var(--color-on-destructive);
+    }
+
+    .btn-peligro:hover {
+        background-color: #a81818;
+    }
+
+    /* ---------- Tablas ----------
+       El contenedor hace el scroll horizontal: en pantallas angostas la tabla
+       se desplaza dentro de su caja y la pagina nunca scrollea de lado. */
+    .tabla-caja {
+        overflow-x: auto;
+        border-radius: 0.75rem;
+        border: 1px solid var(--color-border);
+        background-color: var(--color-card);
+    }
+
+    .tabla {
+        width: 100%;
+        min-width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        text-align: left;
+    }
+
+    .tabla thead {
+        background-color: var(--color-muted);
+    }
+
+    .tabla th {
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--color-foreground);
+        white-space: nowrap;
+    }
+
+    .tabla td {
+        padding: 0.75rem 1rem;
+        border-top: 1px solid var(--color-border);
+        vertical-align: top;
+    }
+
+    .tabla tbody tr:hover {
+        background-color: var(--color-primary-soft);
+    }
+
+    /* Columna de cifras: alineada a la derecha y con digitos de ancho fijo */
+    .tabla .num {
+        text-align: right;
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .enlace-tabla {
+        font-weight: 500;
+        color: var(--color-primary);
+    }
+
+    .enlace-tabla:hover {
+        text-decoration: underline;
+    }
+
+    /* ---------- Formularios ---------- */
+    .campo {
+        display: block;
+        margin-bottom: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-foreground);
+    }
+
+    /* Marca los campos obligatorios; se combina con required en el input */
+    .campo-req::after {
+        content: " *";
+        color: var(--color-destructive);
+    }
+
+    .entrada,
+    .seleccion,
+    .area-texto {
+        display: block;
+        width: 100%;
+        min-height: 2.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-border-strong);
+        background-color: var(--color-card);
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        color: var(--color-foreground);
+        transition: border-color 150ms ease;
+    }
+
+    .entrada:hover,
+    .seleccion:hover,
+    .area-texto:hover {
+        border-color: var(--color-primary);
+    }
+
+    .area-texto {
+        min-height: 6rem;
+        resize: vertical;
+    }
+
+    .ayuda-campo {
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        color: var(--color-muted-foreground);
+    }
+
+    /* ---------- Etiquetas de estado ---------- */
+    .etiqueta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border-radius: 9999px;
+        padding: 0.125rem 0.625rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .etiqueta-exito {
+        background-color: var(--color-success-soft);
+        color: var(--color-success);
+    }
+
+    .etiqueta-aviso {
+        background-color: var(--color-warning-soft);
+        color: var(--color-warning);
+    }
+
+    .etiqueta-peligro {
+        background-color: var(--color-destructive-soft);
+        color: var(--color-destructive);
+    }
+
+    .etiqueta-info {
+        background-color: var(--color-info-soft);
+        color: var(--color-info);
+    }
+
+    /* ---------- Estado vacio ----------
+       Una tabla sin filas debe explicar que pasa, no quedar en blanco. */
+    .estado-vacio {
+        padding: 2.5rem 1rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--color-muted-foreground);
+    }
+}

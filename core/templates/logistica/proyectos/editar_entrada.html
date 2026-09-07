@@ -10,9 +10,9 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
 <div class="max-w-6xl mx-auto p-6 space-y-6">
 
     <!-- ENCABEZADO -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
         <div>
-            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <a href="{% url 'logistica_home' %}" class="hover:underline">
                     Logística
                 </a>
@@ -30,24 +30,24 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
 
                 <span>/</span>
 
-                <span class="text-gray-800 font-medium">
+                <span class="text-foreground font-medium">
                     Editar Entrada
                 </span>
             </div>
 
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">
-                ✏️ Editar Entrada de Materiales
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
+                Editar Entrada de Materiales
             </h1>
 
-            <p class="text-sm text-gray-600 mt-1">
+            <p class="text-sm text-muted-foreground mt-1">
                 Modifica la información de la entrada y sus materiales.
             </p>
 
         </div>
 
         <a href="{% url 'registrar_entrada_material' proyecto.id %}"
-            class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
-            ← Cancelar y volver
+            class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
+            Cancelar y volver
         </a>
     </div>
 
@@ -55,88 +55,88 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
     <form method="POST" class="space-y-6">
         {% csrf_token %}
         <!-- DATOS DE LA ENTRADA -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <h2 class="text-base font-bold text-gray-800 border-b pb-2">
-                📄 Información de la Entrada
+        <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
+            <h2 class="text-base font-bold text-foreground border-b pb-2">
+                Información de la Entrada
             </h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- FECHA -->
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-fecha">
 
                         Fecha de ingreso
 
                     </label>
 
-                    <input type="date" name="fecha" value="{{ entrada.fecha|date:'Y-m-d' }}" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <input id="campo-fecha" type="date" name="fecha" value="{{ entrada.fecha|date:'Y-m-d' }}" required
+                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm">
                 </div>
 
                 <!-- REMISIÓN -->
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-numero_remision">
                         N° Remisión / Factura
                     </label>
 
-                    <input type="text" name="numero_remision" value="{{ entrada.numero_remision }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <input id="campo-numero_remision" type="text" name="numero_remision" value="{{ entrada.numero_remision }}"
+                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm">
                 </div>
 
                 <!-- PROVEEDOR -->
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-proveedor">
                         Proveedor / Fabricante
                     </label>
 
-                    <input type="text" name="proveedor" value="{{ entrada.proveedor }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <input id="campo-proveedor" type="text" name="proveedor" value="{{ entrada.proveedor }}"
+                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm">
                 </div>
 
                 <!-- RECIBIDO POR -->
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-recibido_por">
                         Recibido por
                     </label>
 
-                    <input type="text" name="recibido_por" value="{{ entrada.recibido_por }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <input id="campo-recibido_por" type="text" name="recibido_por" value="{{ entrada.recibido_por }}"
+                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
 
             <!-- OBSERVACIONES -->
             <div>
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-observaciones">
                     Observaciones
                 </label>
 
-                <textarea name="observaciones" rows="3"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ entrada.observaciones }}
+                <textarea id="campo-observaciones" name="observaciones" rows="3"
+                    class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm">{{ entrada.observaciones }}
                 </textarea>
             </div>
         </div>
 
         <!-- MATERIALES -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="bg-card rounded-xl shadow-sm border border-border p-6">
             <div class="flex items-center justify-between border-b pb-3 mb-4">
-                <h2 class="text-base font-bold text-gray-800">
-                    📦 Materiales de esta entrada
+                <h2 class="text-base font-bold text-foreground">
+                    Materiales de esta entrada
                 </h2>
             </div>
 
             <div id="materiales-container" class="space-y-3">
                 {% for detalle in detalles %}
-                <div class="material-row border border-gray-200 rounded-lg p-4">
+                <div class="material-row border border-border rounded-lg p-4">
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
 
                         <!-- MATERIAL -->
                         <div class="md:col-span-7">
-                            <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-material_id--">
                                 Material
                             </label>
 
-                            <select name="material_id[]"
-                                class="material-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            <select id="campo-material_id--" name="material_id[]"
+                                class="material-select w-full border border-border-strong rounded-lg px-3 py-2 text-sm"
                                 required>
 
                                 {% for material in materiales %}
@@ -151,20 +151,20 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
 
                         <!-- CANTIDAD -->
                         <div class="md:col-span-3">
-                            <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-cantidad--">
                                 Cantidad
                             </label>
 
-                            <input type="number" name="cantidad[]" value="{{ detalle.cantidad|cantidad }}" step="0.01" min="0.01"
-                                required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold">
+                            <input id="campo-cantidad--" type="number" name="cantidad[]" value="{{ detalle.cantidad|cantidad }}" step="0.01" min="0.01"
+                                required class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold">
                             
                         </div>
 
                         <!-- ELIMINAR -->
                         <div class="md:col-span-2">
                             <button type="button" onclick="eliminarMaterial(this)"
-                                class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-semibold">
-                                🗑️ Eliminar
+                                class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-destructive rounded-lg text-sm font-semibold">
+                                Eliminar
                             </button>
                         </div>
                     </div>
@@ -176,7 +176,7 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
             <div class="mt-4">
                 <button type="button" onclick="agregarMaterial()"
                     class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-sm font-semibold">
-                    ➕ Agregar material
+                    Agregar material
                 </button>
             </div>
         </div>
@@ -184,13 +184,13 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
         <!-- BOTONES -->
         <div class="flex justify-end gap-3">
             <a href="{% url 'registrar_entrada_material' proyecto.id %}"
-                class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm">
+                class="px-5 py-2.5 bg-muted hover:bg-gray-200 text-foreground font-medium rounded-lg text-sm">
                 Cancelar
             </a>
 
             <button type="submit"
-                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm">
-                💾 Guardar cambios
+                class="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg text-sm">
+                Guardar cambios
             </button>
         </div>
     </form>
@@ -214,19 +214,19 @@ function agregarMaterial() {
 
     const fila = document.createElement("div");
     fila.className =
-        "material-row border border-gray-200 rounded-lg p-4";
+        "material-row border border-border rounded-lg p-4";
 
     fila.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
 
             <!-- MATERIAL -->
             <div class="md:col-span-7">
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-material_id---2">
                     Material
                 </label>
 
-                <select name="material_id[]"
-                        class="material-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                <select id="campo-material_id---2" name="material_id[]"
+                        class="material-select w-full border border-border-strong rounded-lg px-3 py-2 text-sm"
                         required>
 
                     <option value="">
@@ -243,24 +243,24 @@ function agregarMaterial() {
 
             <!-- CANTIDAD -->
             <div class="md:col-span-3">
-                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-cantidad---2">
                     Cantidad
                 </label>
 
-                <input type="number"
+                <input id="campo-cantidad---2" type="number"
                        name="cantidad[]"
                        step="0.01"
                        min="0.01"
                        required
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold">
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold">
             </div>
 
             <!-- ELIMINAR -->
             <div class="md:col-span-2">
                 <button type="button"
                         onclick="eliminarMaterial(this)"
-                        class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-semibold">
-                    🗑️ Eliminar
+                        class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-destructive rounded-lg text-sm font-semibold">
+                    Eliminar
                 </button>
             </div>
         </div>

@@ -2,10 +2,10 @@
 
 {% block content %}
 
-<div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+<div class="max-w-4xl mx-auto bg-card shadow rounded-lg p-6">
 
-    <h1 class="text-3xl font-bold mb-6 text-blue-700">
-        ✏️ Editar Retiro de Cesantías
+    <h1 class="text-3xl font-bold mb-6 text-primary">
+        Editar Retiro de Cesantías
     </h1>
 
     <form method="POST">
@@ -15,7 +15,7 @@
         <!-- Tipo -->
         <div class="mb-4">
 
-            <label class="font-semibold block mb-2">
+            <label class="font-semibold block mb-2" for="tipo_retiro">
                 Tipo de retiro
             </label>
 
@@ -47,11 +47,11 @@
         <!-- Fondo -->
         <div class="mb-4">
 
-            <label class="font-semibold block mb-2">
+            <label class="font-semibold block mb-2" for="campo-fondo_cesantias">
                 Fondo de cesantías
             </label>
 
-            <input
+            <input id="campo-fondo_cesantias"
                 type="text"
                 name="fondo_cesantias"
                 value="{{ retiro.fondo_cesantias }}"
@@ -63,11 +63,11 @@
         <!-- Fecha solicitud -->
         <div class="mb-4">
 
-            <label class="font-semibold block mb-2">
+            <label class="font-semibold block mb-2" for="campo-fecha_solicitud">
                 Fecha solicitud
             </label>
 
-            <input
+            <input id="campo-fecha_solicitud"
                 type="date"
                 name="fecha_solicitud"
                 value="{{ retiro.fecha_solicitud|date:'Y-m-d' }}"
@@ -79,11 +79,11 @@
         <!-- Valor -->
         <div class="mb-4">
 
-            <label class="font-semibold block mb-2">
+            <label class="font-semibold block mb-2" for="campo-valor_retiro">
                 Valor retiro
             </label>
 
-            <input
+            <input id="campo-valor_retiro"
                 type="number"
                 step="0.01"
                 name="valor_retiro"
@@ -96,17 +96,17 @@
         <!-- VIVIENDA -->
         <div id="campos_vivienda">
 
-            <h3 class="font-bold text-green-700 mb-3">
-                🏠 Información Vivienda
+            <h3 class="font-bold text-success mb-3">
+                Información Vivienda
             </h3>
 
             <div class="mb-4">
 
-                <label class="block mb-2">
+                <label class="block mb-2" for="campo-direccion_vivienda">
                     Dirección vivienda
                 </label>
 
-                <input
+                <input id="campo-direccion_vivienda"
                     type="text"
                     name="direccion_vivienda"
                     value="{{ retiro.direccion_vivienda }}"
@@ -117,11 +117,11 @@
 
             <div class="mb-4">
 
-                <label class="block mb-2">
+                <label class="block mb-2" for="campo-descripcion_vivienda">
                     Descripción vivienda
                 </label>
 
-                <textarea
+                <textarea id="campo-descripcion_vivienda"
                     name="descripcion_vivienda"
                     class="border rounded w-full p-2"
                 >{{ retiro.descripcion_vivienda }}</textarea>
@@ -133,17 +133,17 @@
         <!-- EDUCACION -->
         <div id="campos_educacion">
 
-            <h3 class="font-bold text-blue-700 mb-3">
-                🎓 Información Educación
+            <h3 class="font-bold text-primary mb-3">
+                Información Educación
             </h3>
 
             <div class="mb-4">
 
-                <label class="block mb-2">
+                <label class="block mb-2" for="campo-institucion_educativa">
                     Institución educativa
                 </label>
 
-                <input
+                <input id="campo-institucion_educativa"
                     type="text"
                     name="institucion_educativa"
                     value="{{ retiro.institucion_educativa }}"
@@ -154,11 +154,11 @@
 
             <div class="mb-4">
 
-                <label class="block mb-2">
+                <label class="block mb-2" for="campo-programa_estudio">
                     Programa estudio
                 </label>
 
-                <input
+                <input id="campo-programa_estudio"
                     type="text"
                     name="programa_estudio"
                     value="{{ retiro.programa_estudio }}"
@@ -169,11 +169,11 @@
 
             <div class="mb-4">
 
-                <label class="block mb-2">
+                <label class="block mb-2" for="campo-beneficiario">
                     Beneficiario
                 </label>
 
-                <input
+                <input id="campo-beneficiario"
                     type="text"
                     name="beneficiario"
                     value="{{ retiro.beneficiario }}"
@@ -187,17 +187,17 @@
         <!-- DEFINITIVO -->
         <div id="campos_definitivo">
 
-            <h3 class="font-bold text-red-700 mb-3">
-                🚪 Retiro Definitivo
+            <h3 class="font-bold text-destructive mb-3">
+                Retiro Definitivo
             </h3>
 
             <div class="mb-4">
 
-                <label class="block mb-2">
+                <label class="block mb-2" for="campo-fecha_retiro_definitivo">
                     Fecha retiro definitivo
                 </label>
 
-                <input
+                <input id="campo-fecha_retiro_definitivo"
                     type="date"
                     name="fecha_retiro_definitivo"
                     value="{{ retiro.fecha_retiro_definitivo|date:'Y-m-d' }}"
@@ -211,11 +211,11 @@
         <!-- Observaciones -->
         <div class="mb-4">
 
-            <label class="block mb-2">
+            <label class="block mb-2" for="campo-observaciones">
                 Observaciones
             </label>
 
-            <textarea
+            <textarea id="campo-observaciones"
                 name="observaciones"
                 class="border rounded w-full p-2"
             >{{ retiro.observaciones }}</textarea>
@@ -226,14 +226,14 @@
 
             <button
                 type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
             >
-                💾 Guardar cambios
+                Guardar cambios
             </button>
 
             <a
                 href="{% url 'retiros_cesantias_empleado' retiro.empleado.id %}"
-                class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover"
             >
                 Cancelar
             </a>

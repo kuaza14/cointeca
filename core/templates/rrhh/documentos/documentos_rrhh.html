@@ -6,9 +6,9 @@
 
     <a
         href="{% url 'rrhh' %}"
-        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+        class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded">
 
-        ← Volver a RRHH
+        Volver a RRHH
 
     </a>
 
@@ -16,11 +16,11 @@
 
 <h1 class="text-3xl font-bold mb-8">
 
-    📄 Documentos RRHH
+    Documentos RRHH
 
 </h1>
 
-<div class="bg-white rounded-lg shadow p-6">
+<div class="bg-card rounded-lg shadow p-6">
 
     <h2 class="text-xl font-bold mb-6">
 
@@ -28,13 +28,10 @@
 
     </h2>
 
-    <button>
+    <div class="overflow-x-auto">
+<table class="min-w-full border">
 
-    </button>
-
-    <table class="min-w-full border">
-
-        <thead class="bg-gray-100">
+        <thead class="bg-muted">
 
             <tr>
 
@@ -68,9 +65,9 @@
 
                     <a
                         href="{% url 'generar_tratamiento_datos_personales' %}"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
 
-                        📄 Generar
+                        Generar
 
                     </a>
 
@@ -90,9 +87,9 @@
 
                     <a
                         href="{% url 'generar_procedimiento_induccion_capacitacion' %}"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
 
-                        📄 Generar
+                        Generar
 
                     </a>
 
@@ -112,9 +109,9 @@
 
                     <a
                         href="{% url 'generar_procedimiento_nomina_prestaciones' %}"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
 
-                        📄 Generar
+                        Generar
 
                     </a>
 
@@ -134,9 +131,9 @@
 
                     <a
                         href="{% url 'generar_procedimiento_disciplinario_interno' %}"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
 
-                        📄 Generar
+                        Generar
 
                     </a>
 
@@ -156,9 +153,9 @@
 
                     <a
                         href="{% url 'generar_procedimiento_custodia_historia_clinicas_datos_sensibles' %}"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
 
-                        📄 Generar
+                        Generar
 
                     </a>
 
@@ -178,9 +175,9 @@
 
                     <a
                         href="{% url 'generar_reglamento_trabajo_cointeca_sas' %}"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
 
-                        📄 Generar
+                        Generar
 
                     </a>
 
@@ -192,6 +189,7 @@
         </tbody> 
 
     </table>
+</div>
 
 </div>
 

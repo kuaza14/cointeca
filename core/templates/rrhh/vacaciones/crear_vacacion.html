@@ -3,16 +3,16 @@
 {% block content %}
 
 <h1 class="text-3xl font-bold mb-6">
-    ➕ Registrar Vacaciones
+    Registrar Vacaciones
 </h1>
 
 <div class="flex justify-end mb-6">
-    <a href="/rrhh/vacaciones/" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+    <a href="/rrhh/vacaciones/" class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
         Volver a Vacaciones
     </a>
 </div>
 
-<form method="POST" class="bg-white p-6 rounded shadow space-y-4">
+<form method="POST" class="bg-card p-6 rounded shadow space-y-4">
 
     {% csrf_token %}
 
@@ -27,7 +27,7 @@
                 <input
                     type="text"
                     value="{{ empleado.nombre_completo }}"
-                    class="border p-2 rounded w-full bg-gray-100"
+                    class="border p-2 rounded w-full bg-muted"
                     readonly
                 >
 
@@ -59,11 +59,11 @@
         </div>
 
     <div>
-        <label class="font-bold">
+        <label class="font-bold" for="campo-periodo">
             Periodo
         </label>
 
-        <input
+        <input id="campo-periodo"
             type="text"
             name="periodo"
             class="border p-2 rounded w-full"
@@ -71,33 +71,33 @@
     </div>
 
     <div>
-        <label class="font-bold">
+        <label class="font-bold" for="campo-fecha_inicio">
             Fecha inicio de vacaciones
         </label>
 
-        <input
+        <input id="campo-fecha_inicio"
             type="date"
             name="fecha_inicio"
             class="border p-2 rounded w-full" >
     </div>
 
     <div>
-        <label class="font-bold">
+        <label class="font-bold" for="campo-dias_tomados">
             Días a disfrutar
         </label>
 
-        <input
+        <input id="campo-dias_tomados"
             type="number"
             name="dias_tomados"
             class="border p-2 rounded w-full" >
     </div>
 
     <div>
-        <label class="font-bold">
+        <label class="font-bold" for="campo-observaciones">
             Observaciones
         </label>
 
-        <textarea
+        <textarea id="campo-observaciones"
             name="observaciones"
             rows="4"
             class="border p-2 rounded w-full"
@@ -105,7 +105,7 @@
     </div>
 
     <button
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
     >
         Guardar
     </button>
@@ -113,7 +113,7 @@
 </form>
 
 {% if error %}
-<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+<div class="bg-red-100 border border-red-400 text-destructive px-4 py-3 rounded mb-4">
     {{ error }}
 </div>
 {% endif %}

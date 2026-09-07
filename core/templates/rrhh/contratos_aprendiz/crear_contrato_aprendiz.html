@@ -2,7 +2,7 @@
 
 {% block empleado_content %}
 
-<div class="max-w-4xl mx-auto bg-white rounded-xl shadow p-8">
+<div class="max-w-4xl mx-auto bg-card rounded-xl shadow p-8">
 
     <h2 class="text-2xl font-bold mb-6">
 
@@ -18,9 +18,9 @@
 
             <div>
 
-                <label class="font-semibold" >Institución</label>
+                <label class="font-semibold"  for="campo-institucion">Institución</label>
 
-                <input
+                <input id="campo-institucion"
                     type="text"
                     name="institucion"
                     class="border rounded w-full p-2"
@@ -30,40 +30,40 @@
             </div>
 
             <div>
-                <label>NIT de la institución</label>
-                <input type="text"
+                <label for="campo-nit_institucion">NIT de la institución</label>
+                <input id="campo-nit_institucion" type="text"
                     name="nit_institucion"
                     class="border rounded w-full p-2">
             </div>
 
             <div>
-                <label>Centro de formación</label>
-                <input type="text"
+                <label for="campo-centro_formacion">Centro de formación</label>
+                <input id="campo-centro_formacion" type="text"
                     name="centro_formacion"
                     class="border rounded w-full p-2">
             </div>
 
             <div>
 
-                <label>Especialidad</label>
+                <label for="campo-especialidad">Especialidad</label>
 
-                <input type="text" name="especialidad" class="border rounded w-full p-2" required>
-
-            </div>
-
-            <div>
-
-                <label>Número Grupo</label>
-
-                <input type="text" name="numero_grupo" class="border rounded w-full p-2">
+                <input id="campo-especialidad" type="text" name="especialidad" class="border rounded w-full p-2" required>
 
             </div>
 
             <div>
 
-                <label>Modalidad</label>
+                <label for="campo-numero_grupo">Número Grupo</label>
 
-                <select name="modalidad" class="border rounded w-full p-2">
+                <input id="campo-numero_grupo" type="text" name="numero_grupo" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label for="campo-modalidad">Modalidad</label>
+
+                <select id="campo-modalidad" name="modalidad" class="border rounded w-full p-2">
 
                     <option value="Lectiva">
 
@@ -89,57 +89,57 @@
 
             <div>
 
-                <label>Fecha Inicio Contrato</label>
+                <label for="campo-fecha_inicio">Fecha Inicio Contrato</label>
 
-                <input type="date" name="fecha_inicio" class="border rounded w-full p-2">
-
-            </div>
-
-            <div>
-
-                <label>Fecha Fin Contrato</label>
-
-                <input type="date" name="fecha_fin" class="border rounded w-full p-2">
+                <input id="campo-fecha_inicio" type="date" name="fecha_inicio" class="border rounded w-full p-2">
 
             </div>
 
             <div>
 
-                <label>Inicio Etapa Lectiva</label>
+                <label for="campo-fecha_fin">Fecha Fin Contrato</label>
 
-                <input type="date" name="fecha_inicio_lectiva" class="border rounded w-full p-2">
-
-            </div>
-
-            <div>
-
-                <label>Fin Etapa Lectiva</label>
-
-                <input type="date" name="fecha_fin_lectiva" class="border rounded w-full p-2">
+                <input id="campo-fecha_fin" type="date" name="fecha_fin" class="border rounded w-full p-2">
 
             </div>
 
             <div>
 
-                <label>Inicio Etapa Productiva</label>
+                <label for="campo-fecha_inicio_lectiva">Inicio Etapa Lectiva</label>
 
-                <input type="date" name="fecha_inicio_practica" class="border rounded w-full p-2">
-
-            </div>
-
-            <div>
-
-                <label>Fin Etapa Productiva</label>
-
-                <input type="date" name="fecha_fin_practica" class="border rounded w-full p-2">
+                <input id="campo-fecha_inicio_lectiva" type="date" name="fecha_inicio_lectiva" class="border rounded w-full p-2">
 
             </div>
 
             <div>
 
-                <label>Porcentaje apoyo</label>
+                <label for="campo-fecha_fin_lectiva">Fin Etapa Lectiva</label>
 
-                <input type="number" name="porcentaje_apoyo" value="100" class="border rounded w-full p-2">
+                <input id="campo-fecha_fin_lectiva" type="date" name="fecha_fin_lectiva" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label for="campo-fecha_inicio_practica">Inicio Etapa Productiva</label>
+
+                <input id="campo-fecha_inicio_practica" type="date" name="fecha_inicio_practica" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label for="campo-fecha_fin_practica">Fin Etapa Productiva</label>
+
+                <input id="campo-fecha_fin_practica" type="date" name="fecha_fin_practica" class="border rounded w-full p-2">
+
+            </div>
+
+            <div>
+
+                <label for="campo-porcentaje_apoyo">Porcentaje apoyo</label>
+
+                <input id="campo-porcentaje_apoyo" type="number" name="porcentaje_apoyo" value="100" class="border rounded w-full p-2">
 
             </div>
 
@@ -153,7 +153,7 @@
 
             </a>
 
-            <button class="bg-blue-600 text-white px-5 py-2 rounded">
+            <button class="bg-primary text-white px-5 py-2 rounded">
 
                 Guardar
 

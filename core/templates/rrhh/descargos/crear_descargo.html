@@ -11,7 +11,7 @@
 </h2>
     <div class="mb-6">
         <a href="/rrhh/empleados/{{ empleado.id }}/"
-        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
         Volver a Detalle del Empleado
         </a>
     </div>
@@ -25,11 +25,11 @@
     {% csrf_token %}
 
     <div class="mb-4">
-        <label class="font-semibold">
+        <label class="font-semibold" for="campo-fecha_hechos">
             Fecha de los hechos
         </label>
 
-        <input
+        <input id="campo-fecha_hechos"
             type="date"
             name="fecha_hechos"
             class="border p-2 rounded w-full"
@@ -37,11 +37,11 @@
     </div>
 
     <div class="mb-4">
-        <label class="font-semibold">
+        <label class="font-semibold" for="campo-hora_inicio">
             Hora de inicio
         </label>
 
-        <input
+        <input id="campo-hora_inicio"
             type="time"
             name="hora_inicio"
             class="border p-2 rounded w-full"
@@ -49,11 +49,11 @@
     </div>
 
     <div class="mb-4">
-        <label class="font-semibold">
+        <label class="font-semibold" for="campo-descripcion_falta">
             Descripción de la falta
         </label>
 
-        <textarea
+        <textarea id="campo-descripcion_falta"
             name="descripcion_falta"
             rows="4"
             class="border p-2 rounded w-full"
@@ -63,11 +63,11 @@
     </div>
 
     <div class="mb-4">
-        <label class="font-semibold">
+        <label class="font-semibold" for="campo-testigo">
             Testigo o acompañante (Opcional)
         </label>
 
-        <input
+        <input id="campo-testigo"
             type="text"
             name="testigo"
             class="border p-2 rounded w-full">
@@ -75,9 +75,9 @@
 
     <button
         type="submit"
-        class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
+        class="bg-success text-white px-5 py-2 rounded hover:bg-success-hover">
 
-        📄 Generar Acta de Descargos
+        Generar Acta de Descargos
 
     </button>
 
@@ -91,7 +91,8 @@
     Historial de descargos
 </h2>
 
-<table class="w-full border-collapse border border-gray-300 text-sm">
+<div class="overflow-x-auto">
+<table class="w-full border-collapse border border-border-strong text-sm">
 
     <thead class="bg-gray-200">
         <tr>
@@ -140,5 +141,6 @@
 
     </tbody>
 </table>
+</div>
 
 {% endblock %}

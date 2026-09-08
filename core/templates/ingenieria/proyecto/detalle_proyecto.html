@@ -26,20 +26,26 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
+            <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
+               title="Descargar listado consolidado de materiales requeridos y cantidades">
+                <span>📊</span> Descargar Excel Requeridos
+            </a>
             <button id="btnNuevoApoyo" type="button"
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
                 <span>+</span> Nuevo Nodo / Poste
             </button>
             <button onclick="window.print()" type="button"
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                Imprimir Formato
+                <span>🖨️</span> Imprimir Formato
             </button>
             <a href="{% url 'lista_proyectos' %}"
                class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                Volver
+                ← Volver
             </a>
         </div>
     </div>
+
 
     <!-- ENCABEZADO OFICIAL TIPO EXCEL (ING-FR-08) -->
     <div class="bg-card rounded-xl shadow-sm border border-border-strong p-4 print:border-black">
@@ -109,8 +115,8 @@
                         {% for mat in materiales_columnas %}
                         <th class="px-3 py-3 border-r border-gray-700 text-center min-w-[140px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
                             <div class="truncate font-semibold text-white">{{ mat.descripcion }}</div>
-                            <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] {% if mat.unidad == 'M' %}bg-purple-300 text-purple-900{% else %}bg-amber-300 text-amber-900{% endif %} font-bold">
-                                {% if mat.unidad == 'M' %}M (Metros){% else %}U (Unidad){% endif %}
+                            <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] bg-amber-300 text-amber-900 font-bold">
+                                {{ mat.unidad|default:"UN" }}
                             </span>
                         </th>
                         {% empty %}

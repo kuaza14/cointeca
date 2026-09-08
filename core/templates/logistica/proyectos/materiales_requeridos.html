@@ -1,445 +1,246 @@
 {% extends "base.html" %}
 
-{% block title %}
-Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}
-{% endblock %}
+{% block title %}Materiales Requeridos - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
 
 {% block content %}
-
 <div class="max-w-7xl mx-auto p-6 space-y-6">
 
-```
-<!-- ENCABEZADO -->
-<div class="bg-card rounded-xl shadow-sm border border-border p-6">
-
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-
+    <!-- Encabezado y Navegación -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
         <div>
-            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <a href="/dashboard/" class="hover:underline">
-                    Inicio
-                </a>
-
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                <a href="/dashboard/" class="hover:underline">Inicio</a>
                 <span>/</span>
-
-                <a href="{% url 'logistica_home' %}" class="hover:underline">
-                    Logística
-                </a>
-
+                <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                 <span>/</span>
-
-                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">
-                    Proyectos
-                </a>
-
+                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
                 <span>/</span>
-
-                <span class="text-foreground font-medium">
-                    {{ proyecto.numero_emcali }}
-                </span>
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline">{{ proyecto.numero_emcali }}</a>
+                <span>/</span>
+                <span class="text-gray-800 font-medium">Materiales Requeridos</span>
             </div>
-
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
-                Materiales Requeridos
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-black flex items-center gap-2">
+                📋 Materiales Requeridos — Proyecto {{ proyecto.numero_emcali }}
             </h1>
-
-            <p class="text-sm text-muted-foreground mt-1">
-                Proyecto {{ proyecto.numero_emcali }}
+            <p class="text-sm text-gray-600 mt-1">
+                Consolidado oficial de materiales requeridos para la ejecución técnica de la obra.
             </p>
         </div>
 
-        <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-           class="inline-flex items-center justify-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg text-sm transition">
-            Volver al Proyecto
-        </a>
-
-    </div>
-
-</div>
-
-
-<!-- AGREGAR MATERIAL -->
-<div class="bg-card rounded-xl shadow-sm border border-blue-200 p-6">
-
-    <div class="flex items-center justify-between border-b border-border pb-3 mb-5">
-
-        <div>
-            <h2 class="text-base font-bold text-foreground flex items-center gap-2">
-                Agregar Material Requerido
-            </h2>
-
-            <p class="text-xs text-muted-foreground mt-1">
-                Selecciona un material del catálogo y especifica la cantidad total requerida para este proyecto.
-            </p>
-        </div>
-
-    </div>
-
-
-    <form method="POST">
-
-        {% csrf_token %}
-
-        <input type="hidden" name="accion" value="agregar">
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-
-            <!-- MATERIAL -->
-            <div class="md:col-span-2">
-
-                <label class="block text-xs font-bold text-foreground mb-1" for="campo-material_id">
-                    Material
-                </label>
-
-                <select id="campo-material_id" name="material_id"
-                        required
-                        class="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-                    <option value="">
-                        -- Seleccionar material del catálogo --
-                    </option>
-
-                    {% for mat in materiales %}
-                        <option value="{{ mat.id }}">
-                            [{{ mat.item }}] {{ mat.descripcion }}
-                        </option>
-                    {% endfor %}
-
-                </select>
-
-            </div>
-
-
-            <!-- CANTIDAD -->
-            <div>
-
-                <label class="block text-xs font-bold text-foreground mb-1" for="campo-cantidad">
-                    Cantidad requerida
-                </label>
-
-                <div class="flex gap-2">
-
-                    <input id="campo-cantidad" type="number"
-                           name="cantidad"
-                           step="0.01"
-                           min="0.01"
-                           required
-                           placeholder="0.00"
-                           class="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-                    <button type="submit"
-                            class="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg text-sm shadow-sm transition whitespace-nowrap">
-                        + Agregar
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </form>
-
-</div>
-
-
-<!-- RESUMEN -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-    <div class="bg-card rounded-xl shadow-sm border border-indigo-200 bg-indigo-50/20 p-5">
-
-        <div class="flex items-center justify-between">
-
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-900">
-                Materiales Requeridos
-            </span>
-
-            </div>
-
-        <p class="text-2xl font-black text-indigo-900 mt-2">
-            {{ materiales_requeridos|length }}
-        </p>
-
-        <p class="text-xs text-indigo-600 mt-1">
-            Materiales diferentes solicitados para este proyecto
-        </p>
-
-    </div>
-
-
-    <div class="bg-card rounded-xl shadow-sm border border-blue-200 bg-primary-soft/20 p-5">
-
-        <div class="flex items-center justify-between">
-
-            <span class="text-xs font-bold uppercase tracking-wider text-blue-900">
-                Cantidad Total
-            </span>
-
-            </div>
-
-        <p class="text-2xl font-black text-blue-900 mt-2">
-            {{ total_requerido|floatformat:2 }}
-        </p>
-
-        <p class="text-xs text-primary mt-1">
-            Suma de cantidades requeridas
-        </p>
-
-    </div>
-
-</div>
-
-
-<!-- LISTA DE MATERIALES REQUERIDOS -->
-<div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-
-    <div class="p-5 bg-muted border-b border-border">
-
-        <h2 class="text-base font-bold text-foreground flex items-center gap-2">
-            Materiales Requeridos para este Proyecto
-        </h2>
-
-        <p class="text-xs text-muted-foreground mt-1">
-            Estos son los materiales que posteriormente estarán disponibles para registrar las entradas.
-        </p>
-
-    </div>
-
-
-    <div class="overflow-x-auto">
-
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-
-            <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
-
-                <tr>
-
-                    <th class="px-5 py-3 text-left">
-                        Ítem
-                    </th>
-
-                    <th class="px-5 py-3 text-left">
-                        Material
-                    </th>
-
-                    <th class="px-5 py-3 text-center">
-                        Unidad
-                    </th>
-
-                    <th class="px-5 py-3 text-right">
-                        Cantidad Requerida
-                    </th>
-
-                    <th class="px-5 py-3 text-center">
-                        Acciones
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody class="divide-y divide-gray-100 bg-card">
-
-                {% for requerido in materiales_requeridos %}
-
-                <tr class="hover:bg-muted transition">
-
-                    <td class="px-5 py-4 font-semibold text-muted-foreground">
-                        {{ requerido.material.item }}
-                    </td>
-
-                    <td class="px-5 py-4 font-medium text-foreground">
-                        {{ requerido.material.descripcion }}
-                    </td>
-
-                    <td class="px-5 py-4 text-center text-xs font-semibold text-muted-foreground">
-                        {{ requerido.material.unidad|default:"U" }}
-                    </td>
-
-                    <td class="px-5 py-4 text-right">
-
-                        <span class="font-black text-indigo-700">
-                            {{ requerido.cantidad_requerida|floatformat:2 }}
-                        </span>
-
-                    </td>
-
-                    <td class="px-5 py-4">
-
-                        <div class="flex items-center justify-center gap-2">
-
-                            <!-- EDITAR -->
-                            <button type="button"
-                                    onclick="editarCantidad(
-                                        '{{ requerido.id }}',
-                                        '{{ requerido.material.descripcion|escapejs }}',
-                                        '{{ requerido.cantidad_requerida }}'
-                                    )"
-                                    class="inline-flex items-center justify-center px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary border border-blue-200 rounded-lg text-xs font-semibold transition">
-                                Editar
-                            </button>
-
-
-                            <!-- ELIMINAR -->
-                            <form method="POST"
-                                  onsubmit="return confirm('¿Estás seguro de eliminar este material requerido?');">
-
-                                {% csrf_token %}
-
-                                <input type="hidden"
-                                       name="accion"
-                                       value="eliminar">
-
-                                <input type="hidden"
-                                       name="requerido_id"
-                                       value="{{ requerido.id }}">
-
-                                <button type="submit"
-                                        class="inline-flex items-center justify-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-destructive border border-red-200 rounded-lg text-xs font-semibold transition">
-                                    Eliminar
-                                </button>
-
-                            </form>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-
-                    <td colspan="5"
-                        class="px-6 py-12 text-center text-muted-foreground">
-
-                        <div class="max-w-md mx-auto">
-
-                            <div class="mb-3 flex justify-center text-muted-foreground"><svg class="size-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg></div>
-
-                            <p class="text-base font-semibold text-foreground">
-                                No hay materiales requeridos
-                            </p>
-
-                            <p class="text-xs text-muted-foreground mt-1">
-                                Agrega los materiales que necesita este proyecto según los planos y cantidades definidas por Ingeniería.
-                            </p>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-
-<!-- MODAL EDITAR CANTIDAD -->
-<div id="modalEditar"
-     class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-
-    <div class="bg-card rounded-xl shadow-xl w-full max-w-md p-6">
-
-        <div class="flex items-center justify-between border-b pb-3 mb-5">
-
-            <div>
-
-                <h3 class="text-lg font-bold text-foreground">
-                    Editar cantidad
-                </h3>
-
-                <p id="nombreMaterial"
-                   class="text-xs text-muted-foreground mt-1">
-                </p>
-
-            </div>
-
-            <button type="button"
-                    onclick="cerrarModal()"
-                    class="text-gray-400 hover:text-gray-700 text-2xl">
-                &times;
+        <!-- Botones de Acción -->
+        <div class="flex flex-wrap items-center gap-3">
+            <button type="button" onclick="abrirModalAgregar()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                <span>+</span> Pedir Material
             </button>
 
+            <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
+               class="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
+                ← Volver al Proyecto
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
+            <div class="p-3 bg-blue-100 text-blue-700 rounded-lg text-2xl">
+                🏗️
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Proyecto</p>
+                <p class="text-xl font-extrabold text-gray-900">{{ proyecto.numero_emcali }}</p>
+                <p class="text-xs text-gray-500">{{ proyecto.tipo }} · {{ proyecto.estado }}</p>
+            </div>
         </div>
 
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
+            <div class="p-3 bg-indigo-100 text-indigo-700 rounded-lg text-2xl">
+                📦
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Ítems Distintos</p>
+                <p class="text-2xl font-black text-indigo-900">{{ total_items }}</p>
+                <p class="text-xs text-indigo-600">Tipos de materiales requeridos</p>
+            </div>
+        </div>
 
-        <form method="POST">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-4">
+            <div class="p-3 bg-emerald-100 text-emerald-700 rounded-lg text-2xl">
+                📐
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Cantidad Total Requerida</p>
+                <p class="text-2xl font-black text-emerald-800">{{ total_cantidad|floatformat }}</p>
+                <p class="text-xs text-emerald-600">Suma total de unidades y metros</p>
+            </div>
+        </div>
+    </div>
 
-            {% csrf_token %}
-
-            <input type="hidden"
-                   name="accion"
-                   value="editar">
-
-            <input type="hidden"
-                   name="requerido_id"
-                   id="editarRequeridoId">
-
-
-            <label class="block text-xs font-bold text-foreground mb-1" for="editarCantidad">
-                Nueva cantidad requerida
-            </label>
-
-            <input type="number"
-                   name="cantidad"
-                   id="editarCantidad"
-                   step="0.01"
-                   min="0.01"
-                   required
-                   class="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-
-            <div class="flex justify-end gap-2 mt-5">
-
-                <button type="button"
-                        onclick="cerrarModal()"
-                        class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground rounded-lg text-sm font-semibold">
-                    Cancelar
-                </button>
-                
-                <button type="submit"
-                        class="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-semibold">
-                    Guardar Cambios
-                </button>
-
+    <!-- TABLA OFICIAL DE MATERIALES REQUERIDOS -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <span>📋</span> Listado de Materiales Requeridos
+                </h2>
+                <p class="text-xs text-gray-500">Solo se muestran los materiales requeridos para este proyecto y su cantidad total.</p>
             </div>
 
-        </form>
+            <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-800 border border-green-300 text-xs font-bold rounded-lg transition">
+                <span>📊</span> Exportar a Excel
+            </a>
+        </div>
 
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                <thead class="bg-gray-800 text-white uppercase text-xs font-semibold">
+                    <tr>
+                        <th class="px-6 py-3.5 w-24">Ítem</th>
+                        <th class="px-6 py-3.5">Descripción del Material</th>
+                        <th class="px-4 py-3.5 text-center w-28">Unidad</th>
+                        <th class="px-6 py-3.5 text-right w-48 bg-blue-900">Cantidad Requerida</th>
+                        <th class="px-4 py-3.5 text-center w-36">Origen</th>
+                        <th class="px-4 py-3.5 text-center w-20">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    {% for item in lista_requeridos %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-3 font-mono font-semibold text-gray-600 text-xs">
+                            {{ item.material.item }}
+                        </td>
+
+                        <td class="px-6 py-3 font-semibold text-gray-900">
+                            {{ item.material.descripcion }}
+                        </td>
+
+                        <td class="px-4 py-3 text-center">
+                            <span class="px-2 py-0.5 rounded text-xs font-bold {% if item.material.unidad == 'M' %}bg-purple-100 text-purple-800 border border-purple-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+                                {% if item.material.unidad == 'M' %}
+                                    📏 M (Metros)
+                                {% elif item.material.unidad == 'UN' or item.material.unidad == 'U' %}
+                                    📦 U (Unidad)
+                                {% else %}
+                                    {{ item.material.unidad|default:"U" }}
+                                {% endif %}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-3 text-right font-black text-base text-blue-900 bg-blue-50/40">
+                            {{ item.cantidad|floatformat }}
+                        </td>
+
+                        <td class="px-4 py-3 text-center text-xs text-gray-500 font-medium">
+                            <span class="px-2 py-0.5 bg-gray-100 rounded text-gray-700">
+                                {{ item.origen }}
+                            </span>
+                        </td>
+
+                        <td class="px-4 py-3 text-center">
+                            {% if item.id %}
+                            <form method="POST" onsubmit="return confirm('¿Eliminar este material requerido del proyecto?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="eliminar_requerido">
+                                <input type="hidden" name="req_id" value="{{ item.id }}">
+                                <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-semibold p-1 hover:bg-red-50 rounded" title="Eliminar">
+                                    🗑️
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-gray-300 text-xs" title="Asignado desde los apoyos">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <p class="text-base font-semibold text-gray-800">No hay materiales requeridos registrados en este proyecto.</p>
+                            <p class="text-xs text-gray-400 mt-1">Haz clic en "+ Pedir Material" o asigna materiales a los postes en Ingeniería.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if lista_requeridos %}
+                <tfoot class="bg-gray-100 border-t-2 border-gray-400 font-extrabold text-gray-900">
+                    <tr>
+                        <td colspan="3" class="px-6 py-3 text-right uppercase tracking-wider text-xs border-r border-gray-300">
+                            ⚡ TOTAL REQUERIDO DEL PROYECTO:
+                        </td>
+                        <td class="px-6 py-3 text-right text-blue-900 text-base font-black bg-blue-100">
+                            {{ total_cantidad|floatformat }}
+                        </td>
+                        <td colspan="2" class="px-4 py-3 text-center text-xs text-gray-600">
+                            {{ total_items }} Ítems
+                        </td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
     </div>
 
 </div>
+
+<!-- MODAL PARA PEDIR / AGREGAR MATERIAL REQUERIDO -->
+<div id="modalAgregarRequerido" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white !opacity-100 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span>➕</span> Pedir / Agregar Material Requerido
+            </h2>
+            <button type="button" onclick="cerrarModalAgregar()" class="text-gray-400 hover:text-gray-700 text-2xl font-bold">
+                &times;
+            </button>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="agregar">
+
+            <div>
+                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Seleccionar Material *</label>
+                <select name="material_id" required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="">-- Seleccione un material del catálogo --</option>
+                    {% for mat in materiales_catalogo %}
+                        <option value="{{ mat.id }}">
+                            [{{ mat.item }}] {{ mat.descripcion }} {% if mat.unidad %}({{ mat.unidad }}){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Cantidad Requerida *</label>
+                <input type="number" step="0.01" min="0.01" name="cantidad" required placeholder="0.00"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="cerrarModalAgregar()" class="px-4 py-2 text-sm text-gray-700 border rounded-lg hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-5 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm">
+                    Guardar Requerido
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-function editarCantidad(id, material, cantidad) {
-    document.getElementById("editarRequeridoId").value = id;
-    document.getElementById("editarCantidad").value = cantidad;
-    document.getElementById("nombreMaterial").textContent =
-        material;
-
-    document.getElementById("modalEditar").classList.remove("hidden");
-}
-
-function cerrarModal() {
-    document.getElementById("modalEditar").classList.add("hidden");
-}
-
-document.getElementById("modalEditar").addEventListener("click", function(event) {
-    if (event.target === this) {
-        cerrarModal();
+    function abrirModalAgregar() {
+        const modal = document.getElementById('modalAgregarRequerido');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
-});
 
+    function cerrarModalAgregar() {
+        const modal = document.getElementById('modalAgregarRequerido');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 </script>
 {% endblock %}

@@ -46,18 +46,32 @@
 
             <!-- Botones de Acción Rápida -->
             <div class="flex flex-wrap items-center gap-3">
+                <a href="{% url 'materiales_requeridos_proyecto' proyecto.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition"
+                   title="Ver lista exclusiva de materiales requeridos y descargar Excel">
+                    <span>📋</span> Materiales Requeridos
+                </a>
+
+                <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
+                   title="Descargar listado consolidado de materiales requeridos y cantidades">
+                    <span>📊</span> Descargar Excel
+                </a>
+
                 <a href="{% url 'detalle_proyecto' proyecto.id %}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                    Ver Apoyos / Nodos en Ingeniería
+                    <span>📍</span> Ver Apoyos / Nodos en Ingeniería
                 </a>
 
                 <a href="{% url 'proyectos_logistica' %}"
                    class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                    Volver
+                    ← Volver
                 </a>
             </div>
+
         </div>
     </div>
+
 
     <!-- Indicadores de Balance (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -66,7 +80,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold uppercase tracking-wider text-indigo-900">Requerido en Apoyos (Ing.)</span>
                 </div>
-            <p class="text-2xl font-black text-indigo-900 mt-2">{{ total_items_requeridos|floatformat:1 }}</p>
+            <p class="text-2xl font-black text-indigo-900 mt-2">{{ total_items_requeridos|floatformat }}</p>
             <p class="text-xs text-indigo-600 mt-1">Total de materiales configurados en los postes</p>
 
             <!-- Botón Materiales Requeridos -->
@@ -83,7 +97,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold uppercase tracking-wider text-emerald-900">Total Suministrado a Obra</span>
                 </div>
-            <p class="text-2xl font-black text-emerald-800 mt-2">{{ total_items_entrados|floatformat:1 }}</p>
+            <p class="text-2xl font-black text-emerald-800 mt-2">{{ total_items_entrados|floatformat }}</p>
             <p class="text-xs text-emerald-600 mt-1">{{ entradas|length }} remisión{{ entradas|length|pluralize:"es" }} y despachos registrados</p>
             
             <div class="mt-4">
@@ -100,7 +114,7 @@
                 <span class="text-xs font-bold uppercase tracking-wider text-blue-900">Saldo en Obra / Terreno</span>
                 </div>
             <p class="text-2xl font-black {% if saldo_total_items < 0 %}text-amber-700{% else %}text-primary{% endif %} mt-2">
-                {{ saldo_total_items|floatformat:1 }}
+                {{ saldo_total_items|floatformat }}
             </p>
             <p class="text-xs text-primary mt-1">Suministrado − Requerido/Instalado</p>
         </div>
@@ -273,7 +287,7 @@
                 <!-- Detalle de Items de esta Entrada -->
                 <div class="bg-card border rounded-md overflow-hidden">
                     <div class="overflow-x-auto">
-<table class="min-w-full text-xs divide-y divide-gray-200">
+                    <table class="min-w-full text-xs divide-y divide-gray-200">
                         <thead class="bg-muted text-muted-foreground">
                             <tr>
                                 <th class="px-3 py-2 text-left">Ítem</th>
@@ -293,7 +307,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
-</div>
+                    </div>
                 </div>
             </div>
             {% empty %}

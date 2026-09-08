@@ -153,6 +153,7 @@ from core.views.logistica import (
     registrar_entrada_material,
     eliminar_entrada_material,
     materiales_requeridos_proyecto,
+    exportar_materiales_proyecto_excel,
     editar_entrada_material
 )
 
@@ -173,8 +174,10 @@ from core.views.ingenieria import(
     detalle_proyecto,
     crear_apoyo,
     detalle_apoyo,
-    eliminar_apoyo
+    eliminar_apoyo,
 )
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -339,7 +342,9 @@ urlpatterns = [
     path("logistica/proyectos/<int:proyecto_id>/entradas/crear/", registrar_entrada_material, name="registrar_entrada_material"),
     path("logistica/entradas/<int:entrada_id>/eliminar/", eliminar_entrada_material, name="eliminar_entrada_material"),
     path("logistica/proyectos/<int:proyecto_id>/requeridos/", materiales_requeridos_proyecto, name="materiales_requeridos_proyecto"),
+    path("logistica/proyectos/<int:proyecto_id>/requeridos/excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel"),
     path("logistica/entradas/<int:entrada_id>/editar/", editar_entrada_material, name="editar_entrada_material"),
+
 
 
     #documentos
@@ -359,6 +364,8 @@ urlpatterns = [
     path("ingenieria/proyectos/<int:proyecto_id>/apoyos/crear/", crear_apoyo, name="crear_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/", detalle_apoyo, name="detalle_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/eliminar/", eliminar_apoyo, name="eliminar_apoyo"),
+    path("ingenieria/proyectos/<int:proyecto_id>/exportar_excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel"),
+
     
 
 

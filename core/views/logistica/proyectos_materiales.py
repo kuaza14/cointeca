@@ -1,4 +1,9 @@
+import io
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.utils import timezone
 from django.db.models import Sum
 from decimal import Decimal
 from core.models import (
@@ -13,6 +18,7 @@ from core.models import (
 )
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+
 
 
 @login_required
@@ -436,9 +442,10 @@ def materiales_requeridos_proyecto(request, proyecto_id):
         "logistica/proyectos/materiales_requeridos.html",
         {
             "proyecto": proyecto,
-            "materiales": materiales,
-            "materiales_requeridos": materiales_requeridos,
-            "total_requerido": total_requerido,
+            "materiales_catalogo": materiales,
+            "lista_requeridos": materiales_requeridos,
+            "total_items": materiales_requeridos.count(),
+            "total_cantidad": total_requerido,
         }
     )
 
@@ -688,3 +695,245 @@ def editar_entrada_material(request, entrada_id):
             "materiales": materiales,
         }
     )
+
+
+@login_required
+def materiales_requeridos_proyecto(request, proyecto_id):
+    """
+    Vista de Materiales Requeridos para un proyecto en Logística.
+    Permite consultar, agregar requerimientos y descargar/imprimir el Excel.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    materiales_catalogo = Material.objects.all().order_by("descripcion")
+
+    if request.method == "POST":
+        accion = request.POST.get("accion")
+
+        if accion == "agregar_requerido":
+            material_id = request.POST.get("material_id")
+            cantidad_str = request.POST.get("cantidad", "0")
+
+            if material_id:
+                try:
+                    cant = Decimal(cantidad_str.strip())
+                    if cant > 0:
+                        req, created = MaterialRequeridoProyecto.objects.get_or_create(
+                            proyecto=proyecto,
+                            material_id=material_id,
+                            defaults={"cantidad_requerida": cant}
+                        )
+                        if not created:
+                            req.cantidad_requerida += cant
+                            req.save()
+                except (ValueError, TypeError, Decimal.InvalidOperation):
+                    pass
+
+            return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
+
+        elif accion == "eliminar_requerido":
+            req_id = request.POST.get("req_id")
+            if req_id:
+                MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).delete()
+
+            return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
+
+    # Consolidar requerimientos (de MaterialRequeridoProyecto y de ApoyoMaterial)
+    req_directos = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material")
+    
+    req_apoyos = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .values("material_id", "material__item", "material__descripcion", "material__unidad")
+        .annotate(total_apoyo=Sum("cantidad_requerida"))
+    )
+
+    mapa_requeridos = {}
+    for r in req_directos:
+        mapa_requeridos[r.material.id] = {
+            "id": r.id,
+            "material": r.material,
+            "cantidad": r.cantidad_requerida,
+            "origen": "Requerido General",
+        }
+
+    for a in req_apoyos:
+        m_id = a["material_id"]
+        if m_id in mapa_requeridos:
+            mapa_requeridos[m_id]["cantidad"] += a["total_apoyo"]
+        else:
+            mat = Material.objects.get(id=m_id)
+            mapa_requeridos[m_id] = {
+                "id": None,
+                "material": mat,
+                "cantidad": a["total_apoyo"],
+                "origen": "Apoyos Ingeniería",
+            }
+
+    lista_requeridos = sorted(mapa_requeridos.values(), key=lambda x: x["material"].descripcion)
+    total_cantidad = sum(x["cantidad"] for x in lista_requeridos)
+
+    return render(
+        request,
+        "logistica/proyectos/materiales_requeridos.html",
+        {
+            "proyecto": proyecto,
+            "materiales_catalogo": materiales_catalogo,
+            "lista_requeridos": lista_requeridos,
+            "total_cantidad": total_cantidad,
+            "total_items": len(lista_requeridos),
+        }
+    )
+
+
+@login_required
+def exportar_materiales_proyecto_excel(request, proyecto_id):
+    """
+    Genera y descarga un archivo Excel (.xlsx) con los materiales requeridos
+    y sus cantidades para el proyecto.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+
+    # Consolidar requerimientos
+    req_directos = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material")
+    req_apoyos = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .values("material_id", "material__item", "material__descripcion", "material__unidad")
+        .annotate(total_apoyo=Sum("cantidad_requerida"))
+    )
+
+    mapa_requeridos = {}
+    for r in req_directos:
+        mapa_requeridos[r.material.id] = {
+            "item": r.material.item,
+            "descripcion": r.material.descripcion,
+            "unidad": r.material.unidad or "U",
+            "cantidad": r.cantidad_requerida,
+        }
+
+    for a in req_apoyos:
+        m_id = a["material_id"]
+        if m_id in mapa_requeridos:
+            mapa_requeridos[m_id]["cantidad"] += a["total_apoyo"]
+        else:
+            mapa_requeridos[m_id] = {
+                "item": a["material__item"],
+                "descripcion": a["material__descripcion"],
+                "unidad": a["material__unidad"] or "U",
+                "cantidad": a["total_apoyo"],
+            }
+
+    lista_items = sorted(mapa_requeridos.values(), key=lambda x: x["descripcion"])
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Materiales Requeridos"
+
+    font_titulo = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    font_subtitulo = Font(name="Calibri", size=10, bold=True, color="4B5563")
+    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=11, color="111827")
+    font_total = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
+
+    fill_header = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
+    fill_total = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+
+    thin_border_side = Side(border_style="thin", color="CBD5E1")
+    border_cell = Border(left=thin_border_side, right=thin_border_side, top=thin_border_side, bottom=thin_border_side)
+    border_total = Border(
+        top=Side(border_style="medium", color="1E40AF"),
+        bottom=Side(border_style="double", color="1E40AF"),
+        left=thin_border_side,
+        right=thin_border_side
+    )
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    # Encabezado
+    ws.merge_cells("A1:D1")
+    ws["A1"] = "COINTECA S.A.S. — MATERIALES REQUERIDOS"
+    ws["A1"].font = font_titulo
+    ws["A1"].alignment = align_left
+
+    ws.merge_cells("A2:D2")
+    ws["A2"] = f"PROYECTO: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+    ws["A2"].font = font_subtitulo
+    ws["A2"].alignment = align_left
+
+    ws.append([])
+
+    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "CANTIDAD REQUERIDA"]
+    ws.append(headers)
+    header_row = 4
+
+    for col_idx in range(1, 5):
+        cell = ws.cell(row=header_row, column=col_idx)
+        cell.font = font_header
+        cell.fill = fill_header
+        cell.alignment = align_center if col_idx != 2 else align_left
+        cell.border = border_cell
+
+    current_row = header_row + 1
+    total_general = Decimal("0")
+
+    for idx, item in enumerate(lista_items, start=1):
+        cant = item["cantidad"] or Decimal("0")
+        total_general += cant
+
+        ws.append([
+            item["item"],
+            item["descripcion"],
+            item["unidad"],
+            float(cant)
+        ])
+
+        for col_idx in range(1, 5):
+            c = ws.cell(row=current_row, column=col_idx)
+            c.font = font_data
+            c.border = border_cell
+            if idx % 2 == 0:
+                c.fill = fill_zebra
+
+            if col_idx == 1:
+                c.alignment = align_center
+            elif col_idx == 2:
+                c.alignment = align_left
+            elif col_idx == 3:
+                c.alignment = align_center
+            elif col_idx == 4:
+                c.alignment = align_right
+                c.number_format = "#,##0.00"
+
+        current_row += 1
+
+    ws.append(["", "TOTAL GENERAL REQUERIDO", f"{len(lista_items)} ÍTEMS", float(total_general)])
+    for col_idx in range(1, 5):
+        c = ws.cell(row=current_row, column=col_idx)
+        c.font = font_total
+        c.fill = fill_total
+        c.border = border_total
+        if col_idx in [1, 3]:
+            c.alignment = align_center
+        elif col_idx == 2:
+            c.alignment = align_left
+        elif col_idx == 4:
+            c.alignment = align_right
+            c.number_format = "#,##0.00"
+
+    ws.column_dimensions["A"].width = 12
+    ws.column_dimensions["B"].width = 50
+    ws.column_dimensions["C"].width = 15
+    ws.column_dimensions["D"].width = 24
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"Materiales_Requeridos_Proyecto_{proyecto.numero_emcali}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

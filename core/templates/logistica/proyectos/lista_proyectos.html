@@ -146,6 +146,11 @@
                         </td>
 
                         <td class="px-6 py-4 text-right space-x-2">
+                            <a href="{% url 'materiales_requeridos_proyecto' item.proyecto.id %}"
+                               title="Ver Materiales Requeridos & Excel"
+                               class="inline-flex items-center px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition">
+                                📋 Requeridos
+                            </a>
                             <a href="{% url 'detalle_proyecto_logistica' item.proyecto.id %}"
                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg shadow-sm transition">
                                 Control & Saldo
@@ -161,6 +166,7 @@
                                 Apoyos
                             </a>
                         </td>
+
                     </tr>
                     {% empty %}
                     <tr>

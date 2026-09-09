@@ -52,12 +52,6 @@
                     <span>📋</span> Materiales Requeridos
                 </a>
 
-                <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
-                   title="Descargar listado consolidado de materiales requeridos y cantidades">
-                    <span>📊</span> Descargar Excel
-                </a>
-
                 <a href="{% url 'detalle_proyecto' proyecto.id %}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
                     <span>📍</span> Ver Apoyos / Nodos en Ingeniería
@@ -155,12 +149,10 @@
                             <th class="px-5 py-3.5">Ítem</th>
                             <th class="px-5 py-3.5">Descripción del Material</th>
                             <th class="px-3 py-3.5 text-center">Unidad</th>
-                            <th class="px-4 py-3.5 text-right bg-indigo-50/50">Requerido (Ing.)</th>
+                            <th class="px-4 py-3.5 text-right bg-indigo-50/50">Requerido en Obra</th>
                             <th class="px-4 py-3.5 text-right bg-muted">Stock en Bodega</th>
-                            <th class="px-4 py-3.5 text-right bg-emerald-50/50">Suministrado</th>
-                            <th class="px-4 py-3.5 text-right bg-primary-soft/50">Saldo en Obra</th>
-                            <th class="px-4 py-3.5 text-center">% Abastecido</th>
-                            <th class="px-5 py-3.5 text-center">Estado</th>
+                            <th class="px-4 py-3.5 text-right bg-emerald-50/50">Suministrado (Entradas)</th>
+                            <th class="px-4 py-3.5 text-right bg-primary-soft/50">Saldo</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-card">
@@ -193,22 +185,10 @@
                             <td class="px-4 py-3.5 text-right font-black {% if fila.saldo_terreno < 0 %}text-amber-700 bg-amber-50/30{% elif fila.saldo_terreno == 0 %}text-muted-foreground bg-muted{% else %}text-primary bg-primary-soft/20{% endif %}">
                                 {{ fila.saldo_terreno|floatformat }}
                             </td>
-
-                            <td class="px-4 py-3.5 text-center font-bold">
-                                <span class="{% if fila.pct_abastecido >= 100 %}text-success{% elif fila.pct_abastecido > 0 %}text-amber-600{% else %}text-destructive{% endif %}">
-                                    {{ fila.pct_abastecido }}%
-                                </span>
-                            </td>
-
-                            <td class="px-5 py-3.5 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ fila.badge_color }}">
-                                    {{ fila.badge_texto }}
-                                </span>
-                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="px-6 py-12 text-center text-muted-foreground">
+                            <td colspan="7" class="px-6 py-12 text-center text-muted-foreground">
                                 <div class="max-w-sm mx-auto">
                                     <p class="text-base font-semibold text-foreground">No hay materiales registrados para este proyecto</p>
                                     <p class="text-xs text-muted-foreground mt-1">Configura materiales en los apoyos de ingeniería o registra una entrada para ver el balance.</p>

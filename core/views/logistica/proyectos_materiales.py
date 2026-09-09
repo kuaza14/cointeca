@@ -90,36 +90,11 @@ def detalle_proyecto_logistica(request, proyecto_id):
     total_items_entrados = Decimal("0")
 
     for mat in materiales_db:
-        sum_req = req_map.get(mat.id, Decimal("0"))      # Lo que se necesita / usa en los apoyos
-        sum_ent = ent_map.get(mat.id, Decimal("0"))      # Lo que ha entrado/despachado a la obra
+        sum_req = req_map.get(mat.id, Decimal("0"))
+        sum_ent = ent_map.get(mat.id, Decimal("0"))
         stock_bodega = getattr(mat, "inventario", None)
         stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
-
-        saldo_terreno = sum_ent - sum_req                # Saldo en obra (Entrado - Requerido/Instalado)
-
-        # % Abastecido respecto a lo requerido
-        if sum_req > 0:
-            pct_abastecido = round((sum_ent / sum_req * Decimal("100")), 1)
-        else:
-            pct_abastecido = Decimal("100.0") if sum_ent > 0 else Decimal("0.0")
-
-        # Alerta visual
-        if sum_ent < sum_req:
-            estado_alerta = "falta_material"
-            badge_texto = f"Faltan {sum_req - sum_ent}"
-            badge_color = "bg-amber-100 text-amber-800 border-amber-300"
-        elif sum_ent > sum_req:
-            estado_alerta = "excedido"
-            badge_texto = f"Sobrante: +{sum_ent - sum_req}"
-            badge_color = "bg-blue-100 text-blue-800 border-blue-300"
-        elif sum_ent > 0 and sum_ent == sum_req:
-            estado_alerta = "completo"
-            badge_texto = "100% Abastecido"
-            badge_color = "bg-green-100 text-green-800 border-green-300"
-        else:
-            estado_alerta = "sin_entradas"
-            badge_texto = "Sin Entradas"
-            badge_color = "bg-red-100 text-red-700 border-red-300"
+        saldo_terreno = sum_ent - sum_req
 
         balance_materiales.append({
             "material": mat,
@@ -127,10 +102,6 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "stock_bodega": stock_disponible,
             "entrada": sum_ent,
             "saldo_terreno": saldo_terreno,
-            "pct_abastecido": pct_abastecido,
-            "estado_alerta": estado_alerta,
-            "badge_texto": badge_texto,
-            "badge_color": badge_color,
         })
 
         total_items_requeridos += sum_req
@@ -709,33 +680,44 @@ def materiales_requeridos_proyecto(request, proyecto_id):
     if request.method == "POST":
         accion = request.POST.get("accion")
 
-        if accion == "agregar_requerido":
-            material_id = request.POST.get("material_id")
-            cantidad_str = request.POST.get("cantidad", "0")
+        if accion in ["agregar_requerido", "agregar"]:
+            material_ids = request.POST.getlist("material_id[]")
+            cantidades = request.POST.getlist("cantidad[]")
 
-            if material_id:
+            # Soporte por si se envía un único campo
+            if not material_ids:
+                single_mat = request.POST.get("material_id")
+                single_cant = request.POST.get("cantidad")
+                if single_mat:
+                    material_ids = [single_mat]
+                    cantidades = [single_cant]
+
+            for m_id, c_str in zip(material_ids, cantidades):
+                if not m_id or not c_str:
+                    continue
                 try:
-                    cant = Decimal(cantidad_str.strip())
+                    cant = Decimal(str(c_str).strip())
                     if cant > 0:
                         req, created = MaterialRequeridoProyecto.objects.get_or_create(
                             proyecto=proyecto,
-                            material_id=material_id,
+                            material_id=m_id,
                             defaults={"cantidad_requerida": cant}
                         )
                         if not created:
                             req.cantidad_requerida += cant
                             req.save()
                 except (ValueError, TypeError, Decimal.InvalidOperation):
-                    pass
+                    continue
 
             return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
 
-        elif accion == "eliminar_requerido":
-            req_id = request.POST.get("req_id")
+        elif accion in ["eliminar_requerido", "eliminar"]:
+            req_id = request.POST.get("req_id") or request.POST.get("requerido_id")
             if req_id:
                 MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).delete()
 
             return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
+
 
     # Consolidar requerimientos (de MaterialRequeridoProyecto y de ApoyoMaterial)
     req_directos = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material")
@@ -788,7 +770,7 @@ def materiales_requeridos_proyecto(request, proyecto_id):
 def exportar_materiales_proyecto_excel(request, proyecto_id):
     """
     Genera y descarga un archivo Excel (.xlsx) con los materiales requeridos
-    y sus cantidades para el proyecto.
+    y sus cantidades exactas (sin ceros ni decimales sobrantes).
     """
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
@@ -881,11 +863,20 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
         cant = item["cantidad"] or Decimal("0")
         total_general += cant
 
+        # Si es un número entero exacto (ej: 10.0), mostrarlo como entero (10)
+        # Si tiene decimales (ej: 2.5), mostrar exactamente 2.5
+        if cant % 1 == 0:
+            cant_formateada = int(cant)
+            formato_num = "#,##0"
+        else:
+            cant_formateada = float(cant)
+            formato_num = "0.##"
+
         ws.append([
             item["item"],
             item["descripcion"],
             item["unidad"],
-            float(cant)
+            cant_formateada
         ])
 
         for col_idx in range(1, 5):
@@ -903,11 +894,19 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
                 c.alignment = align_center
             elif col_idx == 4:
                 c.alignment = align_right
-                c.number_format = "#,##0.00"
+                c.number_format = formato_num
 
         current_row += 1
 
-    ws.append(["", "TOTAL GENERAL REQUERIDO", f"{len(lista_items)} ÍTEMS", float(total_general)])
+    # Fila total general
+    if total_general % 1 == 0:
+        total_formateado = int(total_general)
+        formato_total = "#,##0"
+    else:
+        total_formateado = float(total_general)
+        formato_total = "0.##"
+
+    ws.append(["", "TOTAL GENERAL REQUERIDO", f"{len(lista_items)} ÍTEMS", total_formateado])
     for col_idx in range(1, 5):
         c = ws.cell(row=current_row, column=col_idx)
         c.font = font_total
@@ -919,7 +918,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
             c.alignment = align_left
         elif col_idx == 4:
             c.alignment = align_right
-            c.number_format = "#,##0.00"
+            c.number_format = formato_total
 
     ws.column_dimensions["A"].width = 12
     ws.column_dimensions["B"].width = 50

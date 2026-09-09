@@ -20,31 +20,25 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3">
                 Formato Poste a Poste — Proyecto {{ proyecto.numero_emcali }}
             </h1>
-            <p class="text-sm text-muted-foreground mt-1">
-                Matriz técnica tipo Excel: Apoyos/Nodos en filas y materiales asignados en columnas.
-            </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
-               class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
-               title="Descargar listado consolidado de materiales requeridos y cantidades">
-                <span>📊</span> Descargar Excel Requeridos
-            </a>
             <button id="btnNuevoApoyo" type="button"
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
                 <span>+</span> Nuevo Nodo / Poste
             </button>
-            <button onclick="window.print()" type="button"
-                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                <span>🖨️</span> Imprimir Formato
-            </button>
+            <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
+               class="inline-flex items-center px-4 py-2.5 text-sm font-semibold rounded-lg transition border"
+               style="background-color: #07df36; color: #0f172a !important; border-color: #94a3b8;">
+                ← Volver a materiales de proyecto
+            </a>
             <a href="{% url 'lista_proyectos' %}"
                class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
                 ← Volver
             </a>
         </div>
     </div>
+
 
 
     <!-- ENCABEZADO OFICIAL TIPO EXCEL (ING-FR-08) -->
@@ -198,7 +192,7 @@
                         {% for celda in fila.celdas %}
                         <td class="px-3 py-2.5 text-center border-r border-border font-bold {% if celda.cantidad > 0 %}text-foreground{% else %}text-gray-300{% endif %}">
                             {% if celda.cantidad > 0 %}
-                                {{ celda.cantidad|floatformat:1 }}
+                                {{ celda.cantidad|floatformat }}
                             {% else %}
                             {% endif %}
                         </td>
@@ -242,7 +236,7 @@
 
                         {% for tot in fila_totales %}
                         <td class="px-3 py-3 text-center border-r border-border-strong text-blue-900 text-sm font-black bg-primary-soft/80">
-                            {{ tot.total|floatformat:1 }}
+                            {{ tot.total|floatformat }}
                         </td>
                         {% endfor %}
 

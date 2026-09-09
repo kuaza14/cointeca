@@ -4,7 +4,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from decimal import Decimal
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
 from core.models import (
     Proyecto,
@@ -32,12 +32,26 @@ def ingenieria_inicio(request):
 
 @login_required
 def lista_proyectos(request):
-    proyectos = Proyecto.objects.all().order_by("-id")
+    query = request.GET.get("q", "").strip()
+    proyectos = Proyecto.objects.all()
+
+    if query:
+        proyectos = proyectos.filter(
+            Q(numero_emcali__icontains=query) |
+            Q(tipo__icontains=query) |
+            Q(estado__icontains=query)
+        )
+
+    proyectos = proyectos.order_by("-id")
+
     return render(
         request,
         "ingenieria/proyecto/lista.html",
         {
-            "proyectos": proyectos
+            "proyectos": proyectos,
+            "query": query,
+            "total_proyectos": Proyecto.objects.count(),
+            "total_filtrados": proyectos.count(),
         }
     )
 

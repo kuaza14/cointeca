@@ -4,39 +4,103 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from decimal import Decimal
 from core.models import (
+    Macroproyecto,
     Proyecto,
     Material,
     Apoyo,
     ApoyoMaterial,
     EntradaMaterialProyecto,
     DetalleEntradaMaterial,
+    RetiroMaterialProyecto,
+    DetalleRetiroMaterial,
     MaterialRequeridoProyecto,
     Inventario,
 )
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
+@login_required
+def macroproyectos_logistica(request):
+    """
+    Vista principal de Macroproyectos en Logística.
+    Agrupa los proyectos por Macroproyecto con métricas consolidadas.
+    """
+    query = request.GET.get("q", "").strip()
+    macroproyectos = Macroproyecto.objects.all().prefetch_related("proyectos")
 
+    if query:
+        macroproyectos = macroproyectos.filter(
+            Q(nombre__icontains=query) |
+            Q(descripcion__icontains=query) |
+            Q(estado__icontains=query)
+        )
+
+    resumen_macros = []
+    for macro in macroproyectos:
+        proyectos_macro = macro.proyectos.all()
+        num_proyectos = proyectos_macro.count()
+        num_entradas = EntradaMaterialProyecto.objects.filter(proyecto__macroproyecto=macro).count()
+        num_apoyos = Apoyo.objects.filter(proyecto__macroproyecto=macro).count()
+        num_retiros = ApoyoMaterial.objects.filter(apoyo__proyecto__macroproyecto=macro, cantidad_retirada__gt=0).count()
+        
+        resumen_macros.append({
+            "macro": macro,
+            "num_proyectos": num_proyectos,
+            "num_entradas": num_entradas,
+            "num_apoyos": num_apoyos,
+            "num_retiros": num_retiros,
+        })
+
+    return render(
+        request,
+        "logistica/macroproyectos/lista_macroproyectos.html",
+        {
+            "macroproyectos": resumen_macros,
+            "query": query,
+            "total_macros": Macroproyecto.objects.count(),
+            "total_filtrados": len(resumen_macros),
+        }
+    )
 
 @login_required
-def proyectos_logistica(request):
+def proyectos_logistica(request, macroproyecto_id=None):
     """
-    Vista principal de Proyectos y Control de Materiales en Logística.
-    Muestra el listado de proyectos con indicadores de entradas y materiales en obra.
+    Listado de proyectos y control de materiales en logística.
+    Si se especifica macroproyecto_id, filtra exclusivamente los proyectos de ese macroproyecto.
     """
-    proyectos = Proyecto.objects.all().order_by("-id")
+    macroproyecto = None
+    if macroproyecto_id:
+        macroproyecto = get_object_or_404(Macroproyecto, id=macroproyecto_id)
+        proyectos = Proyecto.objects.filter(macroproyecto=macroproyecto).order_by("-id")
+    else:
+        macro_param = request.GET.get("macroproyecto_id")
+        if macro_param and macro_param.isdigit():
+            macroproyecto = Macroproyecto.objects.filter(id=int(macro_param)).first()
+            proyectos = Proyecto.objects.filter(macroproyecto=macroproyecto).order_by("-id") if macroproyecto else Proyecto.objects.all().order_by("-id")
+        else:
+            proyectos = Proyecto.objects.all().order_by("-id")
+
+    query = request.GET.get("q", "").strip()
+    if query:
+        proyectos = proyectos.filter(
+            Q(numero_emcali__icontains=query) |
+            Q(tipo__icontains=query) |
+            Q(estado__icontains=query)
+        )
 
     resumen_proyectos = []
     for p in proyectos:
         num_entradas = p.entradas_material.count()
+        num_retiros = ApoyoMaterial.objects.filter(apoyo__proyecto=p, cantidad_retirada__gt=0).count()
         num_apoyos = p.apoyos.count()
         total_items_instalados = ApoyoMaterial.objects.filter(apoyo__proyecto=p).count()
         resumen_proyectos.append({
             "proyecto": p,
             "num_entradas": num_entradas,
+            "num_retiros": num_retiros,
             "num_apoyos": num_apoyos,
             "total_items_instalados": total_items_instalados,
         })
@@ -45,8 +109,10 @@ def proyectos_logistica(request):
         request,
         "logistica/proyectos/lista_proyectos.html",
         {
+            "macroproyecto": macroproyecto,
             "resumen_proyectos": resumen_proyectos,
-            "total_proyectos": proyectos.count(),
+            "total_proyectos": len(resumen_proyectos),
+            "query": query,
         }
     )
 
@@ -61,17 +127,21 @@ def detalle_proyecto_logistica(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
     # 1. Requerido / Consumo en Obra (viene directamente de los Apoyos de Ingeniería)
-    req_qs = (
-        MaterialRequeridoProyecto.objects
-        .filter(proyecto=proyecto)
+    apoyo_inst_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
         .values("material_id")
         .annotate(total=Sum("cantidad_requerida"))
     )
+    req_map = {item["material_id"]: item["total"] for item in apoyo_inst_qs}
 
-    req_map = {
-        item["material_id"]: item["total"]
-        for item in req_qs
-    }
+    mat_req_extra = (
+        MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
+    )
+    for item in mat_req_extra:
+        if item["material_id"] not in req_map:
+            req_map[item["material_id"]] = item["total"]
 
     # 2. Entradas Suministradas (compras de proveedor o despachos de bodega)
     ent_qs = (
@@ -81,17 +151,27 @@ def detalle_proyecto_logistica(request, proyecto_id):
     )
     ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
-    # 3. Obtener todos los materiales involucrados en el proyecto
-    all_material_ids = set(req_map.keys()) | set(ent_map.keys())
+    # 3. Retiros / Desmontes del proyecto (desde los apoyos/postes)
+    ret_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_retirada"))
+    )
+    ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
+
+    # 4. Obtener todos los materiales involucrados en el proyecto
+    all_material_ids = set(req_map.keys()) | set(ent_map.keys()) | set(ret_map.keys())
     materiales_db = Material.objects.filter(id__in=all_material_ids).select_related("inventario").order_by("descripcion")
 
     balance_materiales = []
     total_items_requeridos = Decimal("0")
     total_items_entrados = Decimal("0")
+    total_items_retirados = Decimal("0")
 
     for mat in materiales_db:
         sum_req = req_map.get(mat.id, Decimal("0"))
         sum_ent = ent_map.get(mat.id, Decimal("0"))
+        sum_ret = ret_map.get(mat.id, Decimal("0"))
         stock_bodega = getattr(mat, "inventario", None)
         stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
         saldo_terreno = sum_ent - sum_req
@@ -101,16 +181,24 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "requerido": sum_req,
             "stock_bodega": stock_disponible,
             "entrada": sum_ent,
+            "retirado": sum_ret,
             "saldo_terreno": saldo_terreno,
         })
 
         total_items_requeridos += sum_req
         total_items_entrados += sum_ent
+        total_items_retirados += sum_ret
 
     entradas = (
         EntradaMaterialProyecto.objects.filter(proyecto=proyecto)
         .prefetch_related("detalles__material")
         .order_by("-fecha", "-id")
+    )
+
+    retiros_apoyo = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_retirada__gt=0)
+        .select_related("apoyo", "material")
+        .order_by("apoyo__numero_apoyo", "material__descripcion")
     )
 
     return render(
@@ -120,8 +208,10 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "proyecto": proyecto,
             "balance_materiales": balance_materiales,
             "entradas": entradas,
+            "retiros_apoyo": retiros_apoyo,
             "total_items_requeridos": total_items_requeridos,
             "total_items_entrados": total_items_entrados,
+            "total_items_retirados": total_items_retirados,
             "saldo_total_items": total_items_entrados - total_items_requeridos,
         }
     )
@@ -936,3 +1026,417 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     )
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+# ==============================================================================
+# INFORME CONSOLIDADO MULTI-PROYECTO Y GESTIÓN DE RETIROS DE MATERIALES
+# ==============================================================================
+
+@login_required
+def informe_consolidado_proyectos(request):
+    """
+    Informe Consolidado Multi-Proyecto (Liquidación de Obras).
+    Permite seleccionar múltiples proyectos marcados con checkboxes y consolidar:
+    - Entradas Suministradas a obra
+    - Material Instalado en Apoyos
+    - Material Retirado / Desmontado (en BT y AP)
+    - Saldo final de Liquidación
+    """
+    proyecto_ids = (
+        request.GET.getlist("proyectos")
+        or request.GET.getlist("proyectos[]")
+        or request.POST.getlist("proyectos")
+        or request.POST.getlist("proyectos[]")
+    )
+
+    if not proyecto_ids:
+        raw_ids = request.GET.get("ids", "") or request.POST.get("ids", "")
+        if raw_ids:
+            proyecto_ids = [x.strip() for x in raw_ids.split(",") if x.strip()]
+
+    if not proyecto_ids:
+        return redirect("proyectos_logistica")
+
+    proyectos_seleccionados = Proyecto.objects.filter(id__in=proyecto_ids).order_by("numero_emcali")
+
+    if not proyectos_seleccionados.exists():
+        return redirect("proyectos_logistica")
+
+    # 1. Consolidar Entradas
+    ent_qs = (
+        DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_seleccionados)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    ent_map = {item["material_id"]: item["total"] for item in ent_qs}
+
+    # 2. Consolidar Instalado en Apoyos (Ingeniería)
+    inst_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_seleccionados)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
+    )
+    inst_map = {item["material_id"]: item["total"] for item in inst_qs}
+
+    # 3. Consolidar Retiros / Desmontes (desde los apoyos de ingeniería)
+    ret_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_seleccionados)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_retirada"))
+    )
+    ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
+
+    # 4. Consolidar Requerimientos generales
+    req_qs = (
+        MaterialRequeridoProyecto.objects.filter(proyecto__in=proyectos_seleccionados)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
+    )
+    req_map = {item["material_id"]: item["total"] for item in req_qs}
+
+    # 5. Todos los materiales involucrados
+    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys()) | set(req_map.keys())
+    materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
+
+    tabla_consolidada = []
+    total_entrado_general = Decimal("0")
+    total_instalado_general = Decimal("0")
+    total_retirado_general = Decimal("0")
+    total_requerido_general = Decimal("0")
+
+    for mat in materiales_db:
+        cant_ent = ent_map.get(mat.id, Decimal("0"))
+        cant_inst = inst_map.get(mat.id, Decimal("0"))
+        cant_ret = ret_map.get(mat.id, Decimal("0"))
+        cant_req = req_map.get(mat.id, Decimal("0"))
+        saldo = cant_ent - cant_inst
+
+        stock_bodega = getattr(mat, "inventario", None)
+        stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
+
+        tabla_consolidada.append({
+            "material": mat,
+            "entrado": cant_ent,
+            "instalado": cant_inst,
+            "retirado": cant_ret,
+            "requerido": cant_req,
+            "saldo": saldo,
+            "stock_bodega": stock_disponible,
+        })
+
+        total_entrado_general += cant_ent
+        total_instalado_general += cant_inst
+        total_retirado_general += cant_ret
+        total_requerido_general += cant_req
+
+    # 6. Desglose individual de cada proyecto seleccionado
+    desglose_proyectos = []
+    for p in proyectos_seleccionados:
+        p_ent_qs = DetalleEntradaMaterial.objects.filter(entrada__proyecto=p).values("material_id").annotate(total=Sum("cantidad"))
+        p_ent_map = {x["material_id"]: x["total"] for x in p_ent_qs}
+
+        p_inst_qs = ApoyoMaterial.objects.filter(apoyo__proyecto=p).values("material_id").annotate(total=Sum("cantidad_requerida"))
+        p_inst_map = {x["material_id"]: x["total"] for x in p_inst_qs}
+
+        p_ret_qs = ApoyoMaterial.objects.filter(apoyo__proyecto=p).values("material_id").annotate(total=Sum("cantidad_retirada"))
+        p_ret_map = {x["material_id"]: x["total"] for x in p_ret_qs if x["total"] > 0}
+
+        p_mat_ids = set(p_ent_map.keys()) | set(p_inst_map.keys()) | set(p_ret_map.keys())
+        p_materiales = Material.objects.filter(id__in=p_mat_ids).order_by("descripcion")
+
+        items_proyecto = []
+        p_tot_ent = Decimal("0")
+        p_tot_inst = Decimal("0")
+        p_tot_ret = Decimal("0")
+
+        for mat in p_materiales:
+            c_ent = p_ent_map.get(mat.id, Decimal("0"))
+            c_inst = p_inst_map.get(mat.id, Decimal("0"))
+            c_ret = p_ret_map.get(mat.id, Decimal("0"))
+            items_proyecto.append({
+                "material": mat,
+                "entrado": c_ent,
+                "instalado": c_inst,
+                "retirado": c_ret,
+                "saldo": c_ent - c_inst,
+            })
+            p_tot_ent += c_ent
+            p_tot_inst += c_inst
+            p_tot_ret += c_ret
+
+        desglose_proyectos.append({
+            "proyecto": p,
+            "items": items_proyecto,
+            "total_entrado": p_tot_ent,
+            "total_instalado": p_tot_inst,
+            "total_retirado": p_tot_ret,
+            "saldo_proyecto": p_tot_ent - p_tot_inst,
+            "num_entradas": p.entradas_material.count(),
+            "num_apoyos": p.apoyos.count(),
+            "num_retiros": ApoyoMaterial.objects.filter(apoyo__proyecto=p, cantidad_retirada__gt=0).count(),
+        })
+
+    ids_string = ",".join(str(p.id) for p in proyectos_seleccionados)
+
+    return render(
+        request,
+        "logistica/proyectos/informe_consolidado.html",
+        {
+            "proyectos_seleccionados": proyectos_seleccionados,
+            "total_proyectos_sel": proyectos_seleccionados.count(),
+            "tabla_consolidada": tabla_consolidada,
+            "total_entrado_general": total_entrado_general,
+            "total_instalado_general": total_instalado_general,
+            "total_retirado_general": total_retirado_general,
+            "total_requerido_general": total_requerido_general,
+            "saldo_total_general": total_entrado_general - total_instalado_general,
+            "desglose_proyectos": desglose_proyectos,
+            "ids_string": ids_string,
+        }
+    )
+
+
+@login_required
+def exportar_informe_consolidado_excel(request):
+    """
+    Descarga el informe consolidado multi-proyecto en formato Excel (.xlsx).
+    """
+    raw_ids = request.GET.get("ids", "") or request.POST.get("ids", "")
+    if not raw_ids:
+        proyecto_ids = request.GET.getlist("proyectos") or request.GET.getlist("proyectos[]")
+    else:
+        proyecto_ids = [x.strip() for x in raw_ids.split(",") if x.strip()]
+
+    proyectos_seleccionados = Proyecto.objects.filter(id__in=proyecto_ids).order_by("numero_emcali")
+    if not proyectos_seleccionados.exists():
+        return redirect("proyectos_logistica")
+
+    ent_qs = DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_seleccionados).values("material_id").annotate(total=Sum("cantidad"))
+    ent_map = {item["material_id"]: item["total"] for item in ent_qs}
+
+    inst_qs = ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_seleccionados).values("material_id").annotate(total=Sum("cantidad_requerida"))
+    inst_map = {item["material_id"]: item["total"] for item in inst_qs}
+
+    ret_qs = ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_seleccionados).values("material_id").annotate(total=Sum("cantidad_retirada"))
+    ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
+
+    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys())
+    materiales_db = Material.objects.filter(id__in=all_mat_ids).order_by("item", "descripcion")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Consolidado Obras"
+
+    font_titulo = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    font_subtitulo = Font(name="Calibri", size=10, bold=True, color="4B5563")
+    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=11, color="111827")
+    font_total = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
+
+    fill_header = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
+    fill_total = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+
+    thin_border_side = Side(border_style="thin", color="CBD5E1")
+    border_cell = Border(left=thin_border_side, right=thin_border_side, top=thin_border_side, bottom=thin_border_side)
+    border_total = Border(
+        top=Side(border_style="medium", color="1E40AF"),
+        bottom=Side(border_style="double", color="1E40AF"),
+        left=thin_border_side,
+        right=thin_border_side
+    )
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    proyectos_nombres = ", ".join(p.numero_emcali for p in proyectos_seleccionados)
+
+    ws.merge_cells("A1:F1")
+    ws["A1"] = "COINTECA S.A.S. — INFORME CONSOLIDADO DE MATERIALES Y RETIROS"
+    ws["A1"].font = font_titulo
+    ws["A1"].alignment = align_left
+
+    ws.merge_cells("A2:F2")
+    ws["A2"] = f"PROYECTOS CONSOLIDADOS ({proyectos_seleccionados.count()}): {proyectos_nombres}  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+    ws["A2"].font = font_subtitulo
+    ws["A2"].alignment = align_left
+
+    ws.append([])
+
+    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "ENTRADA (SUMINISTRADO)", "INSTALADO EN POSTES", "RETIRO / DESMONTE", "SALDO"]
+    ws.append(headers)
+    header_row = 4
+
+    for col_idx in range(1, 8):
+        cell = ws.cell(row=header_row, column=col_idx)
+        cell.font = font_header
+        cell.fill = fill_header
+        cell.alignment = align_center if col_idx not in [2] else align_left
+        cell.border = border_cell
+
+    current_row = header_row + 1
+    tot_ent = Decimal("0")
+    tot_inst = Decimal("0")
+    tot_ret = Decimal("0")
+    tot_sal = Decimal("0")
+
+    for idx, mat in enumerate(materiales_db, start=1):
+        c_ent = ent_map.get(mat.id, Decimal("0"))
+        c_inst = inst_map.get(mat.id, Decimal("0"))
+        c_ret = ret_map.get(mat.id, Decimal("0"))
+        c_sal = c_ent - c_inst
+
+        tot_ent += c_ent
+        tot_inst += c_inst
+        tot_ret += c_ret
+        tot_sal += c_sal
+
+        def fmt_val(v):
+            return int(v) if v % 1 == 0 else float(v)
+
+        ws.append([
+            mat.item,
+            mat.descripcion,
+            mat.unidad or "U",
+            fmt_val(c_ent),
+            fmt_val(c_inst),
+            fmt_val(c_ret),
+            fmt_val(c_sal)
+        ])
+
+        for col_idx in range(1, 8):
+            c = ws.cell(row=current_row, column=col_idx)
+            c.font = font_data
+            c.border = border_cell
+            if idx % 2 == 0:
+                c.fill = fill_zebra
+
+            if col_idx in [1, 3]:
+                c.alignment = align_center
+            elif col_idx == 2:
+                c.alignment = align_left
+            else:
+                c.alignment = align_right
+                c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+
+        current_row += 1
+
+    def fmt_tot(v):
+        return int(v) if v % 1 == 0 else float(v)
+
+    ws.append(["", "TOTALES CONSOLIDADOS", f"{len(materiales_db)} ÍTEMS", fmt_tot(tot_ent), fmt_tot(tot_inst), fmt_tot(tot_ret), fmt_tot(tot_sal)])
+    for col_idx in range(1, 8):
+        c = ws.cell(row=current_row, column=col_idx)
+        c.font = font_total
+        c.fill = fill_total
+        c.border = border_total
+        if col_idx in [1, 3]:
+            c.alignment = align_center
+        elif col_idx == 2:
+            c.alignment = align_left
+        else:
+            c.alignment = align_right
+            c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+
+    ws.column_dimensions["A"].width = 12
+    ws.column_dimensions["B"].width = 46
+    ws.column_dimensions["C"].width = 12
+    ws.column_dimensions["D"].width = 24
+    ws.column_dimensions["E"].width = 22
+    ws.column_dimensions["F"].width = 22
+    ws.column_dimensions["G"].width = 18
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"Informe_Consolidado_Proyectos_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+# ==============================================================================
+# GESTIÓN DE RETIROS / DESMONTES DE MATERIALES POR PROYECTO
+# ==============================================================================
+
+@login_required
+@transaction.atomic
+def registrar_retiro_material(request, proyecto_id):
+    """
+    Registra actas/planillas de materiales desmontados o retirados en la obra.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    materiales = Material.objects.all().order_by("descripcion")
+
+    retiros = (
+        RetiroMaterialProyecto.objects.filter(proyecto=proyecto)
+        .prefetch_related("detalles__material")
+        .order_by("-fecha", "-id")
+    )
+
+    if request.method == "POST":
+        fecha = request.POST.get("fecha")
+        if fecha:
+            retiro = RetiroMaterialProyecto.objects.create(
+                proyecto=proyecto,
+                fecha=fecha,
+                responsable=request.POST.get("responsable", "").strip(),
+                numero_acta=request.POST.get("numero_acta", "").strip(),
+                observaciones=request.POST.get("observaciones", "").strip(),
+            )
+
+            material_ids = request.POST.getlist("material_id[]")
+            cantidades = request.POST.getlist("cantidad[]")
+            estados = request.POST.getlist("estado_material[]")
+
+            detalles = []
+            for i, (mat_id, cant_str) in enumerate(zip(material_ids, cantidades)):
+                if not mat_id or not cant_str:
+                    continue
+                try:
+                    cant = Decimal(str(cant_str).strip())
+                    if cant > 0:
+                        est = estados[i] if i < len(estados) and estados[i] else "Bueno"
+                        detalles.append(
+                            DetalleRetiroMaterial(
+                                retiro=retiro,
+                                material_id=mat_id,
+                                cantidad=cant,
+                                estado_material=est
+                            )
+                        )
+                except (ValueError, TypeError, Decimal.InvalidOperation):
+                    continue
+
+            if detalles:
+                DetalleRetiroMaterial.objects.bulk_create(detalles)
+
+            return redirect("registrar_retiro_material", proyecto_id=proyecto.id)
+
+    return render(
+        request,
+        "logistica/proyectos/crear_retiro.html",
+        {
+            "proyecto": proyecto,
+            "materiales": materiales,
+            "retiros": retiros,
+        }
+    )
+
+
+@login_required
+@transaction.atomic
+def eliminar_retiro_material(request, retiro_id):
+    """
+    Elimina un registro de retiro/desmonte de material.
+    """
+    retiro = get_object_or_404(RetiroMaterialProyecto, id=retiro_id)
+    proyecto_id = retiro.proyecto.id
+    if request.method == "POST":
+        retiro.delete()
+    return redirect("registrar_retiro_material", proyecto_id=proyecto_id)

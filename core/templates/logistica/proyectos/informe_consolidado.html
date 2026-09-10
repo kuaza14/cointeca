@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Informe Consolidado de Materiales y Retiros — Cointeca S.A.S.{% endblock %}
+
+{% block content %}
+<div class="max-w-[95rem] mx-auto p-4 sm:p-6 space-y-6 print:p-0 print:space-y-4">
+
+    <!-- Encabezado del Informe -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-6 print:border-none print:p-0">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border">
+            <div>
+                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1 print:hidden">
+                    <a href="/dashboard/" class="hover:underline">Inicio</a>
+                    <span>/</span>
+                    <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                    <span>/</span>
+                    <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
+                    <span>/</span>
+                    <span class="text-foreground font-medium">Informe Consolidado</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
+                    <span>📊</span> Informe Consolidado de Materiales y Retiros
+                </h1>
+                <p class="text-sm text-muted-foreground mt-1">
+                    Liquidación multi-proyecto: Entradas de material, instalaciones en postes y retiros/desmontes de campo.
+                </p>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-wrap items-center gap-3 print:hidden">
+                <button type="button" onclick="window.print()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-sm transition">
+                    <span>🖨️</span> Imprimir Informe
+                </button>
+
+                <a href="{% url 'exportar_informe_consolidado_excel' %}?ids={{ ids_string }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-bold rounded-lg shadow-sm transition"
+                   title="Descargar este consolidado en Excel">
+                    <span>📊</span> Descargar en Excel
+                </a>
+
+                <a href="{% url 'proyectos_logistica' %}"
+                   class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
+                    ← Volver a Proyectos
+                </a>
+            </div>
+        </div>
+
+        <!-- Ficha de Proyectos Incluidos en este Informe -->
+        <div class="mt-4 pt-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">
+                    Proyectos Consolidados ({{ total_proyectos_sel }}):
+                </span>
+                {% for p in proyectos_seleccionados %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-soft text-primary border border-blue-200 rounded-lg text-xs font-bold">
+                        <span>●</span> Proyecto {{ p.numero_emcali }}
+                        <span class="text-[10px] font-normal text-muted-foreground">({{ p.get_tipo_display|default:p.tipo }})</span>
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores Generales (KPIs) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 print:grid-cols-4">
+        <!-- Entradas -->
+        <div class="bg-card rounded-xl shadow-sm border border-emerald-200 bg-emerald-50/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-900 block">Total Suministrado (Entradas)</span>
+            <p class="text-2xl font-black text-emerald-800 mt-1">{{ total_entrado_general|floatformat }}</p>
+            <p class="text-[11px] text-emerald-600 mt-0.5">Remisiones a los proyectos</p>
+        </div>
+
+        <!-- Instalado en Apoyos -->
+        <div class="bg-card rounded-xl shadow-sm border border-indigo-200 bg-indigo-50/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-900 block">Total Instalado en Postes</span>
+            <p class="text-2xl font-black text-indigo-900 mt-1">{{ total_instalado_general|floatformat }}</p>
+            <p class="text-[11px] text-indigo-600 mt-0.5">Asignado a nodos de ingeniería</p>
+        </div>
+
+        <!-- Retirado / Desmontado -->
+        <div class="bg-card rounded-xl shadow-sm border border-amber-200 bg-amber-50/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-900 block">Total Retirado / Desmonte</span>
+            <p class="text-2xl font-black text-amber-800 mt-1">{{ total_retirado_general|floatformat }}</p>
+            <p class="text-[11px] text-amber-600 mt-0.5">Material bajado de postes (BT/AP)</p>
+        </div>
+
+        <!-- Saldo en Obra -->
+        <div class="bg-card rounded-xl shadow-sm border border-blue-200 bg-primary-soft/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900 block">Saldo General en Obra</span>
+            <p class="text-2xl font-black {% if saldo_total_general < 0 %}text-amber-700{% else %}text-primary{% endif %} mt-1">
+                {{ saldo_total_general|floatformat }}
+            </p>
+            <p class="text-[11px] text-primary mt-0.5">Suministrado − Instalado</p>
+        </div>
+    </div>
+
+    <!-- Pestañas de Vista (Consolidado General vs Desglose Individual) -->
+    <div x-data="{ tab: 'consolidado' }" class="space-y-4">
+        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 print:hidden">
+            <button @click="tab = 'consolidado'"
+                    :class="tab === 'consolidado' ? 'border-b-2 border-blue-600 text-primary font-bold' : 'text-muted-foreground hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+                📋 Matriz Consolidada General
+                <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ tabla_consolidada|length }} materiales</span>
+            </button>
+
+            <button @click="tab = 'desglose'"
+                    :class="tab === 'desglose' ? 'border-b-2 border-indigo-600 text-indigo-600 font-bold' : 'text-muted-foreground hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+                📑 Desglose por Proyecto Individual
+                <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold">{{ total_proyectos_sel }} proyectos</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: MATRIZ CONSOLIDADA GENERAL -->
+        <div x-show="tab === 'consolidado'" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden print:border-black print:rounded-none">
+            <div class="p-4 bg-muted border-b border-border flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-foreground text-base">
+                        Consolidado Total de Materiales ({{ total_proyectos_sel }} Proyectos Seleccionados)
+                    </h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">
+                        Sumatoria unificada de entradas, montajes en apoyos, desmontes y saldos de obra.
+                    </p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                    <thead class="bg-neutral text-white uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-20">Ítem</th>
+                            <th class="px-5 py-3">Descripción del Material</th>
+                            <th class="px-3 py-3 text-center w-16">Unidad</th>
+                            <th class="px-4 py-3 text-right bg-emerald-800/80">Suministrado (Entradas)</th>
+                            <th class="px-4 py-3 text-right bg-indigo-800/80">Instalado en Postes</th>
+                            <th class="px-4 py-3 text-right bg-amber-800/80">Retirado / Desmonte</th>
+                            <th class="px-4 py-3 text-right bg-slate-800">Saldo</th>
+                            <th class="px-4 py-3 text-right bg-gray-700">Stock Bodega</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-card">
+                        {% for fila in tabla_consolidada %}
+                        <tr class="hover:bg-primary-soft/40 transition {% if forloop.counter|divisibleby:2 %}bg-muted/30{% endif %}">
+                            <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
+                                {{ fila.material.item }}
+                            </td>
+
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                                {{ fila.material.descripcion }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center font-bold text-muted-foreground">
+                                {{ fila.material.unidad|default:"UN" }}
+                            </td>
+
+                            <!-- Entradas -->
+                            <td class="px-4 py-3 text-right font-black text-emerald-700 bg-emerald-50/30 text-sm">
+                                {% if fila.entrado > 0 %}{{ fila.entrado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+
+                            <!-- Instalado en Apoyos -->
+                            <td class="px-4 py-3 text-right font-black text-indigo-700 bg-indigo-50/30 text-sm">
+                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+
+                            <!-- Retirado / Desmonte -->
+                            <td class="px-4 py-3 text-right font-black text-amber-800 bg-amber-50/40 text-sm">
+                                {% if fila.retirado > 0 %}{{ fila.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+
+                            <!-- Saldo -->
+                            <td class="px-4 py-3 text-right font-black text-sm {% if fila.saldo < 0 %}text-amber-700 bg-amber-50/30{% elif fila.saldo == 0 %}text-muted-foreground bg-muted{% else %}text-primary bg-primary-soft/30{% endif %}">
+                                {{ fila.saldo|floatformat }}
+                            </td>
+
+                            <!-- Stock Bodega -->
+                            <td class="px-4 py-3 text-right font-medium text-muted-foreground bg-muted/40 text-xs">
+                                {{ fila.stock_bodega|floatformat }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-muted-foreground">
+                                No hay registros de materiales, entradas ni retiros en los proyectos seleccionados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <!-- Totales Generales -->
+                    {% if tabla_consolidada %}
+                    <tfoot class="bg-neutral text-white font-black text-xs">
+                        <tr>
+                            <td colspan="3" class="px-5 py-3.5 uppercase tracking-wider text-right">
+                                TOTALES GENERALES CONSOLIDADOS ({{ tabla_consolidada|length }} ÍTEMS):
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-emerald-300 font-black text-sm bg-emerald-950/80">
+                                {{ total_entrado_general|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-indigo-300 font-black text-sm bg-indigo-950/80">
+                                {{ total_instalado_general|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-amber-300 font-black text-sm bg-amber-950/80">
+                                {{ total_retirado_general|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-blue-200 font-black text-sm bg-blue-950/80">
+                                {{ saldo_total_general|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-gray-400 font-normal text-xs">
+                                —
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: DESGLOSE POR PROYECTO INDIVIDUAL -->
+        <div x-show="tab === 'desglose'" style="display: none;" class="space-y-6 print:block">
+            {% for dp in desglose_proyectos %}
+            <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                <div class="px-6 py-4 bg-muted border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-primary shrink-0"></span>
+                        <h4 class="text-base font-extrabold text-foreground">
+                            Proyecto {{ dp.proyecto.numero_emcali }}
+                        </h4>
+                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-card border text-foreground">
+                            {{ dp.proyecto.get_tipo_display|default:dp.proyecto.tipo }}
+                        </span>
+                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-success">
+                            {{ dp.proyecto.estado }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
+                        <span>📦 {{ dp.num_entradas }} Entradas</span>
+                        <span>⚡ {{ dp.num_apoyos }} Postes</span>
+                        <span>🛠️ {{ dp.num_retiros }} Retiros</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                        <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
+                            <tr>
+                                <th class="px-4 py-2.5 text-center w-16">Ítem</th>
+                                <th class="px-5 py-2.5">Material</th>
+                                <th class="px-3 py-2.5 text-center w-16">Unidad</th>
+                                <th class="px-4 py-2.5 text-right bg-emerald-50/50">Entradas</th>
+                                <th class="px-4 py-2.5 text-right bg-indigo-50/50">Instalado</th>
+                                <th class="px-4 py-2.5 text-right bg-amber-50/50">Retirado / Desmonte</th>
+                                <th class="px-4 py-2.5 text-right bg-primary-soft/50">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-card">
+                            {% for item in dp.items %}
+                            <tr class="hover:bg-muted/40 transition">
+                                <td class="px-4 py-2.5 text-center font-mono text-muted-foreground">{{ item.material.item }}</td>
+                                <td class="px-5 py-2.5 font-medium text-foreground">{{ item.material.descripcion }}</td>
+                                <td class="px-3 py-2.5 text-center text-muted-foreground">{{ item.material.unidad|default:"UN" }}</td>
+                                <td class="px-4 py-2.5 text-right font-bold text-emerald-700 bg-emerald-50/20">
+                                    {% if item.entrado > 0 %}{{ item.entrado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 text-right font-bold text-indigo-700 bg-indigo-50/20">
+                                    {% if item.instalado > 0 %}{{ item.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 text-right font-bold text-amber-800 bg-amber-50/30">
+                                    {% if item.retirado > 0 %}{{ item.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 text-right font-black {% if item.saldo < 0 %}text-amber-700{% elif item.saldo == 0 %}text-muted-foreground{% else %}text-primary{% endif %}">
+                                    {{ item.saldo|floatformat }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="px-6 py-6 text-center text-muted-foreground">
+                                    Sin movimientos de materiales registrados en este proyecto.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% if dp.items %}
+                        <tfoot class="bg-muted font-bold text-foreground border-t border-border">
+                            <tr>
+                                <td colspan="3" class="px-5 py-2.5 text-right uppercase text-[11px]">Subtotal Proyecto {{ dp.proyecto.numero_emcali }}:</td>
+                                <td class="px-4 py-2.5 text-right text-emerald-800 font-black">{{ dp.total_entrado|floatformat }}</td>
+                                <td class="px-4 py-2.5 text-right text-indigo-800 font-black">{{ dp.total_instalado|floatformat }}</td>
+                                <td class="px-4 py-2.5 text-right text-amber-800 font-black">{{ dp.total_retirado|floatformat }}</td>
+                                <td class="px-4 py-2.5 text-right text-primary font-black">{{ dp.saldo_proyecto|floatformat }}</td>
+                            </tr>
+                        </tfoot>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

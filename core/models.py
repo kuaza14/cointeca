@@ -909,9 +909,31 @@ class SuspensionDisciplinaria(models.Model):
 ####################################################
 #                 INGENIERÍA
 ####################################################
+class Macroproyecto(models.Model):
+    class Estados(models.TextChoices):
+        PLANEACION = "Planeación", "Planeación"
+        EN_EJECUCION = "En ejecución", "En ejecución"
+        FINALIZADO = "Finalizado", "Finalizado"
+        CANCELADO = "Cancelado", "Cancelado"
+
+    nombre = models.CharField(max_length=150, unique=True, verbose_name="Nombre del Macroproyecto")
+    descripcion = models.TextField(blank=True, default="", verbose_name="Descripción")
+    estado = models.CharField(max_length=30, choices=Estados.choices, default=Estados.PLANEACION)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Macroproyecto"
+        verbose_name_plural = "Macroproyectos"
+        ordering = ["-id"]
+
+    def __str__(self):
+        return self.nombre
+
 class Proyecto(models.Model):
     class Tipos(models.TextChoices):
         BT = "BT", "Baja Tensión"
+        AP_BARRIO = "AP_BARRIO", "Alumbrado Público Barrio"
+        AP_PARQUE = "AP_PARQUE", "Alumbrado Público Parque / Cancha"
         AP = "AP", "Alumbrado Público"
         MT = "MT", "Media Tensión"
 
@@ -921,8 +943,16 @@ class Proyecto(models.Model):
         FINALIZADO = "Finalizado", "Finalizado"
         CANCELADO = "Cancelado", "Cancelado"
 
+    macroproyecto = models.ForeignKey(
+        Macroproyecto,
+        on_delete=models.CASCADE,
+        related_name="proyectos",
+        null=True,
+        blank=True,
+        verbose_name="Macroproyecto"
+    )
     numero_emcali = models.CharField(max_length=50, unique=True, verbose_name="Número Proyecto")
-    tipo = models.CharField(max_length=2, choices=Tipos.choices)
+    tipo = models.CharField(max_length=20, choices=Tipos.choices)
     estado = models.CharField(max_length=30, choices=Estados.choices, default=Estados.PLANEACION)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
@@ -1019,7 +1049,8 @@ class Inventario(models.Model):
 class ApoyoMaterial(models.Model):
     apoyo = models.ForeignKey(Apoyo, on_delete=models.CASCADE, related_name="materiales")
     material = models.ForeignKey(Material, on_delete=models.PROTECT, related_name="apoyos")
-    cantidad_requerida = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    cantidad_requerida = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cantidad Instalada")
+    cantidad_retirada = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cantidad Retirada")
 
     class Meta:
         verbose_name = "Material por Apoyo"
@@ -1229,3 +1260,75 @@ class MaterialRequeridoProyecto(models.Model):
 
     def __str__(self):
         return f"{self.material.descripcion} - {self.cantidad_requerida}"
+
+
+class RetiroMaterialProyecto(models.Model):
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="retiros_material"
+    )
+    fecha = models.DateField()
+    responsable = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+        verbose_name="Responsable / Cuadrilla"
+    )
+    numero_acta = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="N° Acta / Planilla de Retiro"
+    )
+    observaciones = models.TextField(
+        blank=True,
+        default=""
+    )
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Retiro / Desmonte de Material"
+        verbose_name_plural = "Retiros / Desmontes de Material"
+        ordering = ["-fecha", "-id"]
+
+    def __str__(self):
+        return f"Retiro {self.proyecto.numero_emcali} - {self.fecha} ({self.numero_acta})"
+
+
+class DetalleRetiroMaterial(models.Model):
+    retiro = models.ForeignKey(
+        RetiroMaterialProyecto,
+        on_delete=models.CASCADE,
+        related_name="detalles"
+    )
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.PROTECT,
+        related_name="retiros_proyecto"
+    )
+    cantidad = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Cantidad Retirada"
+    )
+    estado_material = models.CharField(
+        max_length=50,
+        blank=True,
+        default="Bueno",
+        choices=[
+            ("Bueno", "Bueno / Reutilizable"),
+            ("Chatarra", "Chatarra / Dañado"),
+            ("Inservible", "Inservible"),
+        ],
+        verbose_name="Estado del Material"
+    )
+
+    class Meta:
+        verbose_name = "Detalle Retiro Material"
+        verbose_name_plural = "Detalles Retiro Material"
+
+    def __str__(self):
+        return f"{self.material.descripcion}: {self.cantidad} ({self.estado_material})"

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Logística - Control de Materiales por Proyecto{% endblock %}
+{% block title %}Logística - Control de Materiales {% if macroproyecto %}- {{ macroproyecto.nombre }}{% endif %} | Cointeca S.A.S{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto p-6 space-y-6">
+<div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- Encabezado y Navegación -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
@@ -13,20 +13,34 @@
                 <span>/</span>
                 <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                 <span>/</span>
+                <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">Macroproyectos</a>
+                {% if macroproyecto %}
+                    <span>/</span>
+                    <span class="text-foreground font-semibold">{{ macroproyecto.nombre }}</span>
+                {% endif %}
+                <span>/</span>
                 <span class="text-foreground font-medium">Control de Materiales</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
-                Control de Materiales por Proyecto
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
+                {% if macroproyecto %}
+                    Control de Materiales: <span class="text-primary">{{ macroproyecto.nombre }}</span>
+                {% else %}
+                    Control de Materiales por Proyecto
+                {% endif %}
             </h1>
             <p class="text-sm text-muted-foreground mt-1">
-                Gestión de entradas directas a obra, despachos de bodega y conciliación con los apoyos de ingeniería.
+                {% if macroproyecto %}
+                    Gestión de entradas directas a obra, despachos y conciliación técnica para los proyectos de <strong>{{ macroproyecto.nombre }}</strong>.
+                {% else %}
+                    Gestión de entradas directas a obra, despachos de bodega y conciliación con los apoyos de ingeniería.
+                {% endif %}
             </p>
         </div>
 
         <div class="flex items-center gap-3">
-            <a href="{% url 'logistica_home' %}"
+            <a href="{% url 'macroproyectos_logistica' %}"
                class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition shadow-sm">
-                Volver a Logística
+                ← Volver a Macroproyectos
             </a>
             <a href="{% url 'materiales_home' %}"
                class="inline-flex items-center px-4 py-2 bg-primary-soft hover:bg-blue-100 text-primary text-sm font-medium rounded-lg transition border border-blue-200">
@@ -35,151 +49,240 @@
         </div>
     </div>
 
-    <!-- Tarjetas Resumen -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div class="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4">
-            <div class="p-3 bg-primary-soft text-primary rounded-lg"><svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div>
+    <!-- Barra de Informes Consolidados y Selector Multi-Proyecto -->
+    <form id="formInformeConsolidado" method="GET" action="{% url 'informe_consolidado_proyectos' %}">
+        <div class="bg-card rounded-xl shadow-sm border border-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Proyectos</p>
-                <p class="text-2xl font-bold text-foreground">{{ total_proyectos }}</p>
+                <h3 class="text-base font-black text-foreground">
+                    Informe Consolidado de Liquidación (Multi-Proyecto)
+                </h3>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Marca los proyectos que deseas consultar para generar el consolidado de entradas, retiros y saldos.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <label class="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground cursor-pointer select-none bg-muted px-3 py-2 rounded-lg border border-border">
+                    <input type="checkbox" id="checkTodosProyectos" class="rounded border-border text-primary focus:ring-blue-500 size-4">
+                    <span>Seleccionar Todos</span>
+                </label>
+
+                <button type="submit" id="btnGenerarInforme"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span>Generar Informe (<strong id="contadorSeleccionados">0</strong>)</span>
+                </button>
             </div>
         </div>
 
-        <div class="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4">
-            <div class="p-3 bg-emerald-100 text-emerald-600 rounded-lg"><svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></div>
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Flujo de Entrada</p>
-                <p class="text-sm font-medium text-foreground">Compras & Despachos Bodega</p>
+        <!-- Listado de Proyectos con Casillas -->
+        <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+            <div class="px-6 py-4 border-b border-border bg-muted/50 flex items-center justify-between">
+                <h2 class="text-base font-bold text-foreground">
+                    Proyectos Registrados {% if macroproyecto %}en {{ macroproyecto.nombre }}{% endif %}
+                </h2>
+                <span class="text-xs font-semibold text-muted-foreground bg-card px-2.5 py-1 rounded-full border">
+                    {{ resumen_proyectos|length }} proyectos
+                </span>
             </div>
-        </div>
 
-        <div class="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4">
-            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg></div>
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Consumo Real en Obra</p>
-                <p class="text-sm font-medium text-foreground">Postes y Apoyos Ingeniería</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Listado de Proyectos -->
-    <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-muted flex items-center justify-between">
-            <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
-                Proyectos Activos
-            </h2>
-            <span class="text-xs font-medium text-muted-foreground bg-card px-2.5 py-1 rounded-full border">
-                {{ resumen_proyectos|length }} registrados
-            </span>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
-                <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
-                    <tr>
-                        <th class="px-6 py-3.5">Proyecto EMCALI</th>
-                        <th class="px-6 py-3.5">Tipo de Red</th>
-                        <th class="px-6 py-3.5">Estado</th>
-                        <th class="px-6 py-3.5 text-center">Entradas (Remisiones)</th>
-                        <th class="px-6 py-3.5 text-center">Postes / Apoyos</th>
-                        <th class="px-6 py-3.5 text-right">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 bg-card">
-                    {% for item in resumen_proyectos %}
-                    <tr class="hover:bg-primary-soft/50 transition">
-                        <td class="px-6 py-4 font-bold text-foreground">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                                <span class="text-base">{{ item.proyecto.numero_emcali }}</span>
-                            </div>
-                        </td>
-
-                        <td class="px-6 py-4 text-foreground">
-                            {% if item.proyecto.tipo == "AP" %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800">
-                                    Alumbrado Público (AP)
-                                </span>
-                            {% elif item.proyecto.tipo == "BT" %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-primary-soft text-primary">
-                                    Baja Tensión (BT)
-                                </span>
-                            {% elif item.proyecto.tipo == "MT" %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-800">
-                                    Media Tensión (MT)
-                                </span>
-                            {% else %}
-                                <span class="text-muted-foreground">{{ item.proyecto.tipo }}</span>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-border text-left text-sm">
+                    <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3.5 text-center w-12">
+                                <span class="sr-only">Selección</span>
+                            </th>
+                            <th class="px-5 py-3.5">Proyecto EMCALI</th>
+                            {% if not macroproyecto %}
+                                <th class="px-4 py-3.5">Macroproyecto</th>
                             {% endif %}
-                        </td>
+                            <th class="px-5 py-3.5">Tipo de Red</th>
+                            <th class="px-4 py-3.5">Estado</th>
+                            <th class="px-4 py-3.5 text-center">Entradas</th>
+                            <th class="px-4 py-3.5 text-center">Postes</th>
+                            <th class="px-4 py-3.5 text-center">Retiros</th>
+                            <th class="px-6 py-3.5 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border bg-card">
+                        {% for item in resumen_proyectos %}
+                        <tr class="hover:bg-primary-soft/40 transition fila-proyecto">
+                            <!-- Checkbox de Selección -->
+                            <td class="px-4 py-4 text-center">
+                                <input type="checkbox" name="proyectos" value="{{ item.proyecto.id }}"
+                                       class="check-proyecto rounded border-border-strong text-primary focus:ring-blue-500 size-4 cursor-pointer">
+                            </td>
 
-                        <td class="px-6 py-4">
-                            {% if item.proyecto.estado == "En ejecución" %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-success">
-                                    En Ejecución
-                                </span>
-                            {% elif item.proyecto.estado == "Planeación" or item.proyecto.estado == "Planeacin" %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-soft text-primary">
-                                    Planeación
-                                </span>
-                            {% elif item.proyecto.estado == "Finalizado" %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-foreground">
-                                    Finalizado
-                                </span>
-                            {% else %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-foreground">
-                                    {{ item.proyecto.estado }}
-                                </span>
+                            <td class="px-5 py-4 font-bold text-foreground text-base">
+                                {{ item.proyecto.numero_emcali }}
+                            </td>
+
+                            {% if not macroproyecto %}
+                            <td class="px-4 py-4 text-xs">
+                                {% if item.proyecto.macroproyecto %}
+                                    <span class="font-semibold text-primary">{{ item.proyecto.macroproyecto.nombre }}</span>
+                                {% else %}
+                                    <span class="text-muted-foreground italic">Sin Macroproyecto</span>
+                                {% endif %}
+                            </td>
                             {% endif %}
-                        </td>
 
-                        <td class="px-6 py-4 text-center">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                {{ item.num_entradas }} entrada{{ item.num_entradas|pluralize }}
-                            </span>
-                        </td>
+                            <td class="px-5 py-4 text-foreground">
+                                {% if item.proyecto.tipo == "AP_BARRIO" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+                                        AP Barrio
+                                    </span>
+                                {% elif item.proyecto.tipo == "AP_PARQUE" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                        AP Parque / Cancha
+                                    </span>
+                                {% elif item.proyecto.tipo == "AP" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                        {{ item.proyecto.get_tipo_display|default:"Alumbrado Público" }}
+                                    </span>
+                                {% elif item.proyecto.tipo == "BT" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-primary-soft text-primary border border-blue-200">
+                                        Baja Tensión (BT)
+                                    </span>
+                                {% elif item.proyecto.tipo == "MT" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                                        Media Tensión (MT)
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-muted text-foreground border border-border">
+                                        {{ item.proyecto.get_tipo_display|default:item.proyecto.tipo }}
+                                    </span>
+                                {% endif %}
+                            </td>
 
-                        <td class="px-6 py-4 text-center">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                {{ item.num_apoyos }} poste{{ item.num_apoyos|pluralize }}
-                            </span>
-                        </td>
+                            <td class="px-4 py-4">
+                                {% if item.proyecto.estado == "En ejecución" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-success border border-green-200">
+                                        En ejecución
+                                    </span>
+                                {% elif item.proyecto.estado == "Planeación" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-soft text-primary border border-blue-200">
+                                        Planeación
+                                    </span>
+                                {% elif item.proyecto.estado == "Finalizado" %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-foreground border border-border">
+                                        Finalizado
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-destructive border border-red-200">
+                                        {{ item.proyecto.estado }}
+                                    </span>
+                                {% endif %}
+                            </td>
 
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <a href="{% url 'materiales_requeridos_proyecto' item.proyecto.id %}"
-                               title="Ver Materiales Requeridos & Excel"
-                               class="inline-flex items-center px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition">
-                                📋 Requeridos
-                            </a>
-                            <a href="{% url 'detalle_proyecto_logistica' item.proyecto.id %}"
-                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg shadow-sm transition">
-                                Control & Saldo
-                            </a>
-                            <a href="{% url 'registrar_entrada_material' item.proyecto.id %}"
-                               title="Registrar Entrada"
-                               class="inline-flex items-center px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition">
-                                + Entrada
-                            </a>
-                            <a href="{% url 'detalle_proyecto' item.proyecto.id %}"
-                               title="Ver Apoyos en Ingeniería"
-                               class="inline-flex items-center px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition">
-                                Apoyos
-                            </a>
-                        </td>
+                            <!-- Entradas -->
+                            <td class="px-4 py-4 text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    {{ item.num_entradas }}
+                                </span>
+                            </td>
 
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-muted-foreground">
-                            <p class="text-base font-medium">No hay proyectos registrados en el sistema.</p>
-                            <p class="text-xs text-gray-400 mt-1">Crea proyectos desde el módulo de Ingeniería o Facturación para comenzar.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <!-- Postes -->
+                            <td class="px-4 py-4 text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    {{ item.num_apoyos }}
+                                </span>
+                            </td>
+
+                            <!-- Retiros -->
+                            <td class="px-4 py-4 text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                    {{ item.num_retiros }}
+                                </span>
+                            </td>
+
+                            <!-- Acciones Rápidas -->
+                            <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap">
+                                <a href="{% url 'detalle_proyecto_logistica' item.proyecto.id %}"
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
+                                    Balance & Saldo
+                                </a>
+                                <a href="{% url 'registrar_entrada_material' item.proyecto.id %}"
+                                   title="Registrar Entrada / Remisión"
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
+                                    + Entrada
+                                </a>
+                                <a href="{% url 'detalle_proyecto' item.proyecto.id %}"
+                                   title="Ver Apoyos / Postes y Retiros"
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold rounded-lg transition">
+                                    Postes (Ing.)
+                                </a>
+                                <a href="{% url 'materiales_requeridos_proyecto' item.proyecto.id %}"
+                                   title="Ver Materiales Requeridos & Excel"
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition">
+                                    Requeridos
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if macroproyecto %}8{% else %}9{% endif %}" class="px-6 py-12 text-center text-muted-foreground">
+                                <p class="text-base font-medium">No hay proyectos registrados {% if macroproyecto %}en este macroproyecto{% endif %}.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    </form>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const checkTodos = document.getElementById("checkTodosProyectos");
+    const checksProyectos = document.querySelectorAll(".check-proyecto");
+    const contador = document.getElementById("contadorSeleccionados");
+    const btnInforme = document.getElementById("btnGenerarInforme");
+    const formInforme = document.getElementById("formInformeConsolidado");
+
+    function actualizarContador() {
+        const seleccionados = document.querySelectorAll(".check-proyecto:checked").length;
+        contador.textContent = seleccionados;
+
+        if (seleccionados === 0) {
+            btnInforme.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+            btnInforme.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+    }
+
+    if (checkTodos) {
+        checkTodos.addEventListener("change", function () {
+            checksProyectos.forEach(chk => {
+                chk.checked = checkTodos.checked;
+            });
+            actualizarContador();
+        });
+    }
+
+    checksProyectos.forEach(chk => {
+        chk.addEventListener("change", function () {
+            const todosMarcados = Array.from(checksProyectos).every(c => c.checked);
+            if (checkTodos) {
+                checkTodos.checked = todosMarcados;
+            }
+            actualizarContador();
+        });
+    });
+
+    if (formInforme) {
+        formInforme.addEventListener("submit", function (e) {
+            const seleccionados = document.querySelectorAll(".check-proyecto:checked").length;
+            if (seleccionados === 0) {
+                e.preventDefault();
+                alert("Por favor selecciona al menos un proyecto marcando su casilla.");
+            }
+        });
+    }
+
+    actualizarContador();
+});
+</script>
 {% endblock %}

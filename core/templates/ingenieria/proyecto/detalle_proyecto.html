@@ -13,7 +13,11 @@
             <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
                 <span>/</span>
-                <a href="{% url 'lista_proyectos' %}" class="hover:underline">Proyectos</a>
+                <a href="{% url 'lista_macroproyectos' %}" class="hover:underline">Macroproyectos</a>
+                {% if proyecto.macroproyecto %}
+                    <span>/</span>
+                    <a href="{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}" class="hover:underline font-semibold text-primary">{{ proyecto.macroproyecto.nombre }}</a>
+                {% endif %}
                 <span>/</span>
                 <span class="text-foreground font-medium">{{ proyecto.numero_emcali }}</span>
             </div>
@@ -32,7 +36,7 @@
                style="background-color: #07df36; color: #0f172a !important; border-color: #94a3b8;">
                 ← Volver a materiales de proyecto
             </a>
-            <a href="{% url 'lista_proyectos' %}"
+            <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}"
                class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
                 ← Volver
             </a>
@@ -190,10 +194,17 @@
 
                         <!-- Celdas Numéricas de Cantidad para Cada Material -->
                         {% for celda in fila.celdas %}
-                        <td class="px-3 py-2.5 text-center border-r border-border font-bold {% if celda.cantidad > 0 %}text-foreground{% else %}text-gray-300{% endif %}">
+                        <td class="px-2 py-2 text-center border-r border-border font-bold">
                             {% if celda.cantidad > 0 %}
-                                {{ celda.cantidad|floatformat }}
-                            {% else %}
+                                <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat }}</div>
+                            {% endif %}
+                            {% if celda.cantidad_retirada > 0 %}
+                                <div class="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold" title="Retirado / Desmontado de este poste">
+                                    Ret: {{ celda.cantidad_retirada|floatformat }}
+                                </div>
+                            {% endif %}
+                            {% if celda.cantidad == 0 and celda.cantidad_retirada == 0 %}
+                                <span class="text-gray-300">—</span>
                             {% endif %}
                         </td>
                         {% empty %}
@@ -205,8 +216,8 @@
                         <!-- Acciones por Fila -->
                         <td class="px-3 py-2.5 text-center space-x-1 whitespace-nowrap">
                             <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
-                               class="inline-flex items-center gap-1 px-2.5 py-1 bg-primary hover:bg-primary-hover text-white font-semibold rounded text-xs shadow-sm transition" title="Asignar o editar materiales">
-                                Abrir
+                               class="inline-flex items-center gap-1 px-2.5 py-1 bg-primary hover:bg-primary-hover text-white font-semibold rounded text-xs shadow-sm transition" title="Editar apoyo, cantidades y materiales">
+                                ✏️ Editar / Materiales
                             </a>
 
                             <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}" class="inline"
@@ -231,12 +242,19 @@
                 <tfoot class="bg-muted border-t-2 border-gray-400 font-extrabold text-foreground sticky bottom-0 z-10 shadow-inner">
                     <tr>
                         <td colspan="6" class="px-4 py-3 text-right uppercase tracking-wider text-xs border-r border-border-strong bg-gray-200">
-                            TOTALES REQUERIDOS DEL PROYECTO:
+                            TOTALES DEL PROYECTO:
                         </td>
 
                         {% for tot in fila_totales %}
-                        <td class="px-3 py-3 text-center border-r border-border-strong text-blue-900 text-sm font-black bg-primary-soft/80">
-                            {{ tot.total|floatformat }}
+                        <td class="px-2 py-2.5 text-center border-r border-border-strong bg-primary-soft/80">
+                            <div class="text-blue-950 text-xs font-black" title="Total Instalado">
+                                {{ tot.total|floatformat }}
+                            </div>
+                            {% if tot.total_retirado > 0 %}
+                                <div class="inline-block mt-0.5 px-1 py-0.5 rounded text-[10px] bg-amber-200 text-amber-900 font-black border border-amber-300" title="Total Retirado / Desmonte">
+                                    Ret: {{ tot.total_retirado|floatformat }}
+                                </div>
+                            {% endif %}
                         </td>
                         {% endfor %}
 
@@ -249,6 +267,59 @@
             </table>
         </div>
     </div>
+
+    <!-- RESUMEN DE MATERIALES RETIRADOS / DESMONTADOS DEL PROYECTO -->
+    {% if tabla_resumen_retiros %}
+    <div class="bg-card rounded-xl shadow-sm border border-amber-300 overflow-hidden">
+        <div class="p-4 bg-amber-500/10 border-b border-amber-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="p-2 bg-amber-100 text-amber-900 rounded-lg text-sm">🛠️</span>
+                <div>
+                    <h3 class="font-bold text-amber-950 text-base">
+                        Resumen de Materiales Retirados / Desmontados del Proyecto
+                    </h3>
+                    <p class="text-xs text-amber-800">
+                        Consolidado de materiales antiguos bajados de los postes en obras de Baja Tensión (BT) y Alumbrado Público (AP).
+                    </p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-amber-100 text-amber-900 font-extrabold text-xs rounded-full border border-amber-300">
+                {{ tabla_resumen_retiros|length }} ítem{{ tabla_resumen_retiros|length|pluralize:"es" }} con desmonte
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                <thead class="bg-amber-900 text-white uppercase text-xs font-semibold">
+                    <tr>
+                        <th class="px-4 py-3 text-center w-20">Ítem</th>
+                        <th class="px-5 py-3">Descripción del Material Retirado</th>
+                        <th class="px-3 py-3 text-center w-24">Unidad</th>
+                        <th class="px-6 py-3 text-right bg-amber-950 w-44">Total Desmontado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-amber-100 bg-card">
+                    {% for item in tabla_resumen_retiros %}
+                    <tr class="hover:bg-amber-50/50 transition {% if forloop.counter|divisibleby:2 %}bg-amber-50/20{% endif %}">
+                        <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
+                            {{ item.material.item }}
+                        </td>
+                        <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                            {{ item.material.descripcion }}
+                        </td>
+                        <td class="px-3 py-3 text-center font-bold text-muted-foreground">
+                            {{ item.material.unidad|default:"UN" }}
+                        </td>
+                        <td class="px-6 py-3 text-right font-black text-amber-900 bg-amber-50/50 text-sm">
+                            {{ item.cantidad_retirada|floatformat }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- MODAL NUEVO APOYO -->
     <div id="modalApoyo" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">

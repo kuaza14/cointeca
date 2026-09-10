@@ -142,19 +142,24 @@ from core.views.rrhh.historial_clinico import generar_historia_clinica_laboral
 
 from core.views.rrhh.acuerdo_responsabilidad import generar_acuerdo_responsabilidad
 
-from core.views.logistica import (
+from core.views.logistica import(
     logistica_home,
     dotacion_home,
     detalle_dotacion,
     generar_dotacion,
     materiales_home,
+    macroproyectos_logistica,
     proyectos_logistica,
     detalle_proyecto_logistica,
     registrar_entrada_material,
     eliminar_entrada_material,
     materiales_requeridos_proyecto,
     exportar_materiales_proyecto_excel,
-    editar_entrada_material
+    editar_entrada_material,
+    informe_consolidado_proyectos,
+    exportar_informe_consolidado_excel,
+    registrar_retiro_material,
+    eliminar_retiro_material,
 )
 
 from core.views.rrhh import(
@@ -169,8 +174,14 @@ from core.views.rrhh import(
 
 from core.views.ingenieria import(
     ingenieria_inicio,
+    lista_macroproyectos,
+    crear_macroproyecto,
+    editar_macroproyecto,
+    eliminar_macroproyecto,
     lista_proyectos,
     crear_proyecto,
+    editar_proyecto,
+    eliminar_proyecto,
     detalle_proyecto,
     crear_apoyo,
     detalle_apoyo,
@@ -337,10 +348,16 @@ urlpatterns = [
     path("logistica/materiales/", materiales_home, name="materiales_home"),
 
     #Logística - Proyectos y Entradas de Material
+    path("logistica/macroproyectos/", macroproyectos_logistica, name="macroproyectos_logistica"),
+    path("logistica/macroproyectos/<int:macroproyecto_id>/proyectos/", proyectos_logistica, name="proyectos_logistica_por_macroproyecto"),
     path("logistica/proyectos/", proyectos_logistica, name="proyectos_logistica"),
+    path("logistica/proyectos/informe-consolidado/", informe_consolidado_proyectos, name="informe_consolidado_proyectos"),
+    path("logistica/proyectos/informe-consolidado/excel/", exportar_informe_consolidado_excel, name="exportar_informe_consolidado_excel"),
     path("logistica/proyectos/<int:proyecto_id>/", detalle_proyecto_logistica, name="detalle_proyecto_logistica"),
     path("logistica/proyectos/<int:proyecto_id>/entradas/crear/", registrar_entrada_material, name="registrar_entrada_material"),
     path("logistica/entradas/<int:entrada_id>/eliminar/", eliminar_entrada_material, name="eliminar_entrada_material"),
+    path("logistica/proyectos/<int:proyecto_id>/retiros/crear/", registrar_retiro_material, name="registrar_retiro_material"),
+    path("logistica/retiros/<int:retiro_id>/eliminar/", eliminar_retiro_material, name="eliminar_retiro_material"),
     path("logistica/proyectos/<int:proyecto_id>/requeridos/", materiales_requeridos_proyecto, name="materiales_requeridos_proyecto"),
     path("logistica/proyectos/<int:proyecto_id>/requeridos/excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel"),
     path("logistica/entradas/<int:entrada_id>/editar/", editar_entrada_material, name="editar_entrada_material"),
@@ -358,9 +375,17 @@ urlpatterns = [
 
     #Ingenieria
     path("ingenieria/", ingenieria_inicio, name="ingenieria_inicio"),
+    path("ingenieria/macroproyectos/", lista_macroproyectos, name="lista_macroproyectos"),
+    path("ingenieria/macroproyectos/crear/", crear_macroproyecto, name="crear_macroproyecto"),
+    path("ingenieria/macroproyectos/<int:id>/editar/", editar_macroproyecto, name="editar_macroproyecto"),
+    path("ingenieria/macroproyectos/<int:id>/eliminar/", eliminar_macroproyecto, name="eliminar_macroproyecto"),
+    path("ingenieria/macroproyectos/<int:macroproyecto_id>/proyectos/", lista_proyectos, name="proyectos_por_macroproyecto"),
+    path("ingenieria/macroproyectos/<int:macroproyecto_id>/proyectos/crear/", crear_proyecto, name="crear_proyecto_en_macroproyecto"),
     path("ingenieria/proyectos/", lista_proyectos, name="lista_proyectos"),
     path("ingenieria/proyectos/crear/", crear_proyecto, name="crear_proyecto"),
     path("ingenieria/proyectos/<int:id>/", detalle_proyecto, name="detalle_proyecto"),
+    path("ingenieria/proyectos/<int:id>/editar/", editar_proyecto, name="editar_proyecto"),
+    path("ingenieria/proyectos/<int:id>/eliminar/", eliminar_proyecto, name="eliminar_proyecto"),
     path("ingenieria/proyectos/<int:proyecto_id>/apoyos/crear/", crear_apoyo, name="crear_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/", detalle_apoyo, name="detalle_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/eliminar/", eliminar_apoyo, name="eliminar_apoyo"),

@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Retiro / Desmonte de Materiales - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6 space-y-6">
+
+    <!-- Encabezado -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                <span>/</span>
+                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
+                <span>/</span>
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline">
+                    {{ proyecto.numero_emcali }}
+                </a>
+                <span>/</span>
+                <span class="text-foreground font-medium">Nuevo Retiro / Desmonte</span>
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
+                <span>🛠️</span> Registrar Retiro / Desmonte de Materiales
+            </h1>
+
+            <p class="text-sm text-muted-foreground mt-1">
+                Registra los materiales desmontados o retirados de los postes (luminarias de sodio, herrajes viejos, cable retirado, etc.).
+            </p>
+        </div>
+
+        <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
+           class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
+            Cancelar y Volver
+        </a>
+    </div>
+
+    <!-- FORMULARIO DE NUEVO RETIRO -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-5">
+        <h2 class="text-base font-bold text-foreground border-b pb-2 flex items-center gap-2">
+            <span>📝</span> Nueva Acta / Planilla de Desmonte
+        </h2>
+
+        <form method="POST" action="{% url 'registrar_retiro_material' proyecto.id %}" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Fecha -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-fecha">
+                        Fecha del Retiro *
+                    </label>
+                    <input type="date" id="campo-fecha" name="fecha" required value="{% now 'Y-m-d' %}"
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-semibold text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <!-- N° Acta / Planilla -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-numero_acta">
+                        N° Acta / Planilla de Terreno
+                    </label>
+                    <input type="text" id="campo-numero_acta" name="numero_acta" placeholder="Ej: ACT-089 o DES-2026"
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <!-- Responsable / Cuadrilla -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-responsable">
+                        Responsable / Cuadrilla que Desmontó
+                    </label>
+                    <input type="text" id="campo-responsable" name="responsable" placeholder="Ej: Carlos Pérez / Cuadrilla 1"
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div>
+                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-observaciones">
+                    Observaciones / Motivo del Retiro
+                </label>
+                <input type="text" id="campo-observaciones" name="observaciones" placeholder="Ej: Desmonte por modernización a LED o cambio de red BT"
+                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+
+            <!-- TABLA DE MATERIALES RETIRADOS -->
+            <div class="border-t pt-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-foreground">
+                            Materiales Desmontados / Retirados
+                        </h3>
+                        <p class="text-xs text-muted-foreground">
+                            Agrega los ítems y cantidades retiradas de los postes en esta jornada.
+                        </p>
+                    </div>
+
+                    <button type="button" id="btnAgregarFila"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold rounded-lg transition">
+                        + Agregar Material
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto border border-border rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-muted text-xs font-semibold text-muted-foreground uppercase">
+                            <tr>
+                                <th class="px-3 py-2.5 text-left">Material Retirado *</th>
+                                <th class="px-3 py-2.5 text-center w-32">Cantidad *</th>
+                                <th class="px-3 py-2.5 text-center w-48">Estado del Material</th>
+                                <th class="px-3 py-2.5 text-center w-16">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filasMateriales" class="divide-y divide-gray-100 bg-card">
+                            <tr class="fila-material">
+                                <td class="px-3 py-2">
+                                    <select name="material_id[]" required class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                        <option value="">Selecciona un material...</option>
+                                        {% for mat in materiales %}
+                                        <option value="{{ mat.id }}">
+                                            {{ mat.descripcion }} — [Cód: {{ mat.item }}] ({{ mat.unidad|default:"UN" }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <input type="number" step="0.01" min="0.01" name="cantidad[]" required placeholder="0.00"
+                                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm text-right font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </td>
+                                <td class="px-3 py-2">
+                                    <select name="estado_material[]" class="w-full border border-border-strong rounded-lg px-2 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                        <option value="Bueno">Bueno / Reutilizable</option>
+                                        <option value="Chatarra" selected>Chatarra / Dañado</option>
+                                        <option value="Inservible">Inservible</option>
+                                    </select>
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <button type="button" class="btnEliminarFila text-destructive hover:text-red-700 text-sm font-bold p-1 rounded hover:bg-red-50" title="Eliminar fila">
+                                        ✕
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Botón Guardar -->
+            <div class="flex justify-end gap-3 pt-2">
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="px-4 py-2 text-sm text-foreground border rounded-lg hover:bg-muted">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-5 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-sm">
+                    💾 Guardar Acta de Retiro
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- HISTORIAL DE RETIROS REGISTRADOS -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
+        <div class="flex items-center justify-between border-b pb-3">
+            <div>
+                <h2 class="text-base font-bold text-foreground">
+                    Historial de Retiros y Desmontes del Proyecto {{ proyecto.numero_emcali }}
+                </h2>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Actas de material retirado en campo.
+                </p>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+                {{ retiros|length }} registro{{ retiros|length|pluralize }}
+            </span>
+        </div>
+
+        {% for ret in retiros %}
+        <div class="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-2">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-bold rounded-md">
+                        📅 {{ ret.fecha|date:"d/m/Y" }}
+                    </span>
+                    {% if ret.numero_acta %}
+                    <span class="text-xs font-semibold text-foreground">
+                        Acta: <strong>{{ ret.numero_acta }}</strong>
+                    </span>
+                    {% endif %}
+                    {% if ret.responsable %}
+                    <span class="text-xs text-muted-foreground">
+                        Responsable: <strong>{{ ret.responsable }}</strong>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <form method="POST" action="{% url 'eliminar_retiro_material' ret.id %}"
+                          onsubmit="return confirm('¿Eliminar este registro de retiro? Se recalculará el consolidado.');">
+                        {% csrf_token %}
+                        <button type="submit" class="text-destructive hover:text-red-700 text-xs font-semibold px-2.5 py-1 hover:bg-red-50 rounded transition">
+                            🗑️ Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if ret.observaciones %}
+            <p class="text-xs text-muted-foreground italic">"{{ ret.observaciones }}"</p>
+            {% endif %}
+
+            <!-- Detalle de Items Retirados -->
+            <div class="bg-card border rounded-md overflow-hidden">
+                <table class="min-w-full text-xs divide-y divide-gray-200">
+                    <thead class="bg-muted text-muted-foreground">
+                        <tr>
+                            <th class="px-3 py-2 text-left">Ítem</th>
+                            <th class="px-3 py-2 text-left">Material Retirado</th>
+                            <th class="px-3 py-2 text-center">Unidad</th>
+                            <th class="px-3 py-2 text-right">Cantidad Retirada</th>
+                            <th class="px-3 py-2 text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for det in ret.detalles.all %}
+                        <tr>
+                            <td class="px-3 py-2 text-muted-foreground font-mono">{{ det.material.item }}</td>
+                            <td class="px-3 py-2 font-medium text-foreground">{{ det.material.descripcion }}</td>
+                            <td class="px-3 py-2 text-center text-muted-foreground">{{ det.material.unidad|default:"UN" }}</td>
+                            <td class="px-3 py-2 text-right font-bold text-amber-800">{{ det.cantidad|floatformat }}</td>
+                            <td class="px-3 py-2 text-center">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold {% if det.estado_material == 'Bueno' %}bg-green-100 text-success{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                    {{ det.estado_material }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-8 text-muted-foreground">
+            <p class="text-sm">No se han registrado retiros ni desmontes para este proyecto.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const btnAgregarFila = document.getElementById("btnAgregarFila");
+    const filasMateriales = document.getElementById("filasMateriales");
+
+    btnAgregarFila.addEventListener("click", function () {
+        const primeraFila = filasMateriales.querySelector(".fila-material");
+        const nuevaFila = primeraFila.cloneNode(true);
+
+        nuevaFila.querySelector("select[name='material_id[]']").value = "";
+        nuevaFila.querySelector("input[name='cantidad[]']").value = "";
+        nuevaFila.querySelector("select[name='estado_material[]']").value = "Chatarra";
+
+        filasMateriales.appendChild(nuevaFila);
+    });
+
+    filasMateriales.addEventListener("click", function (event) {
+        if (event.target.closest(".btnEliminarFila")) {
+            const filas = filasMateriales.querySelectorAll(".fila-material");
+            if (filas.length > 1) {
+                event.target.closest(".fila-material").remove();
+            } else {
+                alert("Debe haber al menos una fila de material.");
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

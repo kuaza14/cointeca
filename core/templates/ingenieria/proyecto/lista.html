@@ -1,31 +1,60 @@
 {% extends "base.html" %}
 
-{% block titulo %}Proyectos | Cointeca S.A.S{% endblock %}
+{% block titulo %}Proyectos {% if macroproyecto %}- {{ macroproyecto.nombre }}{% endif %} | Cointeca S.A.S{% endblock %}
 {% block encabezado %}Ingeniería{% endblock %}
 
 {% block content %}
 
+<!-- Encabezado y Navegación -->
 <div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-        <h1 class="titulo-pagina">Proyectos</h1>
-        <p class="subtitulo-pagina">Proyectos EMCALI registrados.</p>
+        <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+            <a href="/dashboard/" class="hover:underline">Inicio</a>
+            <span>/</span>
+            <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
+            <span>/</span>
+            <a href="{% url 'lista_macroproyectos' %}" class="hover:underline">Macroproyectos</a>
+            {% if macroproyecto %}
+                <span>/</span>
+                <span class="text-foreground font-semibold">{{ macroproyecto.nombre }}</span>
+            {% endif %}
+            <span>/</span>
+            <span class="text-foreground font-medium">Proyectos</span>
+        </div>
+
+        <h1 class="titulo-pagina">
+            {% if macroproyecto %}
+                Proyectos: <span class="text-primary">{{ macroproyecto.nombre }}</span>
+            {% else %}
+                Todos los Proyectos
+            {% endif %}
+        </h1>
+        <p class="subtitulo-pagina">
+            {% if macroproyecto %}
+                Proyectos y redes eléctricas vinculadas a <strong>{{ macroproyecto.nombre }}</strong>.
+            {% else %}
+                Listado consolidado de todos los proyectos registrados en el sistema.
+            {% endif %}
+        </p>
     </div>
 
     <div class="flex flex-wrap gap-3">
-        <button type="button" id="btnNuevoProyecto" class="btn btn-primario">
-            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <button type="button" id="btnNuevoProyecto" class="btn btn-primario font-bold">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
-            Nuevo proyecto
+            Nuevo Proyecto
         </button>
 
-        <a href="{% url 'ingenieria_inicio' %}" class="btn btn-secundario">Volver</a>
+        <a href="{% url 'lista_macroproyectos' %}" class="btn btn-secundario">
+            ← Volver a Macroproyectos
+        </a>
     </div>
 </div>
 
 <!-- Buscador y Métricas -->
 <div class="bg-card rounded-xl shadow-sm border border-border p-4 mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <form method="GET" action="{% url 'lista_proyectos' %}" class="w-full sm:w-96 relative flex items-center">
+    <form method="GET" action="{% if macroproyecto %}{% url 'proyectos_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}" class="w-full sm:w-96 relative flex items-center">
         <div class="relative w-full">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -36,7 +65,7 @@
                    id="buscadorProyectos"
                    name="q"
                    value="{{ query|default:'' }}"
-                   placeholder="Buscar por número EMCALI, tipo o estado..."
+                   placeholder="Buscar por número, tipo o estado..."
                    autocomplete="off"
                    class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <button type="button"
@@ -55,72 +84,152 @@
             Mostrando: <strong id="contadorVisibles" class="text-foreground text-sm">{{ proyectos|length }}</strong> de <strong class="text-foreground text-sm">{{ total_proyectos|default:proyectos|length }}</strong> proyectos
         </span>
         {% if query %}
-        <a href="{% url 'lista_proyectos' %}" class="text-xs text-primary hover:underline font-semibold">
+        <a href="{% if macroproyecto %}{% url 'proyectos_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}" class="text-xs text-primary hover:underline font-semibold">
             Mostrar todos
         </a>
         {% endif %}
     </div>
 </div>
 
+<!-- Tabla de Proyectos -->
 <div class="tabla-caja mt-4">
     <table class="tabla" id="tablaProyectos">
         <thead>
             <tr>
                 <th scope="col">Proyecto</th>
-                <th scope="col">Tipo</th>
+                {% if not macroproyecto %}
+                    <th scope="col">Macroproyecto</th>
+                {% endif %}
+                <th scope="col">Tipo de Red</th>
+                <th scope="col" class="text-center">Postes / Apoyos</th>
                 <th scope="col">Fecha creación</th>
                 <th scope="col">Estado</th>
-                <th scope="col">Acciones</th>
+                <th scope="col" class="text-right">Acciones</th>
             </tr>
         </thead>
         <tbody id="cuerpoTablaProyectos">
             {% for proyecto in proyectos %}
                 <tr class="fila-proyecto">
-                    <td class="font-semibold tabular text-foreground">{{ proyecto.numero_emcali }}</td>
+                    <td class="font-bold tabular text-foreground text-base">
+                        {{ proyecto.numero_emcali }}
+                    </td>
+
+                    {% if not macroproyecto %}
                     <td>
-                        {% if proyecto.tipo == "AP" %}
-                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+                        {% if proyecto.macroproyecto %}
+                            <a href="{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}" class="text-xs font-semibold text-primary hover:underline">
+                                {{ proyecto.macroproyecto.nombre }}
+                            </a>
+                        {% else %}
+                            <span class="text-xs text-muted-foreground italic">Sin Macroproyecto</span>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+
+                    <td>
+                        {% if proyecto.tipo == "AP_BARRIO" %}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                                AP Barrio
+                            </span>
+                        {% elif proyecto.tipo == "AP_PARQUE" %}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                AP Parque / Cancha
+                            </span>
+                        {% elif proyecto.tipo == "AP" %}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
                                 {{ proyecto.get_tipo_display|default:"Alumbrado Público" }}
                             </span>
                         {% elif proyecto.tipo == "BT" %}
-                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-primary-soft text-primary border border-blue-200">
-                                {{ proyecto.get_tipo_display|default:"Baja Tensión" }}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-primary-soft text-primary border border-blue-200">
+                                Baja Tensión (BT)
                             </span>
                         {% elif proyecto.tipo == "MT" %}
-                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
-                                {{ proyecto.get_tipo_display|default:"Media Tensión" }}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+                                Media Tensión (MT)
                             </span>
                         {% else %}
-                            {{ proyecto.get_tipo_display }}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-muted text-foreground border border-border">
+                                {{ proyecto.get_tipo_display|default:proyecto.tipo }}
+                            </span>
                         {% endif %}
                     </td>
-                    <td class="tabular whitespace-nowrap text-muted-foreground">{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
-                    <td>
-                        <span class="etiqueta etiqueta-info">{{ proyecto.estado }}</span>
+
+                    <td class="text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {{ proyecto.apoyos.count }} poste{{ proyecto.apoyos.count|pluralize }}
+                        </span>
                     </td>
+
+                    <td class="tabular whitespace-nowrap text-muted-foreground text-xs">{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
+
                     <td>
-                        <a href="{% url 'detalle_proyecto' proyecto.id %}" class="enlace-tabla font-bold">
-                            Abrir
-                            <span class="sr-only">el proyecto {{ proyecto.numero_emcali }}</span>
-                        </a>
+                        {% if proyecto.estado == "En ejecución" %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-success border border-green-200">
+                                En ejecución
+                            </span>
+                        {% elif proyecto.estado == "Planeación" %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-soft text-primary border border-blue-200">
+                                Planeación
+                            </span>
+                        {% elif proyecto.estado == "Finalizado" %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-foreground border border-border">
+                                Finalizado
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-destructive border border-red-200">
+                                {{ proyecto.estado }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="whitespace-nowrap text-right">
+                        <div class="inline-flex items-center gap-1.5">
+                            <a href="{% url 'detalle_proyecto' proyecto.id %}"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg shadow-sm transition"
+                               title="Abrir matriz de postes">
+                                <span>Abrir Postes</span>
+                            </a>
+
+                            <button type="button"
+                                    class="btnEditarProyecto inline-flex items-center gap-1 px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition border border-border cursor-pointer"
+                                    data-id="{{ proyecto.id }}"
+                                    data-numero="{{ proyecto.numero_emcali }}"
+                                    data-tipo="{{ proyecto.tipo }}"
+                                    data-estado="{{ proyecto.estado }}"
+                                    data-macro-id="{{ proyecto.macroproyecto_id|default:'' }}"
+                                    title="Editar proyecto en modal">
+                                <span>Editar</span>
+                            </button>
+
+                            <button type="button"
+                                    class="btnEliminarProyecto inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-destructive text-xs font-semibold rounded-lg transition border border-red-200 cursor-pointer"
+                                    data-id="{{ proyecto.id }}"
+                                    data-numero="{{ proyecto.numero_emcali }}"
+                                    title="Eliminar proyecto en modal">
+                                <span>Eliminar</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             {% empty %}
                 <tr id="filaVaciaServidor">
-                    <td colspan="5" class="estado-vacio py-8 text-center text-muted-foreground">
-                        {% if query %}
-                            No se encontraron proyectos que coincidan con «<strong>{{ query }}</strong>».
-                            <div class="mt-2">
-                                <a href="{% url 'lista_proyectos' %}" class="btn btn-secundario text-xs">Limpiar búsqueda</a>
-                            </div>
-                        {% else %}
-                            No existen proyectos registrados. Usa «Nuevo proyecto» para crear el primero.
-                        {% endif %}
+                    <td colspan="{% if macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-10 text-center text-muted-foreground">
+                        <div>
+                            {% if query %}
+                                <p class="font-semibold text-foreground">No se encontraron proyectos que coincidan con «{{ query }}»</p>
+                                <div class="mt-2">
+                                    <a href="{% if macroproyecto %}{% url 'proyectos_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}" class="btn btn-secundario text-xs">Limpiar búsqueda</a>
+                                </div>
+                            {% else %}
+                                <p class="font-semibold text-foreground">No hay proyectos registrados {% if macroproyecto %}en este macroproyecto{% endif %}</p>
+                                <p class="text-xs text-muted-foreground mt-1">Haz clic en «Nuevo proyecto» para agregar el primero.</p>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
             {% endfor %}
             <tr id="sinResultadosLive" class="hidden">
-                <td colspan="5" class="estado-vacio py-8 text-center text-muted-foreground">
+                <td colspan="{% if macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-8 text-center text-muted-foreground">
                     No se encontraron proyectos con ese criterio de búsqueda.
                 </td>
             </tr>
@@ -130,8 +239,6 @@
 
 <!-- ======================================================================
      MODAL: NUEVO PROYECTO
-     Fuera del contenedor de la tabla, para que el scroll horizontal de la
-     tabla no lo recorte.
      ====================================================================== -->
 <div id="modalProyecto"
      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
@@ -139,15 +246,15 @@
      aria-modal="true"
      aria-labelledby="tituloModalProyecto">
 
-    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl">
+    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
 
-        <div class="flex items-center justify-between border-b border-border px-6 py-4">
+        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-primary-soft/40">
             <h2 id="tituloModalProyecto" class="text-lg font-bold text-primary">
-                Nuevo proyecto
+                Nuevo Proyecto
             </h2>
 
             <button type="button" id="cerrarModal"
-                    class="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-destructive">
+                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-destructive">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -155,30 +262,182 @@
             </button>
         </div>
 
-        <form method="POST" action="{% url 'crear_proyecto' %}">
+        <form method="POST" action="{% if macroproyecto %}{% url 'crear_proyecto_en_macroproyecto' macroproyecto.id %}{% else %}{% url 'crear_proyecto' %}{% endif %}">
             {% csrf_token %}
 
-            <div class="space-y-5 p-6">
+            {% if macroproyecto %}
+                <input type="hidden" name="macroproyecto_id" value="{{ macroproyecto.id }}">
+            {% endif %}
+
+            <div class="space-y-4 p-6">
+                {% if macroproyecto %}
+                    <div class="p-3 bg-primary-soft/60 border border-blue-200 rounded-lg text-xs text-primary font-semibold">
+                        <span>Macroproyecto: <strong>{{ macroproyecto.nombre }}</strong></span>
+                    </div>
+                {% else %}
+                    <div>
+                        <label for="macroproyecto_id" class="campo">Macroproyecto Asignado</label>
+                        <select id="macroproyecto_id" name="macroproyecto_id" class="seleccion">
+                            <option value="">(Sin asignar o seleccionar después)</option>
+                            {% for m in macroproyectos %}
+                                <option value="{{ m.id }}">{{ m.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
                 <div>
-                    <label for="numero_emcali" class="campo campo-req">Número de proyecto</label>
-                    <input type="text" id="numero_emcali" name="numero_emcali" required class="entrada tabular">
+                    <label for="numero_emcali" class="campo campo-req">Número o Código de Proyecto</label>
+                    <input type="text" id="numero_emcali" name="numero_emcali" required class="entrada tabular" placeholder="Ej: 2024-BT-001, AP-CANCHA-01, etc.">
                 </div>
 
                 <div>
-                    <label for="tipo" class="campo campo-req">Tipo de proyecto</label>
+                    <label for="tipo" class="campo campo-req">Tipo de Proyecto / Red</label>
                     <select id="tipo" name="tipo" required class="seleccion">
                         <option value="">Seleccione…</option>
-                        <option value="BT">Baja tensión</option>
-                        <option value="AP">Alumbrado público barrio</option>
-                        <option value="AP">Alumbrado público cancha</option>
-                        <option value="MT">Media tensión</option>
+                        <option value="BT">Baja Tensión (BT)</option>
+                        <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
+                        <option value="AP_PARQUE">Alumbrado Público Parque / Cancha (AP)</option>
+                        <option value="MT">Media Tensión (MT)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="estado" class="campo campo-req">Estado inicial</label>
+                    <select id="estado" name="estado" required class="seleccion">
+                        <option value="Planeación" selected>Planeación</option>
+                        <option value="En ejecución">En ejecución</option>
+                        <option value="Finalizado">Finalizado</option>
+                        <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-border px-6 py-4">
+            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
                 <button type="button" id="cancelarModal" class="btn btn-secundario">Cancelar</button>
-                <button type="submit" class="btn btn-primario">Guardar</button>
+                <button type="submit" class="btn btn-primario font-bold">Crear Proyecto</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================================
+     MODAL: EDITAR PROYECTO
+     ====================================================================== -->
+<div id="modalEditarProyecto"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="tituloModalEditarProyecto">
+
+    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+
+        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-primary-soft/40">
+            <h2 id="tituloModalEditarProyecto" class="text-lg font-bold text-primary">
+                Editar Proyecto
+            </h2>
+
+            <button type="button" id="cerrarModalEditar"
+                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-destructive">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span class="sr-only">Cerrar</span>
+            </button>
+        </div>
+
+        <form method="POST" id="formEditarProyecto" action="">
+            {% csrf_token %}
+
+            <div class="space-y-4 p-6">
+                <div>
+                    <label for="edit_macroproyecto_id" class="campo">Macroproyecto</label>
+                    <select id="edit_macroproyecto_id" name="macroproyecto_id" class="seleccion">
+                        <option value="">(Sin asignar)</option>
+                        {% for m in macroproyectos %}
+                            <option value="{{ m.id }}">{{ m.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit_numero_emcali" class="campo campo-req">Número o Código de Proyecto</label>
+                    <input type="text" id="edit_numero_emcali" name="numero_emcali" required class="entrada tabular" placeholder="Ej: 2024-BT-001">
+                </div>
+
+                <div>
+                    <label for="edit_tipo" class="campo campo-req">Tipo de Proyecto / Red</label>
+                    <select id="edit_tipo" name="tipo" required class="seleccion">
+                        <option value="">Seleccione…</option>
+                        <option value="BT">Baja Tensión (BT)</option>
+                        <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
+                        <option value="AP_PARQUE">Alumbrado Público Parque / Cancha (AP)</option>
+                        <option value="AP">Alumbrado Público (General)</option>
+                        <option value="MT">Media Tensión (MT)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit_estado" class="campo campo-req">Estado del proyecto</label>
+                    <select id="edit_estado" name="estado" required class="seleccion">
+                        <option value="Planeación">Planeación</option>
+                        <option value="En ejecución">En ejecución</option>
+                        <option value="Finalizado">Finalizado</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
+                <button type="button" id="cancelarModalEditar" class="btn btn-secundario">Cancelar</button>
+                <button type="submit" class="btn btn-primario font-bold">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================================
+     MODAL: ELIMINAR PROYECTO
+     ====================================================================== -->
+<div id="modalEliminarProyecto"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="tituloModalEliminarProyecto">
+
+    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+
+        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-red-50/70">
+            <h2 id="tituloModalEliminarProyecto" class="text-lg font-bold text-destructive">
+                Confirmar Eliminación
+            </h2>
+
+            <button type="button" id="cerrarModalEliminar"
+                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-red-100 hover:text-destructive">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span class="sr-only">Cerrar</span>
+            </button>
+        </div>
+
+        <form method="POST" id="formEliminarProyecto" action="">
+            {% csrf_token %}
+
+            <div class="p-6 space-y-3">
+                <p class="text-sm text-foreground">
+                    ¿Estás seguro de que deseas eliminar el proyecto <strong id="deleteProyectoNombre" class="text-destructive font-mono font-bold"></strong>?
+                </p>
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                    <span>Esta acción no se puede deshacer. Se eliminarán permanentemente todos los apoyos/postes, luminarias y asignaciones de materiales vinculados a este proyecto.</span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
+                <button type="button" id="cancelarModalEliminar" class="btn btn-secundario">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-destructive hover:bg-red-700 text-white text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">
+                    Eliminar Proyecto
+                </button>
             </div>
         </form>
     </div>
@@ -241,7 +500,6 @@
                 filtrarProyectos();
                 inputBuscador.focus();
 
-                // Si venía de búsqueda en servidor (URL con ?q=), redirigir a limpio
                 if (window.location.search.includes("q=")) {
                     window.location.href = window.location.pathname;
                 }
@@ -261,29 +519,123 @@
     function abrir() {
         modal.classList.remove("hidden");
         modal.classList.add("flex");
-        primerCampo.focus();
+        if (primerCampo) primerCampo.focus();
     }
 
     function cerrar() {
         modal.classList.remove("flex");
         modal.classList.add("hidden");
-        btnNuevo.focus();
+        if (btnNuevo) btnNuevo.focus();
     }
 
-    btnNuevo.addEventListener("click", abrir);
-    btnCerrar.addEventListener("click", cerrar);
-    btnCancelar.addEventListener("click", cerrar);
+    if (btnNuevo) btnNuevo.addEventListener("click", abrir);
+    if (btnCerrar) btnCerrar.addEventListener("click", cerrar);
+    if (btnCancelar) btnCancelar.addEventListener("click", cerrar);
 
-    // Clic en el fondo oscuro, no dentro de la ventana
-    modal.addEventListener("click", function (evento) {
-        if (evento.target === modal) {
-            cerrar();
+    if (modal) {
+        modal.addEventListener("click", function (evento) {
+            if (evento.target === modal) {
+                cerrar();
+            }
+        });
+    }
+
+    // ==========================================
+    // MODAL EDITAR PROYECTO
+    // ==========================================
+    const modalEditar = document.getElementById("modalEditarProyecto");
+    const formEditar = document.getElementById("formEditarProyecto");
+    const editNumero = document.getElementById("edit_numero_emcali");
+    const editTipo = document.getElementById("edit_tipo");
+    const editEstado = document.getElementById("edit_estado");
+    const editMacroId = document.getElementById("edit_macroproyecto_id");
+    const btnCerrarEditar = document.getElementById("cerrarModalEditar");
+    const btnCancelarEditar = document.getElementById("cancelarModalEditar");
+
+    function abrirEditar(btn) {
+        const id = btn.dataset.id;
+        const numero = btn.dataset.numero || "";
+        const tipo = btn.dataset.tipo || "";
+        const estado = btn.dataset.estado || "Planeación";
+        const macroId = btn.dataset.macroId || "";
+
+        formEditar.action = "/ingenieria/proyectos/" + id + "/editar/";
+        editNumero.value = numero;
+        editTipo.value = tipo;
+        editEstado.value = estado;
+        if (editMacroId) {
+            editMacroId.value = macroId;
         }
+
+        modalEditar.classList.remove("hidden");
+        modalEditar.classList.add("flex");
+        editNumero.focus();
+    }
+
+    function cerrarEditar() {
+        modalEditar.classList.remove("flex");
+        modalEditar.classList.add("hidden");
+    }
+
+    document.querySelectorAll(".btnEditarProyecto").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            abrirEditar(btn);
+        });
     });
 
+    if (btnCerrarEditar) btnCerrarEditar.addEventListener("click", cerrarEditar);
+    if (btnCancelarEditar) btnCancelarEditar.addEventListener("click", cerrarEditar);
+    if (modalEditar) {
+        modalEditar.addEventListener("click", function(e) {
+            if (e.target === modalEditar) cerrarEditar();
+        });
+    }
+
+    // ==========================================
+    // MODAL ELIMINAR PROYECTO
+    // ==========================================
+    const modalEliminar = document.getElementById("modalEliminarProyecto");
+    const formEliminar = document.getElementById("formEliminarProyecto");
+    const deleteNombre = document.getElementById("deleteProyectoNombre");
+    const btnCerrarEliminar = document.getElementById("cerrarModalEliminar");
+    const btnCancelarEliminar = document.getElementById("cancelarModalEliminar");
+
+    function abrirEliminar(btn) {
+        const id = btn.dataset.id;
+        const numero = btn.dataset.numero || "";
+
+        formEliminar.action = "/ingenieria/proyectos/" + id + "/eliminar/";
+        deleteNombre.textContent = numero;
+
+        modalEliminar.classList.remove("hidden");
+        modalEliminar.classList.add("flex");
+    }
+
+    function cerrarEliminar() {
+        modalEliminar.classList.remove("flex");
+        modalEliminar.classList.add("hidden");
+    }
+
+    document.querySelectorAll(".btnEliminarProyecto").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            abrirEliminar(btn);
+        });
+    });
+
+    if (btnCerrarEliminar) btnCerrarEliminar.addEventListener("click", cerrarEliminar);
+    if (btnCancelarEliminar) btnCancelarEliminar.addEventListener("click", cerrarEliminar);
+    if (modalEliminar) {
+        modalEliminar.addEventListener("click", function(e) {
+            if (e.target === modalEliminar) cerrarEliminar();
+        });
+    }
+
+    // Cerrar con Escape cualquier modal abierto
     document.addEventListener("keydown", function (evento) {
-        if (evento.key === "Escape" && !modal.classList.contains("hidden")) {
-            cerrar();
+        if (evento.key === "Escape") {
+            if (modal && !modal.classList.contains("hidden")) cerrar();
+            if (modalEditar && !modalEditar.classList.contains("hidden")) cerrarEditar();
+            if (modalEliminar && !modalEliminar.classList.contains("hidden")) cerrarEliminar();
         }
     });
 })();

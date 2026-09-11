@@ -195,6 +195,12 @@ def detalle_proyecto_logistica(request, proyecto_id):
         .order_by("-fecha", "-id")
     )
 
+    instalados_apoyo = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_requerida__gt=0)
+        .select_related("apoyo", "material")
+        .order_by("apoyo__numero_apoyo", "material__descripcion")
+    )
+
     retiros_apoyo = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_retirada__gt=0)
         .select_related("apoyo", "material")
@@ -208,7 +214,9 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "proyecto": proyecto,
             "balance_materiales": balance_materiales,
             "entradas": entradas,
+            "instalados_apoyo": instalados_apoyo,
             "retiros_apoyo": retiros_apoyo,
+            "total_items_instalados": total_items_requeridos,
             "total_items_requeridos": total_items_requeridos,
             "total_items_entrados": total_items_entrados,
             "total_items_retirados": total_items_retirados,

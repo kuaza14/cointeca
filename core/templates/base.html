@@ -1,296 +1,423 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block titulo %}Cointeca S.A.S{% endblock %}</title>
+    <title>{% block titulo %}COINTECA S.A.S. INGENIERIA{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
           rel="stylesheet">
 
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}?v=20260912_8">
 </head>
 
-<body class="bg-background text-foreground min-h-screen">
+<body class="bg-[#F8FAFC] text-[#1F2937] min-h-full font-sans antialiased">
 
 <a href="#contenido" class="skip-link">Saltar al contenido</a>
 
 <div class="flex min-h-screen">
 
     <!-- ==================================================================
-         BARRA LATERAL
-         Vive aqui y no en cada modulo, para que la navegacion no
-         desaparezca al entrar a una seccion.
+         BARRA LATERAL (Azul Corporativo #0B2D6B - Estática, sin scroll, fija en pantalla)
          ================================================================== -->
     <aside id="barraLateral"
-           class="fixed inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full overflow-y-auto bg-sidebar text-sidebar-foreground transition-transform duration-200 lg:static lg:translate-x-0">
+           style="background-color: #0B2D6B !important; color: #ffffff !important;"
+           class="fixed inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full overflow-hidden bg-[#0B2D6B] text-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 flex flex-col justify-between shadow-xl">
 
-        <div class="flex h-16 items-center border-b border-white/10 px-4">
-            <a href="{% url 'dashboard' %}" class="flex items-center gap-2 rounded">
-                <img src="{% static 'img/logo-cointeca.png' %}"
-                     alt="Cointeca S.A.S — ir al panel principal"
-                     class="h-9 w-auto">
-            </a>
+        <div>
+            <!-- LOGO SUPERIOR COINTECA OFICIAL (Fiel al diseño original) -->
+            <div class="px-4 pt-4 pb-2.5 flex flex-col items-center justify-center text-center">
+                <a href="{% url 'dashboard' %}" class="flex flex-col items-center group transition-transform duration-150 hover:scale-105">
+                    <img src="{% static 'img/emblema_cointeca.png' %}" 
+                         alt="COINTECA S.A.S." 
+                         class="object-contain drop-shadow-md"
+                         style="width: 50px; height: 42px; max-height: 42px; object-fit: contain;">
+                    <span class="mt-1.5 block text-xs font-extrabold tracking-wider text-white uppercase font-sans">
+                        COINTECA S.A.S.
+                    </span>
+                    <span class="block text-[9px] font-bold tracking-[0.2em] text-blue-200/90 uppercase">
+                        INGENIERIA
+                    </span>
+                </a>
+            </div>
+
+            <!-- NAVEGACIÓN PRINCIPAL -->
+            <nav class="p-3 space-y-2" aria-label="Navegación principal">
+                <div>
+                    <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-blue-200/50 mb-1.5">Menú</p>
+                    <ul class="space-y-1">
+                        {% url 'dashboard' as url_dashboard %}
+
+                        <!-- 1. Inicio -->
+                        <li>
+                            <a href="{{ url_dashboard }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if request.path == url_dashboard or request.path == '/' %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9 22 9 12 15 12 15 22"/>
+                                </svg>
+                                <span>Inicio</span>
+                            </a>
+                        </li>
+
+                        <!-- 2. Ingeniería -->
+                        <li>
+                            <a href="{% url 'ingenieria_inicio' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/ingenieria' in request.path or '/proyectos' in request.path or '/macroproyectos' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                    <polyline points="2 17 12 22 22 17"/>
+                                    <polyline points="2 12 12 17 22 12"/>
+                                </svg>
+                                <span>Ingeniería</span>
+                            </a>
+                        </li>
+
+                        <!-- 3. Facturación -->
+                        <li>
+                            <a href="{% url 'facturacion' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/facturacion' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <line x1="10" y1="9" x2="8" y2="9"/>
+                                </svg>
+                                <span>Facturación</span>
+                            </a>
+                        </li>
+
+                        <!-- 4. RRHH -->
+                        <li>
+                            <a href="{% url 'rrhh' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/rrhh' in request.path or '/empleados' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                <span>RRHH</span>
+                            </a>
+                        </li>
+
+                        <!-- 5. Logística -->
+                        <li>
+                            <a href="{% url 'logistica_home' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/logistica' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m7.5 4.27 9 5.15"/>
+                                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                                    <path d="m3.3 7 8.7 5 8.7-5"/>
+                                    <path d="M12 22V12"/>
+                                </svg>
+                                <span>Logística</span>
+                            </a>
+                        </li>
+
+                        <!-- 6. Indicadores -->
+                        <li>
+                            <a href="{% url 'indicadores' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/indicadores' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="20" x2="18" y2="10"/>
+                                    <line x1="12" y1="20" x2="12" y2="4"/>
+                                    <line x1="6" y1="20" x2="6" y2="14"/>
+                                </svg>
+                                <span>Indicadores</span>
+                            </a>
+                        </li>
+
+                        <!-- 7. Gerencia -->
+                        <li>
+                            <a href="{% url 'actas' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/actas' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                </svg>
+                                <span>Gerencia</span>
+                            </a>
+                        </li>
+
+                        <!-- 8. Contabilidad -->
+                        <li>
+                            <a href="{% url 'caja_menor' %}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/caja-menor' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" style="width: 18px; height: 18px; min-width: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="20" height="12" x="2" y="6" rx="2"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                    <path d="M6 12h.01M18 12h.01"/>
+                                </svg>
+                                <span>Contabilidad</span>
+                            </a>
+                        </li>
+
+                        {% comment %}
+                        <!-- Configuración / Admin (Ocultado a solicitud del usuario sin eliminar código) -->
+                        <li>
+                            <a href="/admin/"
+                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 {% if '/admin' in request.path %}bg-[#1E63F0] text-white shadow-md shadow-blue-600/30 font-semibold{% else %}text-slate-200/80 hover:bg-white/10 hover:text-white{% endif %}">
+                                <svg class="size-4.5 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                                <span>Configuración</span>
+                            </a>
+                        </li>
+                        {% endcomment %}
+                    </ul>
+                </div>
+            </nav>
         </div>
 
-        <nav class="p-3" aria-label="Navegación principal">
-            <ul class="space-y-1">
-                {% url 'dashboard' as url_dashboard %}
-                <li>
-                    <a href="{{ url_dashboard }}"
-                       {% if request.path == url_dashboard %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if request.path == url_dashboard %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/>
-                        </svg>
-                        Inicio
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'caja_menor' %}"
-                       {% if '/caja-menor/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/caja-menor/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        Contabilidad
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'actas' %}"
-                       {% if '/actas/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/actas/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-                        </svg>
-                        Actas de Junta
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'indicadores' %}"
-                       {% if '/indicadores/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/indicadores/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
-                        </svg>
-                        Indicadores
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'facturacion' %}"
-                       {% if '/facturacion/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/facturacion/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Facturación
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'rrhh' %}"
-                       {% if '/rrhh/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/rrhh/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
-                        </svg>
-                        RRHH
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'logistica_home' %}"
-                       {% if '/logistica/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/logistica/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
-                        </svg>
-                        Logística
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{% url 'ingenieria_inicio' %}"
-                       {% if '/ingenieria/' in request.path %}aria-current="page"{% endif %}
-                       class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 hover:bg-sidebar-hover {% if '/ingenieria/' in request.path %}bg-sidebar-active{% endif %}">
-                        <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/>
-                        </svg>
-                        Ingeniería
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <!-- SILUETA DE CAMELLO Y ONDA DORADA INFERIOR OFICIAL (content1.png) -->
+        <div class="relative w-full mt-auto pointer-events-none select-none overflow-hidden">
+            <img src="{% static 'img/content1.png' %}" 
+                 alt="" 
+                 class="w-full h-auto object-contain object-bottom block"
+                 style="mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.02) 10px, rgba(0,0,0,0.08) 22px, rgba(0,0,0,0.22) 36px, rgba(0,0,0,0.48) 52px, rgba(0,0,0,0.76) 68px, rgba(0,0,0,0.94) 84px, black 98px); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.02) 10px, rgba(0,0,0,0.08) 22px, rgba(0,0,0,0.22) 36px, rgba(0,0,0,0.48) 52px, rgba(0,0,0,0.76) 68px, rgba(0,0,0,0.94) 84px, black 98px);">
+        </div>
     </aside>
 
-    <!-- Capa oscura detras del menu en movil -->
+    <!-- Overlay para móvil -->
     <div id="fondoBarraLateral"
-         class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"
+         class="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-xs lg:hidden"
          aria-hidden="true"></div>
 
     <!-- ==================================================================
-         COLUMNA PRINCIPAL
+         CONTENEDOR PRINCIPAL
          ================================================================== -->
     <div class="flex min-w-0 flex-1 flex-col">
 
-        <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-card px-4">
+        <!-- CABECERA PRINCIPAL SUPERIOR -->
+        <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#E5E7EB] bg-white px-4 lg:px-6">
 
-            <!-- Abrir menu en movil -->
-            <button type="button"
-                    id="btnMenu"
-                    aria-controls="barraLateral"
-                    aria-expanded="false"
-                    class="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted lg:hidden">
-                <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-                </svg>
-                <span class="sr-only">Abrir menú de navegación</span>
-            </button>
+            <!-- Izquierda: Botón móvil + Barra de Búsqueda -->
+            <div class="flex items-center gap-4 flex-1 max-w-xl">
+                <button type="button"
+                        id="btnMenu"
+                        aria-controls="barraLateral"
+                        aria-expanded="false"
+                        class="flex size-10 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 lg:hidden">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                    <span class="sr-only">Abrir menú</span>
+                </button>
 
-            <p class="truncate font-semibold text-primary">
-                {% block encabezado %}Cointeca S.A.S{% endblock %}
-            </p>
+                <!-- Barra de búsqueda tipo pill -->
+                <div class="relative w-full max-w-md hidden sm:block">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </span>
+                    <input type="text"
+                           placeholder="Buscar proyectos, clientes, etc..."
+                           class="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 bg-[#F8FAFC] text-sm text-[#1F2937] placeholder-slate-400 focus:bg-white focus:border-[#1E63F0] focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-150">
+                </div>
+            </div>
 
-            <div class="ml-auto flex items-center gap-2">
+            <!-- Derecha: Notificaciones + Perfil de Usuario -->
+            <div class="flex items-center gap-3 sm:gap-4">
 
-                <!-- ALERTAS -->
+                <!-- Campana de Notificaciones con punto ámbar y contador de alertas -->
                 <div id="contenedorAlertas" class="relative">
-
                     <button type="button"
                             id="btnAlertas"
                             aria-controls="panelAlertas"
                             aria-expanded="false"
-                            class="relative flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted">
-                        <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+                            class="relative flex size-10 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100">
+                        <svg class="size-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
-
+                        
                         {% if total_alertas %}
-                            <span class="absolute right-1 top-1 flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-on-destructive"
-                                  aria-hidden="true">{{ total_alertas }}</span>
+                            <span class="absolute -top-0.5 -right-0.5 flex min-w-5 h-5 items-center justify-center rounded-full bg-[#FFC107] text-[#0B2D6B] font-extrabold text-[10px] px-1 shadow-sm ring-2 ring-white">
+                                {{ total_alertas }}
+                            </span>
+                        {% else %}
+                            <span class="absolute top-2 right-2 flex size-2">
+                                <span class="inline-flex rounded-full size-2 bg-slate-300"></span>
+                            </span>
                         {% endif %}
-
-                        <span class="sr-only">
-                            Alertas de vacaciones{% if total_alertas %}: {{ total_alertas }} pendiente{{ total_alertas|pluralize }}{% endif %}
-                        </span>
                     </button>
 
+                    <!-- Dropdown de alertas -->
                     <div id="panelAlertas"
-                         role="region"
-                         aria-label="Alertas de vacaciones"
-                         class="absolute right-0 mt-2 hidden max-h-[28rem] w-[min(26rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-border bg-card shadow-2xl">
+                         class="absolute right-0 mt-3 hidden max-h-[30rem] w-[min(26rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl z-50 p-2">
+                        <div class="px-3 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                            <span class="font-bold text-sm text-[#0B2D6B]">Alertas de Vacaciones</span>
+                            {% if total_alertas %}
+                                <span class="text-xs bg-amber-50 text-[#0B2D6B] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                                    {{ total_alertas }} pendiente{{ total_alertas|pluralize }}
+                                </span>
+                            {% else %}
+                                <span class="text-xs bg-slate-100 text-slate-500 font-semibold px-2 py-0.5 rounded-full">Al día</span>
+                            {% endif %}
+                        </div>
 
+                        <!-- 1. Vacaciones en curso -->
                         {% if vacaciones_actuales %}
-                            <h2 class="sticky top-0 bg-success-soft px-4 py-2 text-sm font-semibold text-success">
-                                Vacaciones en curso
-                            </h2>
-                            {% for alerta in vacaciones_actuales %}
-                                <a href="{% url 'vacaciones_empleado' alerta.id %}"
-                                   class="block border-b border-border px-4 py-3 transition-colors duration-150 hover:bg-primary-soft">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Salió: <strong class="tabular">{{ alerta.inicio }}</strong> ·
-                                        Regresa: <strong class="tabular">{{ alerta.regreso }}</strong>
-                                    </span>
-                                    <span class="block text-sm text-info">
-                                        Faltan {{ alerta.dias_restantes }} día{{ alerta.dias_restantes|pluralize }}
-                                    </span>
-                                </a>
-                            {% endfor %}
+                            <div class="mt-2">
+                                <p class="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50/70 rounded-md mb-1">
+                                    Vacaciones en curso
+                                </p>
+                                {% for alerta in vacaciones_actuales %}
+                                    <a href="{% url 'vacaciones_empleado' alerta.id %}" class="block px-3 py-2.5 rounded-lg hover:bg-blue-50/50 transition-colors text-xs border-b border-slate-50 last:border-0">
+                                        <p class="font-bold text-slate-900">{{ alerta.empleado }}</p>
+                                        <p class="text-slate-500 mt-0.5">
+                                            Salió: <strong class="tabular font-medium">{{ alerta.inicio }}</strong> · Regresa: <strong class="tabular font-medium">{{ alerta.regreso }}</strong>
+                                        </p>
+                                        <p class="text-[11px] font-semibold text-[#1E63F0] mt-0.5">
+                                            Faltan {{ alerta.dias_restantes }} día{{ alerta.dias_restantes|pluralize }}
+                                        </p>
+                                    </a>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
+                        <!-- 2. Próximas vacaciones -->
                         {% if vacaciones_proximas %}
-                            <h2 class="sticky top-0 bg-warning-soft px-4 py-2 text-sm font-semibold text-warning">
-                                Próximas vacaciones
-                            </h2>
-                            {% for alerta in vacaciones_proximas %}
-                                <div class="border-b border-border px-4 py-3">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Sale: <strong class="tabular">{{ alerta.inicio }}</strong>
-                                    </span>
-                                    <span class="block text-sm text-warning">
-                                        Sale dentro de {{ alerta.dias_para_salir }} día{{ alerta.dias_para_salir|pluralize }}
-                                    </span>
-                                </div>
-                            {% endfor %}
+                            <div class="mt-2">
+                                <p class="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50/70 rounded-md mb-1">
+                                    Próximas vacaciones
+                                </p>
+                                {% for alerta in vacaciones_proximas %}
+                                    <div class="px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors text-xs border-b border-slate-50 last:border-0">
+                                        <p class="font-bold text-slate-900">{{ alerta.empleado }}</p>
+                                        <p class="text-slate-500 mt-0.5">
+                                            Sale: <strong class="tabular font-medium">{{ alerta.inicio }}</strong>
+                                        </p>
+                                        <p class="text-[11px] font-semibold text-amber-600 mt-0.5">
+                                            Sale dentro de {{ alerta.dias_para_salir }} día{{ alerta.dias_para_salir|pluralize }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
+                        <!-- 3. Cumplen año / Programar vacaciones -->
                         {% if cumplen_anio %}
-                            <h2 class="sticky top-0 bg-info-soft px-4 py-2 text-sm font-semibold text-info">
-                                Programar vacaciones
-                            </h2>
-                            {% for alerta in cumplen_anio %}
-                                <div class="border-b border-border px-4 py-3">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Aniversario: <strong class="tabular">{{ alerta.fecha }}</strong> ·
-                                        faltan {{ alerta.dias }} día{{ alerta.dias|pluralize }}
-                                    </span>
-                                    <span class="block text-sm font-semibold text-destructive">
-                                        Días pendientes: {{ alerta.pendientes }}
-                                    </span>
-                                </div>
-                            {% endfor %}
+                            <div class="mt-2">
+                                <p class="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50/70 rounded-md mb-1">
+                                    Programar vacaciones
+                                </p>
+                                {% for alerta in cumplen_anio %}
+                                    <div class="px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors text-xs border-b border-slate-50 last:border-0">
+                                        <p class="font-bold text-slate-900">{{ alerta.empleado }}</p>
+                                        <p class="text-slate-500 mt-0.5">
+                                            Aniversario: <strong class="tabular font-medium">{{ alerta.fecha }}</strong> · faltan {{ alerta.dias }} día{{ alerta.dias|pluralize }}
+                                        </p>
+                                        <p class="text-[11px] font-semibold text-red-600 mt-0.5">
+                                            Días pendientes: {{ alerta.pendientes }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
+                        <!-- 4. Pendientes por programar -->
                         {% if pendientes_programar %}
-                            <h2 class="sticky top-0 bg-destructive-soft px-4 py-2 text-sm font-semibold text-destructive">
-                                Pendientes por programar
-                            </h2>
-                            {% for alerta in pendientes_programar %}
-                                <div class="border-b border-border px-4 py-3">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Último aniversario: <strong class="tabular">{{ alerta.fecha }}</strong>
-                                    </span>
-                                    <span class="block text-sm font-semibold text-destructive">
-                                        Días pendientes: {{ alerta.pendientes }} — revisar programación
-                                    </span>
-                                </div>
-                            {% endfor %}
+                            <div class="mt-2">
+                                <p class="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-700 bg-red-50/70 rounded-md mb-1">
+                                    Pendientes por programar
+                                </p>
+                                {% for alerta in pendientes_programar %}
+                                    <div class="px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors text-xs border-b border-slate-50 last:border-0">
+                                        <p class="font-bold text-slate-900">{{ alerta.empleado }}</p>
+                                        <p class="text-slate-500 mt-0.5">
+                                            Último aniversario: <strong class="tabular font-medium">{{ alerta.fecha }}</strong>
+                                        </p>
+                                        <p class="text-[11px] font-semibold text-red-600 mt-0.5">
+                                            Días pendientes: {{ alerta.pendientes }} — revisar programación
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
                         {% if not total_alertas %}
-                            <p class="px-4 py-6 text-center text-sm text-muted-foreground">
-                                No hay alertas de vacaciones.
+                            <p class="px-4 py-8 text-center text-xs text-slate-400">
+                                No hay alertas de vacaciones en este momento.
                             </p>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- CERRAR SESIÓN -->
-                <a href="{% url 'logout' %}"
-                   class="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors duration-150 hover:bg-destructive-soft hover:text-destructive">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
-                    </svg>
-                    <span class="hidden sm:inline">Cerrar sesión</span>
-                    <span class="sr-only sm:hidden">Cerrar sesión</span>
-                </a>
+                <div class="h-6 w-px bg-slate-200"></div>
+
+                <!-- Cápsula de Usuario (Idéntica a la imagen) -->
+                <div class="relative" id="contenedorUsuario">
+                    <button type="button" 
+                            id="btnUsuario"
+                            class="flex items-center gap-3 p-1 sm:px-2 sm:py-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
+                        <div class="size-9 sm:size-10 rounded-full bg-[#0B2D6B] flex items-center justify-center text-white font-bold shadow-xs">
+                            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div class="hidden sm:flex flex-col text-left">
+                            <span class="text-xs font-bold text-[#1F2937] leading-tight">
+                                {{ request.user.get_full_name|default:request.user.username|default:"Usuario"|capfirst }}
+                            </span>
+                            <span class="text-[11px] text-slate-500 font-medium">
+                                {% if request.user.is_superuser %}Administrador{% elif request.user.is_staff %}Equipo Técnico{% else %}Usuario{% endif %}
+                            </span>
+                        </div>
+                        <svg class="size-4 text-slate-400 ml-0.5 hidden sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+
+                    <!-- Menú de Usuario -->
+                    <div id="menuUsuario"
+                         class="absolute right-0 mt-2 hidden w-48 rounded-xl border border-slate-200 bg-white shadow-xl z-50 py-1 text-sm">
+                        <div class="px-4 py-2 border-b border-slate-100 sm:hidden">
+                            <p class="font-semibold text-xs text-slate-800">{{ request.user.username }}</p>
+                        </div>
+                        {% comment %}
+                        <!-- Panel de Control ocultado a solicitud del usuario -->
+                        <a href="/admin/" class="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
+                            <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            Panel de Control
+                        </a>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        {% endcomment %}
+                        <a href="{% url 'logout' %}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50">
+                            <svg class="size-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            Cerrar sesión
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </header>
 
-        <main id="contenido" class="flex-1 px-4 py-6 lg:px-6">
+        <!-- ÁREA DE CONTENIDO -->
+        <main id="contenido" class="flex-1 px-4 py-4 lg:px-6 lg:py-5">
 
             {% if messages %}
                 <div class="mb-6 space-y-2">
                     {% for message in messages %}
-                        <div role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}"
-                             class="rounded-lg border px-4 py-3 text-sm font-medium
-                                {% if message.tags == 'success' %} border-success/30 bg-success-soft text-success
-                                {% elif message.tags == 'error' %} border-destructive/30 bg-destructive-soft text-destructive
-                                {% elif message.tags == 'warning' %} border-warning/30 bg-warning-soft text-warning
-                                {% else %} border-info/30 bg-info-soft text-info {% endif %}">
-                            {{ message }}
+                        <div role="alert"
+                             class="rounded-xl border p-4 text-sm font-semibold flex items-center justify-between shadow-xs
+                                {% if message.tags == 'success' %} border-emerald-200 bg-emerald-50 text-emerald-800
+                                {% elif message.tags == 'error' %} border-red-200 bg-red-50 text-red-800
+                                {% elif message.tags == 'warning' %} border-amber-200 bg-amber-50 text-amber-800
+                                {% else %} border-blue-200 bg-blue-50 text-blue-800 {% endif %}">
+                            <span>{{ message }}</span>
                         </div>
                     {% endfor %}
                 </div>
@@ -303,70 +430,60 @@
 
 <script>
 (function () {
-    // ---------- Menu lateral en movil ----------
+    // Menú móvil
     const barra = document.getElementById("barraLateral");
     const fondo = document.getElementById("fondoBarraLateral");
     const btnMenu = document.getElementById("btnMenu");
 
     function cerrarMenu() {
-        barra.classList.add("-translate-x-full");
-        fondo.classList.add("hidden");
-        btnMenu.setAttribute("aria-expanded", "false");
+        if (barra) barra.classList.add("-translate-x-full");
+        if (fondo) fondo.classList.add("hidden");
+        if (btnMenu) btnMenu.setAttribute("aria-expanded", "false");
     }
 
-    btnMenu.addEventListener("click", function () {
-        const abierto = btnMenu.getAttribute("aria-expanded") === "true";
-        if (abierto) {
-            cerrarMenu();
-        } else {
-            barra.classList.remove("-translate-x-full");
-            fondo.classList.remove("hidden");
-            btnMenu.setAttribute("aria-expanded", "true");
-        }
-    });
+    if (btnMenu) {
+        btnMenu.addEventListener("click", function () {
+            const abierto = btnMenu.getAttribute("aria-expanded") === "true";
+            if (abierto) {
+                cerrarMenu();
+            } else {
+                barra.classList.remove("-translate-x-full");
+                fondo.classList.remove("hidden");
+                btnMenu.setAttribute("aria-expanded", "true");
+            }
+        });
+    }
 
-    fondo.addEventListener("click", cerrarMenu);
+    if (fondo) fondo.addEventListener("click", cerrarMenu);
 
-    // ---------- Panel de alertas ----------
+    // Panel de alertas
     const btnAlertas = document.getElementById("btnAlertas");
-    const panel = document.getElementById("panelAlertas");
+    const panelAlertas = document.getElementById("panelAlertas");
 
-    function cerrarAlertas() {
-        panel.classList.add("hidden");
-        btnAlertas.setAttribute("aria-expanded", "false");
+    if (btnAlertas && panelAlertas) {
+        btnAlertas.addEventListener("click", function (e) {
+            e.stopPropagation();
+            panelAlertas.classList.toggle("hidden");
+            if (menuUsuario) menuUsuario.classList.add("hidden");
+        });
     }
 
-    btnAlertas.addEventListener("click", function (evento) {
-        evento.stopPropagation();
-        const abierto = btnAlertas.getAttribute("aria-expanded") === "true";
-        if (abierto) {
-            cerrarAlertas();
-        } else {
-            panel.classList.remove("hidden");
-            btnAlertas.setAttribute("aria-expanded", "true");
-        }
-    });
+    // Menú de usuario
+    const btnUsuario = document.getElementById("btnUsuario");
+    const menuUsuario = document.getElementById("menuUsuario");
 
-    // Cerrar al hacer clic fuera del panel y del boton que lo abre
-    document.addEventListener("click", function (evento) {
-        if (!evento.target.closest("#contenedorAlertas")) {
-            cerrarAlertas();
-        }
-    });
+    if (btnUsuario && menuUsuario) {
+        btnUsuario.addEventListener("click", function (e) {
+            e.stopPropagation();
+            menuUsuario.classList.toggle("hidden");
+            if (panelAlertas) panelAlertas.classList.add("hidden");
+        });
+    }
 
-    // Escape cierra lo que este abierto y devuelve el foco
-    document.addEventListener("keydown", function (evento) {
-        if (evento.key !== "Escape") {
-            return;
-        }
-        if (btnAlertas.getAttribute("aria-expanded") === "true") {
-            cerrarAlertas();
-            btnAlertas.focus();
-        }
-        if (btnMenu.getAttribute("aria-expanded") === "true") {
-            cerrarMenu();
-            btnMenu.focus();
-        }
+    // Cerrar dropdowns al hacer click fuera
+    document.addEventListener("click", function () {
+        if (panelAlertas) panelAlertas.classList.add("hidden");
+        if (menuUsuario) menuUsuario.classList.add("hidden");
     });
 })();
 </script>

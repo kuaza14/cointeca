@@ -1,80 +1,146 @@
 {% extends "base.html" %}
 
+{% block titulo %}Logística | COINTECA S.A.S.{% endblock %}
+{% block encabezado %}Logística{% endblock %}
+
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-8">
-    Módulo de Logística
-</h1>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Control de Materiales por Macroproyecto y Proyecto -->
-    <a href="{% url 'macroproyectos_logistica' %}"
-       class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-primary-soft transition border-l-4 border-blue-600">
-        <h2 class="text-xl font-bold flex items-center gap-2">
-            Materiales por Macroproyecto
-        </h2>
-
-        <p class="text-muted-foreground mt-2 text-sm">
-            Organización por Macroproyectos, entradas directas a obra, reporte de consumo y balance trifásico con ingeniería.
-        </p>
-    </a>
-
-    <!-- Materiales -->
-    <a href="{% url 'materiales_home' %}"
-       class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-primary-soft transition">
-        <h2 class="text-xl font-bold">
-            Catálogo de Materiales
-        </h2>
-
-        <p class="text-muted-foreground mt-2 text-sm">
-            Consulta y gestión del catálogo general de materiales.
-        </p>
-    </a>
-
-    <!-- Dotación -->
-    <a href="{% url 'dotacion_home' %}"
-       class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-primary-soft transition">
-        <h2 class="text-xl font-bold">
-            Entrega de Dotación
-        </h2>
-
-        <p class="text-muted-foreground mt-2">
-            Gestión de entrega de dotación al personal.
-        </p>
-    </a>
-
-    <!-- Herramientas -->
-    <div class="bg-muted rounded-lg shadow p-6 opacity-60">
-        <h2 class="text-xl font-bold">
-            Entrega de Herramientas
-        </h2>
-
-        <p class="text-muted-foreground mt-2">
-            Próximamente
-        </p>
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="titulo-pagina">Módulo de Logística</h1>
+            <p class="subtitulo-pagina">Control de materiales por obra, catálogo central, dotación y despachos.</p>
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secundario self-start sm:self-auto">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Volver al Dashboard</span>
+        </a>
     </div>
 
-    <!-- Activos -->
-    <div class="bg-muted rounded-lg shadow p-6 opacity-60">
-        <h2 class="text-xl font-bold">
-            Control Activos Fijos
-        </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- Materiales por Macroproyecto y Proyecto -->
+        <a href="{% url 'macroproyectos_logistica' %}"
+           class="tarjeta tarjeta-cuerpo flex flex-col justify-between hover:border-[#1E63F0] group">
+            <div>
+                <div class="size-12 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center mb-4">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-[#1F2937] group-hover:text-[#1E63F0] transition-colors">
+                    Materiales por Macroproyecto
+                </h2>
+                <p class="text-sm text-[#64748B] mt-1.5 leading-relaxed">
+                    Organización por Macroproyectos, entradas directas a obra, reporte de consumo y balance con ingeniería.
+                </p>
+            </div>
+            <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[#1E63F0]">
+                <span>Entrar al módulo</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+        </a>
 
-        <p class="text-muted-foreground mt-2">
-            Próximamente
-        </p>
+        <!-- Catálogo de Materiales -->
+        <a href="{% url 'materiales_home' %}"
+           class="tarjeta tarjeta-cuerpo flex flex-col justify-between hover:border-[#1E63F0] group">
+            <div>
+                <div class="size-12 rounded-xl bg-[#FEF3C7] text-[#F59E0B] flex items-center justify-center mb-4">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-[#1F2937] group-hover:text-[#1E63F0] transition-colors">
+                    Catálogo de Materiales
+                </h2>
+                <p class="text-sm text-[#64748B] mt-1.5 leading-relaxed">
+                    Consulta y gestión centralizada de referencias, unidades de medida y catálogo maestro de piezas.
+                </p>
+            </div>
+            <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[#1E63F0]">
+                <span>Ver Catálogo</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+        </a>
+
+        <!-- Entrega de Dotación -->
+        <a href="{% url 'dotacion_home' %}"
+           class="tarjeta tarjeta-cuerpo flex flex-col justify-between hover:border-[#1E63F0] group">
+            <div>
+                <div class="size-12 rounded-xl bg-[#CCFBF1] text-[#14B8A6] flex items-center justify-center mb-4">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-[#1F2937] group-hover:text-[#1E63F0] transition-colors">
+                    Entrega de Dotación
+                </h2>
+                <p class="text-sm text-[#64748B] mt-1.5 leading-relaxed">
+                    Registro y seguimiento de uniformes, calzado de seguridad y elementos de protección entregados al personal.
+                </p>
+            </div>
+            <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[#1E63F0]">
+                <span>Gestionar Dotación</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+        </a>
+
+        <!-- Herramientas -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-70">
+            <div>
+                <div class="size-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mb-4">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#1F2937]">Herramientas</h2>
+                    <span class="etiqueta etiqueta-info">Próximamente</span>
+                </div>
+                <p class="text-sm text-[#64748B] mt-1.5">Control de herramientas asignadas a cuadrillas.</p>
+            </div>
+        </div>
+
+        <!-- Activos Fijos -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-70">
+            <div>
+                <div class="size-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mb-4">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#1F2937]">Control de Activos</h2>
+                    <span class="etiqueta etiqueta-info">Próximamente</span>
+                </div>
+                <p class="text-sm text-[#64748B] mt-1.5">Placas de inventario y activos fijos empresariales.</p>
+            </div>
+        </div>
+
+        <!-- Vehículos -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-70">
+            <div>
+                <div class="size-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mb-4">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"></path>
+                        <circle cx="7" cy="17" r="2"></circle>
+                        <circle cx="17" cy="17" r="2"></circle>
+                    </svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#1F2937]">Gestión de Flota</h2>
+                    <span class="etiqueta etiqueta-info">Próximamente</span>
+                </div>
+                <p class="text-sm text-[#64748B] mt-1.5">Mantenimiento de camionetas, grúas y SOAT.</p>
+            </div>
+        </div>
+
     </div>
-
-    <!-- Vehículos -->
-    <div class="bg-muted rounded-lg shadow p-6 opacity-60">
-        <h2 class="text-xl font-bold">
-            Gestión de Vehículos
-        </h2>
-
-        <p class="text-muted-foreground mt-2">
-            Próximamente
-        </p>
-    </div>
-
 </div>
 
 {% endblock %}

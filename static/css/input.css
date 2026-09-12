@@ -1,144 +1,158 @@
 @import "tailwindcss";
 
 /* =========================================================================
-   Sistema de diseño Cointeca
-   Estilo: Data-Dense Dashboard (interfaz interna, densa en datos y formularios)
-
-   Los tokens se declaran con @theme para que Tailwind genere las utilidades
-   semanticas (bg-primary, text-muted-foreground, border-border...). Usar
-   siempre el token y no el color crudo: bg-primary en lugar de bg-blue-700.
+   Sistema de diseño Cointeca S.A.S. Ingeniería
+   Basado en la paleta y componentes de alta fidelidad:
+   - Azul Corporativo: #0B2D6B
+   - Azul Técnico:     #1E63F0
+   - Amarillo Energía: #FFC107
+   - Turquesa Datos:   #14B8A6
+   - Azul Claro:       #E6F1FF
+   - Gris Oscuro:      #1F2937
+   - Gris Medio:       #64748B
+   - Gris Claro:       #E5E7EB
+   - Gris Fondo:       #F8FAFC
+   - Morado Acento:    #8B5CF6
+   - Verde Éxito:      #10B981
    ========================================================================= */
 
 @theme {
-    /* --- Marca --- */
-    --color-primary: #1e40af;
-    --color-primary-hover: #1b3a9e;
-    --color-primary-soft: #eff4ff;
+    /* --- Marca Oficial --- */
+    --color-primary: #0b2d6b;
+    --color-primary-hover: #08204d;
+    --color-primary-soft: #e6f1ff;
     --color-on-primary: #ffffff;
 
-    --color-secondary: #3b82f6;
+    --color-secondary: #1e63f0;
+    --color-secondary-hover: #1651c7;
+    --color-secondary-soft: #eff6ff;
     --color-on-secondary: #ffffff;
 
-    /* El acento ambar llega al 4.5:1 unicamente con texto oscuro */
-    --color-accent: #d97706;
+    --color-accent: #ffc107;
+    --color-accent-hover: #e5ac00;
+    --color-accent-soft: #fffbeb;
     --color-on-accent: #1c1300;
+
+    --color-turquoise: #14b8a6;
+    --color-turquoise-soft: #f0fdfa;
+
+    --color-purple: #8b5cf6;
+    --color-purple-soft: #f5f3ff;
 
     /* --- Superficies --- */
     --color-background: #f8fafc;
-    --color-foreground: #0f172a;
+    --color-foreground: #1f2937;
     --color-card: #ffffff;
-    --color-card-foreground: #0f172a;
+    --color-card-foreground: #1f2937;
 
-    --color-muted: #e9eef6;
-    --color-muted-foreground: #475569;
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #64748b;
 
-    --color-border: #dbeafe;
-    --color-border-strong: #c3d9fd;
+    --color-border: #e5e7eb;
+    --color-border-strong: #cbd5e1;
 
     /* --- Barra lateral --- */
-    --color-sidebar: #1e3a8a;
-    --color-sidebar-hover: #1e40af;
-    --color-sidebar-foreground: #e8eefc;
-    --color-sidebar-active: #1d4ed8;
+    --color-sidebar: #0b2d6b;
+    --color-sidebar-hover: #123982;
+    --color-sidebar-foreground: #cbd5e1;
+    --color-sidebar-active: #1e63f0;
 
-    /* --- Estados. Todos cumplen 4.5:1 sobre blanco --- */
-    --color-success: #15803d;
-    --color-success-soft: #ecfdf3;
-    --color-warning: #b45309;
-    --color-warning-soft: #fffaeb;
-    --color-destructive: #c81e1e;
+    /* --- Estados --- */
+    --color-success: #10b981;
+    --color-success-soft: #ecfdf5;
+    --color-warning: #f59e0b;
+    --color-warning-soft: #fffbeb;
+    --color-destructive: #ef4444;
     --color-destructive-soft: #fef2f2;
     --color-on-destructive: #ffffff;
-    --color-info: #0369a1;
-    --color-info-soft: #f0f9ff;
+    --color-info: #1e63f0;
+    --color-info-soft: #e6f1ff;
 
-    /* Botones neutros ("Volver", "Cancelar") y estados hover */
-    --color-neutral: #475569;
-    --color-neutral-hover: #334155;
-    --color-success-hover: #166534;
-    --color-destructive-hover: #a81818;
+    /* Botones neutros y hover */
+    --color-neutral: #64748b;
+    --color-neutral-hover: #475569;
+    --color-success-hover: #059669;
+    --color-destructive-hover: #dc2626;
 
-    --color-ring: #1e40af;
+    --color-ring: #1e63f0;
 
-    /* --- Tipografia --- */
-    --font-sans: "Fira Sans", ui-sans-serif, system-ui, -apple-system,
-        "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "Fira Code", ui-monospace, "SFMono-Regular", "Cascadia Code",
-        Consolas, "Liberation Mono", monospace;
+    /* --- Tipografía --- */
+    --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "Fira Code", ui-monospace, monospace;
 }
 
 @layer base {
     html {
         font-family: var(--font-sans);
+        scroll-behavior: smooth;
     }
 
     body {
         background-color: var(--color-background);
         color: var(--color-foreground);
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
 
-    /* Anillo de foco visible y consistente para navegacion por teclado.
-       Nunca eliminar: es el unico indicador de posicion sin mouse. */
     :focus-visible {
-        outline: 3px solid var(--color-ring);
+        outline: 2px solid var(--color-ring);
         outline-offset: 2px;
-        border-radius: 2px;
+        border-radius: 4px;
     }
 
-    /* Las cifras en tablas se alinean por columna */
     .tabular {
         font-family: var(--font-mono);
         font-variant-numeric: tabular-nums;
     }
 
-    /* Respeta a quien configuro menos movimiento en su sistema operativo */
     @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
             scroll-behavior: auto !important;
         }
     }
+
+    /* Reglas estrictas infalibles de estructura */
+    #barraLateral {
+        background-color: #0B2D6B !important;
+        color: #ffffff !important;
+    }
+
+    svg.size-3, svg[class*="size-3 "] { width: 0.75rem !important; height: 0.75rem !important; min-width: 0.75rem !important; }
+    svg.size-3\.5, svg[class*="size-3.5"] { width: 0.875rem !important; height: 0.875rem !important; min-width: 0.875rem !important; }
+    svg.size-4, svg[class*="size-4 "] { width: 1rem !important; height: 1rem !important; min-width: 1rem !important; }
+    svg.size-4\.5, svg[class*="size-4.5"] { width: 1.125rem !important; height: 1.125rem !important; min-width: 1.125rem !important; }
+    svg.size-5, svg[class*="size-5 "] { width: 1.25rem !important; height: 1.25rem !important; min-width: 1.25rem !important; }
+    svg.size-6, svg[class*="size-6 "] { width: 1.5rem !important; height: 1.5rem !important; min-width: 1.5rem !important; }
 }
 
 @layer components {
-    /* Enlace de salto: invisible hasta recibir foco con Tab */
+    /* Enlace de salto accesible */
     .skip-link {
         position: absolute;
         left: 0.75rem;
         top: -100%;
         z-index: 100;
         border-radius: 0.5rem;
-        background-color: var(--color-primary);
+        background-color: var(--color-secondary);
         padding: 0.75rem 1rem;
         font-weight: 600;
-        color: var(--color-on-primary);
+        color: #ffffff;
         transition: top 150ms ease;
     }
 
     .skip-link:focus {
         top: 0.75rem;
     }
-}
 
-/* =========================================================================
-   Componentes
-   Las mismas piezas se repiten en decenas de plantillas (listados, formularios
-   de crear/editar, fichas de detalle). Se definen una vez aqui para que la
-   plantilla describa la intencion y no el estilo.
-   ========================================================================= */
-
-@layer components {
-
-    /* ---------- Encabezado de pagina ---------- */
+    /* ---------- Encabezado de página ---------- */
     .titulo-pagina {
         font-size: 1.5rem;
         line-height: 2rem;
         font-weight: 700;
         color: var(--color-primary);
+        letter-spacing: -0.02em;
     }
 
     .subtitulo-pagina {
@@ -149,70 +163,79 @@
 
     /* ---------- Tarjeta ---------- */
     .tarjeta {
-        border-radius: 0.75rem;
+        border-radius: 1rem;
         border: 1px solid var(--color-border);
         background-color: var(--color-card);
-        box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+        transition: box-shadow 200ms ease, border-color 200ms ease;
+    }
+
+    .tarjeta:hover {
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     }
 
     .tarjeta-cuerpo {
         padding: 1.25rem;
     }
 
-    /* ---------- Botones ----------
-       min-height 2.75rem = 44px, el minimo tactil recomendado */
+    /* ---------- Botones ---------- */
     .btn {
         display: inline-flex;
-        min-height: 2.75rem;
+        min-height: 2.5rem;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        border-radius: 0.5rem;
+        border-radius: 0.625rem;
         border: 1px solid transparent;
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 1.125rem;
         font-size: 0.875rem;
         font-weight: 600;
         cursor: pointer;
-        transition: background-color 150ms ease, border-color 150ms ease,
-            color 150ms ease;
+        transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:active {
+        transform: translateY(1px);
     }
 
     .btn-primario {
-        background-color: var(--color-primary);
-        color: var(--color-on-primary);
+        background-color: var(--color-secondary);
+        color: #ffffff;
+        box-shadow: 0 1px 2px 0 rgba(30, 99, 240, 0.2);
     }
 
     .btn-primario:hover {
-        background-color: var(--color-primary-hover);
+        background-color: var(--color-secondary-hover);
+        box-shadow: 0 4px 6px -1px rgba(30, 99, 240, 0.3);
     }
 
     .btn-secundario {
-        border-color: var(--color-border-strong);
+        border-color: var(--color-border);
         background-color: var(--color-card);
         color: var(--color-foreground);
     }
 
     .btn-secundario:hover {
         background-color: var(--color-muted);
+        border-color: var(--color-border-strong);
     }
 
     .btn-peligro {
         background-color: var(--color-destructive);
-        color: var(--color-on-destructive);
+        color: #ffffff;
     }
 
     .btn-peligro:hover {
-        background-color: #a81818;
+        background-color: var(--color-destructive-hover);
     }
 
-    /* ---------- Tablas ----------
-       El contenedor hace el scroll horizontal: en pantallas angostas la tabla
-       se desplaza dentro de su caja y la pagina nunca scrollea de lado. */
+    /* ---------- Tablas Modernas ---------- */
     .tabla-caja {
         overflow-x: auto;
-        border-radius: 0.75rem;
+        border-radius: 1rem;
         border: 1px solid var(--color-border);
         background-color: var(--color-card);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.03);
     }
 
     .tabla {
@@ -224,27 +247,35 @@
     }
 
     .tabla thead {
-        background-color: var(--color-muted);
+        background-color: #fafbfc;
+        border-bottom: 1px solid var(--color-border);
     }
 
     .tabla th {
-        padding: 0.75rem 1rem;
+        padding: 0.875rem 1.25rem;
         font-weight: 600;
-        color: var(--color-foreground);
+        color: var(--color-muted-foreground);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         white-space: nowrap;
     }
 
     .tabla td {
-        padding: 0.75rem 1rem;
+        padding: 0.875rem 1.25rem;
         border-top: 1px solid var(--color-border);
-        vertical-align: top;
+        vertical-align: middle;
+        color: var(--color-foreground);
+    }
+
+    .tabla tbody tr {
+        transition: background-color 150ms ease;
     }
 
     .tabla tbody tr:hover {
         background-color: var(--color-primary-soft);
     }
 
-    /* Columna de cifras: alineada a la derecha y con digitos de ancho fijo */
     .tabla .num {
         text-align: right;
         font-family: var(--font-mono);
@@ -253,11 +284,13 @@
     }
 
     .enlace-tabla {
-        font-weight: 500;
-        color: var(--color-primary);
+        font-weight: 600;
+        color: var(--color-secondary);
+        transition: color 150ms ease;
     }
 
     .enlace-tabla:hover {
+        color: var(--color-secondary-hover);
         text-decoration: underline;
     }
 
@@ -270,7 +303,6 @@
         color: var(--color-foreground);
     }
 
-    /* Marca los campos obligatorios; se combina con required en el input */
     .campo-req::after {
         content: " *";
         color: var(--color-destructive);
@@ -281,20 +313,28 @@
     .area-texto {
         display: block;
         width: 100%;
-        min-height: 2.75rem;
-        border-radius: 0.5rem;
-        border: 1px solid var(--color-border-strong);
+        min-height: 2.625rem;
+        border-radius: 0.625rem;
+        border: 1px solid var(--color-border);
         background-color: var(--color-card);
-        padding: 0.625rem 0.875rem;
+        padding: 0.5rem 0.875rem;
         font-size: 0.875rem;
         color: var(--color-foreground);
-        transition: border-color 150ms ease;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .entrada:focus,
+    .seleccion:focus,
+    .area-texto:focus {
+        border-color: var(--color-secondary);
+        box-shadow: 0 0 0 3px rgba(30, 99, 240, 0.15);
+        outline: none;
     }
 
     .entrada:hover,
     .seleccion:hover,
     .area-texto:hover {
-        border-color: var(--color-primary);
+        border-color: var(--color-border-strong);
     }
 
     .area-texto {
@@ -308,41 +348,46 @@
         color: var(--color-muted-foreground);
     }
 
-    /* ---------- Etiquetas de estado ---------- */
+    /* ---------- Etiquetas / Badges de Estado ---------- */
     .etiqueta {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.375rem;
         border-radius: 9999px;
-        padding: 0.125rem 0.625rem;
+        padding: 0.25rem 0.75rem;
         font-size: 0.75rem;
         font-weight: 600;
+        letter-spacing: 0.01em;
     }
 
     .etiqueta-exito {
-        background-color: var(--color-success-soft);
-        color: var(--color-success);
+        background-color: #ecfdf5;
+        color: #065f46;
     }
 
     .etiqueta-aviso {
-        background-color: var(--color-warning-soft);
-        color: var(--color-warning);
+        background-color: #fffbeb;
+        color: #92400e;
     }
 
     .etiqueta-peligro {
-        background-color: var(--color-destructive-soft);
-        color: var(--color-destructive);
+        background-color: #fef2f2;
+        color: #991b1b;
     }
 
     .etiqueta-info {
-        background-color: var(--color-info-soft);
-        color: var(--color-info);
+        background-color: #eff6ff;
+        color: #1e40af;
     }
 
-    /* ---------- Estado vacio ----------
-       Una tabla sin filas debe explicar que pasa, no quedar en blanco. */
+    .etiqueta-morado {
+        background-color: #f5f3ff;
+        color: #6b21a8;
+    }
+
+    /* ---------- Estado vacío ---------- */
     .estado-vacio {
-        padding: 2.5rem 1rem;
+        padding: 3rem 1.5rem;
         text-align: center;
         font-size: 0.875rem;
         color: var(--color-muted-foreground);

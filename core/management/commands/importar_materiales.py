@@ -13,6 +13,13 @@ class Command(BaseCommand):
             type=str,
             help="Ruta del archivo Excel"
         )
+        parser.add_argument(
+            "--no-input",
+            "--yes",
+            "-y",
+            action="store_true",
+            help="Confirmar importación automáticamente sin confirmación interactiva"
+        )
 
     def handle(self, *args, **options):
 
@@ -92,17 +99,18 @@ class Command(BaseCommand):
                 f'{material["unidad"]}'
             )
 
-        confirmar = input(
-            "\n¿Desea importar estos materiales? [s/N]: "
-        ).strip().lower()
+        if not options.get("no_input"):
+            confirmar = input(
+                "\n¿Desea importar estos materiales? [s/N]: "
+            ).strip().lower()
 
-        if confirmar != "s":
-            self.stdout.write(
-                self.style.WARNING(
-                    "Importación cancelada."
+            if confirmar != "s":
+                self.stdout.write(
+                    self.style.WARNING(
+                        "Importación cancelada."
+                    )
                 )
-            )
-            return
+                return
 
         creados_material = 0
         creados_inventario = 0

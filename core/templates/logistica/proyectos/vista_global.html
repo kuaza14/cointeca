@@ -1,0 +1,781 @@
+{% extends "base.html" %}
+
+{% block title %}Vista Global de Materiales y Nodos — Logística | Cointeca S.A.S{% endblock %}
+
+{% block content %}
+<div class="max-w-[98rem] mx-auto p-3 sm:p-6 space-y-6 print:p-0 print:space-y-4">
+
+    <!-- ENCABEZADO Y ACCIONES -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-5 print:border-none print:p-0">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border">
+            <div>
+                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1 print:hidden">
+                    <a href="/dashboard/" class="hover:underline">Inicio</a>
+                    <span>/</span>
+                    <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                    <span>/</span>
+                    <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">Macroproyectos</a>
+                    {% if macro_seleccionado %}
+                        <span>/</span>
+                        <a href="{% url 'proyectos_logistica_por_macroproyecto' macro_seleccionado.id %}" class="hover:underline font-semibold text-primary">{{ macro_seleccionado.nombre }}</a>
+                    {% endif %}
+                    <span>/</span>
+                    <span class="text-foreground font-medium">Vista Global de Materiales y Nodos</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
+                    <span>🌐</span> Vista Global de Materiales y Nodos
+                </h1>
+                <p class="text-xs sm:text-sm text-muted-foreground mt-1">
+                    Kardex general de obra, matriz completa de nodos/apoyos técnicos, auditoría de desmontes y balance de <strong>Material que Sobra</strong>.
+                </p>
+            </div>
+
+            <!-- Botones de Acción Rápida -->
+            <div class="flex flex-wrap items-center gap-2.5 print:hidden">
+                <button type="button" onclick="window.print()"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                    <span>🖨️</span> Imprimir
+                </button>
+
+                {% if proyecto_seleccionado %}
+                <a href="{% url 'exportar_vista_global_excel' %}?proyecto_id={{ proyecto_seleccionado.id }}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                   title="Descargar este proyecto consolidado en Excel (Balance y Nodos)">
+                    <span>📊</span> Descargar Excel
+                </a>
+
+                <a href="{% url 'registrar_entrada_material' proyecto_seleccionado.id %}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                    <span>+</span> Entrada
+                </a>
+
+                <a href="{% url 'detalle_proyecto' proyecto_seleccionado.id %}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
+                    <span>⚡</span> Postes (Ing.)
+                </a>
+
+                <a href="{% url 'detalle_proyecto_logistica' proyecto_seleccionado.id %}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-lg transition">
+                    <span>📦</span> Detalle Logística
+                </a>
+                {% endif %}
+
+                <a href="{% url 'macroproyectos_logistica' %}"
+                   class="inline-flex items-center px-3.5 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-medium rounded-lg transition">
+                    ← Volver
+                </a>
+            </div>
+        </div>
+
+        <!-- PANEL DE FILTROS Y SELECTORES DINÁMICOS -->
+        <div class="mt-4 pt-2 print:hidden">
+            <form id="formFiltroGlobal" method="GET" action="{% url 'vista_global_logistica' %}"
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-muted/50 p-4 rounded-xl border border-border">
+
+                <!-- 1. Selector de Macroproyecto -->
+                <div>
+                    <label for="selectMacroproyecto" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        1. Macroproyecto
+                    </label>
+                    <select id="selectMacroproyecto" name="macroproyecto_id"
+                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">-- Todos los Macroproyectos --</option>
+                        {% for m in todos_macroproyectos %}
+                            <option value="{{ m.id }}" {% if macro_seleccionado and macro_seleccionado.id == m.id %}selected{% endif %}>
+                                {{ m.nombre }} ({{ m.proyectos.count }} proy.)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 2. Selector de Proyecto (Filtrado Dinámicamente) -->
+                <div>
+                    <label for="selectProyecto" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        2. Proyecto / Microproyecto
+                    </label>
+                    <select id="selectProyecto" name="proyecto_id"
+                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">-- Selecciona un Proyecto --</option>
+                        {% for p in todos_proyectos %}
+                            <option value="{{ p.id }}" data-macro="{{ p.macroproyecto_id|default:'' }}"
+                                    {% if proyecto_seleccionado and proyecto_seleccionado.id == p.id %}selected{% endif %}>
+                                Proyecto {{ p.numero_emcali }} {% if p.macroproyecto %}({{ p.macroproyecto.nombre }}){% endif %} - {{ p.tipo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 3. Buscador en vivo de Materiales / Nodos -->
+                <div>
+                    <label for="inputBuscadorGlobal" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        3. Buscar Material / Nodo
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="inputBuscadorGlobal" name="q" value="{{ query|default:'' }}"
+                               placeholder="Ej: luminaria, cable, nodo 2..."
+                               autocomplete="off"
+                               class="w-full border border-border-strong rounded-lg pl-8 pr-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-muted-foreground pointer-events-none">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 4. Botones de Filtrar y Limpiar -->
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                            class="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-sm transition text-center">
+                        Consultar Proyecto
+                    </button>
+                    <a href="{% url 'vista_global_logistica' %}"
+                       class="px-3 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg border border-border transition text-center"
+                       title="Restablecer filtros">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if proyecto_seleccionado %}
+    <!-- BANNER INFORMATIVO DEL PROYECTO SELECCIONADO Y NOTA TÉCNICA DE RED -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-5 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="size-3.5 rounded-full bg-primary animate-pulse"></span>
+                <h2 class="text-xl sm:text-2xl font-black text-foreground">
+                    Proyecto {{ proyecto_seleccionado.numero_emcali }}
+                </h2>
+
+                {% if macro_seleccionado %}
+                <span class="px-3 py-1 text-xs font-bold rounded-lg bg-primary-soft text-primary border border-blue-200">
+                    Macroproyecto: {{ macro_seleccionado.nombre }}
+                </span>
+                {% endif %}
+
+                {% if proyecto_seleccionado.tipo == "AP_BARRIO" %}
+                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                        AP Barrio
+                    </span>
+                {% elif proyecto_seleccionado.tipo == "AP_PARQUE" %}
+                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">
+                        AP Parque / Cancha
+                    </span>
+                {% elif proyecto_seleccionado.tipo == "AP" %}
+                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+                        Alumbrado Público (AP)
+                    </span>
+                {% elif proyecto_seleccionado.tipo == "BT" %}
+                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-primary-soft text-primary border border-blue-200">
+                        Baja Tensión (BT)
+                    </span>
+                {% elif proyecto_seleccionado.tipo == "MT" %}
+                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+                        Media Tensión (MT)
+                    </span>
+                {% endif %}
+
+                <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-success border border-green-200">
+                    {{ proyecto_seleccionado.estado }}
+                </span>
+
+                <span class="px-3 py-1 text-xs font-extrabold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    ⚡ {{ total_nodos }} Nodos / Apoyos Registrados
+                </span>
+            </div>
+        </div>
+
+        <!-- NOTA TÉCNICA INTELIGENTE SEGÚN EL TIPO DE RED -->
+        <div class="p-3.5 rounded-lg border text-xs font-medium flex items-start gap-2.5 {% if proyecto_seleccionado.tipo == 'MT' %}bg-purple-50 text-purple-950 border-purple-200{% elif proyecto_seleccionado.tipo in 'AP_BARRIO,AP_PARQUE,AP' %}bg-amber-50 text-amber-950 border-amber-200{% else %}bg-blue-50 text-blue-950 border-blue-200{% endif %}">
+            <span class="text-base shrink-0">ℹ️</span>
+            <div>
+                <strong class="font-bold">Comportamiento Técnico de la Red:</strong> {{ nota_tecnica_red }}
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE KPIS PRINCIPALES (CON MATERIAL QUE SOBRA) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 print:grid-cols-4">
+        <!-- 1. Suministrado (Entradas) -->
+        <div class="bg-card rounded-xl shadow-sm border border-emerald-200 bg-emerald-50/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-900 block">Total Suministrado (Entradas)</span>
+            <p class="text-2xl font-black text-emerald-800 mt-1">{{ total_items_entrados|floatformat }}</p>
+            <p class="text-[11px] text-emerald-600 mt-0.5">{{ entradas|length }} remisión{{ entradas|length|pluralize:"es" }} de bodega</p>
+        </div>
+
+        <!-- 2. Instalado en Postes -->
+        <div class="bg-card rounded-xl shadow-sm border border-indigo-200 bg-indigo-50/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-900 block">Total Instalado en Postes</span>
+            <p class="text-2xl font-black text-indigo-900 mt-1">{{ total_items_instalados|floatformat }}</p>
+            <p class="text-[11px] text-indigo-600 mt-0.5">Asignado en {{ total_nodos }} nodos de obra</p>
+        </div>
+
+        <!-- 3. Retirado / Desmontes -->
+        <div class="bg-card rounded-xl shadow-sm border border-amber-200 bg-amber-50/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-900 block">Total Retirado / Desmonte</span>
+            <p class="text-2xl font-black text-amber-800 mt-1">{{ total_items_retirados|floatformat }}</p>
+            <p class="text-[11px] text-amber-600 mt-0.5">{{ tabla_resumen_retiros|length }} ítem{{ tabla_resumen_retiros|length|pluralize:"es" }} desmontado{{ tabla_resumen_retiros|length|pluralize }}</p>
+        </div>
+
+        <!-- 4. Material que Sobra (Reemplazo de Saldo) -->
+        <div class="bg-card rounded-xl shadow-sm border border-blue-200 bg-primary-soft/20 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900 block">Material que Sobra</span>
+            <p class="text-2xl font-black {% if total_material_sobrante < 0 %}text-amber-700{% elif total_material_sobrante == 0 %}text-emerald-700{% else %}text-primary{% endif %} mt-1">
+                {{ total_material_sobrante|floatformat }}
+            </p>
+            <p class="text-[11px] text-primary mt-0.5">
+                {% if total_material_sobrante > 0 %}
+                    Sobrante disponible en obra
+                {% elif total_material_sobrante == 0 %}
+                    Liquidación cuadrada (0)
+                {% else %}
+                    Instalado sin remisión (Faltante)
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS ORGANIZADAS (NODOS TIPO INGENIERÍA + BALANCE EDSON) -->
+    <div x-data="{ tab: 'nodos' }" class="space-y-4">
+        <!-- Botones de Pestañas -->
+        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 overflow-x-auto print:hidden">
+            <button @click="tab = 'nodos'"
+                    :class="tab === 'nodos' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-muted-foreground hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+                ⚡ Matriz de Nodos / Apoyos (Formato Ingeniería)
+                <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-bold">{{ apoyos|length }} nodos</span>
+            </button>
+
+            <button @click="tab = 'balance'"
+                    :class="tab === 'balance' ? 'border-b-2 border-blue-600 text-primary font-bold' : 'text-muted-foreground hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+                📋 Matriz de Liquidación (Estilo Edson)
+                <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ balance_materiales|length }} materiales</span>
+            </button>
+
+            <button @click="tab = 'retiros'"
+                    :class="tab === 'retiros' ? 'border-b-2 border-amber-600 text-amber-800 font-bold' : 'text-muted-foreground hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+                🛠️ Resumen de Desmontes
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold">{{ tabla_resumen_retiros|length }}</span>
+            </button>
+
+            <button @click="tab = 'entradas'"
+                    :class="tab === 'entradas' ? 'border-b-2 border-emerald-600 text-emerald-700 font-bold' : 'text-muted-foreground hover:text-gray-700'"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+                📦 Entradas & Remisiones
+                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">{{ entradas|length }}</span>
+            </button>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- PESTAÑA 1: TABLA MATRIZ COMPLETA DE NODOS / APOYOS (INGENIERÍA) -->
+        <!-- ================================================================= -->
+        <div x-show="tab === 'nodos'" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden">
+            <div class="p-4 bg-muted/60 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="font-bold text-foreground text-base">
+                        Matriz Poste a Poste: Todos los Nodos del Proyecto {{ proyecto_seleccionado.numero_emcali }}
+                    </h3>
+                    <p class="text-xs text-muted-foreground">
+                        Visualización detallada de cada nodo/poste con su cuadrilla ejecutante, código de luminaria y cantidades de material instaladas y retiradas.
+                    </p>
+                </div>
+                <span class="text-xs font-bold text-indigo-800 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
+                    {{ apoyos|length }} Nodos en obra
+                </span>
+            </div>
+
+            <div class="overflow-x-auto max-h-[75vh]">
+                <table class="min-w-full border-collapse text-left text-xs" id="tablaNodosGlobal">
+                    <thead class="sticky top-0 z-20">
+                        <!-- Banda Superior de Agrupación -->
+                        <tr class="bg-sky-100 text-sky-900 font-extrabold text-center border-b border-sky-300 text-xs">
+                            <th colspan="6" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
+                                IDENTIFICACIÓN DEL APOYO (POSTE)
+                            </th>
+                            <th colspan="{{ materiales_columnas|length|default:1 }}" class="px-4 py-2 border-r border-sky-300 bg-sky-100">
+                                MATERIALES E INSTALACIONES TÉCNICAS (CON CANTIDADES INSTALADAS Y RETIROS)
+                            </th>
+                            <th class="px-4 py-2 bg-sky-200/90">
+                                ACCIONES
+                            </th>
+                        </tr>
+
+                        <!-- Encabezados de Columna -->
+                        <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                            <th class="px-3 py-2.5 border-r border-gray-700 whitespace-nowrap min-w-[150px]">
+                                QUIÉN EJECUTA
+                            </th>
+                            <th class="px-3 py-2.5 border-r border-gray-700 whitespace-nowrap min-w-[110px]">
+                                NODO / POSTE
+                            </th>
+                            <th class="px-2 py-2.5 border-r border-gray-700 text-center whitespace-nowrap w-16">
+                                N° APOYO
+                            </th>
+                            <th class="px-2 py-2.5 border-r border-gray-700 text-center whitespace-nowrap w-24">
+                                ESTADO
+                            </th>
+                            <th class="px-2 py-2.5 border-r border-gray-700 text-center whitespace-nowrap min-w-[90px]">
+                                POTENCIA
+                            </th>
+                            <th class="px-3 py-2.5 border-r border-gray-700 text-center whitespace-nowrap min-w-[130px]">
+                                CÓDIGO LUM.
+                            </th>
+
+                            <!-- Columnas Dinámicas de Materiales -->
+                            {% for mat in materiales_columnas %}
+                            <th class="px-2.5 py-2.5 border-r border-gray-700 text-center min-w-[130px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
+                                <div class="truncate font-semibold text-white">{{ mat.descripcion }}</div>
+                                <span class="inline-block mt-0.5 px-1 py-0.2 rounded text-[9px] bg-amber-300 text-amber-900 font-bold">
+                                    {{ mat.unidad|default:"UN" }}
+                                </span>
+                            </th>
+                            {% empty %}
+                            <th class="px-4 py-2.5 border-r border-gray-700 text-center text-gray-300 italic font-normal">
+                                (Sin materiales configurados en los apoyos)
+                            </th>
+                            {% endfor %}
+
+                            <th class="px-3 py-2.5 text-center whitespace-nowrap w-28 bg-neutral">
+                                ACCIONES
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <!-- FILAS DE NODOS / APOYOS -->
+                    <tbody class="divide-y divide-gray-200">
+                        {% for fila in filas_matriz %}
+                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-blue-50/50{% else %}bg-card{% endif %} hover:bg-primary-soft/30 transition fila-nodo-global">
+                            <!-- Quién Ejecuta -->
+                            <td class="px-3 py-2 border-r border-border whitespace-nowrap font-medium text-foreground">
+                                {% if fila.apoyo.quien_ejecuta %}
+                                    <div class="flex items-center gap-1.5 font-semibold text-foreground text-xs">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                        <span>{{ fila.apoyo.quien_ejecuta.nombre_completo }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-gray-400 italic text-xs">Sin asignar</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Nodo / Poste -->
+                            <td class="px-3 py-2 font-bold text-foreground border-r border-border whitespace-nowrap font-mono text-xs">
+                                <span class="text-primary font-bold">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
+                            </td>
+
+                            <!-- N° Apoyo -->
+                            <td class="px-2 py-2 text-center font-semibold text-foreground border-r border-border text-xs">
+                                {{ fila.apoyo.numero_apoyo|default:"—" }}
+                            </td>
+
+                            <!-- Estado -->
+                            <td class="px-2 py-2 text-center border-r border-border">
+                                {% if fila.apoyo.estado == "Finalizado" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-success">Finalizado</span>
+                                {% elif fila.apoyo.estado == "En ejecución" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary-soft text-primary">En Ejecución</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pendiente</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Potencias Luminarias -->
+                            <td class="px-2 py-2 text-center border-r border-border align-top text-xs">
+                                {% for lum in fila.apoyo.luminarias.all %}
+                                    <span class="inline-block px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-bold text-[11px] mb-0.5">
+                                        {{ lum.potencia|default:"—" }}
+                                    </span>
+                                {% empty %}
+                                    <span class="text-gray-400">—</span>
+                                {% endfor %}
+                            </td>
+
+                            <!-- Códigos Luminarias -->
+                            <td class="px-2 py-2 text-center border-r border-border align-top text-xs">
+                                {% for lum in fila.apoyo.luminarias.all %}
+                                    <span class="inline-block px-1.5 py-0.5 rounded bg-primary-soft text-primary font-mono font-bold text-[11px] mb-0.5">
+                                        {{ lum.codigo|default:"—" }}
+                                    </span>
+                                {% empty %}
+                                    <span class="text-gray-400">—</span>
+                                {% endfor %}
+                            </td>
+
+                            <!-- Celdas Numéricas de Cantidad por Material -->
+                            {% for celda in fila.celdas %}
+                            <td class="px-2 py-2 text-center border-r border-border font-bold text-xs">
+                                {% if celda.cantidad > 0 %}
+                                    <div class="text-foreground font-black">{{ celda.cantidad|floatformat }}</div>
+                                {% endif %}
+                                {% if celda.cantidad_retirada > 0 %}
+                                    <div class="inline-block mt-0.5 px-1 py-0.2 rounded text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold" title="Retirado / Desmontado de este poste">
+                                        Ret: {{ celda.cantidad_retirada|floatformat }}
+                                    </div>
+                                {% endif %}
+                                {% if celda.cantidad == 0 and celda.cantidad_retirada == 0 %}
+                                    <span class="text-gray-300 font-normal">—</span>
+                                {% endif %}
+                            </td>
+                            {% empty %}
+                            <td class="px-3 py-2 text-center text-gray-400 italic border-r border-border">
+                                Sin materiales
+                            </td>
+                            {% endfor %}
+
+                            <!-- Acciones -->
+                            <td class="px-2 py-2 text-center whitespace-nowrap">
+                                <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
+                                   class="inline-flex items-center px-2 py-1 bg-primary hover:bg-primary-hover text-white text-[11px] font-semibold rounded shadow-sm transition">
+                                    Abrir Apoyo
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ materiales_columnas|length|add:7 }}" class="px-6 py-12 text-center text-muted-foreground">
+                                <p class="text-base font-semibold text-foreground">No hay nodos o apoyos registrados en este proyecto.</p>
+                                <p class="text-xs text-muted-foreground mt-1">Crea apoyos desde el módulo de ingeniería para ver la matriz completa.</p>
+                                <div class="mt-3">
+                                    <a href="{% url 'detalle_proyecto' proyecto_seleccionado.id %}" class="btn btn-primario text-xs">
+                                        Ir a Ingeniería del Proyecto
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <!-- FILA DE TOTALES POR COLUMNA DE MATERIAL -->
+                    {% if filas_matriz and materiales_columnas %}
+                    <tfoot class="bg-muted border-t-2 border-gray-400 font-extrabold text-foreground sticky bottom-0 z-10 shadow-inner text-xs">
+                        <tr>
+                            <td colspan="6" class="px-4 py-2.5 text-right uppercase tracking-wider text-xs border-r border-border-strong bg-gray-200 font-black">
+                                TOTALES DEL PROYECTO:
+                            </td>
+                            {% for tot in fila_totales %}
+                            <td class="px-2 py-2 text-center border-r border-border-strong bg-primary-soft/80">
+                                <div class="text-blue-950 font-black text-xs" title="Total Instalado">
+                                    {{ tot.total|floatformat }}
+                                </div>
+                                {% if tot.total_retirado > 0 %}
+                                    <div class="inline-block mt-0.5 px-1 py-0.2 rounded text-[10px] bg-amber-200 text-amber-900 font-black border border-amber-300" title="Total Retirado / Desmonte">
+                                        Ret: {{ tot.total_retirado|floatformat }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="px-3 py-2 text-center bg-gray-200 text-foreground text-[11px] font-bold">
+                                {{ apoyos|length }} NODOS
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- PESTAÑA 2: MATRIZ DE LIQUIDACIÓN Y BALANCE (ESTILO EDSON) -->
+        <!-- ================================================================= -->
+        <div x-show="tab === 'balance'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden">
+            <div class="p-4 bg-muted border-b border-border flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-foreground text-base">
+                        Kardex y Matriz de Liquidación de Materiales (Proyecto {{ proyecto_seleccionado.numero_emcali }})
+                    </h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">
+                        Fórmulas consolidadas de Entradas, Instalado en Obra, Retirado y <strong>Material que Sobra</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs" id="tablaBalanceGlobal">
+                    <thead class="bg-neutral text-white uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-20">Ítem</th>
+                            <th class="px-5 py-3">Descripción del Material</th>
+                            <th class="px-3 py-3 text-center w-16">Unidad</th>
+                            <th class="px-4 py-3 text-right bg-emerald-800/80">Suministrado (Entradas)</th>
+                            <th class="px-4 py-3 text-right bg-indigo-800/80">Instalado en Postes</th>
+                            <th class="px-4 py-3 text-right bg-amber-800/80">Retirado / Desmonte</th>
+                            <th class="px-4 py-3 text-right bg-slate-800 font-black">Material que Sobra</th>
+                            <th class="px-4 py-3 text-right bg-gray-700">Stock Bodega</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-card">
+                        {% for fila in balance_materiales %}
+                        <tr class="hover:bg-primary-soft/40 transition fila-balance-global {% if forloop.counter|divisibleby:2 %}bg-muted/30{% endif %}">
+                            <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
+                                {{ fila.material.item }}
+                            </td>
+
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                                {{ fila.material.descripcion }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center font-bold text-muted-foreground">
+                                {{ fila.material.unidad|default:"UN" }}
+                            </td>
+
+                            <!-- Entradas -->
+                            <td class="px-4 py-3 text-right font-black text-emerald-700 bg-emerald-50/30 text-sm">
+                                {% if fila.entrada > 0 %}{{ fila.entrada|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+
+                            <!-- Instalado en Apoyos -->
+                            <td class="px-4 py-3 text-right font-black text-indigo-700 bg-indigo-50/30 text-sm">
+                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+
+                            <!-- Retirado / Desmonte -->
+                            <td class="px-4 py-3 text-right font-black text-amber-800 bg-amber-50/40 text-sm">
+                                {% if fila.retirado > 0 %}{{ fila.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+
+                            <!-- Material que Sobra -->
+                            <td class="px-4 py-3 text-right font-black text-sm {% if fila.material_sobrante < 0 %}text-amber-700 bg-amber-50/30{% elif fila.material_sobrante == 0 %}text-emerald-700 bg-emerald-50/20{% else %}text-primary bg-primary-soft/30{% endif %}">
+                                {{ fila.material_sobrante|floatformat }}
+                            </td>
+
+                            <!-- Stock Bodega -->
+                            <td class="px-4 py-3 text-right font-medium text-muted-foreground bg-muted/40 text-xs">
+                                {{ fila.stock_bodega|floatformat }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-muted-foreground">
+                                No hay materiales registrados para este proyecto.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <!-- TOTALES DEL BALANCE -->
+                    {% if balance_materiales %}
+                    <tfoot class="bg-neutral text-white font-black text-xs">
+                        <tr>
+                            <td colspan="3" class="px-5 py-3.5 uppercase tracking-wider text-right">
+                                TOTALES CONSOLIDADOS ({{ balance_materiales|length }} ÍTEMS):
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-emerald-300 font-black text-sm bg-emerald-950/80">
+                                {{ total_items_entrados|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-indigo-300 font-black text-sm bg-indigo-950/80">
+                                {{ total_items_instalados|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-amber-300 font-black text-sm bg-amber-950/80">
+                                {{ total_items_retirados|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-blue-200 font-black text-sm bg-blue-950/80">
+                                {{ total_material_sobrante|floatformat }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right text-gray-400 font-normal text-xs">
+                                —
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- PESTAÑA 3: RESUMEN DE DESMONTES / RETIROS -->
+        <!-- ================================================================= -->
+        <div x-show="tab === 'retiros'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-amber-300 overflow-hidden">
+            <div class="p-4 bg-amber-500/10 border-b border-amber-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="p-2 bg-amber-100 text-amber-900 rounded-lg text-sm">🛠️</span>
+                    <div>
+                        <h3 class="font-bold text-amber-950 text-base">
+                            Materiales Retirados y Desmontados en el Proyecto {{ proyecto_seleccionado.numero_emcali }}
+                        </h3>
+                        <p class="text-xs text-amber-800">
+                            Equipos antiguos y materiales desmontados durante la intervención en los postes.
+                        </p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-amber-100 text-amber-900 font-extrabold text-xs rounded-full border border-amber-300">
+                    {{ tabla_resumen_retiros|length }} ítem{{ tabla_resumen_retiros|length|pluralize:"es" }} con desmonte
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                    <thead class="bg-amber-900 text-white uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-20">Ítem</th>
+                            <th class="px-5 py-3">Descripción del Material Retirado</th>
+                            <th class="px-3 py-3 text-center w-24">Unidad</th>
+                            <th class="px-6 py-3 text-right bg-amber-950 w-44">Total Desmontado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-amber-100 bg-card">
+                        {% for item in tabla_resumen_retiros %}
+                        <tr class="hover:bg-amber-50/50 transition {% if forloop.counter|divisibleby:2 %}bg-amber-50/20{% endif %}">
+                            <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
+                                {{ item.material.item }}
+                            </td>
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                                {{ item.material.descripcion }}
+                            </td>
+                            <td class="px-3 py-3 text-center font-bold text-muted-foreground">
+                                {{ item.material.unidad|default:"UN" }}
+                            </td>
+                            <td class="px-6 py-3 text-right font-black text-amber-900 bg-amber-50/50 text-sm">
+                                {{ item.cantidad_retirada|floatformat }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-muted-foreground">
+                                No se registran materiales retirados ni desmontados en este proyecto.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- PESTAÑA 4: HISTORIAL DE ENTRADAS Y REMISIONES -->
+        <!-- ================================================================= -->
+        <div x-show="tab === 'entradas'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-5 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b">
+                <div>
+                    <h3 class="font-bold text-foreground text-base">
+                        Remisiones y Suministros Recibidos en Obra
+                    </h3>
+                    <p class="text-xs text-muted-foreground">Entradas de bodega o compras directas para el proyecto {{ proyecto_seleccionado.numero_emcali }}.</p>
+                </div>
+                <a href="{% url 'registrar_entrada_material' proyecto_seleccionado.id %}"
+                   class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                    + Nueva Entrada
+                </a>
+            </div>
+
+            {% for ent in entradas %}
+            <div class="border border-border rounded-lg p-4 bg-muted/40 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md">
+                            {{ ent.fecha|date:"d/m/Y" }}
+                        </span>
+                        {% if ent.numero_remision %}
+                        <span class="text-xs font-semibold text-foreground">
+                            Remisión: <strong>{{ ent.numero_remision }}</strong>
+                        </span>
+                        {% endif %}
+                        {% if ent.proveedor %}
+                        <span class="text-xs text-muted-foreground">
+                            Proveedor: <strong>{{ ent.proveedor }}</strong>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Tabla de detalles de esta entrada -->
+                <div class="bg-card border rounded-md overflow-hidden">
+                    <table class="min-w-full text-xs divide-y divide-gray-200">
+                        <thead class="bg-muted text-muted-foreground">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Ítem</th>
+                                <th class="px-3 py-2 text-left">Material</th>
+                                <th class="px-3 py-2 text-center">Unidad</th>
+                                <th class="px-3 py-2 text-right">Cantidad Suministrada</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for det in ent.detalles.all %}
+                            <tr>
+                                <td class="px-3 py-1.5 text-muted-foreground font-mono">{{ det.material.item }}</td>
+                                <td class="px-3 py-1.5 font-medium text-foreground">{{ det.material.descripcion }}</td>
+                                <td class="px-3 py-1.5 text-center text-muted-foreground">{{ det.material.unidad }}</td>
+                                <td class="px-3 py-1.5 text-right font-bold text-emerald-700">{{ det.cantidad|floatformat }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8 text-muted-foreground">
+                <p class="text-sm font-medium">No se registran remisiones ni entradas suministradas a este proyecto.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <!-- MENSAJE SI NO HAY PROYECTOS REGISTRADOS -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-12 text-center text-muted-foreground">
+        <p class="text-base font-semibold text-foreground">No se encontraron proyectos disponibles</p>
+        <p class="text-xs text-muted-foreground mt-1">Crea proyectos en el módulo de Ingeniería o Logística para visualizarlos en la Vista Global.</p>
+        <div class="mt-4">
+            <a href="{% url 'lista_proyectos' %}" class="btn btn-primario text-xs">Ir a Proyectos de Ingeniería</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- SCRIPT DE SINCRONIZACIÓN DINÁMICA Y BÚSQUEDA EN TIEMPO REAL -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const selectMacro = document.getElementById("selectMacroproyecto");
+    const selectProy = document.getElementById("selectProyecto");
+    const inputBuscador = document.getElementById("inputBuscadorGlobal");
+    const todosProyectosData = {{ proyectos_js|safe }};
+
+    // 1. Filtrado dinámico del selector de proyectos según el macroproyecto
+    if (selectMacro && selectProy) {
+        selectMacro.addEventListener("change", function () {
+            const macroId = selectMacro.value;
+            const proyActual = selectProy.value;
+
+            selectProy.innerHTML = '<option value="">-- Selecciona un Proyecto --</option>';
+
+            const filtrados = macroId ? todosProyectosData.filter(p => String(p.macro_id) === String(macroId)) : todosProyectosData;
+
+            filtrados.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p.id;
+                opt.textContent = `Proyecto ${p.numero} (${p.macro_nombre}) - ${p.tipo}`;
+                if (String(p.id) === String(proyActual)) {
+                    opt.selected = true;
+                }
+                selectProy.appendChild(opt);
+            });
+
+            if (filtrados.length > 0 && macroId) {
+                selectProy.value = filtrados[0].id;
+            }
+        });
+    }
+
+    // 2. Buscador en vivo para las tablas (Nodos y Balance)
+    if (inputBuscador) {
+        inputBuscador.addEventListener("input", function () {
+            const q = inputBuscador.value.toLowerCase().trim();
+
+            const filasNodos = document.querySelectorAll(".fila-nodo-global");
+            filasNodos.forEach(f => {
+                const txt = f.textContent.toLowerCase();
+                f.style.display = txt.includes(q) ? "" : "none";
+            });
+
+            const filasBalance = document.querySelectorAll(".fila-balance-global");
+            filasBalance.forEach(f => {
+                const txt = f.textContent.toLowerCase();
+                f.style.display = txt.includes(q) ? "" : "none";
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

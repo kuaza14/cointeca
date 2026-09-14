@@ -85,9 +85,9 @@
             <p class="text-[11px] text-amber-600 mt-0.5">Material bajado de postes (BT/AP)</p>
         </div>
 
-        <!-- Saldo en Obra -->
+        <!-- Material que Sobra -->
         <div class="bg-card rounded-xl shadow-sm border border-blue-200 bg-primary-soft/20 p-4">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900 block">Saldo General en Obra</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900 block">Total Material que Sobra</span>
             <p class="text-2xl font-black {% if saldo_total_general < 0 %}text-amber-700{% else %}text-primary{% endif %} mt-1">
                 {{ saldo_total_general|floatformat }}
             </p>
@@ -121,7 +121,7 @@
                         Consolidado Total de Materiales ({{ total_proyectos_sel }} Proyectos Seleccionados)
                     </h3>
                     <p class="text-xs text-muted-foreground mt-0.5">
-                        Sumatoria unificada de entradas, montajes en apoyos, desmontes y saldos de obra.
+                        Sumatoria unificada de entradas, montajes en apoyos, desmontes y material que sobra.
                     </p>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                             <th class="px-4 py-3 text-right bg-emerald-800/80">Suministrado (Entradas)</th>
                             <th class="px-4 py-3 text-right bg-indigo-800/80">Instalado en Postes</th>
                             <th class="px-4 py-3 text-right bg-amber-800/80">Retirado / Desmonte</th>
-                            <th class="px-4 py-3 text-right bg-slate-800">Saldo</th>
+                            <th class="px-4 py-3 text-right bg-slate-800 font-black">Material que Sobra</th>
                             <th class="px-4 py-3 text-right bg-gray-700">Stock Bodega</th>
                         </tr>
                     </thead>
@@ -253,7 +253,7 @@
                                 <th class="px-4 py-2.5 text-right bg-emerald-50/50">Entradas</th>
                                 <th class="px-4 py-2.5 text-right bg-indigo-50/50">Instalado</th>
                                 <th class="px-4 py-2.5 text-right bg-amber-50/50">Retirado / Desmonte</th>
-                                <th class="px-4 py-2.5 text-right bg-primary-soft/50">Saldo</th>
+                                <th class="px-4 py-2.5 text-right bg-indigo-50/50 font-black">Material que Sobra</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-card">

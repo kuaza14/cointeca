@@ -185,6 +185,11 @@ def crear_proyecto(request, macroproyecto_id=None):
             macroproyecto = Macroproyecto.objects.filter(id=int(m_id)).first()
 
         def _volver():
+            origen = request.POST.get("origen", "").strip()
+            if origen == "logistica":
+                if macroproyecto:
+                    return redirect("proyectos_logistica_por_macroproyecto", macroproyecto_id=macroproyecto.id)
+                return redirect("proyectos_logistica")
             if macroproyecto:
                 return redirect("proyectos_por_macroproyecto", macroproyecto_id=macroproyecto.id)
             return redirect("lista_proyectos")
@@ -333,6 +338,8 @@ def detalle_proyecto(request, id):
                 "cantidad_retirada": tot_ret,
             })
 
+    materiales_catalogo = Material.objects.all().order_by("descripcion")
+
     return render(
         request,
         "ingenieria/proyecto/detalle_proyecto.html",
@@ -343,10 +350,12 @@ def detalle_proyecto(request, id):
             "filas_matriz": filas_matriz,
             "fila_totales": fila_totales,
             "tabla_resumen_retiros": tabla_resumen_retiros,
+            "materiales_catalogo": materiales_catalogo,
         }
     )
 
 @login_required
+@transaction.atomic
 def crear_apoyo(request, proyecto_id):
     proyecto = get_object_or_404(
         Proyecto,
@@ -368,14 +377,58 @@ def crear_apoyo(request, proyecto_id):
         codigos = request.POST.getlist("codigo_luminaria[]")
 
         for potencia, codigo in zip(potencias, codigos):
-
             if potencia.strip() or codigo.strip():
-
                 ApoyoLuminaria.objects.create(
                     apoyo=apoyo,
                     potencia=potencia.strip(),
                     codigo=codigo.strip()
                 )
+
+        # Guardar materiales asignados (múltiples)
+        materiales_ids = request.POST.getlist("material_id[]")
+        cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
+        cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+
+        materiales_creados = 0
+        for i, mat_id in enumerate(materiales_ids):
+            if not mat_id:
+                continue
+
+            try:
+                c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
+                c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
+
+                c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
+                c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
+
+                c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
+                c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+
+                if c_inst <= 0 and c_ret <= 0:
+                    continue
+
+                inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
+                if c_inst > 0:
+                    if inventario.cantidad >= c_inst:
+                        inventario.cantidad -= c_inst
+                    else:
+                        inventario.cantidad = Decimal("0")
+                    inventario.save()
+
+                ApoyoMaterial.objects.create(
+                    apoyo=apoyo,
+                    material_id=mat_id,
+                    cantidad_requerida=max(Decimal("0"), c_inst),
+                    cantidad_retirada=max(Decimal("0"), c_ret),
+                )
+                materiales_creados += 1
+            except (ValueError, TypeError, ArithmeticError):
+                continue
+
+        messages.success(
+            request,
+            f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' creado correctamente con {materiales_creados} material(es) asignado(s)."
+        )
 
     return redirect(
         "detalle_proyecto",

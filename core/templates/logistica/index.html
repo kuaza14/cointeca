@@ -6,6 +6,21 @@
     Módulo de Logística
 </h1>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Vista Global y Consolidada de Materiales y Nodos -->
+    <a href="{% url 'vista_global_logistica' %}"
+       class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-primary-soft transition border-l-4 border-indigo-600 bg-gradient-to-br from-indigo-50/40 to-transparent">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-foreground">
+                <span>🌐</span> Vista Global y Nodos
+            </h2>
+            <span class="px-2 py-0.5 rounded text-[10px] font-black bg-indigo-100 text-indigo-900 uppercase">Kardex Edson</span>
+        </div>
+
+        <p class="text-muted-foreground mt-2 text-sm">
+            Navegación directa entre Macroproyectos y Proyectos (ej: 9901), matriz completa de nodos, auditoría de desmontes y balance de Material que Sobra.
+        </p>
+    </a>
+
     <!-- Control de Materiales por Macroproyecto y Proyecto -->
     <a href="{% url 'macroproyectos_logistica' %}"
        class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-primary-soft transition border-l-4 border-blue-600">

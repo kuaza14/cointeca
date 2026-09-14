@@ -322,150 +322,209 @@
     {% endif %}
 
     <!-- MODAL NUEVO APOYO -->
-    <div id="modalApoyo" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-card rounded-xl shadow-xl w-full max-w-2xl p-6 space-y-4">
+    <div id="modalApoyo" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-card rounded-xl border border-border shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
 
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="text-lg font-bold text-foreground">
-                    Nuevo Nodo / Poste
-                </h2>
+            <div class="flex justify-between items-center border-b border-border px-6 py-4 bg-muted/40 flex-shrink-0">
+                <div>
+                    <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
+                        <span>📍</span> Nuevo Nodo / Poste
+                    </h2>
+                    <p class="text-xs text-muted-foreground mt-0.5">
+                        Registra el apoyo con sus luminarias y materiales asignados para el Proyecto {{ proyecto.numero_emcali }}.
+                    </p>
+                </div>
 
                 <button
                     type="button"
                     onclick="cerrarModalApoyo()"
-                    class="text-gray-400 hover:text-gray-700 text-2xl font-bold">
+                    class="text-muted-foreground hover:text-destructive hover:bg-muted p-1.5 rounded-lg text-2xl font-bold leading-none transition">
                     &times;
                 </button>
             </div>
 
             <form method="POST"
                 action="{% url 'crear_apoyo' proyecto.id %}"
-                class="space-y-4">
+                class="flex flex-col flex-1 overflow-hidden">
 
                 {% csrf_token %}
 
-                <!-- NODO -->
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-nodo">
-                        NODO / Identificador *
-                    </label>
-
-                    <input id="campo-nodo"
-                        type="text"
-                        name="nodo"
-                        required
-                        placeholder="Ej: 29924, 6707556 o POSTE 8M FIBRA"
-                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                <!-- NÚMERO DE APOYO -->
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-numero_apoyo">
-                        Número de Apoyo (Opcional)
-                    </label>
-
-                    <input id="campo-numero_apoyo"
-                        type="number"
-                        name="numero_apoyo"
-                        placeholder="Ej: 1, 2, 3..."
-                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                <!-- ========================================== -->
-                <!-- LUMINARIAS -->
-                <!-- ========================================== -->
-                <div class="border-t pt-4">
-                    <div class="flex items-center justify-between mb-3">
-
+                <div class="p-6 overflow-y-auto space-y-5 flex-1">
+                    <!-- DATOS BÁSICOS DEL NODO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- NODO -->
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-muted-foreground">
-                                Luminarias instaladas
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-nodo">
+                                NODO / Identificador *
                             </label>
 
-                            <p class="text-xs text-muted-foreground mt-1">
-                                Agrega las luminarias que pertenecen a este nodo.
-                            </p>
+                            <input id="campo-nodo"
+                                type="text"
+                                name="nodo"
+                                required
+                                placeholder="Ej: 29924, 6707556 o POSTE 8M FIBRA"
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
 
-                        <button
-                            type="button"
-                            id="btnAgregarLuminaria"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary border border-blue-300 text-xs font-semibold rounded-lg transition">
-                            + Agregar luminaria
-                        </button>
+                        <!-- NÚMERO DE APOYO -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-numero_apoyo">
+                                Número de Apoyo (Opcional)
+                            </label>
+
+                            <input id="campo-numero_apoyo"
+                                type="number"
+                                name="numero_apoyo"
+                                placeholder="Ej: 1, 2, 3..."
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
                     </div>
 
-                    <!-- TABLA DE LUMINARIAS -->
-                    <div class="overflow-x-auto border border-border rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-muted text-xs font-semibold text-muted-foreground uppercase">
+                    <!-- ========================================== -->
+                    <!-- LUMINARIAS -->
+                    <!-- ========================================== -->
+                    <div class="border-t border-border pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-muted-foreground">
+                                    Luminarias instaladas
+                                </label>
+                                <p class="text-xs text-muted-foreground mt-0.5">
+                                    Agrega las luminarias que pertenecen a este nodo.
+                                </p>
+                            </div>
 
-                                <tr>
-                                    <th class="px-3 py-2 text-left">
-                                        Potencia
-                                    </th>
+                            <button
+                                type="button"
+                                id="btnAgregarLuminaria"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary border border-blue-300 text-xs font-semibold rounded-lg transition">
+                                + Agregar luminaria
+                            </button>
+                        </div>
 
-                                    <th class="px-3 py-2 text-left">
-                                        Código luminaria
-                                    </th>
+                        <!-- TABLA DE LUMINARIAS -->
+                        <div class="overflow-x-auto border border-border rounded-lg">
+                            <table class="min-w-full divide-y divide-border text-sm">
+                                <thead class="bg-muted text-xs font-semibold text-muted-foreground uppercase">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left">Potencia</th>
+                                        <th class="px-3 py-2 text-left">Código luminaria</th>
+                                        <th class="px-3 py-2 text-center w-16">Acción</th>
+                                    </tr>
+                                </thead>
 
-                                    <th class="px-3 py-2 text-center w-16">
-                                        Acción
-                                    </th>
-                                </tr>
-                            </thead>
+                                <tbody id="filasLuminarias" class="divide-y divide-border">
+                                    <!-- FILA INICIAL -->
+                                    <tr class="fila-luminaria">
+                                        <td class="px-3 py-2">
+                                            <input
+                                                type="text"
+                                                name="potencia[]"
+                                                placeholder="Ej: 90W"
+                                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                                        </td>
 
-                            <tbody
-                                id="filasLuminarias"
-                                class="divide-y divide-gray-100">
+                                        <td class="px-3 py-2">
+                                            <input
+                                                type="text"
+                                                name="codigo_luminaria[]"
+                                                placeholder="Ej: 123456"
+                                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                                        </td>
 
-                                <!-- FILA INICIAL -->
-                                <tr class="fila-luminaria">
+                                        <td class="px-3 py-2 text-center">
+                                            <button
+                                                type="button"
+                                                class="btnEliminarLuminaria text-destructive hover:text-red-700 text-lg font-bold p-1 rounded hover:bg-red-50"
+                                                title="Eliminar luminaria">
+                                                &times;
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                                    <!-- POTENCIA -->
-                                    <td class="px-3 py-2">
-                                        <input
-                                            type="text"
-                                            name="potencia[]"
-                                            placeholder="Ej: 90W"
-                                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                    </td>
+                    <!-- ========================================== -->
+                    <!-- MATERIALES ASIGNADOS AL NODO (MÚLTIPLES) -->
+                    <!-- ========================================== -->
+                    <div class="border-t border-border pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-muted-foreground">
+                                    Materiales y Herramientas del Nodo
+                                </label>
+                                <p class="text-xs text-muted-foreground mt-0.5">
+                                    Asigna uno o varios materiales a instalar (nuevo) o retirar (desmonte) en este apoyo.
+                                </p>
+                            </div>
 
-                                    <!-- CÓDIGO -->
-                                    <td class="px-3 py-2">
+                            <button
+                                type="button"
+                                id="btnAgregarMaterialNodo"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-semibold rounded-lg transition">
+                                + Agregar material
+                            </button>
+                        </div>
 
-                                        <input
-                                            type="text"
-                                            name="codigo_luminaria[]"
-                                            placeholder="Ej: 123456"
-                                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                    </td>
-
-                                    <!-- ELIMINAR -->
-                                    <td class="px-3 py-2 text-center">
-                                        <button
-                                            type="button"
-                                            class="btnEliminarLuminaria text-destructive hover:text-red-700 text-sm font-bold p-1 rounded hover:bg-red-50"
-                                            title="Eliminar luminaria"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg><span class="sr-only">Cerrar</span></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- TABLA DINÁMICA DE MATERIALES DEL NODO -->
+                        <div class="overflow-x-auto border border-border rounded-lg">
+                            <table class="min-w-full divide-y divide-border text-xs">
+                                <thead class="bg-muted text-xs font-semibold text-muted-foreground uppercase">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left w-1/2">Material / Herramienta</th>
+                                        <th class="px-3 py-2 text-left w-1/4 bg-blue-50/50 text-blue-900">Cant. Instalada (Nuevo)</th>
+                                        <th class="px-3 py-2 text-left w-1/4 bg-amber-50/50 text-amber-900">Cant. Retirada (Desmonte)</th>
+                                        <th class="px-2 py-2 text-center w-12">Quitar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="filasMaterialesNodo" class="divide-y divide-border">
+                                    <!-- FILA INICIAL -->
+                                    <tr class="fila-material-nodo">
+                                        <td class="px-3 py-2">
+                                            <select name="material_id[]"
+                                                    class="w-full border border-border-strong rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-card focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                                <option value="">-- Seleccionar material --</option>
+                                                {% for mat in materiales_catalogo %}
+                                                    <option value="{{ mat.id }}">
+                                                        [{{ mat.item }}] {{ mat.descripcion }} ({{ mat.unidad|default:'U' }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <input type="number" step="any" min="0" name="cantidad_instalada[]" placeholder="0.00"
+                                                   class="w-full border border-blue-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-primary focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <input type="number" step="any" min="0" name="cantidad_retirada[]" placeholder="0.00"
+                                                   class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none bg-card">
+                                        </td>
+                                        <td class="px-2 py-2 text-center">
+                                            <button type="button" class="btnEliminarMaterialNodo text-destructive hover:text-red-700 font-bold text-lg p-1 rounded hover:bg-red-50 transition">
+                                                &times;
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- BOTONES -->
-                <div class="flex justify-end gap-3 pt-2">
+                <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30 flex-shrink-0">
                     <button
                         type="button"
                         onclick="cerrarModalApoyo()"
-                        class="px-4 py-2 text-sm text-foreground border rounded-lg hover:bg-muted">
+                        class="px-4 py-2 text-xs text-foreground border border-border-strong rounded-lg hover:bg-muted font-medium transition">
                         Cancelar
                     </button>
 
                     <button
                         type="submit"
-                        class="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg shadow-sm">
+                        class="px-5 py-2 text-xs bg-primary hover:bg-primary-hover text-white font-bold rounded-lg shadow-sm transition">
                         Guardar Poste
                     </button>
                 </div>
@@ -484,56 +543,86 @@
         const filasLuminarias = document.getElementById("filasLuminarias");
 
         // AGREGAR NUEVA LUMINARIA
-        btnAgregarLuminaria.addEventListener("click", function () {
+        if (btnAgregarLuminaria && filasLuminarias) {
+            btnAgregarLuminaria.addEventListener("click", function () {
+                const nuevaFila = document.createElement("tr");
+                nuevaFila.classList.add("fila-luminaria");
+                nuevaFila.innerHTML = `
+                    <td class="px-3 py-2">
+                        <input
+                            type="text"
+                            name="potencia[]"
+                            placeholder="Ej: 90W"
+                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                    </td>
+                    <td class="px-3 py-2">
+                        <input
+                            type="text"
+                            name="codigo_luminaria[]"
+                            placeholder="Ej: 123456"
+                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                    </td>
+                    <td class="px-3 py-2 text-center">
+                        <button
+                            type="button"
+                            class="btnEliminarLuminaria text-destructive hover:text-red-700 text-lg font-bold p-1 rounded hover:bg-red-50"
+                            title="Eliminar luminaria">
+                            &times;
+                        </button>
+                    </td>
+                `;
+                filasLuminarias.appendChild(nuevaFila);
+            });
 
-            const nuevaFila = document.createElement("tr");
-
-            nuevaFila.classList.add("fila-luminaria");
-
-            nuevaFila.innerHTML = `
-                <td class="px-3 py-2">
-                    <input
-                        type="text"
-                        name="potencia[]"
-                        placeholder="Ej: 90W"
-                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </td>
-
-                <td class="px-3 py-2">
-                    <input
-                        type="text"
-                        name="codigo_luminaria[]"
-                        placeholder="Ej: 123456"
-                        class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </td>
-
-                <td class="px-3 py-2 text-center">
-                    <button
-                        type="button"
-                        class="btnEliminarLuminaria text-destructive hover:text-red-700 text-sm font-bold p-1 rounded hover:bg-red-50"
-                        title="Eliminar luminaria"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg><span class="sr-only">Cerrar</span></button>
-                </td>
-            `;
-
-            filasLuminarias.appendChild(nuevaFila);
-        });
-
-
-        // ELIMINAR LUMINARIA
-        filasLuminarias.addEventListener("click", function (event) {
-
-            const botonEliminar = event.target.closest(".btnEliminarLuminaria");
-
-            if (botonEliminar) {
-
-                const fila = botonEliminar.closest(".fila-luminaria");
-
-                if (fila) {
-                    fila.remove();
+            // ELIMINAR LUMINARIA
+            filasLuminarias.addEventListener("click", function (event) {
+                const botonEliminar = event.target.closest(".btnEliminarLuminaria");
+                if (botonEliminar) {
+                    const fila = botonEliminar.closest(".fila-luminaria");
+                    if (fila) {
+                        fila.remove();
+                    }
                 }
-            }
+            });
+        }
 
-        });
+        // AGREGAR Y ELIMINAR MATERIALES EN EL MODAL DE NODO
+        const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
+        const filasMaterialesNodo = document.getElementById("filasMaterialesNodo");
+
+        if (btnAgregarMaterialNodo && filasMaterialesNodo) {
+            btnAgregarMaterialNodo.addEventListener("click", function () {
+                const primeraFila = filasMaterialesNodo.querySelector(".fila-material-nodo");
+                if (primeraFila) {
+                    const nuevaFila = primeraFila.cloneNode(true);
+                    const sel = nuevaFila.querySelector('select[name="material_id[]"]');
+                    if (sel) sel.selectedIndex = 0;
+                    const inInst = nuevaFila.querySelector('input[name="cantidad_instalada[]"]');
+                    if (inInst) inInst.value = '';
+                    const inRet = nuevaFila.querySelector('input[name="cantidad_retirada[]"]');
+                    if (inRet) inRet.value = '';
+                    filasMaterialesNodo.appendChild(nuevaFila);
+                }
+            });
+
+            filasMaterialesNodo.addEventListener("click", function (e) {
+                const btnEliminar = e.target.closest(".btnEliminarMaterialNodo");
+                if (btnEliminar) {
+                    const filas = filasMaterialesNodo.querySelectorAll(".fila-material-nodo");
+                    if (filas.length > 1) {
+                        btnEliminar.closest(".fila-material-nodo").remove();
+                    } else {
+                        const fila = btnEliminar.closest(".fila-material-nodo");
+                        const sel = fila.querySelector('select[name="material_id[]"]');
+                        if (sel) sel.selectedIndex = 0;
+                        const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
+                        if (inInst) inInst.value = '';
+                        const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
+                        if (inRet) inRet.value = '';
+                    }
+                }
+            });
+        }
 
     });
 </script>

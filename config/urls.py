@@ -160,6 +160,8 @@ from core.views.logistica import(
     exportar_informe_consolidado_excel,
     registrar_retiro_material,
     eliminar_retiro_material,
+    vista_global_logistica,
+    exportar_vista_global_excel,
 )
 
 from core.views.rrhh import(
@@ -348,6 +350,10 @@ urlpatterns = [
     path("logistica/materiales/", materiales_home, name="materiales_home"),
 
     #Logística - Proyectos y Entradas de Material
+    path("logistica/global/", vista_global_logistica, name="vista_global_logistica"),
+    path("logistica/macroproyectos/<int:macroproyecto_id>/global/", vista_global_logistica, name="vista_global_macroproyecto"),
+    path("logistica/proyectos/<int:proyecto_id>/global/", vista_global_logistica, name="vista_global_proyecto"),
+    path("logistica/global/excel/", exportar_vista_global_excel, name="exportar_vista_global_excel"),
     path("logistica/macroproyectos/", macroproyectos_logistica, name="macroproyectos_logistica"),
     path("logistica/macroproyectos/<int:macroproyecto_id>/proyectos/", proyectos_logistica, name="proyectos_logistica_por_macroproyecto"),
     path("logistica/proyectos/", proyectos_logistica, name="proyectos_logistica"),

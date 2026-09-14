@@ -24,13 +24,13 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <a href="{% url 'logistica_home' %}"
-               class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition shadow-sm">
-                ← Volver a Logística
-            </a>
             <a href="{% url 'materiales_home' %}"
                class="inline-flex items-center px-4 py-2 bg-primary-soft hover:bg-blue-100 text-primary text-sm font-medium rounded-lg transition border border-blue-200">
                 Catálogo de Materiales
+            </a>
+            <a href="{% url 'logistica_home' %}"
+               class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition shadow-sm">
+                ← Volver
             </a>
         </div>
     </div>
@@ -167,13 +167,13 @@
                             <div class="inline-flex items-center gap-2">
                                 <a href="{% url 'proyectos_logistica_por_macroproyecto' item.macro.id %}"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
-                                    <span>Materiales y Proyectos ({{ item.num_proyectos }})</span>
+                                    <span>Ver Proyectos ({{ item.num_proyectos }})</span>
                                 </a>
 
                                 <a href="{% url 'proyectos_por_macroproyecto' item.macro.id %}"
                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition border border-border"
                                    title="Ver matriz técnica en Ingeniería">
-                                    <span>Postes (Ing.)</span>
+                                    <span>Ingeniería</span>
                                 </a>
                             </div>
                         </td>

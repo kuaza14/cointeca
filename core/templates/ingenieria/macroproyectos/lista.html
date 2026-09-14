@@ -80,6 +80,8 @@
         <thead>
             <tr>
                 <th scope="col">Macroproyecto</th>
+                <th scope="col">Maniobra EMCALI</th>
+                <th scope="col">Maniobra COINTECA</th>
                 <th scope="col">Estado</th>
                 <th scope="col" class="text-center">Proyectos Asignados</th>
                 <th scope="col" class="text-center">Postes / Apoyos</th>
@@ -101,6 +103,26 @@
                                 </p>
                             {% endif %}
                         </div>
+                    </td>
+
+                    <td class="whitespace-nowrap">
+                        {% if item.macro.numero_maniobra_emcali %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                {{ item.macro.numero_maniobra_emcali }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted-foreground text-xs italic">-</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="whitespace-nowrap">
+                        {% if item.macro.numero_maniobra_cointeca %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                {{ item.macro.numero_maniobra_cointeca }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted-foreground text-xs italic">-</span>
+                        {% endif %}
                     </td>
 
                     <td>
@@ -151,6 +173,8 @@
                                     class="btnEditarMacro inline-flex items-center gap-1 px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition border border-border cursor-pointer"
                                     data-id="{{ item.macro.id }}"
                                     data-nombre="{{ item.macro.nombre }}"
+                                    data-maniobra-emcali="{{ item.macro.numero_maniobra_emcali }}"
+                                    data-maniobra-cointeca="{{ item.macro.numero_maniobra_cointeca }}"
                                     data-descripcion="{{ item.macro.descripcion }}"
                                     data-estado="{{ item.macro.estado }}"
                                     title="Editar macroproyecto">
@@ -170,7 +194,7 @@
                 </tr>
             {% empty %}
                 <tr id="filaVaciaServidor">
-                    <td colspan="6" class="estado-vacio py-10 text-center text-muted-foreground">
+                    <td colspan="8" class="estado-vacio py-10 text-center text-muted-foreground">
                         <div>
                             {% if query %}
                                 <p class="font-semibold text-foreground">No se encontraron macroproyectos que coincidan con «{{ query }}»</p>
@@ -186,7 +210,7 @@
                 </tr>
             {% endfor %}
             <tr id="sinResultadosLive" class="hidden">
-                <td colspan="6" class="estado-vacio py-8 text-center text-muted-foreground">
+                <td colspan="8" class="estado-vacio py-8 text-center text-muted-foreground">
                     No se encontraron macroproyectos con ese criterio de búsqueda.
                 </td>
             </tr>
@@ -226,6 +250,17 @@
                 <div>
                     <label for="nombre_macro" class="campo campo-req">Nombre del Macroproyecto</label>
                     <input type="text" id="nombre_macro" name="nombre" required class="entrada" placeholder="Ej: Macroproyecto Ciudad Córdoba, Macroproyecto Comuna 2, etc.">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="numero_maniobra_emcali" class="campo">Número Maniobra EMCALI</label>
+                        <input type="text" id="numero_maniobra_emcali" name="numero_maniobra_emcali" class="entrada" placeholder="Ej: MAN-EMCALI-001">
+                    </div>
+                    <div>
+                        <label for="numero_maniobra_cointeca" class="campo">Número Maniobra COINTECA</label>
+                        <input type="text" id="numero_maniobra_cointeca" name="numero_maniobra_cointeca" class="entrada" placeholder="Ej: MAN-COIN-001">
+                    </div>
                 </div>
 
                 <div>
@@ -284,6 +319,17 @@
                 <div>
                     <label for="edit_nombre_macro" class="campo campo-req">Nombre del Macroproyecto</label>
                     <input type="text" id="edit_nombre_macro" name="nombre" required class="entrada" placeholder="Nombre del macroproyecto">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit_numero_maniobra_emcali" class="campo">Número Maniobra EMCALI</label>
+                        <input type="text" id="edit_numero_maniobra_emcali" name="numero_maniobra_emcali" class="entrada" placeholder="Ej: MAN-EMCALI-001">
+                    </div>
+                    <div>
+                        <label for="edit_numero_maniobra_cointeca" class="campo">Número Maniobra COINTECA</label>
+                        <input type="text" id="edit_numero_maniobra_cointeca" name="numero_maniobra_cointeca" class="entrada" placeholder="Ej: MAN-COIN-001">
+                    </div>
                 </div>
 
                 <div>
@@ -458,6 +504,8 @@
     const modalEditar = document.getElementById("modalEditarMacroproyecto");
     const formEditar = document.getElementById("formEditarMacroproyecto");
     const editNombre = document.getElementById("edit_nombre_macro");
+    const editManiobraEmcali = document.getElementById("edit_numero_maniobra_emcali");
+    const editManiobraCointeca = document.getElementById("edit_numero_maniobra_cointeca");
     const editDescripcion = document.getElementById("edit_descripcion_macro");
     const editEstado = document.getElementById("edit_estado_macro");
     const btnCerrarEditar = document.getElementById("cerrarModalEditarMacro");
@@ -466,11 +514,15 @@
     function abrirEditar(btn) {
         const id = btn.dataset.id;
         const nombre = btn.dataset.nombre || "";
+        const maniobraEmcali = btn.dataset.maniobraEmcali || "";
+        const maniobraCointeca = btn.dataset.maniobraCointeca || "";
         const descripcion = btn.dataset.descripcion || "";
         const estado = btn.dataset.estado || "Planeación";
 
         formEditar.action = "/ingenieria/macroproyectos/" + id + "/editar/";
         editNombre.value = nombre;
+        if (editManiobraEmcali) editManiobraEmcali.value = maniobraEmcali;
+        if (editManiobraCointeca) editManiobraCointeca.value = maniobraCointeca;
         editDescripcion.value = descripcion;
         editEstado.value = estado;
 

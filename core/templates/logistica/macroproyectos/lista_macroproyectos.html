@@ -90,6 +90,8 @@
                 <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
                     <tr>
                         <th class="px-5 py-3.5">Macroproyecto</th>
+                        <th class="px-4 py-3.5">Maniobra EMCALI</th>
+                        <th class="px-4 py-3.5">Maniobra COINTECA</th>
                         <th class="px-4 py-3.5">Estado</th>
                         <th class="px-4 py-3.5 text-center">Proyectos</th>
                         <th class="px-4 py-3.5 text-center">Entradas Obra</th>
@@ -112,6 +114,26 @@
                                     </p>
                                 {% endif %}
                             </div>
+                        </td>
+
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            {% if item.macro.numero_maniobra_emcali %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    {{ item.macro.numero_maniobra_emcali }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted-foreground text-xs italic">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            {% if item.macro.numero_maniobra_cointeca %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    {{ item.macro.numero_maniobra_cointeca }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted-foreground text-xs italic">-</span>
+                            {% endif %}
                         </td>
 
                         <td class="px-4 py-4">
@@ -180,7 +202,7 @@
                     </tr>
                     {% empty %}
                     <tr id="filaVaciaServidor">
-                        <td colspan="7" class="px-6 py-12 text-center text-muted-foreground">
+                        <td colspan="9" class="px-6 py-12 text-center text-muted-foreground">
                             <div>
                                 {% if query %}
                                     <p class="font-semibold text-foreground">No se encontraron macroproyectos que coincidan con «{{ query }}»</p>
@@ -199,7 +221,7 @@
                     </tr>
                     {% endfor %}
                     <tr id="sinResultadosLive" class="hidden">
-                        <td colspan="7" class="py-8 text-center text-muted-foreground">
+                        <td colspan="9" class="py-8 text-center text-muted-foreground">
                             No se encontraron macroproyectos con ese criterio de búsqueda.
                         </td>
                     </tr>

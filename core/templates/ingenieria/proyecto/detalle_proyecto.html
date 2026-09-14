@@ -350,8 +350,8 @@
                 {% csrf_token %}
 
                 <div class="p-6 overflow-y-auto space-y-5 flex-1">
-                    <!-- DATOS BÁSICOS DEL NODO -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- DATOS BÁSICOS Y TÉCNICOS DEL NODO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- NODO -->
                         <div>
                             <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-nodo">
@@ -362,14 +362,14 @@
                                 type="text"
                                 name="nodo"
                                 required
-                                placeholder="Ej: 29924, 6707556 o POSTE 8M FIBRA"
+                                placeholder="Ej: 29924 o POSTE 8M"
                                 class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
 
                         <!-- NÚMERO DE APOYO -->
                         <div>
                             <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-numero_apoyo">
-                                Número de Apoyo (Opcional)
+                                Número de Apoyo
                             </label>
 
                             <input id="campo-numero_apoyo"
@@ -377,6 +377,93 @@
                                 name="numero_apoyo"
                                 placeholder="Ej: 1, 2, 3..."
                                 class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <!-- FECHA -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-fecha">
+                                Fecha
+                            </label>
+
+                            <input id="campo-fecha"
+                                type="date"
+                                name="fecha"
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                        </div>
+
+                        <!-- TIPO DE INSTALACIÓN -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-tipo_instalacion">
+                                Tipo de Instalación
+                            </label>
+
+                            <select id="campo-tipo_instalacion"
+                                name="tipo_instalacion"
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                                <option value="">-- Seleccione --</option>
+                                <option value="Instalación">Instalación</option>
+                                <option value="Retiro">Retiro</option>
+                                <option value="Desmonte">Desmonte</option>
+                                <option value="Instalación y Retiro">Instalación y Retiro</option>
+                                <option value="Instalación y Desmonte">Instalación y Desmonte</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                            </select>
+                        </div>
+
+                        <!-- DIRECCIÓN -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-direccion">
+                                Dirección / Ubicación
+                            </label>
+
+                            <input id="campo-direccion"
+                                type="text"
+                                name="direccion"
+                                placeholder="Ej: Cra 15 # 24-50, Barrio..."
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                        </div>
+
+                        <!-- TIPO DE ESTRUCTURA -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-tipo_estructura">
+                                Tipo de Estructura
+                            </label>
+
+                            <input id="campo-tipo_estructura"
+                                type="text"
+                                name="tipo_estructura"
+                                placeholder="Ej: Poste Concreto 12m, Fibra 8m, etc."
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                        </div>
+
+                        <!-- CANTIDAD RETENIDA -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-cantidad_retenida">
+                                Cantidad Retenida
+                            </label>
+
+                            <input id="campo-cantidad_retenida"
+                                type="number"
+                                step="any"
+                                min="0"
+                                name="cantidad_retenida"
+                                placeholder="0"
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                        </div>
+
+                        <!-- METROS RETENIDO -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-metros_retenido">
+                                Metros Retenido (m)
+                            </label>
+
+                            <input id="campo-metros_retenido"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                name="metros_retenido"
+                                placeholder="0.00 m"
+                                class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
                         </div>
                     </div>
 

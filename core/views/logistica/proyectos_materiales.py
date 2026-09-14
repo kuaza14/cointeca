@@ -36,6 +36,8 @@ def macroproyectos_logistica(request):
     if query:
         macroproyectos = macroproyectos.filter(
             Q(nombre__icontains=query) |
+            Q(numero_maniobra_emcali__icontains=query) |
+            Q(numero_maniobra_cointeca__icontains=query) |
             Q(descripcion__icontains=query) |
             Q(estado__icontains=query)
         )
@@ -221,12 +223,14 @@ def detalle_proyecto_logistica(request, proyecto_id):
     total_items_instalados = Decimal("0")
     total_items_entrados = Decimal("0")
     total_items_retirados = Decimal("0")
+    total_devolucion = Decimal("0")
 
     for mat in materiales_db:
         sum_req = req_map.get(mat.id, Decimal("0"))
         sum_inst = inst_map.get(mat.id, Decimal("0"))
         sum_ent = ent_map.get(mat.id, Decimal("0"))
         sum_ret = ret_map.get(mat.id, Decimal("0"))
+        devolucion = max(Decimal("0"), sum_ent - sum_inst)
         stock_bodega = getattr(mat, "inventario", None)
         stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
 
@@ -238,14 +242,17 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "entrada": sum_ent,
             "retirado": sum_ret,
             "material_sobrante": sum_ent - sum_inst,
+            "devolucion": devolucion,
         })
 
         total_items_requeridos += sum_req
         total_items_instalados += sum_inst
         total_items_entrados += sum_ent
         total_items_retirados += sum_ret
+        total_devolucion += devolucion
 
     total_material_sobrante = total_items_entrados - total_items_instalados
+    materiales_devolucion = [item for item in balance_materiales if item["devolucion"] > 0]
 
     entradas = (
         EntradaMaterialProyecto.objects.filter(proyecto=proyecto)
@@ -279,6 +286,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
         {
             "proyecto": proyecto,
             "balance_materiales": balance_materiales,
+            "materiales_devolucion": materiales_devolucion,
             "entradas": entradas,
             "requeridos_proyecto": requeridos_proyecto,
             "instalados_apoyo": instalados_apoyo,
@@ -289,6 +297,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "total_items_entrados": total_items_entrados,
             "total_items_retirados": total_items_retirados,
             "total_material_sobrante": total_material_sobrante,
+            "total_devolucion": total_devolucion,
         }
     )
 
@@ -1179,6 +1188,7 @@ def informe_consolidado_proyectos(request):
     total_instalado_general = Decimal("0")
     total_retirado_general = Decimal("0")
     total_requerido_general = Decimal("0")
+    total_devolucion_general = Decimal("0")
 
     for mat in materiales_db:
         cant_ent = ent_map.get(mat.id, Decimal("0"))
@@ -1186,6 +1196,7 @@ def informe_consolidado_proyectos(request):
         cant_ret = ret_map.get(mat.id, Decimal("0"))
         cant_req = req_map.get(mat.id, Decimal("0"))
         saldo = cant_ent - cant_inst
+        devolucion = max(Decimal("0"), cant_ent - cant_inst)
 
         stock_bodega = getattr(mat, "inventario", None)
         stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
@@ -1197,6 +1208,7 @@ def informe_consolidado_proyectos(request):
             "retirado": cant_ret,
             "requerido": cant_req,
             "saldo": saldo,
+            "devolucion": devolucion,
             "stock_bodega": stock_disponible,
         })
 
@@ -1204,6 +1216,7 @@ def informe_consolidado_proyectos(request):
         total_instalado_general += cant_inst
         total_retirado_general += cant_ret
         total_requerido_general += cant_req
+        total_devolucion_general += devolucion
 
     # 6. Desglose individual de cada proyecto seleccionado
     desglose_proyectos = []
@@ -1224,21 +1237,25 @@ def informe_consolidado_proyectos(request):
         p_tot_ent = Decimal("0")
         p_tot_inst = Decimal("0")
         p_tot_ret = Decimal("0")
+        p_tot_dev = Decimal("0")
 
         for mat in p_materiales:
             c_ent = p_ent_map.get(mat.id, Decimal("0"))
             c_inst = p_inst_map.get(mat.id, Decimal("0"))
             c_ret = p_ret_map.get(mat.id, Decimal("0"))
+            c_dev = max(Decimal("0"), c_ent - c_inst)
             items_proyecto.append({
                 "material": mat,
                 "entrado": c_ent,
                 "instalado": c_inst,
                 "retirado": c_ret,
                 "saldo": c_ent - c_inst,
+                "devolucion": c_dev,
             })
             p_tot_ent += c_ent
             p_tot_inst += c_inst
             p_tot_ret += c_ret
+            p_tot_dev += c_dev
 
         desglose_proyectos.append({
             "proyecto": p,
@@ -1246,6 +1263,7 @@ def informe_consolidado_proyectos(request):
             "total_entrado": p_tot_ent,
             "total_instalado": p_tot_inst,
             "total_retirado": p_tot_ret,
+            "total_devolucion": p_tot_dev,
             "saldo_proyecto": p_tot_ent - p_tot_inst,
             "num_entradas": p.entradas_material.count(),
             "num_apoyos": p.apoyos.count(),
@@ -1265,6 +1283,7 @@ def informe_consolidado_proyectos(request):
             "total_instalado_general": total_instalado_general,
             "total_retirado_general": total_retirado_general,
             "total_requerido_general": total_requerido_general,
+            "total_devolucion_general": total_devolucion_general,
             "saldo_total_general": total_entrado_general - total_instalado_general,
             "desglose_proyectos": desglose_proyectos,
             "ids_string": ids_string,
@@ -1328,19 +1347,19 @@ def exportar_informe_consolidado_excel(request):
 
     proyectos_nombres = ", ".join(p.numero_emcali for p in proyectos_seleccionados)
 
-    ws.merge_cells("A1:F1")
+    ws.merge_cells("A1:G1")
     ws["A1"] = "COINTECA S.A.S. — INFORME CONSOLIDADO DE MATERIALES Y RETIROS"
     ws["A1"].font = font_titulo
     ws["A1"].alignment = align_left
 
-    ws.merge_cells("A2:F2")
+    ws.merge_cells("A2:G2")
     ws["A2"] = f"PROYECTOS CONSOLIDADOS ({proyectos_seleccionados.count()}): {proyectos_nombres}  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
     ws["A2"].font = font_subtitulo
     ws["A2"].alignment = align_left
 
     ws.append([])
 
-    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "ENTRADA (SUMINISTRADO)", "INSTALADO EN POSTES", "RETIRO / DESMONTE", "MATERIAL QUE SOBRA"]
+    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "ENTRADA (SUMINISTRADO)", "INSTALADO EN POSTES", "RETIRO / DESMONTE", "MATERIAL DE DEVOLUCIÓN (SOBRANTE)"]
     ws.append(headers)
     header_row = 4
 
@@ -1355,18 +1374,18 @@ def exportar_informe_consolidado_excel(request):
     tot_ent = Decimal("0")
     tot_inst = Decimal("0")
     tot_ret = Decimal("0")
-    tot_sal = Decimal("0")
+    tot_dev = Decimal("0")
 
     for idx, mat in enumerate(materiales_db, start=1):
         c_ent = ent_map.get(mat.id, Decimal("0"))
         c_inst = inst_map.get(mat.id, Decimal("0"))
         c_ret = ret_map.get(mat.id, Decimal("0"))
-        c_sal = c_ent - c_inst
+        c_dev = max(Decimal("0"), c_ent - c_inst)
 
         tot_ent += c_ent
         tot_inst += c_inst
         tot_ret += c_ret
-        tot_sal += c_sal
+        tot_dev += c_dev
 
         def fmt_val(v):
             return int(v) if v % 1 == 0 else float(v)
@@ -1378,7 +1397,7 @@ def exportar_informe_consolidado_excel(request):
             fmt_val(c_ent),
             fmt_val(c_inst),
             fmt_val(c_ret),
-            fmt_val(c_sal)
+            fmt_val(c_dev)
         ])
 
         for col_idx in range(1, 8):
@@ -1401,7 +1420,7 @@ def exportar_informe_consolidado_excel(request):
     def fmt_tot(v):
         return int(v) if v % 1 == 0 else float(v)
 
-    ws.append(["", "TOTALES CONSOLIDADOS", f"{len(materiales_db)} ÍTEMS", fmt_tot(tot_ent), fmt_tot(tot_inst), fmt_tot(tot_ret), fmt_tot(tot_sal)])
+    ws.append(["", "TOTALES CONSOLIDADOS", f"{len(materiales_db)} ÍTEMS", fmt_tot(tot_ent), fmt_tot(tot_inst), fmt_tot(tot_ret), fmt_tot(tot_dev)])
     for col_idx in range(1, 8):
         c = ws.cell(row=current_row, column=col_idx)
         c.font = font_total

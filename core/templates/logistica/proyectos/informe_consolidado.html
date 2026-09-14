@@ -85,13 +85,13 @@
             <p class="text-[11px] text-amber-600 mt-0.5">Material bajado de postes (BT/AP)</p>
         </div>
 
-        <!-- Material que Sobra -->
-        <div class="bg-card rounded-xl shadow-sm border border-blue-200 bg-primary-soft/20 p-4">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900 block">Total Material que Sobra</span>
-            <p class="text-2xl font-black {% if saldo_total_general < 0 %}text-amber-700{% else %}text-primary{% endif %} mt-1">
-                {{ saldo_total_general|floatformat }}
+        <!-- Materiales de Devolución -->
+        <div class="bg-card rounded-xl shadow-sm border border-amber-300 bg-amber-50/40 p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-950 block">Materiales de Devolución</span>
+            <p class="text-2xl font-black text-amber-900 mt-1">
+                {{ total_devolucion_general|floatformat }}
             </p>
-            <p class="text-[11px] text-primary mt-0.5">Suministrado − Instalado</p>
+            <p class="text-[11px] text-amber-800 mt-0.5">Suministrado − Instalado (Reintegro a bodega)</p>
         </div>
     </div>
 
@@ -121,7 +121,7 @@
                         Consolidado Total de Materiales ({{ total_proyectos_sel }} Proyectos Seleccionados)
                     </h3>
                     <p class="text-xs text-muted-foreground mt-0.5">
-                        Sumatoria unificada de entradas, montajes en apoyos, desmontes y material que sobra.
+                        Sumatoria unificada de entradas, montajes en apoyos, desmontes y material sobrante a devolver a bodega.
                     </p>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                             <th class="px-4 py-3 text-right bg-emerald-800/80">Suministrado (Entradas)</th>
                             <th class="px-4 py-3 text-right bg-indigo-800/80">Instalado en Postes</th>
                             <th class="px-4 py-3 text-right bg-amber-800/80">Retirado / Desmonte</th>
-                            <th class="px-4 py-3 text-right bg-slate-800 font-black">Material que Sobra</th>
+                            <th class="px-4 py-3 text-right bg-amber-900 font-black text-amber-200">Material de Devolución</th>
                             <th class="px-4 py-3 text-right bg-gray-700">Stock Bodega</th>
                         </tr>
                     </thead>
@@ -170,9 +170,15 @@
                                 {% if fila.retirado > 0 %}{{ fila.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
                             </td>
 
-                            <!-- Saldo -->
-                            <td class="px-4 py-3 text-right font-black text-sm {% if fila.saldo < 0 %}text-amber-700 bg-amber-50/30{% elif fila.saldo == 0 %}text-muted-foreground bg-muted{% else %}text-primary bg-primary-soft/30{% endif %}">
-                                {{ fila.saldo|floatformat }}
+                            <!-- Devolución / Sobrante -->
+                            <td class="px-4 py-3 text-right font-black text-sm bg-amber-50/40">
+                                {% if fila.devolucion > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-200 text-amber-950 border border-amber-300">
+                                        <span>↩️</span> {{ fila.devolucion|floatformat }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-300 font-normal">—</span>
+                                {% endif %}
                             </td>
 
                             <!-- Stock Bodega -->
@@ -205,8 +211,8 @@
                             <td class="px-4 py-3.5 text-right text-amber-300 font-black text-sm bg-amber-950/80">
                                 {{ total_retirado_general|floatformat }}
                             </td>
-                            <td class="px-4 py-3.5 text-right text-blue-200 font-black text-sm bg-blue-950/80">
-                                {{ saldo_total_general|floatformat }}
+                            <td class="px-4 py-3.5 text-right text-amber-100 font-black text-sm bg-amber-950">
+                                ↩️ {{ total_devolucion_general|floatformat }}
                             </td>
                             <td class="px-4 py-3.5 text-right text-gray-400 font-normal text-xs">
                                 —
@@ -253,7 +259,7 @@
                                 <th class="px-4 py-2.5 text-right bg-emerald-50/50">Entradas</th>
                                 <th class="px-4 py-2.5 text-right bg-indigo-50/50">Instalado</th>
                                 <th class="px-4 py-2.5 text-right bg-amber-50/50">Retirado / Desmonte</th>
-                                <th class="px-4 py-2.5 text-right bg-indigo-50/50 font-black">Material que Sobra</th>
+                                <th class="px-4 py-2.5 text-right bg-amber-50/60 font-black text-amber-950">Material de Devolución</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-card">
@@ -271,8 +277,14 @@
                                 <td class="px-4 py-2.5 text-right font-bold text-amber-800 bg-amber-50/30">
                                     {% if item.retirado > 0 %}{{ item.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
                                 </td>
-                                <td class="px-4 py-2.5 text-right font-black {% if item.saldo < 0 %}text-amber-700{% elif item.saldo == 0 %}text-muted-foreground{% else %}text-primary{% endif %}">
-                                    {{ item.saldo|floatformat }}
+                                <td class="px-4 py-2.5 text-right font-black">
+                                    {% if item.devolucion > 0 %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300 text-xs">
+                                            <span>↩️</span> {{ item.devolucion|floatformat }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-gray-300 font-normal">—</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
@@ -290,7 +302,7 @@
                                 <td class="px-4 py-2.5 text-right text-emerald-800 font-black">{{ dp.total_entrado|floatformat }}</td>
                                 <td class="px-4 py-2.5 text-right text-indigo-800 font-black">{{ dp.total_instalado|floatformat }}</td>
                                 <td class="px-4 py-2.5 text-right text-amber-800 font-black">{{ dp.total_retirado|floatformat }}</td>
-                                <td class="px-4 py-2.5 text-right text-primary font-black">{{ dp.saldo_proyecto|floatformat }}</td>
+                                <td class="px-4 py-2.5 text-right text-amber-900 font-black">↩️ {{ dp.total_devolucion|floatformat }}</td>
                             </tr>
                         </tfoot>
                         {% endif %}

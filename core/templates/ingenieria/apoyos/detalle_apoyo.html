@@ -114,6 +114,49 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-fecha">Fecha</label>
+                    <input id="campo-fecha" type="date" name="fecha" value="{{ apoyo.fecha|date:'Y-m-d'|default:'' }}"
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-tipo_instalacion">Tipo de Instalación</label>
+                    <select id="campo-tipo_instalacion" name="tipo_instalacion" class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                        <option value="">-- Seleccione --</option>
+                        <option value="Instalación" {% if apoyo.tipo_instalacion == 'Instalación' %}selected{% endif %}>Instalación</option>
+                        <option value="Retiro" {% if apoyo.tipo_instalacion == 'Retiro' %}selected{% endif %}>Retiro</option>
+                        <option value="Desmonte" {% if apoyo.tipo_instalacion == 'Desmonte' %}selected{% endif %}>Desmonte</option>
+                        <option value="Instalación y Retiro" {% if apoyo.tipo_instalacion == 'Instalación y Retiro' %}selected{% endif %}>Instalación y Retiro</option>
+                        <option value="Instalación y Desmonte" {% if apoyo.tipo_instalacion == 'Instalación y Desmonte' %}selected{% endif %}>Instalación y Desmonte</option>
+                        <option value="Mantenimiento" {% if apoyo.tipo_instalacion == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                    </select>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-direccion">Dirección / Ubicación</label>
+                    <input id="campo-direccion" type="text" name="direccion" value="{{ apoyo.direccion|default:'' }}" placeholder="Ej: Cra 15 # 24-50, Barrio..."
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-tipo_estructura">Tipo de Estructura</label>
+                    <input id="campo-tipo_estructura" type="text" name="tipo_estructura" value="{{ apoyo.tipo_estructura|default:'' }}" placeholder="Ej: Poste Concreto 12m, Fibra 8m, etc."
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-cantidad_retenida">Cantidad Retenida</label>
+                    <input id="campo-cantidad_retenida" type="number" step="any" min="0" name="cantidad_retenida" value="{{ apoyo.cantidad_retenida|unlocalize }}" placeholder="0"
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-metros_retenido">Metros Retenido (m)</label>
+                    <input id="campo-metros_retenido" type="number" step="0.01" min="0" name="metros_retenido" value="{{ apoyo.metros_retenido|unlocalize }}" placeholder="0.00 m"
+                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
+                </div>
+
+                <div>
                     <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-estado">Estado del Apoyo</label>
                     <select id="campo-estado" name="estado" class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="Pendiente" {% if apoyo.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>

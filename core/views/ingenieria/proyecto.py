@@ -41,6 +41,8 @@ def lista_macroproyectos(request):
     if query:
         macroproyectos = macroproyectos.filter(
             Q(nombre__icontains=query) |
+            Q(numero_maniobra_emcali__icontains=query) |
+            Q(numero_maniobra_cointeca__icontains=query) |
             Q(descripcion__icontains=query) |
             Q(estado__icontains=query)
         )
@@ -70,6 +72,8 @@ def lista_macroproyectos(request):
 def crear_macroproyecto(request):
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
+        numero_maniobra_emcali = request.POST.get("numero_maniobra_emcali", "").strip()
+        numero_maniobra_cointeca = request.POST.get("numero_maniobra_cointeca", "").strip()
         descripcion = request.POST.get("descripcion", "").strip()
         estado = request.POST.get("estado", Macroproyecto.Estados.PLANEACION).strip()
 
@@ -83,6 +87,8 @@ def crear_macroproyecto(request):
 
         macro = Macroproyecto.objects.create(
             nombre=nombre,
+            numero_maniobra_emcali=numero_maniobra_emcali,
+            numero_maniobra_cointeca=numero_maniobra_cointeca,
             descripcion=descripcion,
             estado=estado if estado in Macroproyecto.Estados.values else Macroproyecto.Estados.PLANEACION
         )
@@ -96,6 +102,8 @@ def editar_macroproyecto(request, id):
 
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
+        numero_maniobra_emcali = request.POST.get("numero_maniobra_emcali", "").strip()
+        numero_maniobra_cointeca = request.POST.get("numero_maniobra_cointeca", "").strip()
         descripcion = request.POST.get("descripcion", "").strip()
         estado = request.POST.get("estado", macro.estado).strip()
 
@@ -108,6 +116,8 @@ def editar_macroproyecto(request, id):
             return redirect("lista_macroproyectos")
 
         macro.nombre = nombre
+        macro.numero_maniobra_emcali = numero_maniobra_emcali
+        macro.numero_maniobra_cointeca = numero_maniobra_cointeca
         macro.descripcion = descripcion
         if estado in Macroproyecto.Estados.values:
             macro.estado = estado
@@ -366,10 +376,35 @@ def crear_apoyo(request, proyecto_id):
         numero_apoyo_val = request.POST.get("numero_apoyo")
         numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
 
+        fecha_val = request.POST.get("fecha")
+        fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
+
+        tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
+        direccion = request.POST.get("direccion", "").strip()
+        tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+
+        cant_ret_val = request.POST.get("cantidad_retenida")
+        try:
+            cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
+        except (ValueError, TypeError, ArithmeticError):
+            cantidad_retenida = Decimal("0")
+
+        m_ret_val = request.POST.get("metros_retenido")
+        try:
+            metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
+        except (ValueError, TypeError, ArithmeticError):
+            metros_retenido = Decimal("0")
+
         apoyo = Apoyo.objects.create(
             proyecto=proyecto,
             numero_apoyo=numero_apoyo,
             nodo=request.POST.get("nodo", "").strip(),
+            fecha=fecha,
+            tipo_instalacion=tipo_instalacion,
+            direccion=direccion,
+            tipo_estructura=tipo_estructura,
+            cantidad_retenida=cantidad_retenida,
+            metros_retenido=metros_retenido,
             estado="Pendiente"
         )
 
@@ -605,6 +640,25 @@ def detalle_apoyo(request, apoyo_id):
             if numero_apoyo and numero_apoyo.isdigit()
             else None
         )
+
+        fecha_val = request.POST.get("fecha")
+        apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
+
+        apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
+        apoyo.direccion = request.POST.get("direccion", "").strip()
+        apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+
+        cant_ret_val = request.POST.get("cantidad_retenida")
+        try:
+            apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
+        except (ValueError, TypeError, ArithmeticError):
+            apoyo.cantidad_retenida = Decimal("0")
+
+        m_ret_val = request.POST.get("metros_retenido")
+        try:
+            apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
+        except (ValueError, TypeError, ArithmeticError):
+            apoyo.metros_retenido = Decimal("0")
 
         apoyo.estado = request.POST.get(
             "estado",

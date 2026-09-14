@@ -35,6 +35,20 @@
                     Gestión de entradas directas a obra, despachos de bodega y conciliación con los apoyos de ingeniería.
                 {% endif %}
             </p>
+            {% if macroproyecto and macroproyecto.numero_maniobra_emcali or macroproyecto and macroproyecto.numero_maniobra_cointeca %}
+                <div class="flex flex-wrap items-center gap-2 mt-2">
+                    {% if macroproyecto.numero_maniobra_emcali %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                            Maniobra EMCALI: {{ macroproyecto.numero_maniobra_emcali }}
+                        </span>
+                    {% endif %}
+                    {% if macroproyecto.numero_maniobra_cointeca %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                            Maniobra COINTECA: {{ macroproyecto.numero_maniobra_cointeca }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
 
         <div class="flex items-center gap-3">

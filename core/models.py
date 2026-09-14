@@ -917,6 +917,8 @@ class Macroproyecto(models.Model):
         CANCELADO = "Cancelado", "Cancelado"
 
     nombre = models.CharField(max_length=150, unique=True, verbose_name="Nombre del Macroproyecto")
+    numero_maniobra_emcali = models.CharField(max_length=100, blank=True, default="", verbose_name="Número Maniobra EMCALI")
+    numero_maniobra_cointeca = models.CharField(max_length=100, blank=True, default="", verbose_name="Número Maniobra COINTECA")
     descripcion = models.TextField(blank=True, default="", verbose_name="Descripción")
     estado = models.CharField(max_length=30, choices=Estados.choices, default=Estados.PLANEACION)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -979,6 +981,12 @@ class Apoyo(models.Model):
     )
     nodo = models.CharField(max_length=100, blank=True, null=True)
     numero_apoyo = models.PositiveIntegerField(null=True, blank=True)
+    fecha = models.DateField(null=True, blank=True, verbose_name="Fecha")
+    tipo_instalacion = models.CharField(max_length=60, blank=True, default="", verbose_name="Tipo de Instalación")
+    direccion = models.CharField(max_length=255, blank=True, default="", verbose_name="Dirección")
+    tipo_estructura = models.CharField(max_length=100, blank=True, default="", verbose_name="Tipo de Estructura")
+    cantidad_retenida = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=0, verbose_name="Cantidad Retenida")
+    metros_retenido = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0, verbose_name="Metros Retenido")
     observacion = models.TextField(blank=True, default="")
     estado = models.CharField(max_length=20, choices=Estados.choices, default=Estados.PENDIENTE)
 

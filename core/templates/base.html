@@ -12,7 +12,147 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
           rel="stylesheet">
 
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}?v={% now 'U' %}">
+
+    <style>
+        /* =========================================================================
+           ESTILOS CRÍTICOS INLINE: MODALES, FONDOS, BOTONES Y FORMULARIOS
+           Garantiza 100% solidez y opacidad sin depender de caché de archivos CSS
+           ========================================================================= */
+
+        /* Fondo oscuro de superposición */
+        [role="dialog"],
+        div[id^="modal"],
+        .modal-backdrop,
+        .modal-overlay {
+            background-color: rgba(2, 6, 23, 0.75) !important;
+        }
+
+        /* Tarjeta / Contenedor de Modal (100% Sólido) */
+        [role="dialog"] > div,
+        div[id^="modal"] > div,
+        .modal-card,
+        .modal-box,
+        .modal-container,
+        .modal-contenido {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            opacity: 1 !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* Formularios y cuerpos dentro del modal */
+        [role="dialog"] form,
+        div[id^="modal"] form,
+        [role="dialog"] .bg-white,
+        div[id^="modal"] .bg-white {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            opacity: 1 !important;
+        }
+
+        /* Cabeceras de Modales */
+        [role="dialog"] .bg-blue-900,
+        [role="dialog"] .bg-blue-800,
+        div[id^="modal"] .bg-blue-900,
+        div[id^="modal"] .bg-blue-800,
+        .modal-header-blue {
+            background-color: #1e3a8a !important;
+            color: #ffffff !important;
+        }
+        [role="dialog"] .bg-blue-900 *,
+        div[id^="modal"] .bg-blue-900 * {
+            color: #ffffff !important;
+        }
+
+        [role="dialog"] .bg-red-700,
+        [role="dialog"] .bg-red-800,
+        div[id^="modal"] .bg-red-700,
+        div[id^="modal"] .bg-red-800,
+        .modal-header-red {
+            background-color: #b91c1c !important;
+            color: #ffffff !important;
+        }
+        [role="dialog"] .bg-red-700 *,
+        div[id^="modal"] .bg-red-700 * {
+            color: #ffffff !important;
+        }
+
+        /* Pie del modal */
+        [role="dialog"] .bg-slate-50,
+        div[id^="modal"] .bg-slate-50,
+        [role="dialog"] .border-t,
+        div[id^="modal"] .border-t {
+            background-color: #f8fafc !important;
+        }
+
+        /* Inputs, selects y textareas */
+        [role="dialog"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+        [role="dialog"] select,
+        [role="dialog"] textarea,
+        div[id^="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+        div[id^="modal"] select,
+        div[id^="modal"] textarea {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1.5px solid #cbd5e1 !important;
+        }
+
+        /* Botones universales */
+        .btn-primario,
+        .bg-blue-700,
+        .bg-primary {
+            background-color: #1d4ed8 !important;
+            color: #ffffff !important;
+        }
+        .btn-primario:hover,
+        .bg-blue-700:hover,
+        .hover\:bg-blue-800:hover,
+        .bg-primary:hover {
+            background-color: #1e40af !important;
+            color: #ffffff !important;
+        }
+
+        .btn-secundario,
+        .bg-slate-100 {
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        .btn-secundario:hover,
+        .hover\:bg-slate-200:hover {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+
+        .btn-peligro,
+        .bg-red-600,
+        .bg-destructive {
+            background-color: #dc2626 !important;
+            color: #ffffff !important;
+        }
+        .btn-peligro:hover,
+        .hover\:bg-red-700:hover,
+        .bg-destructive:hover {
+            background-color: #b91c1c !important;
+            color: #ffffff !important;
+        }
+
+        .btn-exito,
+        .btn-verde,
+        .bg-green-700,
+        .bg-emerald-600 {
+            background-color: #15803d !important;
+            color: #ffffff !important;
+        }
+        .btn-exito:hover,
+        .btn-verde:hover,
+        .hover\:bg-green-800:hover,
+        .hover\:bg-emerald-700:hover {
+            background-color: #166534 !important;
+            color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body class="bg-background text-foreground min-h-screen">

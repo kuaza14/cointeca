@@ -3,9 +3,11 @@
 {% block title %}Vista Global de Materiales y Nodos — Logística | Cointeca S.A.S{% endblock %}
 
 {% block content %}
-<div class="max-w-[98rem] mx-auto p-3 sm:p-6 space-y-6 print:p-0 print:space-y-4">
+<div class="max-w-[99rem] mx-auto p-3 sm:p-6 space-y-6 print:p-0 print:space-y-4">
 
-    <!-- ENCABEZADO Y ACCIONES -->
+    <!-- ===================================================================== -->
+    <!-- 1. ENCABEZADO PRINCIPAL Y ACCIONES RÁPIDAS -->
+    <!-- ===================================================================== -->
     <div class="bg-card rounded-xl shadow-sm border border-border p-5 print:border-none print:p-0">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border">
             <div>
@@ -17,46 +19,43 @@
                     <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">Macroproyectos</a>
                     {% if macro_seleccionado %}
                         <span>/</span>
-                        <a href="{% url 'proyectos_logistica_por_macroproyecto' macro_seleccionado.id %}" class="hover:underline font-semibold text-primary">{{ macro_seleccionado.nombre }}</a>
+                        <a href="{% url 'logistica_home' %}" class="hover:underline font-semibold text-primary">{{ macro_seleccionado.nombre }}</a>
                     {% endif %}
                     <span>/</span>
                     <span class="text-foreground font-medium">Vista Global de Materiales y Nodos</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
-                    <span>🌐</span> Vista Global de Materiales y Nodos
-                </h1>
-                <p class="text-xs sm:text-sm text-muted-foreground mt-1">
-                    Kardex general de obra, matriz completa de nodos/apoyos técnicos, auditoría de desmontes y balance de <strong>Material que Sobra</strong>.
-                </p>
+                <h2 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
+                    <span>🌐</span> Vista Global de Materiales
+                </h2>
             </div>
 
             <!-- Botones de Acción Rápida -->
             <div class="flex flex-wrap items-center gap-2.5 print:hidden">
-                <button type="button" onclick="window.print()"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
-                    <span>🖨️</span> Imprimir
-                </button>
-
                 {% if proyecto_seleccionado %}
                 <a href="{% url 'exportar_vista_global_excel' %}?proyecto_id={{ proyecto_seleccionado.id }}"
                    class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
                    title="Descargar este proyecto consolidado en Excel (Balance y Nodos)">
                     <span>📊</span> Descargar Excel
                 </a>
-
-                <a href="{% url 'registrar_entrada_material' proyecto_seleccionado.id %}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm transition">
-                    <span>+</span> Entrada
-                </a>
-
                 <a href="{% url 'detalle_proyecto' proyecto_seleccionado.id %}"
                    class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
                     <span>⚡</span> Postes (Ing.)
                 </a>
-
                 <a href="{% url 'detalle_proyecto_logistica' proyecto_seleccionado.id %}"
                    class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-lg transition">
                     <span>📦</span> Detalle Logística
+                </a>
+                {% elif macro_seleccionado %}
+                <a href="{% url 'exportar_vista_global_excel' %}?macroproyecto_id={{ macro_seleccionado.id }}&proyecto_id=todos"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                   title="Descargar todos los proyectos de este macroproyecto en Excel">
+                    <span>📊</span> Descargar Consolidado Macro (Excel)
+                </a>
+                {% else %}
+                <a href="{% url 'exportar_vista_global_excel' %}?proyecto_id=todos"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                   title="Descargar consolidado global en Excel">
+                    <span>📊</span> Descargar Consolidado Global (Excel)
                 </a>
                 {% endif %}
 
@@ -88,14 +87,20 @@
                     </select>
                 </div>
 
-                <!-- 2. Selector de Proyecto (Filtrado Dinámicamente) -->
+                <!-- 2. Selector de Proyecto / Consolidado -->
                 <div>
                     <label for="selectProyecto" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        2. Proyecto / Microproyecto
+                        2. Proyecto / Ámbito
                     </label>
                     <select id="selectProyecto" name="proyecto_id"
                             class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">-- Selecciona un Proyecto --</option>
+                        <option value="todos" {% if es_consolidado %}selected{% endif %}>
+                            {% if macro_seleccionado %}
+                                🌐 Todos los Proyectos de {{ macro_seleccionado.nombre }} (Consolidado)
+                            {% else %}
+                                🌐 Todos los Macroproyectos y Proyectos (Global)
+                            {% endif %}
+                        </option>
                         {% for p in todos_proyectos %}
                             <option value="{{ p.id }}" data-macro="{{ p.macroproyecto_id|default:'' }}"
                                     {% if proyecto_seleccionado and proyecto_seleccionado.id == p.id %}selected{% endif %}>
@@ -108,11 +113,11 @@
                 <!-- 3. Buscador en vivo de Materiales / Nodos -->
                 <div>
                     <label for="inputBuscadorGlobal" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        3. Buscar Material / Nodo
+                        3. Búsqueda Rápida General
                     </label>
                     <div class="relative">
                         <input type="text" id="inputBuscadorGlobal" name="q" value="{{ query|default:'' }}"
-                               placeholder="Ej: luminaria, cable, nodo 2..."
+                               placeholder="Buscar por barrio, cuadrilla, poste, material..."
                                autocomplete="off"
                                class="w-full border border-border-strong rounded-lg pl-8 pr-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-muted-foreground pointer-events-none">
@@ -127,11 +132,11 @@
                 <div class="flex items-end gap-2">
                     <button type="submit"
                             class="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-sm transition text-center">
-                        Consultar Proyecto
+                        Consultar
                     </button>
                     <a href="{% url 'vista_global_logistica' %}"
                        class="px-3 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg border border-border transition text-center"
-                       title="Restablecer filtros">
+                       title="Restablecer filtros de búsqueda">
                         Limpiar
                     </a>
                 </div>
@@ -139,64 +144,11 @@
         </div>
     </div>
 
-    {% if proyecto_seleccionado %}
-    <!-- BANNER INFORMATIVO DEL PROYECTO SELECCIONADO Y NOTA TÉCNICA DE RED -->
-    <div class="bg-card rounded-xl shadow-sm border border-border p-5 space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="size-3.5 rounded-full bg-primary animate-pulse"></span>
-                <h2 class="text-xl sm:text-2xl font-black text-foreground">
-                    Proyecto {{ proyecto_seleccionado.numero_emcali }}
-                </h2>
+    {% if proyectos_scope.exists %}
 
-                {% if macro_seleccionado %}
-                <span class="px-3 py-1 text-xs font-bold rounded-lg bg-primary-soft text-primary border border-blue-200">
-                    Macroproyecto: {{ macro_seleccionado.nombre }}
-                </span>
-                {% endif %}
-
-                {% if proyecto_seleccionado.tipo == "AP_BARRIO" %}
-                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-900 border border-amber-300">
-                        AP Barrio
-                    </span>
-                {% elif proyecto_seleccionado.tipo == "AP_PARQUE" %}
-                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">
-                        AP Parque / Cancha
-                    </span>
-                {% elif proyecto_seleccionado.tipo == "AP" %}
-                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
-                        Alumbrado Público (AP)
-                    </span>
-                {% elif proyecto_seleccionado.tipo == "BT" %}
-                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-primary-soft text-primary border border-blue-200">
-                        Baja Tensión (BT)
-                    </span>
-                {% elif proyecto_seleccionado.tipo == "MT" %}
-                    <span class="px-3 py-1 text-xs font-bold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
-                        Media Tensión (MT)
-                    </span>
-                {% endif %}
-
-                <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-success border border-green-200">
-                    {{ proyecto_seleccionado.estado }}
-                </span>
-
-                <span class="px-3 py-1 text-xs font-extrabold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    ⚡ {{ total_nodos }} Nodos / Apoyos Registrados
-                </span>
-            </div>
-        </div>
-
-        <!-- NOTA TÉCNICA INTELIGENTE SEGÚN EL TIPO DE RED -->
-        <div class="p-3.5 rounded-lg border text-xs font-medium flex items-start gap-2.5 {% if proyecto_seleccionado.tipo == 'MT' %}bg-purple-50 text-purple-950 border-purple-200{% elif proyecto_seleccionado.tipo in 'AP_BARRIO,AP_PARQUE,AP' %}bg-amber-50 text-amber-950 border-amber-200{% else %}bg-blue-50 text-blue-950 border-blue-200{% endif %}">
-            <span class="text-base shrink-0">ℹ️</span>
-            <div>
-                <strong class="font-bold">Comportamiento Técnico de la Red:</strong> {{ nota_tecnica_red }}
-            </div>
-        </div>
-    </div>
-
-    <!-- TARJETAS DE KPIS PRINCIPALES (CON MATERIAL QUE SOBRA) -->
+    <!-- ===================================================================== -->
+    <!-- 3. TARJETAS DE KPIS PRINCIPALES (CON MATERIAL QUE SOBRA) -->
+    <!-- ===================================================================== -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 print:grid-cols-4">
         <!-- 1. Suministrado (Entradas) -->
         <div class="bg-card rounded-xl shadow-sm border border-emerald-200 bg-emerald-50/20 p-4">
@@ -237,64 +189,41 @@
         </div>
     </div>
 
-    <!-- PESTAÑAS ORGANIZADAS (NODOS TIPO INGENIERÍA + BALANCE EDSON) -->
-    <div x-data="{ tab: 'nodos' }" class="space-y-4">
-        <!-- Botones de Pestañas -->
-        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 overflow-x-auto print:hidden">
-            <button @click="tab = 'nodos'"
-                    :class="tab === 'nodos' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
-                ⚡ Matriz de Nodos / Apoyos (Formato Ingeniería)
-                <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-bold">{{ apoyos|length }} nodos</span>
+    <!-- ===================================================================== -->
+    <!-- 4. PESTAÑAS INTERACTIVAS (NODOS INGENIERÍA + DEVOLUCIÓN + BALANCE + DESMONTES + ENTRADAS) -->
+    <!-- ===================================================================== -->
+    <div class="space-y-4" id="contenedorModulosGlobal">
+        <!-- Barra de Navegación de Pestañas -->
+        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 overflow-x-auto print:hidden shadow-sm">
+            <button type="button" onclick="cambiarPestanaGlobal('nodos')" id="tabBtnNodos" class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-indigo-600 text-indigo-700 font-bold tab-btn-global">
+                ⚡ Matriz de Nodos / Apoyos (Filtros Tipo Excel) <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-bold" id="badgeNodosTotal">{{ apoyos|length }}</span>
             </button>
-
-            <button @click="tab = 'balance'"
-                    :class="tab === 'balance' ? 'border-b-2 border-blue-600 text-primary font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
-                📋 Matriz de Liquidación (Estilo Edson)
-                <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ balance_materiales|length }} materiales</span>
+            <button type="button" onclick="cambiarPestanaGlobal('devoluciones')" id="tabBtnDevoluciones" class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-global">
+                ↩️ Devolución / Reintegros <span class="text-xs px-2 py-0.5 rounded-full {% if materiales_devolucion|length > 0 %}bg-amber-100 text-amber-900 font-bold border border-amber-300{% else %}bg-muted text-muted-foreground{% endif %}">{{ materiales_devolucion|length }}</span>
             </button>
-
-            <button @click="tab = 'retiros'"
-                    :class="tab === 'retiros' ? 'border-b-2 border-amber-600 text-amber-800 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
-                🛠️ Resumen de Desmontes
-                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold">{{ tabla_resumen_retiros|length }}</span>
+            <button type="button" onclick="cambiarPestanaGlobal('balance')" id="tabBtnBalance" class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-global">
+                📋 Matriz de Liquidación (Estilo Edson) <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ balance_materiales|length }} materiales</span>
             </button>
-
-            <button @click="tab = 'entradas'"
-                    :class="tab === 'entradas' ? 'border-b-2 border-emerald-600 text-emerald-700 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
-                📦 Entradas & Remisiones
-                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">{{ entradas|length }}</span>
+            <button type="button" onclick="cambiarPestanaGlobal('retiros')" id="tabBtnRetiros" class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-global">
+                🛠️ Resumen de Desmontes <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold">{{ tabla_resumen_retiros|length }}</span>
+            </button>
+            <button type="button" onclick="cambiarPestanaGlobal('entradas')" id="tabBtnEntradas" class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-global">
+                📦 Entradas & Remisiones <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">{{ entradas|length }}</span>
             </button>
         </div>
 
         <!-- ================================================================= -->
-        <!-- PESTAÑA 1: TABLA MATRIZ COMPLETA DE NODOS / APOYOS (INGENIERÍA) -->
+        <!-- PESTAÑA 1: TABLA MATRIZ COMPLETA DE NODOS / APOYOS CON FILTROS EXCEL -->
         <!-- ================================================================= -->
-        <div x-show="tab === 'nodos'" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden">
-            <div class="p-4 bg-muted/60 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                    <h3 class="font-bold text-foreground text-base">
-                        Matriz Poste a Poste: Todos los Nodos del Proyecto {{ proyecto_seleccionado.numero_emcali }}
-                    </h3>
-                    <p class="text-xs text-muted-foreground">
-                        Visualización detallada de cada nodo/poste con su cuadrilla ejecutante, código de luminaria y cantidades de material instaladas y retiradas.
-                    </p>
-                </div>
-                <span class="text-xs font-bold text-indigo-800 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
-                    {{ apoyos|length }} Nodos en obra
-                </span>
-            </div>
-
+        <div id="panelNodos" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden pestana-panel-global">
+            <!-- Tabla de Nodos con Overflow -->
             <div class="overflow-x-auto max-h-[75vh]">
                 <table class="min-w-full border-collapse text-left text-xs" id="tablaNodosGlobal">
                     <thead class="sticky top-0 z-20">
                         <!-- Banda Superior de Agrupación -->
                         <tr class="bg-sky-100 text-sky-900 font-extrabold text-center border-b border-sky-300 text-xs">
-                            <th colspan="6" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
-                                IDENTIFICACIÓN DEL APOYO (POSTE)
+                            <th colspan="13" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
+                                IDENTIFICACIÓN TÉCNICA Y LOCALIZACIÓN DEL APOYO (POSTE)
                             </th>
                             <th colspan="{{ materiales_columnas|length|default:1 }}" class="px-4 py-2 border-r border-sky-300 bg-sky-100">
                                 MATERIALES E INSTALACIONES TÉCNICAS (CON CANTIDADES INSTALADAS Y RETIROS)
@@ -304,42 +233,155 @@
                             </th>
                         </tr>
 
-                        <!-- Encabezados de Columna -->
-                        <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
-                            <th class="px-3 py-2.5 border-r border-gray-700 whitespace-nowrap min-w-[150px]">
-                                QUIÉN EJECUTA
+                        <!-- Encabezados de Columna con Botones de Filtro Tipo Excel -->
+                        <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700 select-none">
+                            
+                            <!-- Col 0: Proyecto -->
+                            <th class="px-2.5 py-2 border-r border-gray-700 whitespace-nowrap min-w-[130px] th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>PROYECTO</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Proyecto" onclick="abrirFiltroExcel(event, 0, 'PROYECTO')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
                             </th>
-                            <th class="px-3 py-2.5 border-r border-gray-700 whitespace-nowrap min-w-[110px]">
-                                NODO / POSTE
+
+                            <!-- Col 1: Quién Ejecuta -->
+                            <th class="px-2.5 py-2 border-r border-gray-700 whitespace-nowrap min-w-[140px] th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>QUIÉN EJECUTA</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Cuadrilla / Ejecutante" onclick="abrirFiltroExcel(event, 1, 'QUIÉN EJECUTA')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
                             </th>
-                            <th class="px-2 py-2.5 border-r border-gray-700 text-center whitespace-nowrap w-16">
-                                N° APOYO
+
+                            <!-- Col 2: Nodo / Poste -->
+                            <th class="px-2 py-2 border-r border-gray-700 whitespace-nowrap min-w-[100px] th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>NODO / POSTE</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Nodo" onclick="abrirFiltroExcel(event, 2, 'NODO / POSTE')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
                             </th>
-                            <th class="px-2 py-2.5 border-r border-gray-700 text-center whitespace-nowrap w-24">
-                                ESTADO
+
+                            <!-- Col 3: N° Apoyo -->
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="3">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>N° APOYO</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por N° Apoyo" onclick="abrirFiltroExcel(event, 3, 'N° APOYO')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
                             </th>
-                            <th class="px-2 py-2.5 border-r border-gray-700 text-center whitespace-nowrap min-w-[90px]">
-                                POTENCIA
+
+                            <!-- Col 4: Fecha -->
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px] th-excel-col" data-col-idx="4">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>FECHA</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Fecha" onclick="abrirFiltroExcel(event, 4, 'FECHA')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
                             </th>
-                            <th class="px-3 py-2.5 border-r border-gray-700 text-center whitespace-nowrap min-w-[130px]">
-                                CÓDIGO LUM.
+
+                            <!-- Col 5: Dirección / Barrio -->
+                            <th class="px-3 py-2 border-r border-gray-700 whitespace-nowrap min-w-[160px] th-excel-col" data-col-idx="5">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>DIRECCIÓN / BARRIO</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Dirección / Barrio" onclick="abrirFiltroExcel(event, 5, 'DIRECCIÓN / BARRIO')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 6: Tipo de Instalación -->
+                            <th class="px-2.5 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[125px] th-excel-col" data-col-idx="6">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>TIPO INSTALACIÓN</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Tipo de Instalación (Instalación, Retiro, Desmonte)" onclick="abrirFiltroExcel(event, 6, 'TIPO INSTALACIÓN')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 7: Tipo Estructura -->
+                            <th class="px-2.5 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[120px] th-excel-col" data-col-idx="7">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>ESTRUCTURA</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Tipo Estructura" onclick="abrirFiltroExcel(event, 7, 'ESTRUCTURA')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 8: Cant. Retenida -->
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[85px] th-excel-col" data-col-idx="8">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>CANT. RET</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Cant. Retenida" onclick="abrirFiltroExcel(event, 8, 'CANT. RETENIDA')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 9: Metros Retenido -->
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[85px] th-excel-col" data-col-idx="9">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>MET. RET</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Metros Retenido" onclick="abrirFiltroExcel(event, 9, 'METROS RETENIDO')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 10: Estado -->
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap w-24 th-excel-col" data-col-idx="10">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>ESTADO</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Estado" onclick="abrirFiltroExcel(event, 10, 'ESTADO')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 11: Potencia -->
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[85px] th-excel-col" data-col-idx="11">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>POTENCIA</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Potencia" onclick="abrirFiltroExcel(event, 11, 'POTENCIA')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <!-- Col 12: Código Lum. -->
+                            <th class="px-2.5 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px] th-excel-col" data-col-idx="12">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>CÓDIGO LUM.</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Código Lum." onclick="abrirFiltroExcel(event, 12, 'CÓDIGO LUM.')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
                             </th>
 
                             <!-- Columnas Dinámicas de Materiales -->
                             {% for mat in materiales_columnas %}
-                            <th class="px-2.5 py-2.5 border-r border-gray-700 text-center min-w-[130px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
+                            <th class="px-2.5 py-2 border-r border-gray-700 text-center min-w-[130px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
                                 <div class="truncate font-semibold text-white">{{ mat.descripcion }}</div>
                                 <span class="inline-block mt-0.5 px-1 py-0.2 rounded text-[9px] bg-amber-300 text-amber-900 font-bold">
                                     {{ mat.unidad|default:"UN" }}
                                 </span>
                             </th>
                             {% empty %}
-                            <th class="px-4 py-2.5 border-r border-gray-700 text-center text-gray-300 italic font-normal">
+                            <th class="px-4 py-2 border-r border-gray-700 text-center text-gray-300 italic font-normal">
                                 (Sin materiales configurados en los apoyos)
                             </th>
                             {% endfor %}
 
-                            <th class="px-3 py-2.5 text-center whitespace-nowrap w-28 bg-neutral">
+                            <!-- Columna Acciones -->
+                            <th class="px-3 py-2 text-center whitespace-nowrap w-24 bg-neutral">
                                 ACCIONES
                             </th>
                         </tr>
@@ -348,12 +390,37 @@
                     <!-- FILAS DE NODOS / APOYOS -->
                     <tbody class="divide-y divide-gray-200">
                         {% for fila in filas_matriz %}
-                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-blue-50/50{% else %}bg-card{% endif %} hover:bg-primary-soft/30 transition fila-nodo-global">
-                            <!-- Quién Ejecuta -->
-                            <td class="px-3 py-2 border-r border-border whitespace-nowrap font-medium text-foreground">
+                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-blue-50/40{% else %}bg-card{% endif %} hover:bg-primary-soft/30 transition fila-nodo-global"
+                            data-col-0="{{ fila.apoyo.proyecto.numero_emcali|default:'Sin Proyecto' }}"
+                            data-col-1="{{ fila.apoyo.quien_ejecuta.nombre_completo|default:'Sin asignar' }}"
+                            data-col-2="{{ fila.apoyo.nodo|default:'Sin Nodo' }}"
+                            data-col-3="{{ fila.apoyo.numero_apoyo|default:'—' }}"
+                            data-col-4="{{ fila.apoyo.fecha|date:'d/m/Y'|default:'—' }}"
+                            data-col-5="{{ fila.apoyo.direccion|default:'—' }}"
+                            data-col-6="{{ fila.apoyo.tipo_instalacion|default:'—' }}"
+                            data-col-7="{{ fila.apoyo.tipo_estructura|default:'—' }}"
+                            data-col-8="{{ fila.apoyo.cantidad_retenida|default:'—' }}"
+                            data-col-9="{{ fila.apoyo.metros_retenido|default:'—' }}"
+                            data-col-10="{{ fila.apoyo.estado|default:'—' }}"
+                            data-col-11="{% for lum in fila.apoyo.luminarias.all %}{{ lum.potencia|default:'—' }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}"
+                            data-col-12="{% for lum in fila.apoyo.luminarias.all %}{{ lum.codigo|default:'—' }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}">
+
+                            <!-- Col 0: Proyecto -->
+                            <td class="px-2.5 py-2 border-r border-border whitespace-nowrap font-bold text-xs text-foreground">
+                                {% if fila.apoyo.proyecto %}
+                                    <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-900 border border-blue-200 font-bold">
+                                        Proy. {{ fila.apoyo.proyecto.numero_emcali }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400 italic">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Col 1: Quién Ejecuta -->
+                            <td class="px-2.5 py-2 border-r border-border whitespace-nowrap font-medium text-foreground">
                                 {% if fila.apoyo.quien_ejecuta %}
                                     <div class="flex items-center gap-1.5 font-semibold text-foreground text-xs">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                        <span class="size-2 rounded-full bg-emerald-500 shrink-0"></span>
                                         <span>{{ fila.apoyo.quien_ejecuta.nombre_completo }}</span>
                                     </div>
                                 {% else %}
@@ -361,17 +428,83 @@
                                 {% endif %}
                             </td>
 
-                            <!-- Nodo / Poste -->
-                            <td class="px-3 py-2 font-bold text-foreground border-r border-border whitespace-nowrap font-mono text-xs">
+                            <!-- Col 2: Nodo / Poste -->
+                            <td class="px-2 py-2 font-bold text-foreground border-r border-border whitespace-nowrap font-mono text-xs">
                                 <span class="text-primary font-bold">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
                             </td>
 
-                            <!-- N° Apoyo -->
+                            <!-- Col 3: N° Apoyo -->
                             <td class="px-2 py-2 text-center font-semibold text-foreground border-r border-border text-xs">
                                 {{ fila.apoyo.numero_apoyo|default:"—" }}
                             </td>
 
-                            <!-- Estado -->
+                            <!-- Col 4: Fecha -->
+                            <td class="px-2 py-2 text-center text-foreground border-r border-border text-xs font-mono">
+                                {% if fila.apoyo.fecha %}
+                                    <span class="px-1.5 py-0.5 rounded bg-muted text-foreground font-semibold">
+                                        {{ fila.apoyo.fecha|date:"d/m/Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Col 5: Dirección / Barrio -->
+                            <td class="px-3 py-2 text-foreground border-r border-border text-xs font-medium max-w-[220px] truncate" title="{{ fila.apoyo.direccion|default:'' }}">
+                                {{ fila.apoyo.direccion|default:"—" }}
+                            </td>
+
+                            <!-- Col 6: Tipo de Instalación -->
+                            <td class="px-2.5 py-2 text-center border-r border-border text-xs">
+                                {% if fila.apoyo.tipo_instalacion == "Instalación" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-300">
+                                        Instalación
+                                    </span>
+                                {% elif fila.apoyo.tipo_instalacion == "Retiro" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                        Retiro
+                                    </span>
+                                {% elif fila.apoyo.tipo_instalacion == "Desmonte" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                                        Desmonte
+                                    </span>
+                                {% elif fila.apoyo.tipo_instalacion %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-800 border border-gray-300">
+                                        {{ fila.apoyo.tipo_instalacion }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Col 7: Tipo Estructura -->
+                            <td class="px-2.5 py-2 text-center border-r border-border text-xs text-foreground font-medium">
+                                {{ fila.apoyo.tipo_estructura|default:"—" }}
+                            </td>
+
+                            <!-- Col 8: Cant. Retenida -->
+                            <td class="px-2 py-2 text-center border-r border-border text-xs font-semibold text-foreground">
+                                {% if fila.apoyo.cantidad_retenida is not None and fila.apoyo.cantidad_retenida > 0 %}
+                                    <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">
+                                        {{ fila.apoyo.cantidad_retenida|floatformat }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Col 9: Metros Retenido -->
+                            <td class="px-2 py-2 text-center border-r border-border text-xs font-semibold text-foreground">
+                                {% if fila.apoyo.metros_retenido is not None and fila.apoyo.metros_retenido > 0 %}
+                                    <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-900 border border-indigo-200">
+                                        {{ fila.apoyo.metros_retenido|floatformat }}m
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Col 10: Estado -->
                             <td class="px-2 py-2 text-center border-r border-border">
                                 {% if fila.apoyo.estado == "Finalizado" %}
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-success">Finalizado</span>
@@ -382,7 +515,7 @@
                                 {% endif %}
                             </td>
 
-                            <!-- Potencias Luminarias -->
+                            <!-- Col 11: Potencias Luminarias -->
                             <td class="px-2 py-2 text-center border-r border-border align-top text-xs">
                                 {% for lum in fila.apoyo.luminarias.all %}
                                     <span class="inline-block px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-bold text-[11px] mb-0.5">
@@ -393,7 +526,7 @@
                                 {% endfor %}
                             </td>
 
-                            <!-- Códigos Luminarias -->
+                            <!-- Col 12: Códigos Luminarias -->
                             <td class="px-2 py-2 text-center border-r border-border align-top text-xs">
                                 {% for lum in fila.apoyo.luminarias.all %}
                                     <span class="inline-block px-1.5 py-0.5 rounded bg-primary-soft text-primary font-mono font-bold text-[11px] mb-0.5">
@@ -404,9 +537,12 @@
                                 {% endfor %}
                             </td>
 
-                            <!-- Celdas Numéricas de Cantidad por Material -->
+                            <!-- Celdas Numéricas de Materiales -->
                             {% for celda in fila.celdas %}
-                            <td class="px-2 py-2 text-center border-r border-border font-bold text-xs">
+                            <td class="px-2 py-2 text-center border-r border-border font-bold text-xs celda-material"
+                                data-mat-idx="{{ forloop.counter0 }}"
+                                data-cant-inst="{{ celda.cantidad }}"
+                                data-cant-ret="{{ celda.cantidad_retirada }}">
                                 {% if celda.cantidad > 0 %}
                                     <div class="text-foreground font-black">{{ celda.cantidad|floatformat }}</div>
                                 {% endif %}
@@ -435,40 +571,44 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="{{ materiales_columnas|length|add:7 }}" class="px-6 py-12 text-center text-muted-foreground">
-                                <p class="text-base font-semibold text-foreground">No hay nodos o apoyos registrados en este proyecto.</p>
+                            <td colspan="{{ materiales_columnas|length|add:14 }}" class="px-6 py-12 text-center text-muted-foreground">
+                                <p class="text-base font-semibold text-foreground">No hay nodos o apoyos registrados en este ámbito de consulta.</p>
                                 <p class="text-xs text-muted-foreground mt-1">Crea apoyos desde el módulo de ingeniería para ver la matriz completa.</p>
+                                {% if proyecto_seleccionado %}
                                 <div class="mt-3">
                                     <a href="{% url 'detalle_proyecto' proyecto_seleccionado.id %}" class="btn btn-primario text-xs">
                                         Ir a Ingeniería del Proyecto
                                     </a>
                                 </div>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
 
-                    <!-- FILA DE TOTALES POR COLUMNA DE MATERIAL -->
+                    <!-- FILA DE TOTALES POR COLUMNA DE MATERIAL (RECALCULADA EN VIVO POR JS) -->
                     {% if filas_matriz and materiales_columnas %}
-                    <tfoot class="bg-muted border-t-2 border-gray-400 font-extrabold text-foreground sticky bottom-0 z-10 shadow-inner text-xs">
+                    <tfoot class="bg-muted border-t-2 border-gray-400 font-extrabold text-foreground sticky bottom-0 z-10 shadow-inner text-xs" id="tfootNodosGlobal">
                         <tr>
-                            <td colspan="6" class="px-4 py-2.5 text-right uppercase tracking-wider text-xs border-r border-border-strong bg-gray-200 font-black">
-                                TOTALES DEL PROYECTO:
+                            <td colspan="13" class="px-4 py-2.5 text-right uppercase tracking-wider text-xs border-r border-border-strong bg-gray-200 font-black">
+                                TOTALES (<span id="tfootContadorNodos">{{ apoyos|length }}</span> NODOS VISIBLES):
                             </td>
                             {% for tot in fila_totales %}
-                            <td class="px-2 py-2 text-center border-r border-border-strong bg-primary-soft/80">
-                                <div class="text-blue-950 font-black text-xs" title="Total Instalado">
+                            <td class="px-2 py-2 text-center border-r border-border-strong bg-primary-soft/80 tfoot-col-mat" data-mat-idx="{{ forloop.counter0 }}">
+                                <div class="text-blue-950 font-black text-xs tfoot-val-inst" title="Total Instalado">
                                     {{ tot.total|floatformat }}
                                 </div>
                                 {% if tot.total_retirado > 0 %}
-                                    <div class="inline-block mt-0.5 px-1 py-0.2 rounded text-[10px] bg-amber-200 text-amber-900 font-black border border-amber-300" title="Total Retirado / Desmonte">
+                                    <div class="inline-block mt-0.5 px-1 py-0.2 rounded text-[10px] bg-amber-200 text-amber-900 font-black border border-amber-300 tfoot-val-ret" title="Total Retirado / Desmonte">
                                         Ret: {{ tot.total_retirado|floatformat }}
                                     </div>
+                                {% else %}
+                                    <div class="tfoot-val-ret hidden"></div>
                                 {% endif %}
                             </td>
                             {% endfor %}
                             <td class="px-3 py-2 text-center bg-gray-200 text-foreground text-[11px] font-bold">
-                                {{ apoyos|length }} NODOS
+                                FIN
                             </td>
                         </tr>
                     </tfoot>
@@ -478,13 +618,113 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- PESTAÑA 2: MATRIZ DE LIQUIDACIÓN Y BALANCE (ESTILO EDSON) -->
+        <!-- PESTAÑA 2: MATERIALES DE DEVOLUCIÓN / REINTEGRO A BODEGA -->
         <!-- ================================================================= -->
-        <div x-show="tab === 'balance'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden">
+        <div id="panelDevoluciones" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-amber-300 overflow-hidden pestana-panel-global hidden">
+            <div class="p-4 bg-amber-500/10 border-b border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="font-bold text-amber-950 text-base flex items-center gap-2">
+                        <span>↩️</span> Materiales de Devolución / Reintegro a Bodega
+                    </h3>
+                    <p class="text-xs text-amber-800 mt-0.5">
+                        Materiales suministrados a la obra que sobraron tras la instalación en los apoyos técnicos (<span class="font-semibold">Suministrado &gt; Instalado</span>) y deben ser reintegrados al inventario de bodega.
+                    </p>
+                </div>
+                {% if materiales_devolucion %}
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold shrink-0">
+                    <span>⚠️</span> {{ materiales_devolucion|length }} material{{ materiales_devolucion|pluralize }} sobrante{{ materiales_devolucion|pluralize }} (Total: {{ total_devolucion|floatformat }})
+                </span>
+                {% endif %}
+            </div>
+
+            {% if materiales_devolucion %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-xs divide-y divide-gray-200 text-left" id="tablaDevolucionesGlobal">
+                    <thead class="bg-amber-900 text-white uppercase font-semibold text-[11px]">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-20">Ítem</th>
+                            <th class="px-5 py-3">Descripción del Material</th>
+                            <th class="px-3 py-3 text-center w-20">Unidad</th>
+                            <th class="px-4 py-3 text-right bg-emerald-950/80">Suministrado (Entradas)</th>
+                            <th class="px-4 py-3 text-right bg-indigo-950/80">Instalado en Obra</th>
+                            <th class="px-4 py-3 text-right bg-amber-950 font-black text-amber-200">Cantidad a Devolver</th>
+                            <th class="px-4 py-3 text-right bg-slate-900">Stock Actual en Bodega</th>
+                            <th class="px-4 py-3 text-center w-36">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-card">
+                        {% for fila in materiales_devolucion %}
+                        <tr class="hover:bg-amber-50/40 transition {% if forloop.counter|divisibleby:2 %}bg-amber-50/20{% endif %}">
+                            <td class="px-4 py-3 font-mono text-muted-foreground font-bold text-center">{{ fila.material.item }}</td>
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">{{ fila.material.descripcion }}</td>
+                            <td class="px-3 py-3 text-center font-bold text-muted-foreground">{{ fila.material.unidad|default:"UN" }}</td>
+                            <td class="px-4 py-3 text-right font-bold text-emerald-700 bg-emerald-50/20 text-sm">
+                                {{ fila.entrada|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-indigo-700 bg-indigo-50/20 text-sm">
+                                {{ fila.instalado|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-black text-amber-900 bg-amber-100/70 text-sm">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-300 font-extrabold text-amber-950">
+                                    ↩️ {{ fila.material_sobrante|floatformat }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right font-medium text-foreground bg-muted/30">
+                                {{ fila.stock_bodega|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                    Pendiente Devolución
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="bg-amber-900 text-white font-bold text-xs">
+                        <tr>
+                            <td colspan="3" class="px-4 py-3 text-right uppercase text-[11px] tracking-wider">
+                                TOTAL MATERIALES A DEVOLVER:
+                            </td>
+                            <td class="px-4 py-3 text-right text-emerald-200 font-black">
+                                {{ total_items_entrados|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-right text-indigo-200 font-black">
+                                {{ total_items_instalados|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-right text-amber-300 font-black text-sm bg-amber-950">
+                                ↩️ {{ total_devolucion|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-300 font-normal">
+                                —
+                            </td>
+                            <td class="px-4 py-3 text-center text-amber-200 text-[11px]">
+                                {{ materiales_devolucion|length }} ítem{{ materiales_devolucion|pluralize }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-10 text-center text-muted-foreground bg-card">
+                <div class="size-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                    ✓
+                </div>
+                <h4 class="font-bold text-foreground text-sm">No hay materiales sobrantes pendientes de devolución</h4>
+                <p class="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+                    Todo el material suministrado a la obra coincide exactamente con las cantidades instaladas en los postes técnicos o no registra sobrantes.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- PESTAÑA 3: MATRIZ DE LIQUIDACIÓN Y BALANCE (ESTILO EDSON) -->
+        <!-- ================================================================= -->
+        <div id="panelBalance" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden pestana-panel-global hidden">
             <div class="p-4 bg-muted border-b border-border flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
-                        Kardex y Matriz de Liquidación de Materiales (Proyecto {{ proyecto_seleccionado.numero_emcali }})
+                        Kardex y Matriz de Liquidación de Materiales
                     </h3>
                     <p class="text-xs text-muted-foreground mt-0.5">
                         Fórmulas consolidadas de Entradas, Instalado en Obra, Retirado y <strong>Material que Sobra</strong>.
@@ -549,7 +789,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="8" class="px-6 py-12 text-center text-muted-foreground">
-                                No hay materiales registrados para este proyecto.
+                                No hay materiales registrados para este ámbito de consulta.
                             </td>
                         </tr>
                         {% endfor %}
@@ -587,13 +827,13 @@
         <!-- ================================================================= -->
         <!-- PESTAÑA 3: RESUMEN DE DESMONTES / RETIROS -->
         <!-- ================================================================= -->
-        <div x-show="tab === 'retiros'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-amber-300 overflow-hidden">
+        <div id="panelRetiros" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-amber-300 overflow-hidden pestana-panel-global hidden">
             <div class="p-4 bg-amber-500/10 border-b border-amber-200 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="p-2 bg-amber-100 text-amber-900 rounded-lg text-sm">🛠️</span>
                     <div>
                         <h3 class="font-bold text-amber-950 text-base">
-                            Materiales Retirados y Desmontados en el Proyecto {{ proyecto_seleccionado.numero_emcali }}
+                            Materiales Retirados y Desmontados
                         </h3>
                         <p class="text-xs text-amber-800">
                             Equipos antiguos y materiales desmontados durante la intervención en los postes.
@@ -634,7 +874,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="4" class="px-6 py-8 text-center text-muted-foreground">
-                                No se registran materiales retirados ni desmontados en este proyecto.
+                                No se registran materiales retirados ni desmontados en esta consulta.
                             </td>
                         </tr>
                         {% endfor %}
@@ -646,18 +886,20 @@
         <!-- ================================================================= -->
         <!-- PESTAÑA 4: HISTORIAL DE ENTRADAS Y REMISIONES -->
         <!-- ================================================================= -->
-        <div x-show="tab === 'entradas'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-5 space-y-4">
+        <div id="panelEntradas" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-5 space-y-4 pestana-panel-global hidden">
             <div class="flex items-center justify-between pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
                         Remisiones y Suministros Recibidos en Obra
                     </h3>
-                    <p class="text-xs text-muted-foreground">Entradas de bodega o compras directas para el proyecto {{ proyecto_seleccionado.numero_emcali }}.</p>
+                    <p class="text-xs text-muted-foreground">Entradas de bodega o compras directas para los proyectos consultados.</p>
                 </div>
+                {% if proyecto_seleccionado %}
                 <a href="{% url 'registrar_entrada_material' proyecto_seleccionado.id %}"
                    class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
                     + Nueva Entrada
                 </a>
+                {% endif %}
             </div>
 
             {% for ent in entradas %}
@@ -667,6 +909,11 @@
                         <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md">
                             {{ ent.fecha|date:"d/m/Y" }}
                         </span>
+                        {% if ent.proyecto %}
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                            Proyecto {{ ent.proyecto.numero_emcali }}
+                        </span>
+                        {% endif %}
                         {% if ent.numero_remision %}
                         <span class="text-xs font-semibold text-foreground">
                             Remisión: <strong>{{ ent.numero_remision }}</strong>
@@ -706,13 +953,13 @@
             </div>
             {% empty %}
             <div class="text-center py-8 text-muted-foreground">
-                <p class="text-sm font-medium">No se registran remisiones ni entradas suministradas a este proyecto.</p>
+                <p class="text-sm font-medium">No se registran remisiones ni entradas suministradas en este ámbito de consulta.</p>
             </div>
             {% endfor %}
         </div>
     </div>
     {% else %}
-    <!-- MENSAJE SI NO HAY PROYECTOS REGISTRADOS -->
+    <!-- MENSAJE SI NO HAY PROYECTOS DISPONIBLES -->
     <div class="bg-card rounded-xl shadow-sm border border-border p-12 text-center text-muted-foreground">
         <p class="text-base font-semibold text-foreground">No se encontraron proyectos disponibles</p>
         <p class="text-xs text-muted-foreground mt-1">Crea proyectos en el módulo de Ingeniería o Logística para visualizarlos en la Vista Global.</p>
@@ -724,21 +971,534 @@
 
 </div>
 
-<!-- SCRIPT DE SINCRONIZACIÓN DINÁMICA Y BÚSQUEDA EN TIEMPO REAL -->
+<!-- ========================================================================= -->
+<!-- 5. MENÚ FLOTANTE INTERACTIVO TIPO EXCEL (POPOVER) -->
+<!-- ========================================================================= -->
+<div id="excelFilterPopover"
+     class="hidden fixed z-50 w-72 max-w-[90vw] bg-card border border-border-strong rounded-xl shadow-2xl p-3 text-xs text-foreground space-y-2.5 animate-in fade-in duration-150"
+     style="top: 0; left: 0;">
+    
+    <!-- Encabezado del Popover -->
+    <div class="flex items-center justify-between border-b border-border pb-2">
+        <div class="flex items-center gap-1.5 font-bold text-foreground truncate">
+            <span>🔍</span> <span id="popoverColName">Filtrar Columna</span>
+        </div>
+        <button type="button" onclick="cerrarFiltroExcel()" class="text-muted-foreground hover:text-foreground text-sm font-bold px-1.5 py-0.5 rounded hover:bg-muted transition">
+            ✕
+        </button>
+    </div>
+
+    <!-- Acciones de Ordenamiento -->
+    <div class="grid grid-cols-2 gap-1.5 border-b border-border pb-2">
+        <button type="button" id="btnSortAsc" onclick="ejecutarSortExcel(true)"
+                class="flex items-center justify-center gap-1 px-2 py-1.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg transition text-[11px]">
+            <span>🔼</span> Ordenar A-Z
+        </button>
+        <button type="button" id="btnSortDesc" onclick="ejecutarSortExcel(false)"
+                class="flex items-center justify-center gap-1 px-2 py-1.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg transition text-[11px]">
+            <span>🔽</span> Ordenar Z-A
+        </button>
+    </div>
+
+    <!-- Botón Borrar Filtro de esta Columna -->
+    <button type="button" id="btnClearThisCol" onclick="borrarFiltroColumnaActual()"
+            class="w-full flex items-center justify-center gap-1 px-2 py-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-bold rounded-lg transition text-[11px]">
+        <span>🗑️</span> Borrar filtro de esta columna
+    </button>
+
+    <!-- Buscador en Tiempo Real dentro del Dropdown -->
+    <div class="relative">
+        <input type="text" id="popoverSearchInput" placeholder="Buscar en opciones..."
+               autocomplete="off"
+               class="w-full border border-border-strong rounded-lg pl-7 pr-2.5 py-1.5 text-xs bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-2 text-muted-foreground pointer-events-none">
+            🔍
+        </span>
+    </div>
+
+    <!-- Lista Desplazable de Casillas de Selección Múltiple -->
+    <div class="space-y-1">
+        <!-- Casilla Seleccionar Todo -->
+        <label class="flex items-center gap-2 p-1 rounded hover:bg-muted font-bold text-foreground cursor-pointer border-b border-border pb-1">
+            <input type="checkbox" id="chkSelectAll" class="size-3.5 rounded text-primary focus:ring-0 cursor-pointer" onchange="toggleSelectAllExcel(this.checked)">
+            <span>(Seleccionar todo)</span>
+        </label>
+
+        <!-- Contenedor dinámico de checkboxes -->
+        <div id="popoverCheckboxList" class="max-h-44 overflow-y-auto space-y-0.5 p-1 bg-muted/20 rounded-lg border border-border">
+            <!-- Rellenado dinámicamente con JS -->
+        </div>
+    </div>
+
+    <!-- Botones de Confirmación y Cancelación -->
+    <div class="flex items-center justify-end gap-2 pt-2 border-t border-border">
+        <button type="button" onclick="cerrarFiltroExcel()"
+                class="px-3 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition">
+            Cancelar
+        </button>
+        <button type="button" onclick="aplicarFiltroColumnaActual()"
+                class="px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
+            Aceptar
+        </button>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 6. ESTILOS Y MOTOR JAVASCRIPT DE FILTRADO TIPO EXCEL -->
+<!-- ========================================================================= -->
+<style>
+/* Estilos para el botón de filtro en los encabezados */
+.btn-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.btn-filter-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}
+.btn-filter-trigger.filter-active {
+    background-color: #f59e0b !important;
+    color: #78350f !important;
+    border-color: #d97706 !important;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.7);
+}
+.th-excel-col.has-active-filter {
+    background-color: #1e3a8a !important;
+}
+</style>
+
 <script>
+// ---------- ESTADO GLOBAL DE FILTROS TIPO EXCEL ----------
+let colActualFiltro = null;
+let nombreColActualFiltro = "";
+// activeFilters: { colIdx: Set of selected string values }
+let activeFilters = {};
+let allDistinctValuesMap = {}; // colIdx -> Array of { val: string, count: number }
+
+// ---------- PESTAÑAS PRINCIPALES ----------
+function cambiarPestanaGlobal(tabName) {
+    const paneles = {
+        'nodos': document.getElementById('panelNodos'),
+        'devoluciones': document.getElementById('panelDevoluciones'),
+        'balance': document.getElementById('panelBalance'),
+        'retiros': document.getElementById('panelRetiros'),
+        'entradas': document.getElementById('panelEntradas')
+    };
+
+    const botones = {
+        'nodos': document.getElementById('tabBtnNodos'),
+        'devoluciones': document.getElementById('tabBtnDevoluciones'),
+        'balance': document.getElementById('tabBtnBalance'),
+        'retiros': document.getElementById('tabBtnRetiros'),
+        'entradas': document.getElementById('tabBtnEntradas')
+    };
+
+    for (const key in paneles) {
+        if (paneles[key]) {
+            if (key === tabName) {
+                paneles[key].classList.remove('hidden');
+                paneles[key].style.display = '';
+            } else {
+                paneles[key].classList.add('hidden');
+                paneles[key].style.display = 'none';
+            }
+        }
+    }
+
+    for (const key in botones) {
+        if (botones[key]) {
+            if (key === tabName) {
+                botones[key].className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-indigo-600 text-indigo-700 font-bold tab-btn-global';
+            } else {
+                botones[key].className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-global';
+            }
+        }
+    }
+}
+
+// ---------- INICIALIZACIÓN DE VALORES DISTINTOS POR COLUMNA ----------
+function indexarValoresColumnas() {
+    const filas = document.querySelectorAll(".fila-nodo-global");
+    allDistinctValuesMap = {};
+
+    // Columnas técnicas de 0 a 12
+    for (let c = 0; c <= 12; c++) {
+        const counts = {};
+        filas.forEach(f => {
+            const rawVal = (f.getAttribute(`data-col-${c}`) || "").trim();
+            const val = rawVal === "" ? "(Vacío)" : rawVal;
+            counts[val] = (counts[val] || 0) + 1;
+        });
+
+        const list = Object.keys(counts).map(v => ({ val: v, count: counts[v] }));
+        // Orden alfabético
+        list.sort((a, b) => a.val.localeCompare(b.val, undefined, { numeric: true, sensitivity: 'base' }));
+        allDistinctValuesMap[c] = list;
+    }
+}
+
+// ---------- ABRIR POPUP DE FILTRO EXCEL ----------
+function abrirFiltroExcel(event, colIdx, colName) {
+    event.stopPropagation();
+    colActualFiltro = colIdx;
+    nombreColActualFiltro = colName;
+
+    const popover = document.getElementById("excelFilterPopover");
+    const popoverTitle = document.getElementById("popoverColName");
+    const searchInput = document.getElementById("popoverSearchInput");
+    const chkListContainer = document.getElementById("popoverCheckboxList");
+    const chkSelectAll = document.getElementById("chkSelectAll");
+    const btnClearThisCol = document.getElementById("btnClearThisCol");
+
+    popoverTitle.textContent = `Filtrar: ${colName}`;
+    searchInput.value = "";
+
+    // Estado del botón borrar
+    if (activeFilters[colIdx]) {
+        btnClearThisCol.style.display = "flex";
+    } else {
+        btnClearThisCol.style.display = "none";
+    }
+
+    // Valores para esta columna
+    const items = allDistinctValuesMap[colIdx] || [];
+    const currentSelectedSet = activeFilters[colIdx] || null; // null significa todo seleccionado
+
+    chkListContainer.innerHTML = "";
+    let todosMarcados = true;
+
+    items.forEach((item, index) => {
+        const isChecked = currentSelectedSet === null || currentSelectedSet.has(item.val);
+        if (!isChecked) todosMarcados = false;
+
+        const rowDiv = document.createElement("label");
+        rowDiv.className = "flex items-center justify-between gap-2 px-1.5 py-1 rounded hover:bg-muted text-xs cursor-pointer chk-option-item";
+        rowDiv.setAttribute("data-val-normalized", item.val.toLowerCase());
+
+        rowDiv.innerHTML = `
+            <div class="flex items-center gap-2 truncate">
+                <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked ? "checked" : ""}>
+                <span class="truncate font-medium text-foreground">${item.val}</span>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.2 bg-muted text-muted-foreground font-mono rounded-full shrink-0">${item.count}</span>
+        `;
+        chkListContainer.appendChild(rowDiv);
+    });
+
+    chkSelectAll.checked = todosMarcados;
+
+    // Posicionar popover debajo del botón
+    const btn = event.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const popoverWidth = 288; // 72 * 4
+
+    let leftPos = rect.left;
+    if (leftPos + popoverWidth > window.innerWidth - 10) {
+        leftPos = window.innerWidth - popoverWidth - 15;
+    }
+    if (leftPos < 10) leftPos = 10;
+
+    let topPos = rect.bottom + window.scrollY + 6;
+
+    popover.style.left = `${leftPos}px`;
+    popover.style.top = `${topPos}px`;
+    popover.classList.remove("hidden");
+
+    setTimeout(() => {
+        searchInput.focus();
+    }, 50);
+}
+
+// ---------- CERRAR POPUP DE FILTRO EXCEL ----------
+function cerrarFiltroExcel() {
+    const popover = document.getElementById("excelFilterPopover");
+    if (popover) {
+        popover.classList.add("hidden");
+    }
+    colActualFiltro = null;
+}
+
+// ---------- TOGGLE SELECCIONAR TODO ----------
+function toggleSelectAllExcel(checked) {
+    const visibleChkItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item:not(.hidden) .chk-item-filter");
+    visibleChkItems.forEach(chk => {
+        chk.checked = checked;
+    });
+}
+
+// ---------- BUSCADOR EN VIVO DENTRO DEL POPUP ----------
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("popoverSearchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const q = searchInput.value.toLowerCase().trim();
+            const optionItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item");
+            
+            optionItems.forEach(item => {
+                const text = item.getAttribute("data-val-normalized") || "";
+                if (text.includes(q)) {
+                    item.classList.remove("hidden");
+                } else {
+                    item.classList.add("hidden");
+                }
+            });
+        });
+    }
+
+    // Indexar valores al cargar
+    indexarValoresColumnas();
+});
+
+// ---------- APLICAR FILTRO DE LA COLUMNA ACTUAL ----------
+function aplicarFiltroColumnaActual() {
+    if (colActualFiltro === null) return;
+
+    const allChk = document.querySelectorAll("#popoverCheckboxList .chk-item-filter");
+    const allTotal = allChk.length;
+    let checkedCount = 0;
+    const selectedSet = new Set();
+
+    allChk.forEach(chk => {
+        if (chk.checked) {
+            checkedCount++;
+            selectedSet.add(decodeURIComponent(chk.value));
+        }
+    });
+
+    if (checkedCount === allTotal) {
+        // Si todos están marcados, no hay restricción
+        delete activeFilters[colActualFiltro];
+    } else {
+        activeFilters[colActualFiltro] = selectedSet;
+    }
+
+    cerrarFiltroExcel();
+    ejecutarFiltradoGeneral();
+}
+
+// ---------- BORRAR FILTRO DE COLUMNA ACTUAL ----------
+function borrarFiltroColumnaActual() {
+    if (colActualFiltro !== null) {
+        delete activeFilters[colActualFiltro];
+        cerrarFiltroExcel();
+        ejecutarFiltradoGeneral();
+    }
+}
+
+// ---------- LIMPIAR TODOS LOS FILTROS ----------
+function limpiarTodosFiltrosExcel() {
+    activeFilters = {};
+    const inputGlobal = document.getElementById("inputBuscadorGlobal");
+    if (inputGlobal) inputGlobal.value = "";
+    ejecutarFiltradoGeneral();
+}
+
+// ---------- ORDENAR FILAS A-Z / Z-A ----------
+function ejecutarSortExcel(ascendente) {
+    if (colActualFiltro === null) return;
+    const colIdx = colActualFiltro;
+    const tbody = document.querySelector("#tablaNodosGlobal tbody");
+    const filas = Array.from(document.querySelectorAll(".fila-nodo-global"));
+
+    filas.sort((a, b) => {
+        const valA = (a.getAttribute(`data-col-${colIdx}`) || "").trim();
+        const valB = (b.getAttribute(`data-col-${colIdx}`) || "").trim();
+
+        // Comprobación de fechas DD/MM/YYYY
+        const dateA = parseFecha(valA);
+        const dateB = parseFecha(valB);
+        if (dateA && dateB) {
+            return ascendente ? dateA - dateB : dateB - dateA;
+        }
+
+        // Comprobación numérica
+        const numA = parseFloat(valA.replace(/[^0-9.-]+/g,""));
+        const numB = parseFloat(valB.replace(/[^0-9.-]+/g,""));
+        if (!isNaN(numA) && !isNaN(numB) && !valA.includes("/") && !valB.includes("/")) {
+            return ascendente ? numA - numB : numB - numA;
+        }
+
+        // Comparación alfabética estándar
+        return ascendente ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
+    });
+
+    filas.forEach(f => tbody.appendChild(f));
+    cerrarFiltroExcel();
+}
+
+function parseFecha(str) {
+    if (!str || !str.includes("/")) return null;
+    const parts = str.split("/");
+    if (parts.length === 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parseInt(parts[2], 10);
+        return new Date(y, m, d);
+    }
+    return null;
+}
+
+// ---------- MOTOR DE FILTRADO Y RECÁLCULO EN VIVO ----------
+function ejecutarFiltradoGeneral() {
+    const inputGlobal = document.getElementById("inputBuscadorGlobal");
+    const qGlobal = inputGlobal ? inputGlobal.value.toLowerCase().trim() : "";
+    const filas = document.querySelectorAll(".fila-nodo-global");
+
+    let visiblesCount = 0;
+    const activeCols = Object.keys(activeFilters);
+
+    // Sumatorias para el footer
+    const colMatTotals = {}; // matIdx -> { inst: 0, ret: 0 }
+
+    filas.forEach(f => {
+        let cumple = true;
+
+        // 1. Filtro global de texto
+        if (qGlobal !== "") {
+            const txt = f.textContent.toLowerCase();
+            if (!txt.includes(qGlobal)) {
+                cumple = false;
+            }
+        }
+
+        // 2. Filtros de columnas activas
+        if (cumple && activeCols.length > 0) {
+            for (const col of activeCols) {
+                const setValores = activeFilters[col];
+                const rawVal = (f.getAttribute(`data-col-${col}`) || "").trim();
+                const val = rawVal === "" ? "(Vacío)" : rawVal;
+                if (!setValores.has(val)) {
+                    cumple = false;
+                    break;
+                }
+            }
+        }
+
+        if (cumple) {
+            f.style.display = "";
+            visiblesCount++;
+
+            // Sumar celdas de materiales de esta fila visible
+            const celdasMat = f.querySelectorAll(".celda-material");
+            celdasMat.forEach(c => {
+                const mIdx = c.getAttribute("data-mat-idx");
+                if (!colMatTotals[mIdx]) {
+                    colMatTotals[mIdx] = { inst: 0, ret: 0 };
+                }
+                const cInst = parseFloat(c.getAttribute("data-cant-inst")) || 0;
+                const cRet = parseFloat(c.getAttribute("data-cant-ret")) || 0;
+                colMatTotals[mIdx].inst += cInst;
+                colMatTotals[mIdx].ret += cRet;
+            });
+        } else {
+            f.style.display = "none";
+        }
+    });
+
+    // Actualizar contadores
+    const countSpan = document.getElementById("nodosVisiblesCount");
+    if (countSpan) countSpan.textContent = visiblesCount;
+
+    const tfootNodeSpan = document.getElementById("tfootContadorNodos");
+    if (tfootNodeSpan) tfootNodeSpan.textContent = visiblesCount;
+
+    // Actualizar estados visuales en encabezados de columna
+    for (let c = 0; c <= 12; c++) {
+        const th = document.querySelector(`.th-excel-col[data-col-idx="${c}"]`);
+        if (th) {
+            const btn = th.querySelector(".btn-filter-trigger");
+            if (activeFilters[c]) {
+                th.classList.add("has-active-filter");
+                if (btn) {
+                    btn.classList.add("filter-active");
+                    btn.innerHTML = '<span>🔻</span>';
+                }
+            } else {
+                th.classList.remove("has-active-filter");
+                if (btn) {
+                    btn.classList.remove("filter-active");
+                    btn.innerHTML = '<span class="icon-arrow">▼</span>';
+                }
+            }
+        }
+    }
+
+    // Botón global de limpiar filtros
+    const btnLimpiar = document.getElementById("btnLimpiarTodosFiltros");
+    const spanNumFiltros = document.getElementById("filtrosActivosNum");
+    if (btnLimpiar && spanNumFiltros) {
+        const numActivos = activeCols.length + (qGlobal ? 1 : 0);
+        spanNumFiltros.textContent = numActivos;
+        if (numActivos > 0) {
+            btnLimpiar.classList.remove("hidden");
+        } else {
+            btnLimpiar.classList.add("hidden");
+        }
+    }
+
+    // Actualizar celdas del tfoot con los totales dinámicos
+    const tfootCeldas = document.querySelectorAll(".tfoot-col-mat");
+    tfootCeldas.forEach(tc => {
+        const mIdx = tc.getAttribute("data-mat-idx");
+        const tot = colMatTotals[mIdx] || { inst: 0, ret: 0 };
+        const valInstDiv = tc.querySelector(".tfoot-val-inst");
+        const valRetDiv = tc.querySelector(".tfoot-val-ret");
+
+        if (valInstDiv) {
+            valInstDiv.textContent = Number.isInteger(tot.inst) ? tot.inst : tot.inst.toFixed(1);
+        }
+        if (valRetDiv) {
+            if (tot.ret > 0) {
+                valRetDiv.classList.remove("hidden");
+                valRetDiv.textContent = `Ret: ${Number.isInteger(tot.ret) ? tot.ret : tot.ret.toFixed(1)}`;
+            } else {
+                valRetDiv.classList.add("hidden");
+            }
+        }
+    });
+}
+
+// ---------- EVENTOS DE CLIC FUERA Y TECLADO ----------
+document.addEventListener("click", function (e) {
+    const popover = document.getElementById("excelFilterPopover");
+    if (popover && !popover.classList.contains("hidden")) {
+        if (!popover.contains(e.target) && !e.target.closest(".btn-filter-trigger")) {
+            cerrarFiltroExcel();
+        }
+    }
+});
+
+document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+        cerrarFiltroExcel();
+    }
+});
+
+// ---------- SINCRONIZACIÓN DE SELECTORES DINÁMICOS ----------
 document.addEventListener("DOMContentLoaded", function () {
     const selectMacro = document.getElementById("selectMacroproyecto");
     const selectProy = document.getElementById("selectProyecto");
     const inputBuscador = document.getElementById("inputBuscadorGlobal");
     const todosProyectosData = {{ proyectos_js|safe }};
 
-    // 1. Filtrado dinámico del selector de proyectos según el macroproyecto
+    // Selector dependiente
     if (selectMacro && selectProy) {
         selectMacro.addEventListener("change", function () {
             const macroId = selectMacro.value;
             const proyActual = selectProy.value;
 
-            selectProy.innerHTML = '<option value="">-- Selecciona un Proyecto --</option>';
+            selectProy.innerHTML = macroId ?
+                `<option value="todos">🌐 Todos los Proyectos de este Macroproyecto (Consolidado)</option>` :
+                `<option value="todos">🌐 Todos los Macroproyectos y Proyectos (Global)</option>`;
 
             const filtrados = macroId ? todosProyectosData.filter(p => String(p.macro_id) === String(macroId)) : todosProyectosData;
 
@@ -751,24 +1511,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 selectProy.appendChild(opt);
             });
-
-            if (filtrados.length > 0 && macroId) {
-                selectProy.value = filtrados[0].id;
-            }
         });
     }
 
-    // 2. Buscador en vivo para las tablas (Nodos y Balance)
+    // Buscador general en vivo
     if (inputBuscador) {
         inputBuscador.addEventListener("input", function () {
+            ejecutarFiltradoGeneral();
+
+            // Filtrar también en pestaña de balance
             const q = inputBuscador.value.toLowerCase().trim();
-
-            const filasNodos = document.querySelectorAll(".fila-nodo-global");
-            filasNodos.forEach(f => {
-                const txt = f.textContent.toLowerCase();
-                f.style.display = txt.includes(q) ? "" : "none";
-            });
-
             const filasBalance = document.querySelectorAll(".fila-balance-global");
             filasBalance.forEach(f => {
                 const txt = f.textContent.toLowerCase();

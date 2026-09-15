@@ -255,43 +255,48 @@
      MODAL: NUEVO PROYECTO
      ====================================================================== -->
 <div id="modalProyecto"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
+     style="background-color: rgba(2, 6, 23, 0.75) !important;"
      role="dialog"
      aria-modal="true"
      aria-labelledby="tituloModalProyecto">
 
-    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
-
-        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-primary-soft/40">
-            <h2 id="tituloModalProyecto" class="text-lg font-bold text-primary">
-                Nuevo Proyecto
+    <div class="w-full max-w-md rounded-xl border border-gray-200 shadow-2xl overflow-hidden"
+         style="background-color: #ffffff !important; color: #0f172a !important;">
+        <div class="flex items-center justify-between border-b border-blue-800 px-6 py-4"
+             style="background-color: #1e3a8a !important; color: #ffffff !important;">
+            <h2 id="tituloModalProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
+                <span>📁</span> Nuevo Proyecto
             </h2>
 
             <button type="button" id="cerrarModal"
-                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-destructive">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    class="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-blue-800 hover:text-white"
+                    style="color: #ffffff !important;">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 <span class="sr-only">Cerrar</span>
             </button>
         </div>
 
-        <form method="POST" action="{% if macroproyecto %}{% url 'crear_proyecto_en_macroproyecto' macroproyecto.id %}{% else %}{% url 'crear_proyecto' %}{% endif %}">
+        <form method="POST" action="{% if macroproyecto %}{% url 'crear_proyecto_en_macroproyecto' macroproyecto.id %}{% else %}{% url 'crear_proyecto' %}{% endif %}" style="background-color: #ffffff !important;">
             {% csrf_token %}
 
             {% if macroproyecto %}
                 <input type="hidden" name="macroproyecto_id" value="{{ macroproyecto.id }}">
             {% endif %}
 
-            <div class="space-y-4 p-6">
+            <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 {% if macroproyecto %}
-                    <div class="p-3 bg-primary-soft/60 border border-blue-200 rounded-lg text-xs text-primary font-semibold">
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 font-semibold" style="background-color: #eff6ff !important; color: #1e3a8a !important;">
                         <span>Macroproyecto: <strong>{{ macroproyecto.nombre }}</strong></span>
                     </div>
                 {% else %}
                     <div>
-                        <label for="macroproyecto_id" class="campo">Macroproyecto Asignado</label>
-                        <select id="macroproyecto_id" name="macroproyecto_id" class="seleccion">
+                        <label for="macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto Asignado</label>
+                        <select id="macroproyecto_id" name="macroproyecto_id"
+                                style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                             <option value="">(Sin asignar o seleccionar después)</option>
                             {% for m in macroproyectos %}
                                 <option value="{{ m.id }}">{{ m.nombre }}</option>
@@ -301,13 +306,17 @@
                 {% endif %}
 
                 <div>
-                    <label for="numero_emcali" class="campo campo-req">Número o Código de Proyecto</label>
-                    <input type="text" id="numero_emcali" name="numero_emcali" required class="entrada tabular" placeholder="Ej: 2024-BT-001, AP-CANCHA-01, etc.">
+                    <label for="numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de Proyecto <span class="text-red-600">*</span></label>
+                    <input type="text" id="numero_emcali" name="numero_emcali" required
+                           style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 2024-BT-001, AP-CANCHA-01, etc.">
                 </div>
 
                 <div>
-                    <label for="tipo" class="campo campo-req">Tipo de Proyecto / Red</label>
-                    <select id="tipo" name="tipo" required class="seleccion">
+                    <label for="tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Proyecto / Red <span class="text-red-600">*</span></label>
+                    <select id="tipo" name="tipo" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="">Seleccione…</option>
                         <option value="BT">Baja Tensión (BT)</option>
                         <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
@@ -317,8 +326,10 @@
                 </div>
 
                 <div>
-                    <label for="estado" class="campo campo-req">Estado inicial</label>
-                    <select id="estado" name="estado" required class="seleccion">
+                    <label for="estado" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Estado inicial <span class="text-red-600">*</span></label>
+                    <select id="estado" name="estado" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="Planeación" selected>Planeación</option>
                         <option value="En ejecución">En ejecución</option>
                         <option value="Finalizado">Finalizado</option>
@@ -327,9 +338,13 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
-                <button type="button" id="cancelarModal" class="btn btn-secundario">Cancelar</button>
-                <button type="submit" class="btn btn-primario font-bold">Crear Proyecto</button>
+            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4" style="background-color: #f8fafc !important;">
+                <button type="button" id="cancelarModal"
+                        style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
+                        class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
+                <button type="submit"
+                        style="background-color: #1d4ed8 !important; color: #ffffff !important;"
+                        class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear Proyecto</button>
             </div>
         </form>
     </div>
@@ -339,34 +354,39 @@
      MODAL: EDITAR PROYECTO
      ====================================================================== -->
 <div id="modalEditarProyecto"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
+     style="background-color: rgba(2, 6, 23, 0.75) !important;"
      role="dialog"
      aria-modal="true"
      aria-labelledby="tituloModalEditarProyecto">
 
-    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
-
-        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-primary-soft/40">
-            <h2 id="tituloModalEditarProyecto" class="text-lg font-bold text-primary">
-                Editar Proyecto
+    <div class="w-full max-w-md rounded-xl border border-gray-200 shadow-2xl overflow-hidden"
+         style="background-color: #ffffff !important; color: #0f172a !important;">
+        <div class="flex items-center justify-between border-b border-blue-800 px-6 py-4"
+             style="background-color: #1e3a8a !important; color: #ffffff !important;">
+            <h2 id="tituloModalEditarProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
+                <span>✏️</span> Editar Proyecto
             </h2>
 
             <button type="button" id="cerrarModalEditar"
-                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-destructive">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    class="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-blue-800 hover:text-white"
+                    style="color: #ffffff !important;">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 <span class="sr-only">Cerrar</span>
             </button>
         </div>
 
-        <form method="POST" id="formEditarProyecto" action="">
+        <form method="POST" id="formEditarProyecto" action="" style="background-color: #ffffff !important;">
             {% csrf_token %}
 
-            <div class="space-y-4 p-6">
+            <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 <div>
-                    <label for="edit_macroproyecto_id" class="campo">Macroproyecto</label>
-                    <select id="edit_macroproyecto_id" name="macroproyecto_id" class="seleccion">
+                    <label for="edit_macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto</label>
+                    <select id="edit_macroproyecto_id" name="macroproyecto_id"
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="">(Sin asignar)</option>
                         {% for m in macroproyectos %}
                             <option value="{{ m.id }}">{{ m.nombre }}</option>
@@ -375,13 +395,17 @@
                 </div>
 
                 <div>
-                    <label for="edit_numero_emcali" class="campo campo-req">Número o Código de Proyecto</label>
-                    <input type="text" id="edit_numero_emcali" name="numero_emcali" required class="entrada tabular" placeholder="Ej: 2024-BT-001">
+                    <label for="edit_numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de Proyecto <span class="text-red-600">*</span></label>
+                    <input type="text" id="edit_numero_emcali" name="numero_emcali" required
+                           style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 2024-BT-001">
                 </div>
 
                 <div>
-                    <label for="edit_tipo" class="campo campo-req">Tipo de Proyecto / Red</label>
-                    <select id="edit_tipo" name="tipo" required class="seleccion">
+                    <label for="edit_tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Proyecto / Red <span class="text-red-600">*</span></label>
+                    <select id="edit_tipo" name="tipo" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="">Seleccione…</option>
                         <option value="BT">Baja Tensión (BT)</option>
                         <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
@@ -392,8 +416,10 @@
                 </div>
 
                 <div>
-                    <label for="edit_estado" class="campo campo-req">Estado del proyecto</label>
-                    <select id="edit_estado" name="estado" required class="seleccion">
+                    <label for="edit_estado" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Estado del proyecto <span class="text-red-600">*</span></label>
+                    <select id="edit_estado" name="estado" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="Planeación">Planeación</option>
                         <option value="En ejecución">En ejecución</option>
                         <option value="Finalizado">Finalizado</option>
@@ -402,9 +428,13 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
-                <button type="button" id="cancelarModalEditar" class="btn btn-secundario">Cancelar</button>
-                <button type="submit" class="btn btn-primario font-bold">Guardar Cambios</button>
+            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4" style="background-color: #f8fafc !important;">
+                <button type="button" id="cancelarModalEditar"
+                        style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
+                        class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
+                <button type="submit"
+                        style="background-color: #1d4ed8 !important; color: #ffffff !important;"
+                        class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Guardar Cambios</button>
             </div>
         </form>
     </div>
@@ -414,42 +444,49 @@
      MODAL: ELIMINAR PROYECTO
      ====================================================================== -->
 <div id="modalEliminarProyecto"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
+     style="background-color: rgba(2, 6, 23, 0.75) !important;"
      role="dialog"
      aria-modal="true"
      aria-labelledby="tituloModalEliminarProyecto">
 
-    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
-
-        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-red-50/70">
-            <h2 id="tituloModalEliminarProyecto" class="text-lg font-bold text-destructive">
-                Confirmar Eliminación
+    <div class="w-full max-w-md rounded-xl border border-gray-200 shadow-2xl overflow-hidden"
+         style="background-color: #ffffff !important; color: #0f172a !important;">
+        <div class="flex items-center justify-between border-b border-red-800 px-6 py-4"
+             style="background-color: #b91c1c !important; color: #ffffff !important;">
+            <h2 id="tituloModalEliminarProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
+                <span>⚠️</span> Confirmar Eliminación
             </h2>
 
             <button type="button" id="cerrarModalEliminar"
-                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-red-100 hover:text-destructive">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    class="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-red-800 hover:text-white"
+                    style="color: #ffffff !important;">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 <span class="sr-only">Cerrar</span>
             </button>
         </div>
 
-        <form method="POST" id="formEliminarProyecto" action="">
+        <form method="POST" id="formEliminarProyecto" action="" style="background-color: #ffffff !important;">
             {% csrf_token %}
 
-            <div class="p-6 space-y-3">
-                <p class="text-sm text-foreground">
-                    ¿Estás seguro de que deseas eliminar el proyecto <strong id="deleteProyectoNombre" class="text-destructive font-mono font-bold"></strong>?
+            <div class="p-6 space-y-4" style="background-color: #ffffff !important; color: #0f172a !important;">
+                <p class="text-sm text-gray-800">
+                    ¿Estás seguro de que deseas eliminar el proyecto <strong id="deleteProyectoNombre" class="text-red-700 font-mono font-bold"></strong>?
                 </p>
-                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
-                    <span>Esta acción no se puede deshacer. Se eliminarán permanentemente todos los apoyos/postes, luminarias y asignaciones de materiales vinculados a este proyecto.</span>
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed" style="background-color: #fffbeb !important; color: #78350f !important; border: 1px solid #fde68a !important;">
+                    <span><strong>Advertencia:</strong> Esta acción no se puede deshacer. Se eliminarán permanentemente todos los apoyos/postes, luminarias y asignaciones de materiales vinculados a este proyecto.</span>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
-                <button type="button" id="cancelarModalEliminar" class="btn btn-secundario">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-destructive hover:bg-red-700 text-white text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">
+            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4" style="background-color: #f8fafc !important;">
+                <button type="button" id="cancelarModalEliminar"
+                        style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
+                        class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
+                <button type="submit"
+                        style="background-color: #dc2626 !important; color: #ffffff !important;"
+                        class="px-5 py-2 hover:bg-red-700 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">
                     Eliminar Proyecto
                 </button>
             </div>

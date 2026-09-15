@@ -33,6 +33,21 @@
         </p>
     </a>
 
+    <!-- Devolución / Reintegros de Materiales a Bodega -->
+    <a href="{% url 'vista_global_logistica' %}"
+       class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-amber-50/40 transition border-l-4 border-amber-500 bg-gradient-to-br from-amber-50/30 to-transparent">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-foreground">
+                <span>↩️</span> Devolución / Reintegros
+            </h2>
+            <span class="px-2 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 uppercase">Sobrantes a Bodega</span>
+        </div>
+
+        <p class="text-muted-foreground mt-2 text-sm">
+            Auditoría y control de materiales sobrantes de obra (Suministrado − Instalado) listos para reintegro al inventario de bodega.
+        </p>
+    </a>
+
     <!-- Materiales -->
     <a href="{% url 'materiales_home' %}"
        class="bg-card rounded-lg shadow p-6 hover:shadow-lg hover:bg-primary-soft transition">

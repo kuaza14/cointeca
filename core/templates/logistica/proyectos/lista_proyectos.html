@@ -52,18 +52,18 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <button type="button" id="btnNuevoProyecto" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg transition shadow-sm cursor-pointer">
+            <button type="button" id="btnNuevoProyecto" class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold rounded-lg transition shadow-sm cursor-pointer">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
                 <span>Nuevo Proyecto</span>
             </button>
             <a href="{% url 'macroproyectos_logistica' %}"
-               class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition shadow-sm">
+               class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-sm font-semibold rounded-lg transition shadow-sm">
                 ← Volver a Macroproyectos
             </a>
             <a href="{% url 'materiales_home' %}"
-               class="inline-flex items-center px-4 py-2 bg-primary-soft hover:bg-blue-100 text-primary text-sm font-medium rounded-lg transition border border-blue-200">
+               class="inline-flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 text-sm font-semibold rounded-lg transition border border-blue-200">
                 Catálogo de Materiales
             </a>
         </div>
@@ -71,43 +71,43 @@
 
     <!-- Barra de Informes Consolidados y Selector Multi-Proyecto -->
     <form id="formInformeConsolidado" method="GET" action="{% url 'informe_consolidado_proyectos' %}">
-        <div class="bg-card rounded-xl shadow-sm border border-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-                <h3 class="text-base font-black text-foreground">
+                <h3 class="text-base font-black text-gray-900">
                     Informe Consolidado de Liquidación (Multi-Proyecto)
                 </h3>
-                <p class="text-xs text-muted-foreground mt-0.5">
+                <p class="text-xs text-gray-500 mt-0.5">
                     Marca los proyectos que deseas consultar para generar el consolidado de entradas, retiros y saldo en obra.
                 </p>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
-                <label class="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground cursor-pointer select-none bg-muted px-3 py-2 rounded-lg border border-border">
-                    <input type="checkbox" id="checkTodosProyectos" class="rounded border-border text-primary focus:ring-blue-500 size-4">
+                <label class="inline-flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer select-none bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg border border-slate-300 transition">
+                    <input type="checkbox" id="checkTodosProyectos" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 size-4">
                     <span>Seleccionar Todos</span>
                 </label>
 
                 <button type="submit" id="btnGenerarInforme"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold rounded-lg shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
                     <span>Generar Informe (<strong id="contadorSeleccionados">0</strong>)</span>
                 </button>
             </div>
         </div>
 
         <!-- Listado de Proyectos con Casillas -->
-        <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-            <div class="px-6 py-4 border-b border-border bg-muted/50 flex items-center justify-between">
-                <h2 class="text-base font-bold text-foreground">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between">
+                <h2 class="text-base font-bold text-gray-900">
                     Proyectos Registrados {% if macroproyecto %}en {{ macroproyecto.nombre }}{% endif %}
                 </h2>
-                <span class="text-xs font-semibold text-muted-foreground bg-card px-2.5 py-1 rounded-full border">
+                <span class="text-xs font-semibold text-gray-600 bg-white px-2.5 py-1 rounded-full border border-gray-300">
                     {{ resumen_proyectos|length }} proyectos
                 </span>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-border text-left text-sm">
-                    <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                    <thead class="bg-slate-100 text-gray-700 uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3.5 text-center w-12">
                                 <span class="sr-only">Selección</span>
@@ -124,30 +124,30 @@
                             <th class="px-6 py-3.5 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border bg-card">
+                    <tbody class="divide-y divide-gray-200 bg-white">
                         {% for item in resumen_proyectos %}
-                        <tr class="hover:bg-primary-soft/40 transition fila-proyecto">
+                        <tr class="hover:bg-blue-50/50 transition fila-proyecto">
                             <!-- Checkbox de Selección -->
                             <td class="px-4 py-4 text-center">
                                 <input type="checkbox" name="proyectos" value="{{ item.proyecto.id }}"
-                                       class="check-proyecto rounded border-border-strong text-primary focus:ring-blue-500 size-4 cursor-pointer">
+                                       class="check-proyecto rounded border-gray-300 text-blue-600 focus:ring-blue-500 size-4 cursor-pointer">
                             </td>
 
-                            <td class="px-5 py-4 font-bold text-foreground text-base">
+                            <td class="px-5 py-4 font-bold text-gray-900 text-base">
                                 {{ item.proyecto.numero_emcali }}
                             </td>
 
                             {% if not macroproyecto %}
                             <td class="px-4 py-4 text-xs">
                                 {% if item.proyecto.macroproyecto %}
-                                    <span class="font-semibold text-primary">{{ item.proyecto.macroproyecto.nombre }}</span>
+                                    <span class="font-semibold text-blue-700">{{ item.proyecto.macroproyecto.nombre }}</span>
                                 {% else %}
-                                    <span class="text-muted-foreground italic">Sin Macroproyecto</span>
+                                    <span class="text-gray-400 italic">Sin Macroproyecto</span>
                                 {% endif %}
                             </td>
                             {% endif %}
 
-                            <td class="px-5 py-4 text-foreground">
+                            <td class="px-5 py-4 text-gray-800">
                                 {% if item.proyecto.tipo == "AP_BARRIO" %}
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
                                         AP Barrio
@@ -161,7 +161,7 @@
                                         {{ item.proyecto.get_tipo_display|default:"Alumbrado Público" }}
                                     </span>
                                 {% elif item.proyecto.tipo == "BT" %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-primary-soft text-primary border border-blue-200">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
                                         Baja Tensión (BT)
                                     </span>
                                 {% elif item.proyecto.tipo == "MT" %}
@@ -169,7 +169,7 @@
                                         Media Tensión (MT)
                                     </span>
                                 {% else %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-muted text-foreground border border-border">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-300">
                                         {{ item.proyecto.get_tipo_display|default:item.proyecto.tipo }}
                                     </span>
                                 {% endif %}
@@ -177,19 +177,19 @@
 
                             <td class="px-4 py-4">
                                 {% if item.proyecto.estado == "En ejecución" %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-success border border-green-200">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
                                         En ejecución
                                     </span>
                                 {% elif item.proyecto.estado == "Planeación" %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-soft text-primary border border-blue-200">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
                                         Planeación
                                     </span>
                                 {% elif item.proyecto.estado == "Finalizado" %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-foreground border border-border">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-300">
                                         Finalizado
                                     </span>
                                 {% else %}
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-destructive border border-red-200">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
                                         {{ item.proyecto.estado }}
                                     </span>
                                 {% endif %}
@@ -219,7 +219,7 @@
                             <!-- Acciones Rápidas -->
                             <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                 <a href="{% url 'detalle_proyecto_logistica' item.proyecto.id %}"
-                                   class="inline-flex items-center px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded-lg shadow-sm transition">
                                     Balance & Saldo
                                 </a>
                                 <a href="{% url 'registrar_entrada_material' item.proyecto.id %}"
@@ -234,18 +234,18 @@
                                 </a>
                                 <a href="{% url 'materiales_requeridos_proyecto' item.proyecto.id %}"
                                    title="Ver Materiales Requeridos & Excel"
-                                   class="inline-flex items-center px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition">
+                                   class="inline-flex items-center px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg transition">
                                     Requeridos
                                 </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="{% if macroproyecto %}8{% else %}9{% endif %}" class="px-6 py-12 text-center text-muted-foreground">
+                            <td colspan="{% if macroproyecto %}8{% else %}9{% endif %}" class="px-6 py-12 text-center text-gray-500">
                                 <p class="text-base font-medium">No hay proyectos registrados {% if macroproyecto %}en este macroproyecto{% endif %}.</p>
                                 <div class="mt-3">
                                     <button type="button" onclick="document.getElementById('modalNuevoProyecto').classList.remove('hidden'); document.getElementById('modalNuevoProyecto').classList.add('flex');"
-                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                                         <span>+ Crear Proyecto {% if macroproyecto %}en {{ macroproyecto.nombre }}{% endif %}</span>
                                     </button>
@@ -265,38 +265,44 @@
      MODAL: NUEVO PROYECTO
      ====================================================================== -->
 <div id="modalNuevoProyecto"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
+     style="background-color: rgba(2, 6, 23, 0.75) !important;"
      role="dialog"
      aria-modal="true"
      aria-labelledby="tituloModalNuevoProyecto">
 
-    <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-xl overflow-hidden">
-        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-muted/40">
-            <h2 id="tituloModalNuevoProyecto" class="text-lg font-bold text-foreground">
-                Nuevo Proyecto
+    <div class="w-full max-w-md rounded-xl border border-gray-200 shadow-2xl overflow-hidden"
+         style="background-color: #ffffff !important; color: #0f172a !important;">
+        <div class="flex items-center justify-between border-b border-blue-800 px-6 py-4"
+             style="background-color: #1e3a8a !important; color: #ffffff !important;">
+            <h2 id="tituloModalNuevoProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
+                <span>📁</span> Nuevo Proyecto
             </h2>
             <button type="button" id="cerrarModalNuevo"
-                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    class="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-blue-800 hover:text-white"
+                    style="color: #ffffff !important;">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 <span class="sr-only">Cerrar</span>
             </button>
         </div>
 
-        <form method="POST" action="{% if macroproyecto %}{% url 'crear_proyecto_en_macroproyecto' macroproyecto.id %}{% else %}{% url 'crear_proyecto' %}{% endif %}">
+        <form method="POST" action="{% if macroproyecto %}{% url 'crear_proyecto_en_macroproyecto' macroproyecto.id %}{% else %}{% url 'crear_proyecto' %}{% endif %}" style="background-color: #ffffff !important;">
             {% csrf_token %}
             <input type="hidden" name="origen" value="logistica">
 
-            <div class="space-y-4 p-6">
+            <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 {% if macroproyecto %}
-                    <div class="p-3 bg-primary-soft/60 border border-blue-200 rounded-lg text-xs text-primary font-semibold">
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 font-semibold" style="background-color: #eff6ff !important; color: #1e3a8a !important;">
                         <span>Macroproyecto: <strong>{{ macroproyecto.nombre }}</strong></span>
                     </div>
                 {% else %}
                     <div>
-                        <label for="macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Macroproyecto Asignado</label>
-                        <select id="macroproyecto_id" name="macroproyecto_id" class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background text-foreground">
+                        <label for="macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto Asignado</label>
+                        <select id="macroproyecto_id" name="macroproyecto_id"
+                                style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                             <option value="">(Sin asignar o seleccionar después)</option>
                             {% for m in macroproyectos %}
                                 <option value="{{ m.id }}">{{ m.nombre }}</option>
@@ -306,13 +312,17 @@
                 {% endif %}
 
                 <div>
-                    <label for="numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Número o Código de Proyecto <span class="text-destructive">*</span></label>
-                    <input type="text" id="numero_emcali" name="numero_emcali" required class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm font-bold text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background" placeholder="Ej: 9901, AP-CANCHA-01, etc.">
+                    <label for="numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de Proyecto <span class="text-red-600">*</span></label>
+                    <input type="text" id="numero_emcali" name="numero_emcali" required
+                           style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 9901, AP-CANCHA-01, etc.">
                 </div>
 
                 <div>
-                    <label for="tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Tipo de Proyecto / Red <span class="text-destructive">*</span></label>
-                    <select id="tipo" name="tipo" required class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background text-foreground">
+                    <label for="tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Proyecto / Red <span class="text-red-600">*</span></label>
+                    <select id="tipo" name="tipo" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="">Seleccione…</option>
                         <option value="BT">Baja Tensión (BT)</option>
                         <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
@@ -323,8 +333,10 @@
                 </div>
 
                 <div>
-                    <label for="estado" class="campo campo-req block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Estado inicial <span class="text-destructive">*</span></label>
-                    <select id="estado" name="estado" required class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background text-foreground">
+                    <label for="estado" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Estado inicial <span class="text-red-600">*</span></label>
+                    <select id="estado" name="estado" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
                         <option value="Planeación" selected>Planeación</option>
                         <option value="En ejecución">En ejecución</option>
                         <option value="Finalizado">Finalizado</option>
@@ -333,9 +345,13 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
-                <button type="button" id="cancelarModalNuevo" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">Cancelar</button>
-                <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-md transition">Crear Proyecto</button>
+            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4" style="background-color: #f8fafc !important;">
+                <button type="button" id="cancelarModalNuevo"
+                        style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
+                        class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
+                <button type="submit"
+                        style="background-color: #1d4ed8 !important; color: #ffffff !important;"
+                        class="px-5 py-2 hover:bg-blue-800 text-white text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear Proyecto</button>
             </div>
         </form>
     </div>

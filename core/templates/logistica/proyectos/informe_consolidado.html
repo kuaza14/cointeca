@@ -96,25 +96,23 @@
     </div>
 
     <!-- Pestañas de Vista (Consolidado General vs Desglose Individual) -->
-    <div x-data="{ tab: 'consolidado' }" class="space-y-4">
-        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 print:hidden">
-            <button @click="tab = 'consolidado'"
-                    :class="tab === 'consolidado' ? 'border-b-2 border-blue-600 text-primary font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+    <div class="space-y-4">
+        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 print:hidden shadow-sm">
+            <button type="button" onclick="cambiarPestanaInforme('consolidado')" id="tabBtnInformeConsolidado"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-blue-600 text-primary font-bold tab-btn-informe">
                 📋 Matriz Consolidada General
                 <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ tabla_consolidada|length }} materiales</span>
             </button>
 
-            <button @click="tab = 'desglose'"
-                    :class="tab === 'desglose' ? 'border-b-2 border-indigo-600 text-indigo-600 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2">
+            <button type="button" onclick="cambiarPestanaInforme('desglose')" id="tabBtnInformeDesglose"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe">
                 📑 Desglose por Proyecto Individual
                 <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold">{{ total_proyectos_sel }} proyectos</span>
             </button>
         </div>
 
         <!-- TAB 1: MATRIZ CONSOLIDADA GENERAL -->
-        <div x-show="tab === 'consolidado'" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden print:border-black print:rounded-none">
+        <div id="panelInformeConsolidado" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden print:border-black print:rounded-none">
             <div class="p-4 bg-muted border-b border-border flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
@@ -225,7 +223,7 @@
         </div>
 
         <!-- TAB 2: DESGLOSE POR PROYECTO INDIVIDUAL -->
-        <div x-show="tab === 'desglose'" style="display: none;" class="space-y-6 print:block">
+        <div id="panelInformeDesglose" class="space-y-6 hidden print:block">
             {% for dp in desglose_proyectos %}
             <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
                 <div class="px-6 py-4 bg-muted border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -314,4 +312,25 @@
     </div>
 
 </div>
+
+<script>
+function cambiarPestanaInforme(tabName) {
+    const pConsolidado = document.getElementById('panelInformeConsolidado');
+    const pDesglose = document.getElementById('panelInformeDesglose');
+    const btnConsolidado = document.getElementById('tabBtnInformeConsolidado');
+    const btnDesglose = document.getElementById('tabBtnInformeDesglose');
+
+    if (tabName === 'consolidado') {
+        if (pConsolidado) { pConsolidado.classList.remove('hidden'); pConsolidado.style.display = ''; }
+        if (pDesglose) { pDesglose.classList.add('hidden'); pDesglose.style.display = 'none'; }
+        if (btnConsolidado) { btnConsolidado.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-blue-600 text-primary font-bold tab-btn-informe'; }
+        if (btnDesglose) { btnDesglose.className = 'py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe'; }
+    } else {
+        if (pConsolidado) { pConsolidado.classList.add('hidden'); pConsolidado.style.display = 'none'; }
+        if (pDesglose) { pDesglose.classList.remove('hidden'); pDesglose.style.display = ''; }
+        if (btnConsolidado) { btnConsolidado.className = 'py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe'; }
+        if (btnDesglose) { btnDesglose.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-indigo-600 text-indigo-600 font-bold tab-btn-informe'; }
+    }
+}
+</script>
 {% endblock %}

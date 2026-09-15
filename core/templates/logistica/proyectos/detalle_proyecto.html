@@ -75,8 +75,8 @@
 
                 <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
-                   title="Descargar listado consolidado de materiales y cantidades en Excel">
-                    <span>Excel</span>
+                   title="Descargar libro Excel con Matriz de Balance, Requeridos, Devoluciones y Nodos">
+                    <span>📊</span> Descargar Excel
                 </a>
 
                 <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'proyectos_logistica' %}{% endif %}"
@@ -89,58 +89,60 @@
     </div>
 
     <!-- Pestañas de Navegación del Proyecto -->
-    <div x-data="{ tab: 'balance' }" class="space-y-4">
-        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 overflow-x-auto">
-            <button @click="tab = 'balance'"
-                    :class="tab === 'balance' ? 'border-b-2 border-blue-600 text-primary font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+    <div class="space-y-4">
+        <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 overflow-x-auto print:hidden shadow-sm">
+            <button type="button" onclick="cambiarPestanaDetalle('balance')" id="tabBtnDetalleBalance"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-blue-600 text-primary font-bold tab-btn-detalle">
                 Matriz de Balance
                 <span class="text-xs px-2 py-0.5 rounded-full bg-muted text-foreground">{{ balance_materiales|length }}</span>
             </button>
 
-            <button @click="tab = 'devoluciones'"
-                    :class="tab === 'devoluciones' ? 'border-b-2 border-amber-600 text-amber-800 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="cambiarPestanaDetalle('devoluciones')" id="tabBtnDetalleDevoluciones"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-detalle">
                 Materiales de Devolución
                 <span class="text-xs px-2 py-0.5 rounded-full {% if materiales_devolucion|length > 0 %}bg-amber-100 text-amber-900 font-bold border border-amber-300{% else %}bg-muted text-muted-foreground{% endif %}">{{ materiales_devolucion|length }}</span>
             </button>
 
-            <button @click="tab = 'requeridos'"
-                    :class="tab === 'requeridos' ? 'border-b-2 border-blue-600 text-blue-700 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="cambiarPestanaDetalle('requeridos')" id="tabBtnDetalleRequeridos"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-detalle">
                 Materiales Requeridos
                 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 font-bold">{{ requeridos_proyecto|length }}</span>
             </button>
 
-            <button @click="tab = 'instalados'"
-                    :class="tab === 'instalados' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="cambiarPestanaDetalle('instalados')" id="tabBtnDetalleInstalados"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-detalle">
                 Materiales Instalados (Apoyos)
                 <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-bold">{{ instalados_apoyo|length }}</span>
             </button>
 
-            <button @click="tab = 'retiros'"
-                    :class="tab === 'retiros' ? 'border-b-2 border-amber-600 text-amber-800 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="cambiarPestanaDetalle('retiros')" id="tabBtnDetalleRetiros"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-detalle">
                 Materiales Retirados (Apoyos)
                 <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold">{{ retiros_apoyo|length }}</span>
             </button>
 
-            <button @click="tab = 'entradas'"
-                    :class="tab === 'entradas' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-muted-foreground hover:text-gray-700'"
-                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="cambiarPestanaDetalle('entradas')" id="tabBtnDetalleEntradas"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-detalle">
                 Entradas (Remisiones)
                 <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">{{ entradas|length }}</span>
             </button>
         </div>
 
         <!-- TAB 1: MATRIZ DE BALANCE -->
-        <div x-show="tab === 'balance'" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden">
+        <div id="panelDetalleBalance" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden pestana-panel-detalle">
             <div class="p-4 bg-muted border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
                         Conciliación de Materiales para el Proyecto {{ proyecto.numero_emcali }}
                     </h3>
+                    <p class="text-xs text-muted-foreground">Matriz comparativa de requeridos, suministrados, instalados, retirados y devoluciones.</p>
+                </div>
+                <div>
+                    <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                       title="Descargar balance completo en Excel">
+                        <span>📊</span> Descargar Balance en Excel
+                    </a>
                 </div>
             </div>
 
@@ -253,7 +255,7 @@
         </div>
 
         <!-- TAB DEVOLUCIONES: MATERIALES DE DEVOLUCIÓN A BODEGA -->
-        <div x-show="tab === 'devoluciones'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4">
+        <div id="panelDetalleDevoluciones" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4 pestana-panel-detalle hidden">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base flex items-center gap-2">
@@ -264,9 +266,16 @@
                     </p>
                 </div>
                 {% if materiales_devolucion %}
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold">
-                    <span>⚠️</span> {{ materiales_devolucion|length }} material{{ materiales_devolucion|pluralize }} con sobrante para devolución (Total: {{ total_devolucion|floatformat }})
-                </span>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold">
+                        <span>⚠️</span> {{ materiales_devolucion|length }} material{{ materiales_devolucion|pluralize }} con sobrante para devolución (Total: {{ total_devolucion|floatformat }})
+                    </span>
+                    <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                       title="Descargar este reporte y balance en Excel">
+                        <span>📊</span> Descargar Excel
+                    </a>
+                </div>
                 {% endif %}
             </div>
 
@@ -346,7 +355,7 @@
         </div>
 
         <!-- TAB 2: MATERIALES REQUERIDOS -->
-        <div x-show="tab === 'requeridos'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4">
+        <div id="panelDetalleRequeridos" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4 pestana-panel-detalle hidden">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
@@ -417,7 +426,7 @@
         </div>
 
         <!-- TAB 3: MATERIALES INSTALADOS EN APOYOS -->
-        <div x-show="tab === 'instalados'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4">
+        <div id="panelDetalleInstalados" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4 pestana-panel-detalle hidden">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
@@ -482,7 +491,7 @@
         </div>
 
         <!-- TAB 4: MATERIALES RETIRADOS / DESMONTADOS EN APOYOS -->
-        <div x-show="tab === 'retiros'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4">
+        <div id="panelDetalleRetiros" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4 pestana-panel-detalle hidden">
             <div class="flex items-center justify-between pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
@@ -542,7 +551,7 @@
         </div>
 
         <!-- TAB 5: HISTORIAL DE ENTRADAS -->
-        <div x-show="tab === 'entradas'" style="display: none;" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4">
+        <div id="panelDetalleEntradas" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border p-6 space-y-4 pestana-panel-detalle hidden">
             <div class="flex items-center justify-between pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base">
@@ -635,22 +644,21 @@
 </div>
 
 <!-- MODAL: PEDIR / AGREGAR MATERIALES REQUERIDOS (MÚLTIPLES FILAS) -->
-<div id="modalPedirRequerido" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
-    <div class="w-full max-w-3xl rounded-xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150 max-h-[90vh] flex flex-col">
-        <div class="flex items-center justify-between border-b border-border px-6 py-4 bg-blue-50/80 dark:bg-blue-950/40">
+<div id="modalPedirRequerido" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+    <div class="w-full max-w-3xl rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        <!-- Cabecera Institucional Azul Oscuro -->
+        <div class="flex items-center justify-between border-b border-blue-950 px-6 py-4 bg-blue-900 text-white">
             <div>
-                <h2 class="text-lg font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
                     <span>📋</span> Pedir / Agregar Materiales Requeridos
                 </h2>
-                <p class="text-xs text-muted-foreground mt-0.5">
+                <p class="text-xs text-blue-100 mt-0.5">
                     Puedes agregar uno o varios materiales y sus cantidades requeridas para el Proyecto {{ proyecto.numero_emcali }}.
                 </p>
             </div>
             <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.add('hidden'); document.getElementById('modalPedirRequerido').classList.remove('flex');"
-                    class="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+                    class="flex size-8 items-center justify-center rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition text-xl font-bold">
+                ✕
             </button>
         </div>
 
@@ -658,30 +666,30 @@
             {% csrf_token %}
             <input type="hidden" name="accion" value="agregar_requerido">
 
-            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 bg-slate-50">
                 <div class="flex items-center justify-between pb-1">
-                    <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Listado de Materiales a Solicitar</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Listado de Materiales a Solicitar</span>
                     <button type="button" id="btnAgregarFilaRequerido"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-semibold rounded-lg transition">
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
                         <span>+ Agregar otra fila</span>
                     </button>
                 </div>
 
-                <div class="overflow-x-auto border border-border rounded-lg">
-                    <table class="min-w-full divide-y divide-border text-sm">
-                        <thead class="bg-muted text-xs font-semibold text-muted-foreground uppercase">
+                <div class="overflow-x-auto border border-gray-300 rounded-xl bg-white shadow-xs">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-slate-800 text-xs font-bold text-white uppercase">
                             <tr>
                                 <th class="px-4 py-3 text-left w-3/5">Material del Catálogo</th>
                                 <th class="px-4 py-3 text-left w-2/5">Cantidad Requerida</th>
                                 <th class="px-3 py-3 text-center w-14">Quitar</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-border" id="filasModalRequeridos">
+                        <tbody class="divide-y divide-gray-200 bg-white" id="filasModalRequeridos">
                             <!-- Fila 1 inicial -->
-                            <tr class="fila-modal-requerido">
+                            <tr class="fila-modal-requerido hover:bg-blue-50/40 transition">
                                 <td class="px-3 py-2.5">
                                     <select name="material_id[]" required
-                                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs font-medium text-foreground bg-card focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                            class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold text-gray-900 bg-white focus:border-blue-600 focus:outline-none">
                                         <option value="" disabled selected>-- Selecciona un material --</option>
                                         {% for mat in materiales_catalogo %}
                                             <option value="{{ mat.id }}">
@@ -692,10 +700,10 @@
                                 </td>
                                 <td class="px-3 py-2.5">
                                     <input type="number" step="any" min="0.01" name="cantidad[]" required placeholder="Ej: 10"
-                                           class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs font-bold text-foreground bg-card focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                           class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 bg-white focus:border-blue-600 focus:outline-none">
                                 </td>
                                 <td class="px-3 py-2.5 text-center">
-                                    <button type="button" class="btnEliminarFilaReq text-destructive hover:text-red-700 font-bold text-lg p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/50 transition">
+                                    <button type="button" class="btnEliminarFilaReq text-red-600 hover:text-red-800 font-black text-xl p-1 rounded hover:bg-red-50 transition" title="Eliminar fila">
                                         &times;
                                     </button>
                                 </td>
@@ -705,12 +713,14 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
-                <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.add('hidden'); document.getElementById('modalPedirRequerido').classList.remove('flex');" class="btn btn-secundario text-xs">
+            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 bg-gray-100">
+                <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.add('hidden'); document.getElementById('modalPedirRequerido').classList.remove('flex');"
+                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg border border-gray-300 transition">
                     Cancelar
                 </button>
-                <button type="submit" class="btn btn-primario font-bold bg-blue-600 hover:bg-blue-700 text-xs px-5 py-2">
-                    Guardar Requerimientos
+                <button type="submit"
+                        class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5">
+                    <span>💾</span> Guardar Requerimientos
                 </button>
             </div>
         </form>
@@ -718,6 +728,57 @@
 </div>
 
 <script>
+function cambiarPestanaDetalle(tabName) {
+    const paneles = {
+        'balance': document.getElementById('panelDetalleBalance'),
+        'devoluciones': document.getElementById('panelDetalleDevoluciones'),
+        'requeridos': document.getElementById('panelDetalleRequeridos'),
+        'instalados': document.getElementById('panelDetalleInstalados'),
+        'retiros': document.getElementById('panelDetalleRetiros'),
+        'entradas': document.getElementById('panelDetalleEntradas')
+    };
+
+    const botones = {
+        'balance': document.getElementById('tabBtnDetalleBalance'),
+        'devoluciones': document.getElementById('tabBtnDetalleDevoluciones'),
+        'requeridos': document.getElementById('tabBtnDetalleRequeridos'),
+        'instalados': document.getElementById('tabBtnDetalleInstalados'),
+        'retiros': document.getElementById('tabBtnDetalleRetiros'),
+        'entradas': document.getElementById('tabBtnDetalleEntradas')
+    };
+
+    for (const key in paneles) {
+        if (paneles[key]) {
+            if (key === tabName) {
+                paneles[key].classList.remove('hidden');
+                paneles[key].style.display = '';
+            } else {
+                paneles[key].classList.add('hidden');
+                paneles[key].style.display = 'none';
+            }
+        }
+    }
+
+    const activeClasses = {
+        'balance': 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-blue-600 text-primary font-bold tab-btn-detalle',
+        'devoluciones': 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-amber-600 text-amber-800 font-bold tab-btn-detalle',
+        'requeridos': 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-blue-600 text-blue-700 font-bold tab-btn-detalle',
+        'instalados': 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-indigo-600 text-indigo-700 font-bold tab-btn-detalle',
+        'retiros': 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-amber-600 text-amber-800 font-bold tab-btn-detalle',
+        'entradas': 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-emerald-600 text-emerald-600 font-bold tab-btn-detalle'
+    };
+
+    for (const key in botones) {
+        if (botones[key]) {
+            if (key === tabName) {
+                botones[key].className = activeClasses[key] || 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-primary text-primary font-bold tab-btn-detalle';
+            } else {
+                botones[key].className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-detalle';
+            }
+        }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const tbody = document.getElementById("filasModalRequeridos");
     const btnAgregar = document.getElementById("btnAgregarFilaRequerido");

@@ -2,6 +2,7 @@ import io
 import json
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
@@ -944,51 +945,64 @@ def materiales_requeridos_proyecto(request, proyecto_id):
 @login_required
 def exportar_materiales_proyecto_excel(request, proyecto_id):
     """
-    Genera y descarga un archivo Excel (.xlsx) con los materiales requeridos
-    y sus cantidades exactas (sin ceros ni decimales sobrantes).
+    Genera y descarga un archivo Excel (.xlsx) de 1 sola hoja con la
+    Matriz de Balance y Liquidación esencial de materiales del proyecto.
     """
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    proyecto = get_object_or_404(Proyecto.objects.select_related("macroproyecto"), id=proyecto_id)
 
-    # Consolidar requerimientos
-    req_directos = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material")
-    req_apoyos = (
+    # 1. Instalado en Apoyos (Ingeniería)
+    apoyo_inst_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id", "material__item", "material__descripcion", "material__unidad")
-        .annotate(total_apoyo=Sum("cantidad_requerida"))
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
     )
+    inst_map = {item["material_id"]: item["total"] for item in apoyo_inst_qs}
 
-    mapa_requeridos = {}
-    for r in req_directos:
-        mapa_requeridos[r.material.id] = {
-            "item": r.material.item,
-            "descripcion": r.material.descripcion,
-            "unidad": r.material.unidad or "U",
-            "cantidad": r.cantidad_requerida,
-        }
+    # 2. Materiales Requeridos directos del Proyecto
+    mat_req_extra = (
+        MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
+    )
+    req_directo_map = {item["material_id"]: item["total"] for item in mat_req_extra}
 
-    for a in req_apoyos:
-        m_id = a["material_id"]
-        if m_id in mapa_requeridos:
-            mapa_requeridos[m_id]["cantidad"] += a["total_apoyo"]
-        else:
-            mapa_requeridos[m_id] = {
-                "item": a["material__item"],
-                "descripcion": a["material__descripcion"],
-                "unidad": a["material__unidad"] or "U",
-                "cantidad": a["total_apoyo"],
-            }
+    # Consolidar mapa de requeridos
+    req_map = {}
+    for m_id, cant in req_directo_map.items():
+        req_map[m_id] = cant
+    for m_id, cant in inst_map.items():
+        if m_id not in req_map:
+            req_map[m_id] = cant
 
-    lista_items = sorted(mapa_requeridos.values(), key=lambda x: x["descripcion"])
+    # 3. Entradas Suministradas (EntradaMaterialProyecto)
+    ent_qs = (
+        DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    ent_map = {item["material_id"]: item["total"] for item in ent_qs}
+
+    # 4. Retiros / Desmontes del proyecto (desde ApoyoMaterial)
+    ret_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_retirada"))
+    )
+    ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
+
+    # 5. Materiales involucrados
+    all_material_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys())
+    materiales_db = list(Material.objects.filter(id__in=all_material_ids).select_related("inventario").order_by("item", "descripcion"))
 
     wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Materiales Requeridos"
+    ws1 = wb.active
+    ws1.title = "Balance de Materiales"
 
-    font_titulo = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    font_titulo = Font(name="Calibri", size=13, bold=True, color="1E3A8A")
     font_subtitulo = Font(name="Calibri", size=10, bold=True, color="4B5563")
-    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
-    font_data = Font(name="Calibri", size=11, color="111827")
-    font_total = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=10, color="111827")
+    font_total = Font(name="Calibri", size=10, bold=True, color="1E3A8A")
 
     fill_header = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
     fill_total = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid")
@@ -1007,104 +1021,135 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     align_left = Alignment(horizontal="left", vertical="center")
     align_right = Alignment(horizontal="right", vertical="center")
 
-    # Encabezado
-    ws.merge_cells("A1:D1")
-    ws["A1"] = "COINTECA S.A.S. — MATERIALES REQUERIDOS"
-    ws["A1"].font = font_titulo
-    ws["A1"].alignment = align_left
+    def fmt_v(v):
+        if v is None:
+            return 0
+        return int(v) if v % 1 == 0 else float(v)
 
-    ws.merge_cells("A2:D2")
-    ws["A2"] = f"PROYECTO: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
-    ws["A2"].font = font_subtitulo
-    ws["A2"].alignment = align_left
+    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else "Sin Macroproyecto"
+    fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
-    ws.append([])
+    # ENCABEZADO INSTITUCIONAL
+    ws1.merge_cells("A1:I1")
+    ws1["A1"] = f"COINTECA S.A.S. — MATRIZ DE BALANCE Y LIQUIDACIÓN (PROYECTO {proyecto.numero_emcali})"
+    ws1["A1"].font = font_titulo
+    ws1["A1"].alignment = align_left
 
-    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "CANTIDAD REQUERIDA"]
-    ws.append(headers)
-    header_row = 4
+    ws1.merge_cells("A2:I2")
+    ws1["A2"] = f"PROYECTO: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  MACROPROYECTO: {macro_nom}  |  FECHA: {fecha_hoy}"
+    ws1["A2"].font = font_subtitulo
+    ws1["A2"].alignment = align_left
 
-    for col_idx in range(1, 5):
-        cell = ws.cell(row=header_row, column=col_idx)
-        cell.font = font_header
-        cell.fill = fill_header
-        cell.alignment = align_center if col_idx != 2 else align_left
-        cell.border = border_cell
+    ws1.append([])
+    headers1 = [
+        "ÍTEM",
+        "DESCRIPCIÓN DEL MATERIAL",
+        "UNIDAD",
+        "MATERIALES REQUERIDOS",
+        "SUMINISTRADO (ENTRADAS)",
+        "MATERIALES INSTALADOS",
+        "MATERIALES RETIRADOS",
+        "MATERIAL DE DEVOLUCIÓN (SOBRANTE)",
+        "STOCK EN BODEGA",
+    ]
+    ws1.append(headers1)
 
-    current_row = header_row + 1
-    total_general = Decimal("0")
+    for col in range(1, 10):
+        c = ws1.cell(row=4, column=col)
+        c.font = font_header
+        c.fill = fill_header
+        c.alignment = align_center if col not in [2] else align_left
+        c.border = border_cell
 
-    for idx, item in enumerate(lista_items, start=1):
-        cant = item["cantidad"] or Decimal("0")
-        total_general += cant
+    row_idx = 5
+    tot_req = Decimal("0")
+    tot_ent = Decimal("0")
+    tot_inst = Decimal("0")
+    tot_ret = Decimal("0")
+    tot_dev = Decimal("0")
 
-        # Si es un número entero exacto (ej: 10.0), mostrarlo como entero (10)
-        # Si tiene decimales (ej: 2.5), mostrar exactamente 2.5
-        if cant % 1 == 0:
-            cant_formateada = int(cant)
-            formato_num = "#,##0"
-        else:
-            cant_formateada = float(cant)
-            formato_num = "0.##"
+    for idx, mat in enumerate(materiales_db, start=1):
+        c_req = req_map.get(mat.id, Decimal("0"))
+        c_ent = ent_map.get(mat.id, Decimal("0"))
+        c_inst = inst_map.get(mat.id, Decimal("0"))
+        c_ret = ret_map.get(mat.id, Decimal("0"))
+        c_dev = max(Decimal("0"), c_ent - c_inst)
+        stock_obj = getattr(mat, "inventario", None)
+        c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
-        ws.append([
-            item["item"],
-            item["descripcion"],
-            item["unidad"],
-            cant_formateada
+        tot_req += c_req
+        tot_ent += c_ent
+        tot_inst += c_inst
+        tot_ret += c_ret
+        tot_dev += c_dev
+
+        ws1.append([
+            mat.item or "",
+            mat.descripcion,
+            mat.unidad or "UN",
+            fmt_v(c_req),
+            fmt_v(c_ent),
+            fmt_v(c_inst),
+            fmt_v(c_ret),
+            fmt_v(c_dev),
+            fmt_v(c_stock),
         ])
 
-        for col_idx in range(1, 5):
-            c = ws.cell(row=current_row, column=col_idx)
+        for col in range(1, 10):
+            c = ws1.cell(row=row_idx, column=col)
             c.font = font_data
             c.border = border_cell
             if idx % 2 == 0:
                 c.fill = fill_zebra
-
-            if col_idx == 1:
+            if col in [1, 3]:
                 c.alignment = align_center
-            elif col_idx == 2:
+            elif col == 2:
                 c.alignment = align_left
-            elif col_idx == 3:
-                c.alignment = align_center
-            elif col_idx == 4:
+            else:
                 c.alignment = align_right
-                c.number_format = formato_num
+                c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+        row_idx += 1
 
-        current_row += 1
-
-    # Fila total general
-    if total_general % 1 == 0:
-        total_formateado = int(total_general)
-        formato_total = "#,##0"
-    else:
-        total_formateado = float(total_general)
-        formato_total = "0.##"
-
-    ws.append(["", "TOTAL GENERAL REQUERIDO", f"{len(lista_items)} ÍTEMS", total_formateado])
-    for col_idx in range(1, 5):
-        c = ws.cell(row=current_row, column=col_idx)
+    # Fila de Totales
+    ws1.append([
+        "",
+        "TOTALES CONSOLIDADOS",
+        f"{len(materiales_db)} ÍTEMS",
+        fmt_v(tot_req),
+        fmt_v(tot_ent),
+        fmt_v(tot_inst),
+        fmt_v(tot_ret),
+        fmt_v(tot_dev),
+        "—"
+    ])
+    for col in range(1, 10):
+        c = ws1.cell(row=row_idx, column=col)
         c.font = font_total
         c.fill = fill_total
         c.border = border_total
-        if col_idx in [1, 3]:
+        if col in [1, 3, 9]:
             c.alignment = align_center
-        elif col_idx == 2:
+        elif col == 2:
             c.alignment = align_left
-        elif col_idx == 4:
+        else:
             c.alignment = align_right
-            c.number_format = formato_total
+            c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
 
-    ws.column_dimensions["A"].width = 12
-    ws.column_dimensions["B"].width = 50
-    ws.column_dimensions["C"].width = 15
-    ws.column_dimensions["D"].width = 24
+    ws1.column_dimensions["A"].width = 12
+    ws1.column_dimensions["B"].width = 46
+    ws1.column_dimensions["C"].width = 12
+    ws1.column_dimensions["D"].width = 22
+    ws1.column_dimensions["E"].width = 24
+    ws1.column_dimensions["F"].width = 22
+    ws1.column_dimensions["G"].width = 22
+    ws1.column_dimensions["H"].width = 26
+    ws1.column_dimensions["I"].width = 18
 
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
 
-    filename = f"Materiales_Requeridos_Proyecto_{proyecto.numero_emcali}.xlsx"
+    filename = f"Balance_Materiales_Proyecto_{proyecto.numero_emcali}.xlsx"
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -1294,7 +1339,9 @@ def informe_consolidado_proyectos(request):
 @login_required
 def exportar_informe_consolidado_excel(request):
     """
-    Descarga el informe consolidado multi-proyecto en formato Excel (.xlsx).
+    Descarga el informe consolidado multi-proyecto en formato Excel (.xlsx) con:
+    - Hoja 1: "Consolidado Obras" (Entradas, Instalado, Retiros, Sobrantes y Stock en Bodega)
+    - Hoja 2: "Devolución a Bodega" (Materiales sobrantes para reintegro a bodega)
     """
     raw_ids = request.GET.get("ids", "") or request.POST.get("ids", "")
     if not raw_ids:
@@ -1316,17 +1363,17 @@ def exportar_informe_consolidado_excel(request):
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
     all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys())
-    materiales_db = Material.objects.filter(id__in=all_mat_ids).order_by("item", "descripcion")
+    materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
 
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Consolidado Obras"
 
-    font_titulo = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    font_titulo = Font(name="Calibri", size=13, bold=True, color="1E3A8A")
     font_subtitulo = Font(name="Calibri", size=10, bold=True, color="4B5563")
-    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
-    font_data = Font(name="Calibri", size=11, color="111827")
-    font_total = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=10, color="111827")
+    font_total = Font(name="Calibri", size=10, bold=True, color="1E3A8A")
 
     fill_header = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
     fill_total = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid")
@@ -1346,28 +1393,38 @@ def exportar_informe_consolidado_excel(request):
     align_right = Alignment(horizontal="right", vertical="center")
 
     proyectos_nombres = ", ".join(p.numero_emcali for p in proyectos_seleccionados)
+    fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
-    ws.merge_cells("A1:G1")
+    ws.merge_cells("A1:H1")
     ws["A1"] = "COINTECA S.A.S. — INFORME CONSOLIDADO DE MATERIALES Y RETIROS"
     ws["A1"].font = font_titulo
     ws["A1"].alignment = align_left
 
-    ws.merge_cells("A2:G2")
-    ws["A2"] = f"PROYECTOS CONSOLIDADOS ({proyectos_seleccionados.count()}): {proyectos_nombres}  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+    ws.merge_cells("A2:H2")
+    ws["A2"] = f"PROYECTOS CONSOLIDADOS ({proyectos_seleccionados.count()}): {proyectos_nombres}  |  FECHA: {fecha_hoy}"
     ws["A2"].font = font_subtitulo
     ws["A2"].alignment = align_left
 
     ws.append([])
 
-    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "ENTRADA (SUMINISTRADO)", "INSTALADO EN POSTES", "RETIRO / DESMONTE", "MATERIAL DE DEVOLUCIÓN (SOBRANTE)"]
+    headers = [
+        "ÍTEM",
+        "DESCRIPCIÓN DEL MATERIAL",
+        "UNIDAD",
+        "ENTRADA (SUMINISTRADO)",
+        "INSTALADO EN POSTES",
+        "RETIRO / DESMONTE",
+        "MATERIAL DE DEVOLUCIÓN (SOBRANTE)",
+        "STOCK EN BODEGA"
+    ]
     ws.append(headers)
     header_row = 4
 
-    for col_idx in range(1, 8):
+    for col_idx in range(1, 9):
         cell = ws.cell(row=header_row, column=col_idx)
         cell.font = font_header
         cell.fill = fill_header
-        cell.alignment = align_center if col_idx not in [2] else align_left
+        cell.alignment = align_center if col_idx != 2 else align_left
         cell.border = border_cell
 
     current_row = header_row + 1
@@ -1376,31 +1433,47 @@ def exportar_informe_consolidado_excel(request):
     tot_ret = Decimal("0")
     tot_dev = Decimal("0")
 
+    materiales_devolucion = []
+
+    def fmt_val(v):
+        if v is None:
+            return 0
+        return int(v) if v % 1 == 0 else float(v)
+
     for idx, mat in enumerate(materiales_db, start=1):
         c_ent = ent_map.get(mat.id, Decimal("0"))
         c_inst = inst_map.get(mat.id, Decimal("0"))
         c_ret = ret_map.get(mat.id, Decimal("0"))
         c_dev = max(Decimal("0"), c_ent - c_inst)
+        stock_obj = getattr(mat, "inventario", None)
+        c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
         tot_ent += c_ent
         tot_inst += c_inst
         tot_ret += c_ret
         tot_dev += c_dev
 
-        def fmt_val(v):
-            return int(v) if v % 1 == 0 else float(v)
+        if c_dev > 0:
+            materiales_devolucion.append({
+                "mat": mat,
+                "ent": c_ent,
+                "inst": c_inst,
+                "dev": c_dev,
+                "stock": c_stock
+            })
 
         ws.append([
-            mat.item,
+            mat.item or "",
             mat.descripcion,
-            mat.unidad or "U",
+            mat.unidad or "UN",
             fmt_val(c_ent),
             fmt_val(c_inst),
             fmt_val(c_ret),
-            fmt_val(c_dev)
+            fmt_val(c_dev),
+            fmt_val(c_stock)
         ])
 
-        for col_idx in range(1, 8):
+        for col_idx in range(1, 9):
             c = ws.cell(row=current_row, column=col_idx)
             c.font = font_data
             c.border = border_cell
@@ -1417,16 +1490,22 @@ def exportar_informe_consolidado_excel(request):
 
         current_row += 1
 
-    def fmt_tot(v):
-        return int(v) if v % 1 == 0 else float(v)
-
-    ws.append(["", "TOTALES CONSOLIDADOS", f"{len(materiales_db)} ÍTEMS", fmt_tot(tot_ent), fmt_tot(tot_inst), fmt_tot(tot_ret), fmt_tot(tot_dev)])
-    for col_idx in range(1, 8):
+    ws.append([
+        "",
+        "TOTALES CONSOLIDADOS",
+        f"{len(materiales_db)} ÍTEMS",
+        fmt_val(tot_ent),
+        fmt_val(tot_inst),
+        fmt_val(tot_ret),
+        fmt_val(tot_dev),
+        "—"
+    ])
+    for col_idx in range(1, 9):
         c = ws.cell(row=current_row, column=col_idx)
         c.font = font_total
         c.fill = fill_total
         c.border = border_total
-        if col_idx in [1, 3]:
+        if col_idx in [1, 3, 8]:
             c.alignment = align_center
         elif col_idx == 2:
             c.alignment = align_left
@@ -1440,7 +1519,102 @@ def exportar_informe_consolidado_excel(request):
     ws.column_dimensions["D"].width = 24
     ws.column_dimensions["E"].width = 22
     ws.column_dimensions["F"].width = 22
-    ws.column_dimensions["G"].width = 18
+    ws.column_dimensions["G"].width = 26
+    ws.column_dimensions["H"].width = 18
+
+    # HOJA 2: DEVOLUCIÓN A BODEGA (REINTEGROS)
+    if materiales_devolucion:
+        ws_dev = wb.create_sheet(title="Devolución a Bodega")
+        ws_dev.merge_cells("A1:G1")
+        ws_dev["A1"] = f"COINTECA S.A.S. — MATERIALES DE DEVOLUCIÓN A BODEGA (CONSOLIDADO)"
+        ws_dev["A1"].font = font_titulo
+        ws_dev["A1"].alignment = align_left
+
+        ws_dev.merge_cells("A2:G2")
+        ws_dev["A2"] = f"MATERIALES SOBRANTES CONSOLIDADOS TRAS INSTALACIÓN  |  FECHA: {fecha_hoy}"
+        ws_dev_headers = [
+            "ÍTEM",
+            "DESCRIPCIÓN DEL MATERIAL",
+            "UNIDAD",
+            "SUMINISTRADO (ENTRADAS)",
+            "INSTALADO EN POSTES",
+            "CANTIDAD A DEVOLVER / REINTEGRAR",
+            "STOCK ACTUAL EN BODEGA"
+        ]
+        ws_dev.append([])
+        ws_dev.append(ws_dev_headers)
+
+        for col in range(1, 8):
+            c = ws_dev.cell(row=4, column=col)
+            c.font = font_header
+            c.fill = fill_header
+            c.alignment = align_center if col != 2 else align_left
+            c.border = border_cell
+
+        row_dev_idx = 5
+        tot_d_ent = Decimal("0")
+        tot_d_inst = Decimal("0")
+        tot_d_dev = Decimal("0")
+
+        for idx, d in enumerate(materiales_devolucion, start=1):
+            tot_d_ent += d["ent"]
+            tot_d_inst += d["inst"]
+            tot_d_dev += d["dev"]
+
+            ws_dev.append([
+                d["mat"].item or "",
+                d["mat"].descripcion,
+                d["mat"].unidad or "UN",
+                fmt_val(d["ent"]),
+                fmt_val(d["inst"]),
+                fmt_val(d["dev"]),
+                fmt_val(d["stock"])
+            ])
+
+            for col in range(1, 8):
+                c = ws_dev.cell(row=row_dev_idx, column=col)
+                c.font = font_data
+                c.border = border_cell
+                if idx % 2 == 0:
+                    c.fill = fill_zebra
+                if col in [1, 3]:
+                    c.alignment = align_center
+                elif col == 2:
+                    c.alignment = align_left
+                else:
+                    c.alignment = align_right
+                    c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+            row_dev_idx += 1
+
+        ws_dev.append([
+            "",
+            "TOTAL A DEVOLVER A BODEGA",
+            f"{len(materiales_devolucion)} ÍTEMS",
+            fmt_val(tot_d_ent),
+            fmt_val(tot_d_inst),
+            fmt_val(tot_d_dev),
+            "—"
+        ])
+        for col in range(1, 8):
+            c = ws_dev.cell(row=row_dev_idx, column=col)
+            c.font = font_total
+            c.fill = fill_total
+            c.border = border_total
+            if col in [1, 3, 7]:
+                c.alignment = align_center
+            elif col == 2:
+                c.alignment = align_left
+            else:
+                c.alignment = align_right
+                c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+
+        ws_dev.column_dimensions["A"].width = 12
+        ws_dev.column_dimensions["B"].width = 48
+        ws_dev.column_dimensions["C"].width = 12
+        ws_dev.column_dimensions["D"].width = 24
+        ws_dev.column_dimensions["E"].width = 22
+        ws_dev.column_dimensions["F"].width = 28
+        ws_dev.column_dimensions["G"].width = 20
 
     buffer = io.BytesIO()
     wb.save(buffer)
@@ -1545,12 +1719,14 @@ def eliminar_retiro_material(request, retiro_id):
 def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
     """
     Vista Global y Consolidada de Materiales en Logística.
-    Permite navegar fluidamente entre cualquier Macroproyecto y Proyecto (ej: Proyecto 9901), visualizando:
-    1. Selector interactivo superior de Macroproyecto y Proyecto con buscador en tiempo real.
-    2. Tabla Matriz Completa de Nodos / Apoyos con materiales instalados y retirados, luminarias y estado (formato ingeniería).
-    3. Matriz de Liquidación y Balance con columna 'Material que Sobra' (Suministrado - Instalado).
-    4. Resumen de retiros / desmontes y remisiones de entrada.
-    5. Indicador contextual de tipo de red (Alumbrado Público con auditoría de desmontes vs Media Tensión sin retiros).
+    Permite navegar fluidamente entre cualquier Macroproyecto y Proyecto (ej: Proyecto 9901)
+    o ver el consolidado de todos los proyectos de un macroproyecto / globales, visualizando:
+    1. Selector interactivo superior de Macroproyecto y Proyecto con opción multi-proyecto / consolidado.
+    2. Tabla Matriz Completa de Nodos / Apoyos con datos técnicos (fecha, dirección/barrio, tipo instalación, tipo estructura, retenidas, materiales instalados y retirados, luminarias, estado).
+    3. Motor de filtros interactivos tipo Excel (orden A-Z, buscador, selección múltiple de casillas).
+    4. Matriz de Liquidación y Balance con columna 'Material que Sobra' (Suministrado - Instalado).
+    5. Resumen de retiros / desmontes y remisiones de entrada.
+    6. Indicador contextual de tipo de red y maniobras EMCALI/COINTECA.
     """
     todos_macroproyectos = Macroproyecto.objects.all().order_by("nombre")
     todos_proyectos_raw = Proyecto.objects.select_related("macroproyecto").order_by("numero_emcali")
@@ -1577,19 +1753,36 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
         macro_seleccionado = Macroproyecto.objects.filter(id=int(macro_id_param)).first()
 
     proyecto_seleccionado = None
+    es_consolidado = False
+
     if proy_id_param and str(proy_id_param).isdigit():
-        proyecto_seleccionado = Proyecto.objects.filter(id=int(proy_id_param)).first()
-
-    if macro_seleccionado and not proyecto_seleccionado:
-        proyectos_del_macro = Proyecto.objects.filter(macroproyecto=macro_seleccionado).order_by("numero_emcali")
-        if proyectos_del_macro.exists():
-            proyecto_seleccionado = proyectos_del_macro.first()
-
-    if not proyecto_seleccionado and todos_proyectos_raw.exists():
+        proyecto_seleccionado = Proyecto.objects.filter(id=int(proy_id_param)).select_related("macroproyecto").first()
+        if proyecto_seleccionado:
+            proyectos_scope = Proyecto.objects.filter(id=proyecto_seleccionado.id).select_related("macroproyecto")
+            if not macro_seleccionado and proyecto_seleccionado.macroproyecto:
+                macro_seleccionado = proyecto_seleccionado.macroproyecto
+        else:
+            proyectos_scope = Proyecto.objects.none()
+    elif proy_id_param == "todos":
+        es_consolidado = True
+        if macro_seleccionado:
+            proyectos_scope = Proyecto.objects.filter(macroproyecto=macro_seleccionado).select_related("macroproyecto").order_by("numero_emcali")
+        else:
+            proyectos_scope = Proyecto.objects.all().select_related("macroproyecto").order_by("numero_emcali")
+    elif macro_seleccionado:
+        # Por defecto si se selecciona un macroproyecto y no se especifica proyecto, mostrar el consolidado del macro
+        proyectos_scope = Proyecto.objects.filter(macroproyecto=macro_seleccionado).select_related("macroproyecto").order_by("numero_emcali")
+        if proyectos_scope.count() == 1:
+            proyecto_seleccionado = proyectos_scope.first()
+        else:
+            es_consolidado = True
+    elif todos_proyectos_raw.exists():
         proyecto_seleccionado = todos_proyectos_raw.first()
-
-    if proyecto_seleccionado and not macro_seleccionado and proyecto_seleccionado.macroproyecto:
-        macro_seleccionado = proyecto_seleccionado.macroproyecto
+        proyectos_scope = Proyecto.objects.filter(id=proyecto_seleccionado.id).select_related("macroproyecto")
+        if proyecto_seleccionado.macroproyecto:
+            macro_seleccionado = proyecto_seleccionado.macroproyecto
+    else:
+        proyectos_scope = Proyecto.objects.none()
 
     filas_matriz = []
     materiales_columnas = []
@@ -1607,29 +1800,34 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
     total_material_sobrante = Decimal("0")
     nota_tecnica_red = ""
 
-    if proyecto_seleccionado:
-        p = proyecto_seleccionado
+    materiales_devolucion = []
+    total_devolucion = Decimal("0")
 
-        if p.tipo == "MT":
-            nota_tecnica_red = "⚡ En Media Tensión (MT) no se realizan desmontes ni retiros de luminarias. Se audita exclusivamente el suministro e instalación técnica en red primaria."
-        elif p.tipo in ["AP_BARRIO", "AP_PARQUE", "AP"]:
-            nota_tecnica_red = "💡 En Alumbrado Público (AP) se audita la instalación de nuevas luminarias y materiales, así como los desmontes y retiros de luminarias y equipos antiguos."
-        elif p.tipo == "BT":
-            nota_tecnica_red = "🔌 En Baja Tensión (BT) se audita el tendido de red, postes técnicos, accesorios y retiros aplicables."
+    if proyectos_scope.exists():
+        if proyecto_seleccionado:
+            p = proyecto_seleccionado
+            if p.tipo == "MT":
+                nota_tecnica_red = "⚡ En Media Tensión (MT) no se realizan desmontes ni retiros de luminarias. Se audita exclusivamente el suministro e instalación técnica en red primaria."
+            elif p.tipo in ["AP_BARRIO", "AP_PARQUE", "AP"]:
+                nota_tecnica_red = "💡 En Alumbrado Público (AP) se audita la instalación de nuevas luminarias y materiales, así como los desmontes y retiros de luminarias y equipos antiguos."
+            elif p.tipo == "BT":
+                nota_tecnica_red = "🔌 En Baja Tensión (BT) se audita el tendido de red, postes técnicos, accesorios y retiros aplicables."
+            else:
+                nota_tecnica_red = "🔧 Control y conciliación de materiales en obra."
         else:
-            nota_tecnica_red = "🔧 Control y conciliación de materiales en obra."
+            nota_tecnica_red = f"🌐 Visualización consolidada de {proyectos_scope.count()} proyecto(s). Usa los filtros tipo Excel en cada columna para segmentar por barrio, tipo de instalación, cuadrilla o fecha con exactitud."
 
-        # A. Apoyos y Matriz Poste a Poste (Formato Ingeniería)
+        # A. Apoyos y Matriz Poste a Poste (Formato Ingeniería con datos técnicos completos)
         apoyos = (
             Apoyo.objects
-            .filter(proyecto=p)
-            .select_related("quien_ejecuta")
+            .filter(proyecto__in=proyectos_scope)
+            .select_related("quien_ejecuta", "proyecto", "proyecto__macroproyecto")
             .prefetch_related("luminarias")
-            .order_by("numero_apoyo", "id")
+            .order_by("proyecto__numero_emcali", "numero_apoyo", "id")
         )
 
         apoyo_materiales = ApoyoMaterial.objects.filter(
-            apoyo__proyecto=p
+            apoyo__proyecto__in=proyectos_scope
         ).select_related("material")
 
         materiales_ids = apoyo_materiales.values_list('material_id', flat=True).distinct()
@@ -1679,14 +1877,14 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
 
         # B. Matriz de Liquidación y Balance (Estilo Edson)
         inst_qs = (
-            ApoyoMaterial.objects.filter(apoyo__proyecto=p)
+            ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope)
             .values("material_id")
             .annotate(total=Sum("cantidad_requerida"))
         )
         inst_map = {item["material_id"]: item["total"] for item in inst_qs}
 
         req_qs = (
-            MaterialRequeridoProyecto.objects.filter(proyecto=p)
+            MaterialRequeridoProyecto.objects.filter(proyecto__in=proyectos_scope)
             .values("material_id")
             .annotate(total=Sum("cantidad_requerida"))
         )
@@ -1696,14 +1894,14 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
                 req_map[m_id] = cant
 
         ent_qs = (
-            DetalleEntradaMaterial.objects.filter(entrada__proyecto=p)
+            DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_scope)
             .values("material_id")
             .annotate(total=Sum("cantidad"))
         )
         ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
         ret_qs = (
-            ApoyoMaterial.objects.filter(apoyo__proyecto=p)
+            ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope)
             .values("material_id")
             .annotate(total=Sum("cantidad_retirada"))
         )
@@ -1734,6 +1932,7 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
                 "instalado": sum_inst,
                 "retirado": sum_ret,
                 "material_sobrante": material_sobrante,
+                "devolucion": material_sobrante if material_sobrante > 0 else Decimal("0"),
                 "stock_bodega": stock_disp,
             })
 
@@ -1744,16 +1943,29 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
 
         total_material_sobrante = total_items_entrados - total_items_instalados
 
+        # C. Materiales con saldo sobrante que deben reintegrarse/devolverse a bodega
+        materiales_devolucion = [item for item in balance_materiales if item["material_sobrante"] > 0]
+        total_devolucion = sum(item["material_sobrante"] for item in materiales_devolucion)
+
         entradas = (
-            EntradaMaterialProyecto.objects.filter(proyecto=p)
-            .prefetch_related("detalles__material")
+            EntradaMaterialProyecto.objects.filter(proyecto__in=proyectos_scope)
+            .prefetch_related("detalles__material", "proyecto")
             .order_by("-fecha", "-id")
         )
         retiros_actas = (
-            RetiroMaterialProyecto.objects.filter(proyecto=p)
-            .prefetch_related("detalles__material")
+            RetiroMaterialProyecto.objects.filter(proyecto__in=proyectos_scope)
+            .prefetch_related("detalles__material", "proyecto")
             .order_by("-fecha", "-id")
         )
+
+    maniobra_emcali_display = ""
+    maniobra_cointeca_display = ""
+    if macro_seleccionado:
+        maniobra_emcali_display = macro_seleccionado.numero_maniobra_emcali or ""
+        maniobra_cointeca_display = macro_seleccionado.numero_maniobra_cointeca or ""
+    elif proyecto_seleccionado and proyecto_seleccionado.macroproyecto:
+        maniobra_emcali_display = proyecto_seleccionado.macroproyecto.numero_maniobra_emcali or ""
+        maniobra_cointeca_display = proyecto_seleccionado.macroproyecto.numero_maniobra_cointeca or ""
 
     proyectos_macro_list = []
     if macro_seleccionado:
@@ -1768,7 +1980,11 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             "proyectos_js": json.dumps(proyectos_js),
             "macro_seleccionado": macro_seleccionado,
             "proyecto_seleccionado": proyecto_seleccionado,
+            "proyectos_scope": proyectos_scope,
+            "es_consolidado": es_consolidado,
             "proyectos_macro_list": proyectos_macro_list,
+            "maniobra_emcali_display": maniobra_emcali_display,
+            "maniobra_cointeca_display": maniobra_cointeca_display,
             "nota_tecnica_red": nota_tecnica_red,
             "apoyos": apoyos,
             "materiales_columnas": materiales_columnas,
@@ -1776,6 +1992,8 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             "fila_totales": fila_totales,
             "tabla_resumen_retiros": tabla_resumen_retiros,
             "balance_materiales": balance_materiales,
+            "materiales_devolucion": materiales_devolucion,
+            "total_devolucion": total_devolucion,
             "entradas": entradas,
             "retiros_actas": retiros_actas,
             "total_items_requeridos": total_items_requeridos,
@@ -1795,48 +2013,67 @@ def exportar_vista_global_excel(request):
     """
     Descarga el reporte completo en formato Excel (.xlsx) con 2 hojas:
     1. Matriz de Liquidación y Balance (Estilo Edson con Suministrado, Instalado, Retirado y Material que Sobra).
-    2. Matriz de Nodos Poste a Poste (con columnas de materiales e identificación técnica).
+    2. Matriz de Nodos Poste a Poste (con columnas técnicas: Proyecto, Maniobras, Fecha, Dirección, Tipo Instalación,
+       Tipo Estructura, Retenidas, Luminarias y Materiales instalados/retirados).
     """
     proyecto_id = request.GET.get("proyecto_id")
-    if not proyecto_id or not str(proyecto_id).isdigit():
-        return redirect("vista_global_logistica")
+    macroproyecto_id = request.GET.get("macroproyecto_id")
 
-    proyecto = get_object_or_404(Proyecto, id=int(proyecto_id))
+    macroproyecto = None
+    if macroproyecto_id and str(macroproyecto_id).isdigit():
+        macroproyecto = Macroproyecto.objects.filter(id=int(macroproyecto_id)).first()
+
+    proyecto = None
+    es_consolidado = False
+    if proyecto_id and str(proyecto_id).isdigit():
+        proyecto = Proyecto.objects.filter(id=int(proyecto_id)).select_related("macroproyecto").first()
+        proyectos_scope = Proyecto.objects.filter(id=proyecto.id) if proyecto else Proyecto.objects.none()
+    elif proyecto_id == "todos" or (macroproyecto and not proyecto_id):
+        es_consolidado = True
+        if macroproyecto:
+            proyectos_scope = Proyecto.objects.filter(macroproyecto=macroproyecto).select_related("macroproyecto")
+        else:
+            proyectos_scope = Proyecto.objects.all().select_related("macroproyecto")
+    elif Proyecto.objects.exists():
+        proyecto = Proyecto.objects.first()
+        proyectos_scope = Proyecto.objects.filter(id=proyecto.id)
+    else:
+        return redirect("vista_global_logistica")
 
     # 1. Datos para Balance
     inst_qs = (
-        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope)
         .values("material_id")
         .annotate(total=Sum("cantidad_requerida"))
     )
     inst_map = {item["material_id"]: item["total"] for item in inst_qs}
 
     ent_qs = (
-        DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
+        DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_scope)
         .values("material_id")
         .annotate(total=Sum("cantidad"))
     )
     ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
     ret_qs = (
-        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope)
         .values("material_id")
         .annotate(total=Sum("cantidad_retirada"))
     )
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
     all_mat_ids = set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys())
-    materiales_db = Material.objects.filter(id__in=all_mat_ids).order_by("item", "descripcion")
+    materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
 
     # 2. Datos para Nodos
     apoyos = (
         Apoyo.objects
-        .filter(proyecto=proyecto)
-        .select_related("quien_ejecuta")
+        .filter(proyecto__in=proyectos_scope)
+        .select_related("quien_ejecuta", "proyecto", "proyecto__macroproyecto")
         .prefetch_related("luminarias")
-        .order_by("numero_apoyo", "id")
+        .order_by("proyecto__numero_emcali", "numero_apoyo", "id")
     )
-    apoyo_materiales = ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto).select_related("material")
+    apoyo_materiales = ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope).select_related("material")
     materiales_ids_nodos = apoyo_materiales.values_list('material_id', flat=True).distinct()
     materiales_columnas = list(Material.objects.filter(id__in=materiales_ids_nodos).order_by("item", "descripcion"))
 
@@ -1870,26 +2107,42 @@ def exportar_vista_global_excel(request):
     ws1 = wb.active
     ws1.title = "Matriz de Balance"
 
-    ws1.merge_cells("A1:G1")
-    ws1["A1"] = f"COINTECA S.A.S. — LIQUIDACIÓN Y BALANCE DE MATERIALES (PROYECTO {proyecto.numero_emcali})"
+    nombre_scope = f"PROYECTO {proyecto.numero_emcali}" if proyecto else f"CONSOLIDADO ({macroproyecto.nombre if macroproyecto else 'GLOBAL'})"
+    ws1.merge_cells("A1:H1")
+    ws1["A1"] = f"COINTECA S.A.S. — LIQUIDACIÓN Y BALANCE DE MATERIALES ({nombre_scope})"
     ws1["A1"].font = font_titulo
     ws1["A1"].alignment = align_left
 
-    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else "Sin Macroproyecto"
-    ws1.merge_cells("A2:G2")
-    ws1["A2"] = f"MACROPROYECTO: {macro_nom}  |  TIPO RED: {proyecto.tipo}  |  NODOS: {apoyos.count()}  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+    macro_nom = macroproyecto.nombre if macroproyecto else (proyecto.macroproyecto.nombre if proyecto and proyecto.macroproyecto else "Sin Macroproyecto")
+    maniobras_txt = ""
+    if macroproyecto:
+        maniobras_txt = f" | MANIOBRA EMCALI: {macroproyecto.numero_maniobra_emcali or 'N/A'} | MANIOBRA COINTECA: {macroproyecto.numero_maniobra_cointeca or 'N/A'}"
+    elif proyecto and proyecto.macroproyecto:
+        maniobras_txt = f" | MANIOBRA EMCALI: {proyecto.macroproyecto.numero_maniobra_emcali or 'N/A'} | MANIOBRA COINTECA: {proyecto.macroproyecto.numero_maniobra_cointeca or 'N/A'}"
+
+    ws1.merge_cells("A2:H2")
+    ws1["A2"] = f"MACROPROYECTO: {macro_nom}{maniobras_txt} | NODOS: {apoyos.count()} | FECHA: {timezone.now().strftime('%d/%m/%Y')}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
 
     ws1.append([])
-    headers1 = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "SUMINISTRADO (ENTRADAS)", "INSTALADO EN POSTES", "RETIRADO / DESMONTE", "MATERIAL QUE SOBRA"]
+    headers1 = [
+        "ÍTEM",
+        "DESCRIPCIÓN DEL MATERIAL",
+        "UNIDAD",
+        "SUMINISTRADO (ENTRADAS)",
+        "INSTALADO EN POSTES",
+        "RETIRADO / DESMONTE",
+        "MATERIAL QUE SOBRA",
+        "STOCK EN BODEGA"
+    ]
     ws1.append(headers1)
 
-    for col in range(1, 8):
+    for col in range(1, 9):
         c = ws1.cell(row=4, column=col)
         c.font = font_header
         c.fill = fill_header
-        c.alignment = align_center if col not in [2] else align_left
+        c.alignment = align_center if col != 2 else align_left
         c.border = border_cell
 
     row_idx = 5
@@ -1897,8 +2150,11 @@ def exportar_vista_global_excel(request):
     tot_inst = Decimal("0")
     tot_ret = Decimal("0")
     tot_sob = Decimal("0")
+    materiales_devolucion = []
 
     def fmt_v(v):
+        if v is None:
+            return 0
         return int(v) if v % 1 == 0 else float(v)
 
     for idx, mat in enumerate(materiales_db, start=1):
@@ -1906,14 +2162,35 @@ def exportar_vista_global_excel(request):
         c_inst = inst_map.get(mat.id, Decimal("0"))
         c_ret = ret_map.get(mat.id, Decimal("0"))
         c_sob = c_ent - c_inst
+        c_dev = max(Decimal("0"), c_sob)
+        stock_obj = getattr(mat, "inventario", None)
+        c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
         tot_ent += c_ent
         tot_inst += c_inst
         tot_ret += c_ret
         tot_sob += c_sob
 
-        ws1.append([mat.item, mat.descripcion, mat.unidad or "UN", fmt_v(c_ent), fmt_v(c_inst), fmt_v(c_ret), fmt_v(c_sob)])
-        for col in range(1, 8):
+        if c_dev > 0:
+            materiales_devolucion.append({
+                "mat": mat,
+                "ent": c_ent,
+                "inst": c_inst,
+                "dev": c_dev,
+                "stock": c_stock
+            })
+
+        ws1.append([
+            mat.item or "",
+            mat.descripcion,
+            mat.unidad or "UN",
+            fmt_v(c_ent),
+            fmt_v(c_inst),
+            fmt_v(c_ret),
+            fmt_v(c_sob),
+            fmt_v(c_stock)
+        ])
+        for col in range(1, 9):
             c = ws1.cell(row=row_idx, column=col)
             c.font = font_data
             c.border = border_cell
@@ -1928,13 +2205,22 @@ def exportar_vista_global_excel(request):
                 c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
         row_idx += 1
 
-    ws1.append(["", "TOTALES CONSOLIDADOS", f"{len(materiales_db)} ÍTEMS", fmt_v(tot_ent), fmt_v(tot_inst), fmt_v(tot_ret), fmt_v(tot_sob)])
-    for col in range(1, 8):
+    ws1.append([
+        "",
+        "TOTALES CONSOLIDADOS",
+        f"{len(materiales_db)} ÍTEMS",
+        fmt_v(tot_ent),
+        fmt_v(tot_inst),
+        fmt_v(tot_ret),
+        fmt_v(tot_sob),
+        "—"
+    ])
+    for col in range(1, 9):
         c = ws1.cell(row=row_idx, column=col)
         c.font = font_total
         c.fill = fill_total
         c.border = border_total
-        if col in [1, 3]:
+        if col in [1, 3, 8]:
             c.alignment = align_center
         elif col == 2:
             c.alignment = align_left
@@ -1949,16 +2235,31 @@ def exportar_vista_global_excel(request):
     ws1.column_dimensions["E"].width = 22
     ws1.column_dimensions["F"].width = 22
     ws1.column_dimensions["G"].width = 22
+    ws1.column_dimensions["H"].width = 18
 
     # HOJA 2: MATRIZ DE NODOS POSTE A POSTE
     ws2 = wb.create_sheet(title="Nodos Poste a Poste")
-    ws2.merge_cells("A1:F1")
-    ws2["A1"] = f"COINTECA S.A.S. — MATRIZ POSTE A POSTE (PROYECTO {proyecto.numero_emcali})"
+    ws2.merge_cells("A1:K1")
+    ws2["A1"] = f"COINTECA S.A.S. — MATRIZ POSTE A POSTE ({nombre_scope})"
     ws2["A1"].font = font_titulo
     ws2["A1"].alignment = align_left
 
     ws2.append([])
-    fixed_headers = ["QUIÉN EJECUTA", "NODO / POSTE", "N° APOYO", "ESTADO", "POTENCIA", "CÓDIGO LUM."]
+    fixed_headers = [
+        "PROYECTO",
+        "QUIÉN EJECUTA",
+        "NODO / POSTE",
+        "N° APOYO",
+        "FECHA",
+        "DIRECCIÓN / BARRIO",
+        "TIPO INSTALACIÓN",
+        "TIPO ESTRUCTURA",
+        "CANT. RETENIDA",
+        "METROS RETENIDO",
+        "ESTADO",
+        "POTENCIA",
+        "CÓDIGO LUM."
+    ]
     mat_headers = [f"{m.descripcion} ({m.unidad or 'UN'})" for m in materiales_columnas]
     ws2.append(fixed_headers + mat_headers)
     total_cols = len(fixed_headers) + len(mat_headers)
@@ -1967,22 +2268,44 @@ def exportar_vista_global_excel(request):
         c = ws2.cell(row=3, column=col)
         c.font = font_header
         c.fill = fill_header
-        c.alignment = align_center if col > 1 else align_left
+        c.alignment = align_center if col not in [2, 6] else align_left
         c.border = border_cell
 
     row_nodos = 4
     totales_mat_nodos = {m.id: Decimal("0") for m in materiales_columnas}
 
     for idx, ap in enumerate(apoyos, start=1):
+        proy_txt = ap.proyecto.numero_emcali if ap.proyecto else "—"
         quien = ap.quien_ejecuta.nombre_completo if ap.quien_ejecuta else "Sin asignar"
         nodo_str = ap.nodo or "Sin Nodo"
         num_ap = ap.numero_apoyo or "—"
+        fecha_str = ap.fecha.strftime("%d/%m/%Y") if ap.fecha else "—"
+        dir_str = ap.direccion or "—"
+        tipo_inst = ap.tipo_instalacion or "—"
+        tipo_est = ap.tipo_estructura or "—"
+        cant_ret = fmt_v(ap.cantidad_retenida) if ap.cantidad_retenida is not None else "—"
+        met_ret = fmt_v(ap.metros_retenido) if ap.metros_retenido is not None else "—"
         est = ap.estado
         lums = ap.luminarias.all()
         potencias_str = ", ".join(l.potencia for l in lums if l.potencia) or "—"
         codigos_str = ", ".join(l.codigo for l in lums if l.codigo) or "—"
 
-        row_data = [quien, nodo_str, num_ap, est, potencias_str, codigos_str]
+        row_data = [
+            proy_txt,
+            quien,
+            nodo_str,
+            num_ap,
+            fecha_str,
+            dir_str,
+            tipo_inst,
+            tipo_est,
+            cant_ret,
+            met_ret,
+            est,
+            potencias_str,
+            codigos_str
+        ]
+
         for m in materiales_columnas:
             c_inst = cantidades_inst_map.get((ap.id, m.id), Decimal("0"))
             c_ret = cantidades_ret_map.get((ap.id, m.id), Decimal("0"))
@@ -2004,14 +2327,14 @@ def exportar_vista_global_excel(request):
             c.border = border_cell
             if idx % 2 == 0:
                 c.fill = fill_zebra
-            if col in [2, 3, 4, 5, 6] or col > 6:
+            if col in [1, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] or col > 13:
                 c.alignment = align_center
             else:
                 c.alignment = align_left
         row_nodos += 1
 
     # Totales hoja 2
-    row_tot_nodos = ["TOTALES", f"{len(apoyos)} NODOS", "", "", "", ""]
+    row_tot_nodos = ["TOTALES", f"{len(apoyos)} NODOS", "", "", "", "", "", "", "", "", "", "", ""]
     for m in materiales_columnas:
         row_tot_nodos.append(fmt_v(totales_mat_nodos[m.id]))
     ws2.append(row_tot_nodos)
@@ -2023,21 +2346,123 @@ def exportar_vista_global_excel(request):
         c.border = border_total
         c.alignment = align_center if col > 1 else align_left
 
-    ws2.column_dimensions["A"].width = 24
-    ws2.column_dimensions["B"].width = 18
-    ws2.column_dimensions["C"].width = 12
-    ws2.column_dimensions["D"].width = 14
-    ws2.column_dimensions["E"].width = 16
-    ws2.column_dimensions["F"].width = 18
-    for c_idx in range(7, total_cols + 1):
-        col_letter = openpyxl.utils.get_column_letter(c_idx)
+    ws2.column_dimensions["A"].width = 16
+    ws2.column_dimensions["B"].width = 24
+    ws2.column_dimensions["C"].width = 16
+    ws2.column_dimensions["D"].width = 12
+    ws2.column_dimensions["E"].width = 14
+    ws2.column_dimensions["F"].width = 28
+    ws2.column_dimensions["G"].width = 18
+    ws2.column_dimensions["H"].width = 18
+    ws2.column_dimensions["I"].width = 14
+    ws2.column_dimensions["J"].width = 14
+    ws2.column_dimensions["K"].width = 14
+    ws2.column_dimensions["L"].width = 16
+    ws2.column_dimensions["M"].width = 18
+    for c_idx in range(14, total_cols + 1):
+        col_letter = get_column_letter(c_idx)
         ws2.column_dimensions[col_letter].width = 20
+
+    # HOJA 3: DEVOLUCIÓN A BODEGA (REINTEGROS)
+    if materiales_devolucion:
+        ws3 = wb.create_sheet(title="Devolución a Bodega")
+        ws3.merge_cells("A1:G1")
+        ws3["A1"] = f"COINTECA S.A.S. — MATERIALES DE DEVOLUCIÓN A BODEGA ({nombre_scope})"
+        ws3["A1"].font = font_titulo
+        ws3["A1"].alignment = align_left
+
+        ws3.merge_cells("A2:G2")
+        ws3["A2"] = f"MATERIALES SOBRANTES CONSOLIDADOS TRAS INSTALACIÓN  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+        ws3.append([])
+        ws3_headers = [
+            "ÍTEM",
+            "DESCRIPCIÓN DEL MATERIAL",
+            "UNIDAD",
+            "SUMINISTRADO (ENTRADAS)",
+            "INSTALADO EN POSTES",
+            "CANTIDAD A DEVOLVER / REINTEGRAR",
+            "STOCK ACTUAL EN BODEGA"
+        ]
+        ws3.append(ws3_headers)
+
+        for col in range(1, 8):
+            c = ws3.cell(row=4, column=col)
+            c.font = font_header
+            c.fill = fill_header
+            c.alignment = align_center if col != 2 else align_left
+            c.border = border_cell
+
+        row3_idx = 5
+        tot_d_ent = Decimal("0")
+        tot_d_inst = Decimal("0")
+        tot_d_dev = Decimal("0")
+
+        for idx, d in enumerate(materiales_devolucion, start=1):
+            tot_d_ent += d["ent"]
+            tot_d_inst += d["inst"]
+            tot_d_dev += d["dev"]
+
+            ws3.append([
+                d["mat"].item or "",
+                d["mat"].descripcion,
+                d["mat"].unidad or "UN",
+                fmt_v(d["ent"]),
+                fmt_v(d["inst"]),
+                fmt_v(d["dev"]),
+                fmt_v(d["stock"])
+            ])
+
+            for col in range(1, 8):
+                c = ws3.cell(row=row3_idx, column=col)
+                c.font = font_data
+                c.border = border_cell
+                if idx % 2 == 0:
+                    c.fill = fill_zebra
+                if col in [1, 3]:
+                    c.alignment = align_center
+                elif col == 2:
+                    c.alignment = align_left
+                else:
+                    c.alignment = align_right
+                    c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+            row3_idx += 1
+
+        ws3.append([
+            "",
+            "TOTAL A DEVOLVER A BODEGA",
+            f"{len(materiales_devolucion)} ÍTEMS",
+            fmt_v(tot_d_ent),
+            fmt_v(tot_d_inst),
+            fmt_v(tot_d_dev),
+            "—"
+        ])
+        for col in range(1, 8):
+            c = ws3.cell(row=row3_idx, column=col)
+            c.font = font_total
+            c.fill = fill_total
+            c.border = border_total
+            if col in [1, 3, 7]:
+                c.alignment = align_center
+            elif col == 2:
+                c.alignment = align_left
+            else:
+                c.alignment = align_right
+                c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+
+        ws3.column_dimensions["A"].width = 12
+        ws3.column_dimensions["B"].width = 48
+        ws3.column_dimensions["C"].width = 12
+        ws3.column_dimensions["D"].width = 24
+        ws3.column_dimensions["E"].width = 22
+        ws3.column_dimensions["F"].width = 28
+        ws3.column_dimensions["G"].width = 20
 
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
 
-    filename = f"Vista_Global_Proyecto_{proyecto.numero_emcali}_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    nombre_slug = proyecto.numero_emcali if proyecto else (macroproyecto.nombre.replace(" ", "_") if macroproyecto else "Consolidado_Global")
+    filename = f"Vista_Global_{nombre_slug}_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

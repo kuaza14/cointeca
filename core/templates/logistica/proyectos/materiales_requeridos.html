@@ -195,47 +195,46 @@
 
 <!-- MODAL PARA PEDIR / AGREGAR MATERIALES REQUERIDOS (SELECTOR + TABLA ACUMULATIVA) -->
 <div id="modalAgregarRequerido"
-     class="hidden fixed inset-0 z-50 items-center justify-center p-4 overflow-y-auto"
-     style="background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);">
+     class="hidden fixed inset-0 z-50 items-center justify-center p-4 overflow-y-auto bg-slate-950/70 backdrop-blur-xs"
+     role="dialog"
+     aria-modal="true">
 
-    <div class="relative w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 border my-8"
-         style="background-color: #ffffff; color: #0f172a; border-color: #cbd5e1; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="relative w-full max-w-2xl rounded-xl shadow-2xl border border-gray-200 bg-white my-8 overflow-hidden"
+         style="max-height: 90vh; display: flex; flex-direction: column;">
 
         <!-- Cabecera del Modal -->
-        <div class="flex justify-between items-center border-b border-gray-200 pb-3 flex-shrink-0">
+        <div class="flex justify-between items-center border-b border-blue-800 px-6 py-4 bg-blue-900 text-white flex-shrink-0">
             <div>
-                <h2 class="text-xl font-black text-gray-900 flex items-center gap-2">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
                     <span>➕</span> Pedir / Agregar Materiales Requeridos
                 </h2>
-                <p class="text-xs text-gray-500 mt-0.5">Selecciona los materiales arriba y agrégalos a la lista antes de guardar.</p>
+                <p class="text-xs text-blue-100 mt-0.5">Selecciona los materiales arriba y agrégalos a la lista antes de guardar.</p>
             </div>
             <button type="button" onclick="cerrarModalAgregar()"
-                    class="text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-1.5 rounded-lg text-2xl font-bold leading-none">
+                    class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-blue-800 transition">
                 &times;
             </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+        <div class="flex-1 overflow-y-auto space-y-4 p-6 bg-white">
             <!-- SECCIÓN 1: SELECTOR Y CANTIDAD (AMPLIO Y FÁCIL) -->
-            <div class="p-4 rounded-xl border-2 border-blue-200 bg-blue-50/40 space-y-3">
+            <div class="p-4 rounded-xl border-2 border-blue-200 bg-blue-50/50 space-y-3">
                 <span class="text-xs font-bold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
                     <span>🔍</span> 1. Elegir Material y Cantidad
                 </span>
 
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                        Seleccionar Material del Catálogo *
+                        Seleccionar Material del Catálogo <span class="text-red-600">*</span>
                     </label>
                     <select id="selectMaterialModal"
-                            class="w-full border-2 border-gray-300 rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:outline-none"
-                            style="background-color: #ffffff; color: #0f172a;">
+                            class="w-full border-2 border-gray-300 rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
                         <option value="" disabled selected>-- Busca o selecciona el material por su nombre --</option>
                         {% for mat in materiales_catalogo %}
                             <option value="{{ mat.id }}"
                                     data-item="{{ mat.item }}"
                                     data-desc="{{ mat.descripcion }}"
-                                    data-unidad="{{ mat.unidad|default:'U' }}"
-                                    style="color: #0f172a;">
+                                    data-unidad="{{ mat.unidad|default:'U' }}">
                                 {{ mat.descripcion }} — [Cód: {{ mat.item }}] ({{ mat.unidad|default:'U' }})
                             </option>
                         {% endfor %}
@@ -245,17 +244,15 @@
                 <div class="flex flex-wrap sm:flex-nowrap items-end gap-3 pt-1">
                     <div class="w-36 sm:w-44 flex-shrink-0">
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                            Cantidad *
+                            Cantidad <span class="text-red-600">*</span>
                         </label>
                         <input type="number" id="inputCantidadModal" step="any" min="0.01" placeholder="Ej: 10"
-                               class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-black text-gray-900 focus:border-blue-600 focus:outline-none"
-                               style="background-color: #ffffff; color: #0f172a;"
+                               class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-black text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white"
                                onkeydown="if(event.key==='Enter'){event.preventDefault(); agregarMaterialALista();}">
                     </div>
 
                     <button type="button" onclick="agregarMaterialALista()"
-                            class="px-5 py-2 text-white font-bold text-sm rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 flex-shrink-0"
-                            style="background-color: #1d4ed8; color: #ffffff !important; height: 38px;">
+                            class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 flex-shrink-0 h-[38px]">
                         <span>➕</span> Agregar a la Lista
                     </button>
                 </div>
@@ -271,24 +268,24 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
                         <span>📋</span> 2. Lista de Materiales a Guardar
                     </span>
-                    <span id="contadorItemsLista" class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                    <span id="contadorItemsLista" class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
                         0 materiales
                     </span>
                 </div>
 
                 <!-- Tabla visual -->
-                <div class="border-2 border-gray-200 rounded-xl overflow-hidden" style="background-color: #ffffff;">
+                <div class="border-2 border-gray-200 rounded-xl overflow-hidden bg-white">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-bold">
+                        <thead class="bg-slate-800 text-white uppercase text-xs font-bold">
                             <tr>
-                                <th class="px-3 py-2 text-left w-20">Cód</th>
-                                <th class="px-3 py-2 text-left">Material</th>
-                                <th class="px-2 py-2 text-center w-16">Unidad</th>
-                                <th class="px-3 py-2 text-right w-24">Cantidad</th>
-                                <th class="px-2 py-2 text-center w-12">Quitar</th>
+                                <th class="px-3 py-2.5 text-left w-20">Cód</th>
+                                <th class="px-3 py-2.5 text-left">Material</th>
+                                <th class="px-2 py-2.5 text-center w-16">Unidad</th>
+                                <th class="px-3 py-2.5 text-right w-24">Cantidad</th>
+                                <th class="px-2 py-2.5 text-center w-12">Quitar</th>
                             </tr>
                         </thead>
-                        <tbody id="cuerpoTablaModal" class="divide-y divide-gray-100" style="background-color: #ffffff;">
+                        <tbody id="cuerpoTablaModal" class="divide-y divide-gray-100 bg-white">
                             <tr id="filaVaciaModal">
                                 <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-xs">
                                     Aún no has agregado materiales a la lista.<br>
@@ -302,12 +299,11 @@
                 <!-- Botones del Modal -->
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 flex-shrink-0">
                     <button type="button" onclick="cerrarModalAgregar()"
-                            class="px-4 py-2.5 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300 transition">
+                            class="px-4 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-300 transition">
                         Cancelar
                     </button>
                     <button type="submit" id="btnGuardarModal" disabled
-                            class="px-6 py-2.5 text-sm font-bold rounded-lg shadow-md transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            style="background-color: #059669; color: #ffffff !important;">
+                            class="px-6 py-2.5 text-sm font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span>💾</span> Guardar Todos los Materiales Requeridos
                     </button>
                 </div>

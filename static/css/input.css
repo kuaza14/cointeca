@@ -1,4 +1,10 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../..");
+
+@source "../../core";
+@source "../../core/templates";
+@source "../../core/templates/**/*.html";
+@source "../../static";
+@source "../../static/**/*.js";
 
 /* =========================================================================
    Sistema de diseño Cointeca
@@ -178,31 +184,41 @@
     }
 
     .btn-primario {
-        background-color: var(--color-primary);
-        color: var(--color-on-primary);
+        background-color: #1e40af;
+        color: #ffffff;
     }
 
     .btn-primario:hover {
-        background-color: var(--color-primary-hover);
+        background-color: #1b3a9e;
     }
 
     .btn-secundario {
-        border-color: var(--color-border-strong);
-        background-color: var(--color-card);
-        color: var(--color-foreground);
+        border: 1px solid #cbd5e1;
+        background-color: #f1f5f9;
+        color: #334155;
     }
 
     .btn-secundario:hover {
-        background-color: var(--color-muted);
+        background-color: #e2e8f0;
+        color: #0f172a;
     }
 
     .btn-peligro {
-        background-color: var(--color-destructive);
-        color: var(--color-on-destructive);
+        background-color: #dc2626;
+        color: #ffffff;
     }
 
     .btn-peligro:hover {
-        background-color: #a81818;
+        background-color: #b91c1c;
+    }
+
+    .btn-exito {
+        background-color: #15803d;
+        color: #ffffff;
+    }
+
+    .btn-exito:hover {
+        background-color: #166534;
     }
 
     /* ---------- Tablas ----------
@@ -348,3 +364,190 @@
         color: var(--color-muted-foreground);
     }
 }
+
+/* =========================================================================
+   Garantía de estilos para botones de acción (Excel, Descargas, etc.)
+   ========================================================================= */
+.bg-green-700, .btn-green-700, .btn-exito, .btn-verde {
+    background-color: #15803d !important;
+    color: #ffffff !important;
+}
+.bg-green-700:hover, .hover\:bg-green-800:hover, .btn-verde:hover, .btn-exito:hover {
+    background-color: #166534 !important;
+    color: #ffffff !important;
+}
+
+.bg-emerald-600, .btn-emerald-600 {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+}
+.bg-emerald-600:hover, .hover\:bg-emerald-700:hover, .btn-emerald-600:hover {
+    background-color: #047857 !important;
+    color: #ffffff !important;
+}
+
+.bg-green-800 {
+    background-color: #166534 !important;
+    color: #ffffff !important;
+}
+
+/* =========================================================================
+   Garantía Total de Opacidad, Contraste y Estructura de Modales
+   ========================================================================= */
+
+/* Fondo oscuro de superposición (Backdrop Overlay) */
+[role="dialog"],
+div[id^="modal"],
+.modal-backdrop,
+.modal-overlay {
+    background-color: rgba(2, 6, 23, 0.75) !important;
+}
+
+/* Tarjeta / Contenedor principal del modal (100% Sólido y Opaco) */
+[role="dialog"] > div,
+div[id^="modal"] > div,
+.modal-card,
+.modal-box,
+.modal-container,
+.modal-contenido {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Cuerpo interno y formularios del modal */
+[role="dialog"] form,
+div[id^="modal"] form,
+[role="dialog"] .bg-white,
+div[id^="modal"] .bg-white {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* Cabeceras de Modales (Azul Principal) */
+[role="dialog"] .bg-blue-900,
+[role="dialog"] .bg-blue-800,
+div[id^="modal"] .bg-blue-900,
+div[id^="modal"] .bg-blue-800,
+.modal-header-blue {
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+}
+
+[role="dialog"] .bg-blue-900 h2,
+[role="dialog"] .bg-blue-900 h3,
+div[id^="modal"] .bg-blue-900 h2,
+div[id^="modal"] .bg-blue-900 h3 {
+    color: #ffffff !important;
+}
+
+[role="dialog"] .bg-blue-900 p,
+div[id^="modal"] .bg-blue-900 p {
+    color: #dbeafe !important;
+}
+
+/* Cabeceras de Modales de Peligro / Eliminación (Rojo) */
+[role="dialog"] .bg-red-700,
+[role="dialog"] .bg-red-800,
+div[id^="modal"] .bg-red-700,
+div[id^="modal"] .bg-red-800,
+.modal-header-red {
+    background-color: #b91c1c !important;
+    color: #ffffff !important;
+}
+
+[role="dialog"] .bg-red-700 h2,
+div[id^="modal"] .bg-red-700 h2 {
+    color: #ffffff !important;
+}
+
+/* Botones de Cerrar en cabecera */
+[role="dialog"] button.text-white\/80,
+div[id^="modal"] button.text-white\/80 {
+    color: #ffffff !important;
+}
+[role="dialog"] button.text-white\/80:hover,
+div[id^="modal"] button.text-white\/80:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Pie del modal / barra de acciones */
+[role="dialog"] .bg-slate-50,
+div[id^="modal"] .bg-slate-50,
+[role="dialog"] .border-t,
+div[id^="modal"] .border-t {
+    background-color: #f8fafc !important;
+}
+
+/* Entradas de formulario dentro de modales */
+[role="dialog"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+[role="dialog"] select,
+[role="dialog"] textarea,
+div[id^="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+div[id^="modal"] select,
+div[id^="modal"] textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #cbd5e1 !important;
+}
+
+[role="dialog"] input:focus,
+[role="dialog"] select:focus,
+[role="dialog"] textarea:focus,
+div[id^="modal"] input:focus,
+div[id^="modal"] select:focus,
+div[id^="modal"] textarea:focus {
+    border-color: #2563eb !important;
+    outline: none !important;
+}
+
+/* =========================================================================
+   Garantía de Botones Globales (Azules, Rojos, Verdes, Neutros)
+   ========================================================================= */
+
+/* Botón Primario / Guardar / Crear */
+.btn-primario,
+.bg-blue-700,
+.bg-primary {
+    background-color: #1d4ed8 !important;
+    color: #ffffff !important;
+}
+.btn-primario:hover,
+.bg-blue-700:hover,
+.hover\:bg-blue-800:hover,
+.bg-primary:hover {
+    background-color: #1e40af !important;
+    color: #ffffff !important;
+}
+
+/* Botón Secundario / Cancelar */
+.btn-secundario,
+.bg-slate-100 {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+}
+.btn-secundario:hover,
+.hover\:bg-slate-200:hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+/* Botón de Peligro / Eliminar */
+.btn-peligro,
+.bg-red-600,
+.bg-destructive {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+.btn-peligro:hover,
+.hover\:bg-red-700:hover,
+.bg-destructive:hover {
+    background-color: #b91c1c !important;
+    color: #ffffff !important;
+}
+
+

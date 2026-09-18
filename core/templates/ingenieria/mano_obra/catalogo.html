@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Catálogo de Tarifas y Mano de Obra - Ingeniería{% endblock %}
+
+{% block content %}
+<div class="max-w-[95rem] mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- Encabezado -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
+                <span>/</span>
+                <span class="text-foreground font-medium">Catálogo de Mano de Obra y Tarifas</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3">
+                🛠️ Tarifario Contractual de Mano de Obra & Actividades
+            </h1>
+            <p class="text-xs sm:text-sm text-muted-foreground mt-1">
+                Gestión de códigos oficiales, unidades de medida y tarifas unitarias para la liquidación de obras.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'lista_proyectos' %}" class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
+                ← Volver a Proyectos
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros y Buscador -->
+    <div class="bg-card rounded-xl p-4 shadow-sm border border-border">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="md:col-span-6">
+                <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Buscar por Código o Descripción</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="Ej: Apertura, Hueco, 209, Cable, Aplomada..."
+                       class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary">
+            </div>
+
+            <div class="md:col-span-4">
+                <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Categoría</label>
+                <select name="categoria" class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background">
+                    <option value="">-- Todas las Categorías --</option>
+                    {% for cat_val, cat_label in categorias %}
+                        <option value="{{ cat_val }}" {% if categoria_sel == cat_val %}selected{% endif %}>{{ cat_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="md:col-span-2 flex gap-2">
+                <button type="submit" class="w-full px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                    Filtrar
+                </button>
+                {% if query or categoria_sel %}
+                    <a href="{% url 'catalogo_mano_obra' %}" class="px-3 py-2 bg-muted hover:bg-gray-200 text-muted-foreground text-sm rounded-lg flex items-center justify-center">
+                        ✕
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Ítems -->
+    <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div class="px-5 py-3.5 bg-muted/40 border-b border-border flex items-center justify-between">
+            <div class="text-xs font-bold text-foreground uppercase tracking-wide">
+                Total actividades: <span class="text-primary">{{ total_filtrados }}</span> de {{ total_items }}
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                        <th class="px-4 py-3 text-center w-20">CÓDIGO</th>
+                        <th class="px-4 py-3">DESCRIPCIÓN DE LA ACTIVIDAD / SERVICIO</th>
+                        <th class="px-4 py-3 w-48">CATEGORÍA</th>
+                        <th class="px-3 py-3 text-center w-20">UND</th>
+                        <th class="px-3 py-3 text-center w-28">TIPO</th>
+                        <th class="px-4 py-3 text-right w-36">VALOR UNITARIO</th>
+                        <th class="px-4 py-3 text-center w-24">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for item in items %}
+                    <tr class="hover:bg-muted/30 transition">
+                        <td class="px-4 py-2.5 font-mono font-bold text-center text-primary">
+                            {{ item.codigo }}
+                        </td>
+                        <td class="px-4 py-2.5 font-semibold text-foreground">
+                            {{ item.descripcion }}
+                        </td>
+                        <td class="px-4 py-2.5 text-muted-foreground font-medium">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                {{ item.categoria }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2.5 text-center font-bold font-mono">
+                            <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px]">
+                                {{ item.unidad }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2.5 text-center">
+                            {% if item.tipo_calculo == "AUTOMATICO" %}
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                    ⚡ Automático
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">
+                                    ✍️ Manual
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5 text-right font-mono font-black text-sm text-foreground">
+                            ${{ item.valor_unitario|floatformat:0 }}
+                        </td>
+                        <td class="px-4 py-2.5 text-center">
+                            <button type="button" onclick="abrirModalPrecio('{{ item.id }}', '{{ item.codigo }}', '{{ item.descripcion|escapejs }}', '{{ item.valor_unitario }}')"
+                                    class="px-2.5 py-1 bg-primary-soft text-primary hover:bg-primary hover:text-white rounded text-xs font-bold transition">
+                                ✏️ Tarifa
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-muted-foreground italic">
+                            No se encontraron actividades con los filtros especificados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR TARIFA -->
+<div id="modalEditarTarifa" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-card w-full max-w-md rounded-2xl shadow-xl border border-border overflow-hidden">
+        <div class="px-6 py-4 bg-muted/40 border-b border-border flex items-center justify-between">
+            <h3 class="font-extrabold text-foreground text-base">✏️ Actualizar Tarifa Contractual</h3>
+            <button type="button" onclick="cerrarModalPrecio()" class="text-muted-foreground hover:text-foreground text-lg">✕</button>
+        </div>
+        <form id="formTarifa" method="POST" action="" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <span class="block text-xs font-bold uppercase text-muted-foreground mb-1">Actividad</span>
+                <p id="modalDesc" class="text-sm font-semibold text-foreground"></p>
+                <span id="modalCode" class="inline-block mt-1 font-mono text-xs font-bold text-primary"></span>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Nuevo Valor Unitario ($)</label>
+                <input type="number" step="0.01" name="valor_unitario" id="modalPrecioInput" required
+                       class="w-full px-3.5 py-2.5 text-base font-mono font-bold rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary">
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-border">
+                <button type="button" onclick="cerrarModalPrecio()" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg">Cancelar</button>
+                <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg shadow-sm">Guardar Tarifa</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalPrecio(id, codigo, desc, precio) {
+    document.getElementById('modalDesc').innerText = desc;
+    document.getElementById('modalCode').innerText = 'Código: ' + codigo;
+    document.getElementById('modalPrecioInput').value = precio;
+    document.getElementById('formTarifa').action = '/ingenieria/mano-obra/' + id + '/editar-tarifa/';
+    document.getElementById('modalEditarTarifa').classList.remove('hidden');
+}
+function cerrarModalPrecio() {
+    document.getElementById('modalEditarTarifa').classList.add('hidden');
+}
+</script>
+{% endblock %}

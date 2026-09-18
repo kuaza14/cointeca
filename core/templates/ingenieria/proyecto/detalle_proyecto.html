@@ -22,7 +22,7 @@
                 <span class="text-foreground font-medium">{{ proyecto.numero_emcali }}</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3">
-                Formato Poste a Poste — Proyecto {{ proyecto.numero_emcali }}
+                Proyecto {{ proyecto.numero_emcali }} — Formato Técnico & Liquidación
             </h1>
         </div>
 
@@ -42,8 +42,6 @@
             </a>
         </div>
     </div>
-
-
 
     <!-- ENCABEZADO OFICIAL TIPO EXCEL (ING-FR-08) -->
     <div class="bg-card rounded-xl shadow-sm border border-border-strong p-4 print:border-black">
@@ -67,468 +65,729 @@
         </div>
     </div>
 
-    <!-- TABLA MATRIZ TIPO EXCEL (POSTE A POSTE) -->
-    <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
-        <div class="overflow-x-auto max-h-[70vh]">
-            <table class="min-w-full border-collapse text-left text-xs">
-                <!-- ENCABEZADO DE LA MATRIZ -->
-                <thead class="sticky top-0 z-20">
-                    <!-- Banda Superior -->
-                    <tr class="bg-sky-100 text-sky-900 font-extrabold text-center border-b border-sky-300 text-xs tracking-wider">
-                        <th colspan="6" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
-                            IDENTIFICACIÓN DEL APOYO (POSTE)
-                        </th>
-                        <th colspan="{{ materiales_columnas|length|default:1 }}" class="px-4 py-2 border-r border-sky-300 bg-sky-100">
-                            MATERIALES E INSTALACIONES TÉCNICAS REQUERIDAS
-                        </th>
-                        <th class="px-4 py-2 bg-sky-200/90">
-                            ACCIONES
-                        </th>
-                    </tr>
+    <!-- PESTAÑAS DE NAVEGACIÓN MODERNA -->
+    <div class="flex border-b border-border bg-card rounded-xl p-1.5 shadow-xs gap-2">
+        <a href="?tab=materiales"
+           class="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition {% if tab_activa == 'materiales' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
+            📦 <span>1. Matriz de Materiales (Poste a Poste)</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'materiales' %}bg-white/20 text-white{% else %}bg-muted text-foreground{% endif %}">
+                {{ apoyos|length }} postes
+            </span>
+        </a>
 
-                    <!-- Nombres de Columnas / Materiales Arriba -->
-                    <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
-                        <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap min-w-[170px]">
-                            QUIÉN EJECUTA
-                        </th>
-                        <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap">
-                            NODO / POSTE
-                        </th>
-                        <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-20">
-                            N° APOYO
-                        </th>
-                        <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-28">
-                            ESTADO
-                        </th>
+        <a href="?tab=mano_obra"
+           class="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition {% if tab_activa == 'mano_obra' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
+            🛠️ <span>2. Liquidación de Mano de Obra (Proyecciones)</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'mano_obra' %}bg-white/20 text-white{% else %}bg-muted text-foreground{% endif %}">
+                {{ mo_columnas|length }} actividades
+            </span>
+        </a>
 
-                        <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px]">
-                            POT. INST.
-                        </th>
-
-                        <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[150px]">
-                            CÓDIGO LUM. INST.
-                        </th>
-
-                        <!-- Columnas Dinámicas de Cada Material -->
-                        {% for mat in materiales_columnas %}
-                        <th class="px-3 py-3 border-r border-gray-700 text-center min-w-[140px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
-                            <div class="truncate font-semibold text-white">{{ mat.descripcion }}</div>
-                            <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] bg-amber-300 text-amber-900 font-bold">
-                                {{ mat.unidad|default:"UN" }}
-                            </span>
-                        </th>
-                        {% empty %}
-                        <th class="px-4 py-3 border-r border-gray-700 text-center text-gray-300 italic font-normal">
-                            (Aún no hay materiales en las columnas del proyecto)
-                        </th>
-                        {% endfor %}
-
-                        <th class="px-4 py-3 text-center whitespace-nowrap w-36 bg-neutral">
-                            ACCIONES
-                        </th>
-                    </tr>
-                </thead>
-
-                <!-- FILAS: CADA FILA ES UN NODO/POSTE -->
-                <tbody class="divide-y divide-gray-200">
-                    {% for fila in filas_matriz %}
-                    <tr class="{% if forloop.counter|divisibleby:2 %}bg-blue-200{% else %}bg-card{% endif %}">
-                        <!-- Quién Ejecuta -->
-                        <td class="px-4 py-2.5 border-r border-border whitespace-nowrap font-medium text-foreground">
-                            {% if fila.apoyo.quien_ejecuta %}
-                                <div class="flex items-center gap-1.5 font-semibold text-foreground">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                                    <span class="text-xs">{{ fila.apoyo.quien_ejecuta.nombre_completo }}</span>
-                                </div>
-                            {% else %}
-                                <span class="text-gray-400 italic text-xs">Sin asignar</span>
-                            {% endif %}
-                        </td>
-
-                        <!-- Nodo / Poste -->
-                        <td class="px-4 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
-                            <span class="text-primary">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
-                        </td>
-
-                        <!-- Número de apoyo -->
-                        <td class="px-3 py-2.5 text-center font-semibold text-foreground border-r border-border">
-                            {{ fila.apoyo.numero_apoyo|default:"—" }}
-                        </td>
-
-                        <!-- Estado -->
-                        <td class="px-3 py-2.5 text-center border-r border-border">
-                            {% if fila.apoyo.estado == "Finalizado" %}
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-success">Finalizado</span>
-                            {% elif fila.apoyo.estado == "En ejecución" %}
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary-soft text-primary">En Ejecución</span>
-                            {% else %}
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pendiente</span>
-                            {% endif %}
-                        </td>
-
-                        <!-- POTENCIAS DE LAS LUMINARIAS -->
-                        <td class="px-3 py-2.5 text-center border-r border-border align-top">
-                            <div class="flex flex-col gap-1">
-                                {% for luminaria in fila.apoyo.luminarias.all %}
-                                    <span class="inline-block px-2 py-1 rounded bg-amber-50 text-amber-800 font-bold text-xs whitespace-nowrap">
-                                        {{ luminaria.potencia|default:"—" }}
-                                    </span>
-                                {% empty %}
-                                    <span class="text-gray-400">—</span>
-                                {% endfor %}
-                            </div>
-                        </td>
-
-                        <!-- CÓDIGOS DE LAS LUMINARIAS -->
-                        <td class="px-3 py-2.5 text-center border-r border-border align-top">
-                            <div class="flex flex-col gap-1">
-                                {% for luminaria in fila.apoyo.luminarias.all %}
-                                    <span class="inline-block px-2 py-1 rounded bg-primary-soft text-primary font-mono font-bold text-xs whitespace-nowrap">
-                                        {{ luminaria.codigo|default:"—" }}
-                                    </span>
-                                {% empty %}
-                                    <span class="text-gray-400">—</span>
-                                {% endfor %}
-                            </div>
-                        </td>
-
-                        <!-- Celdas Numéricas de Cantidad para Cada Material -->
-                        {% for celda in fila.celdas %}
-                        <td class="px-2 py-2 text-center border-r border-border font-bold">
-                            {% if celda.cantidad > 0 %}
-                                <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat }}</div>
-                            {% endif %}
-                            {% if celda.cantidad_retirada > 0 %}
-                                <div class="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold" title="Retirado / Desmontado de este poste">
-                                    Ret: {{ celda.cantidad_retirada|floatformat }}
-                                </div>
-                            {% endif %}
-                            {% if celda.cantidad == 0 and celda.cantidad_retirada == 0 %}
-                                <span class="text-gray-300">—</span>
-                            {% endif %}
-                        </td>
-                        {% empty %}
-                        <td class="px-4 py-2.5 text-center text-gray-400 italic border-r border-border" colspan="1">
-                            Sin materiales configurados
-                        </td>
-                        {% endfor %}
-
-                        <!-- Acciones por Fila -->
-                        <td class="px-3 py-2.5 text-center space-x-1 whitespace-nowrap">
-                            <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
-                               class="inline-flex items-center gap-1 px-2.5 py-1 bg-primary hover:bg-primary-hover text-white font-semibold rounded text-xs shadow-sm transition" title="Editar apoyo, cantidades y materiales">
-                                ✏️ Editar / Materiales
-                            </a>
-
-                            <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}" class="inline"
-                                  onsubmit="return confirm('¿Eliminar este apoyo/nodo?');">
-                                {% csrf_token %}
-                                <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 text-destructive font-semibold rounded text-xs border border-red-200 transition" title="Eliminar apoyo"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg><span class="sr-only">Eliminar</span></button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="{{ materiales_columnas|length|add:7 }}" class="px-6 py-12 text-center text-muted-foreground">
-                            <p class="text-base font-semibold text-foreground">No hay apoyos o postes registrados en este proyecto.</p>
-                            <p class="text-xs text-gray-400 mt-1">Haz clic en "+ Nuevo Nodo / Poste" para empezar a cargar los apoyos del plano.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-                <!-- FILA FINAL DE TOTALES POR MATERIAL (SUMA HACIA ABAJO) -->
-                {% if filas_matriz and materiales_columnas %}
-                <tfoot class="bg-muted border-t-2 border-gray-400 font-extrabold text-foreground sticky bottom-0 z-10 shadow-inner">
-                    <tr>
-                        <td colspan="6" class="px-4 py-3 text-right uppercase tracking-wider text-xs border-r border-border-strong bg-gray-200">
-                            TOTALES DEL PROYECTO:
-                        </td>
-
-                        {% for tot in fila_totales %}
-                        <td class="px-2 py-2.5 text-center border-r border-border-strong bg-primary-soft/80">
-                            <div class="text-blue-950 text-xs font-black" title="Total Instalado">
-                                {{ tot.total|floatformat }}
-                            </div>
-                            {% if tot.total_retirado > 0 %}
-                                <div class="inline-block mt-0.5 px-1 py-0.5 rounded text-[10px] bg-amber-200 text-amber-900 font-black border border-amber-300" title="Total Retirado / Desmonte">
-                                    Ret: {{ tot.total_retirado|floatformat }}
-                                </div>
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-
-                        <td class="px-3 py-3 text-center bg-gray-200 text-foreground text-[11px]">
-                            {{ apoyos|length }} POSTES
-                        </td>
-                    </tr>
-                </tfoot>
-                {% endif %}
-            </table>
-        </div>
+        <a href="?tab=resumen"
+           class="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition {% if tab_activa == 'resumen' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
+            💰 <span>3. Resumen Financiero & Facturación</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'resumen' %}bg-amber-300 text-amber-900 font-extrabold{% else %}bg-amber-100 text-amber-800 font-bold{% endif %}">
+                ${{ gran_total_mo_pesos|floatformat:0 }}
+            </span>
+        </a>
     </div>
 
-    <!-- RESUMEN DE MATERIALES RETIRADOS / DESMONTADOS DEL PROYECTO -->
-    {% if tabla_resumen_retiros %}
-    <div class="bg-card rounded-xl shadow-sm border border-amber-300 overflow-hidden">
-        <div class="p-4 bg-amber-500/10 border-b border-amber-200 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="p-2 bg-amber-100 text-amber-900 rounded-lg text-sm">🛠️</span>
-                <div>
-                    <h3 class="font-bold text-amber-950 text-base">
-                        Resumen de Materiales Retirados / Desmontados del Proyecto
-                    </h3>
-                    <p class="text-xs text-amber-800">
-                        Consolidado de materiales antiguos bajados de los postes en obras de Baja Tensión (BT) y Alumbrado Público (AP).
-                    </p>
-                </div>
+    <!-- ======================================================================= -->
+    <!-- PESTAÑA 1: MATRIZ DE MATERIALES POSTE A POSTE                          -->
+    <!-- ======================================================================= -->
+    {% if tab_activa == "materiales" %}
+    <div class="space-y-6">
+        <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
+            <div class="overflow-x-auto max-h-[70vh]">
+                <table class="min-w-full border-collapse text-left text-xs">
+                    <thead class="sticky top-0 z-20">
+                        <tr class="bg-sky-100 text-sky-900 font-extrabold text-center border-b border-sky-300 text-xs tracking-wider">
+                            <th colspan="6" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
+                                IDENTIFICACIÓN DEL APOYO (POSTE)
+                            </th>
+                            <th colspan="{{ materiales_columnas|length|default:1 }}" class="px-4 py-2 border-r border-sky-300 bg-sky-100">
+                                MATERIALES E INSTALACIONES TÉCNICAS REQUERIDAS
+                            </th>
+                            <th class="px-4 py-2 bg-sky-200/90">
+                                ACCIONES
+                            </th>
+                        </tr>
+
+                        <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                            <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap min-w-[170px]">QUIÉN EJECUTA</th>
+                            <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap">NODO / POSTE</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-20">N° APOYO</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-28">ESTADO</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px]">POT. INST.</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[150px]">CÓDIGO LUM. INST.</th>
+
+                            {% for mat in materiales_columnas %}
+                            <th class="px-3 py-3 border-r border-gray-700 text-center min-w-[140px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
+                                <div class="truncate font-semibold text-white">{{ mat.descripcion }}</div>
+                                <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] bg-amber-300 text-amber-900 font-bold">
+                                    {{ mat.unidad|default:"UN" }}
+                                </span>
+                            </th>
+                            {% empty %}
+                            <th class="px-4 py-3 border-r border-gray-700 text-center text-gray-300 italic font-normal">
+                                (Aún no hay materiales en las columnas del proyecto)
+                            </th>
+                            {% endfor %}
+
+                            <th class="px-4 py-3 text-center whitespace-nowrap w-36 bg-neutral">ACCIONES</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-200">
+                        {% for fila in filas_matriz %}
+                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-blue-50/50{% else %}bg-card{% endif %} hover:bg-sky-50/40 transition">
+                            <td class="px-4 py-2.5 border-r border-border whitespace-nowrap font-medium text-foreground">
+                                {% if fila.apoyo.quien_ejecuta %}
+                                    <div class="flex items-center gap-1.5 font-semibold text-foreground">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                        <span class="text-xs">{{ fila.apoyo.quien_ejecuta.nombre_completo }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-gray-400 italic text-xs">Sin asignar</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-4 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
+                                <span class="text-primary">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
+                            </td>
+
+                            <td class="px-3 py-2.5 text-center font-semibold text-foreground border-r border-border">
+                                {{ fila.apoyo.numero_apoyo|default:"—" }}
+                            </td>
+
+                            <td class="px-3 py-2.5 text-center border-r border-border">
+                                {% if fila.apoyo.estado == "Finalizado" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-success">Finalizado</span>
+                                {% elif fila.apoyo.estado == "En ejecución" %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary-soft text-primary">En Ejecución</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pendiente</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-3 py-2.5 text-center border-r border-border align-top">
+                                <div class="flex flex-col gap-1">
+                                    {% for luminaria in fila.apoyo.luminarias.all %}
+                                        <span class="inline-block px-2 py-1 rounded bg-amber-50 text-amber-800 font-bold text-xs whitespace-nowrap">
+                                            {{ luminaria.potencia|default:"—" }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <td class="px-3 py-2.5 text-center border-r border-border align-top">
+                                <div class="flex flex-col gap-1">
+                                    {% for luminaria in fila.apoyo.luminarias.all %}
+                                        <span class="inline-block px-2 py-1 rounded bg-primary-soft text-primary font-mono font-bold text-xs whitespace-nowrap">
+                                            {{ luminaria.codigo|default:"—" }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            {% for celda in fila.celdas %}
+                            <td class="px-2 py-2 text-center border-r border-border font-bold">
+                                {% if celda.cantidad > 0 %}
+                                    <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat:0 }}</div>
+                                {% endif %}
+                                {% if celda.cantidad_retirada > 0 %}
+                                    <div class="text-[10px] font-extrabold text-amber-700 bg-amber-100/80 px-1 py-0.5 rounded mt-0.5" title="Retirado/Desmonte">
+                                        Ret: {{ celda.cantidad_retirada|floatformat:0 }}
+                                    </div>
+                                {% endif %}
+                                {% if celda.cantidad <= 0 and celda.cantidad_retirada <= 0 %}
+                                    <span class="text-gray-300 font-normal">-</span>
+                                {% endif %}
+                            </td>
+                            {% empty %}
+                            <td class="px-4 py-2 text-center text-gray-400 italic">-</td>
+                            {% endfor %}
+
+                            <td class="px-4 py-2.5 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button type="button"
+                                            onclick="abrirModalGestionMateriales('{{ fila.apoyo.id }}', '{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}')"
+                                            class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
+                                            title="Ver, editar o eliminar materiales puestos en este poste">
+                                        📦 Materiales ({{ fila.materiales_asociados|length }})
+                                    </button>
+                                    <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
+                                       class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs"
+                                       title="Editar materiales y datos del poste">
+                                        ✏️ Editar
+                                    </a>
+                                    <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}"
+                                          onsubmit="return confirm('¿Estás seguro de que deseas eliminar este poste (Nodo {{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo }})? Los materiales asignados se devolverán al inventario.');"
+                                          class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="tab" value="materiales">
+                                        <button type="submit"
+                                                class="px-2.5 py-1 bg-red-100 text-destructive hover:bg-destructive hover:text-white rounded text-xs font-bold transition"
+                                                title="Eliminar poste completo">
+                                            🗑️ Eliminar
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ materiales_columnas|length|add:7 }}" class="px-4 py-12 text-center text-muted-foreground">
+                                No se han registrado postes ni nodos en este proyecto. Haz clic en <strong>+ Nuevo Nodo / Poste</strong> para comenzar.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    {% if fila_totales %}
+                    <tfoot class="sticky bottom-0 z-10 bg-slate-900 text-white font-extrabold border-t-2 border-slate-700 shadow-lg">
+                        <tr>
+                            <td colspan="6" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
+                                TOTAL MATERIALES PROYECTO:
+                            </td>
+                            {% for tot in fila_totales %}
+                            <td class="px-2 py-3 text-center border-r border-slate-700">
+                                {% if tot.total > 0 %}
+                                    <div class="text-emerald-400 font-black text-xs">{{ tot.total|floatformat:0 }}</div>
+                                {% endif %}
+                                {% if tot.total_retirado > 0 %}
+                                    <div class="text-amber-400 font-bold text-[10px]">R:{{ tot.total_retirado|floatformat:0 }}</div>
+                                {% endif %}
+                                {% if tot.total <= 0 and tot.total_retirado <= 0 %}
+                                    <span class="text-slate-500 font-normal">0</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="px-4 py-3 text-center text-slate-400 text-xs">SUMA TOTAL</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
             </div>
-            <span class="px-3 py-1 bg-amber-100 text-amber-900 font-extrabold text-xs rounded-full border border-amber-300">
-                {{ tabla_resumen_retiros|length }} ítem{{ tabla_resumen_retiros|length|pluralize:"es" }} con desmonte
-            </span>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
-                <thead class="bg-amber-900 text-white uppercase text-xs font-semibold">
-                    <tr>
-                        <th class="px-4 py-3 text-center w-20">Ítem</th>
-                        <th class="px-5 py-3">Descripción del Material Retirado</th>
-                        <th class="px-3 py-3 text-center w-24">Unidad</th>
-                        <th class="px-6 py-3 text-right bg-amber-950 w-44">Total Desmontado</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-amber-100 bg-card">
-                    {% for item in tabla_resumen_retiros %}
-                    <tr class="hover:bg-amber-50/50 transition {% if forloop.counter|divisibleby:2 %}bg-amber-50/20{% endif %}">
-                        <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
-                            {{ item.material.item }}
-                        </td>
-                        <td class="px-5 py-3 font-semibold text-foreground text-sm">
-                            {{ item.material.descripcion }}
-                        </td>
-                        <td class="px-3 py-3 text-center font-bold text-muted-foreground">
-                            {{ item.material.unidad|default:"UN" }}
-                        </td>
-                        <td class="px-6 py-3 text-right font-black text-amber-900 bg-amber-50/50 text-sm">
-                            {{ item.cantidad_retirada|floatformat }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% if tabla_resumen_retiros %}
+        <div class="bg-card rounded-xl p-5 shadow-sm border border-amber-200 bg-amber-50/20">
+            <h3 class="text-sm font-extrabold text-amber-900 flex items-center gap-2 mb-3">
+                <span>🔄</span> Resumen de Materiales Retirados / Desmontados en Terreno
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {% for r in tabla_resumen_retiros %}
+                <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-xs flex justify-between items-center">
+                    <div>
+                        <div class="text-xs font-bold text-gray-900">{{ r.material.descripcion }}</div>
+                        <div class="text-[10px] text-gray-500">Item: {{ r.material.item }}</div>
+                    </div>
+                    <div class="text-sm font-black text-amber-700 bg-amber-100 px-2 py-1 rounded">
+                        {{ r.cantidad_retirada|floatformat:0 }} {{ r.material.unidad|default:"UN" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ======================================================================= -->
+    <!-- PESTAÑA 2: LIQUIDACIÓN DE MANO DE OBRA (PROYECCIONES)                   -->
+    <!-- ======================================================================= -->
+    {% if tab_activa == "mano_obra" %}
+    <div class="space-y-6">
+
+        <!-- Barra de Acciones de Mano de Obra -->
+        <div class="bg-card rounded-xl p-4 shadow-sm border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-foreground flex items-center gap-2">
+                    🛠️ Matriz de Liquidación de Mano de Obra y Servicios
+                </h2>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Calcula automáticamente las 130 actividades contractuales (huecos, aplomadas, luminarias, cables +5%, transportes) a partir de los materiales del poste.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- BOTÓN CALCULAR AUTOMÁTICO -->
+                <form method="POST" action="{% url 'ejecutar_calculo_mano_obra' proyecto.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                        <span>⚡</span> Generar Mano de Obra Automática
+                    </button>
+                </form>
+
+                <!-- BOTÓN ASIGNAR ACTIVIDAD MANUAL -->
+                <button type="button" onclick="abrirModalAsignarMO()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
+                    <span>➕</span> Asignar Servicio Manual
+                </button>
+
+                <!-- BOTÓN TARIFARIO -->
+                <a href="{% url 'catalogo_mano_obra' %}" target="_blank"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition border border-border">
+                    <span>📖</span> Ver Tarifario ($)
+                </a>
+
+                <!-- BOTÓN EXPORTAR EXCEL -->
+                <a href="{% url 'exportar_liquidacion_proyecto_excel' proyecto.id %}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold rounded-lg transition border border-blue-200">
+                    <span>📥</span> Exportar Excel
+                </a>
+            </div>
+        </div>
+
+        <!-- TABLA MATRIZ POSTE A POSTE DE MANO DE OBRA -->
+        <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
+            <div class="overflow-x-auto max-h-[70vh]">
+                <table class="min-w-full border-collapse text-left text-xs">
+                    <thead class="sticky top-0 z-20">
+                        <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                            <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap min-w-[160px] bg-neutral">
+                                NODO / POSTE
+                            </th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-20 bg-neutral">
+                                N° APOYO
+                            </th>
+
+                            <!-- Columnas Dinámicas de Actividades de Mano de Obra -->
+                            {% for item in mo_columnas %}
+                            <th class="px-3 py-3 border-r border-gray-700 text-center min-w-[150px] max-w-[200px] bg-slate-800" title="{{ item.descripcion }}">
+                                <div class="font-mono text-emerald-300 text-[10px] font-black">CÓD. {{ item.codigo }}</div>
+                                <div class="truncate text-white font-semibold mt-0.5">{{ item.descripcion }}</div>
+                                <div class="mt-1 flex items-center justify-center gap-1">
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] bg-slate-700 text-gray-200 font-bold">
+                                        {{ item.unidad }}
+                                    </span>
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-400 text-amber-950 font-bold">
+                                        ${{ item.valor_unitario|floatformat:0 }}
+                                    </span>
+                                </div>
+                            </th>
+                            {% empty %}
+                            <th class="px-4 py-6 text-center text-gray-300 italic font-normal">
+                                (No se ha calculado mano de obra para este proyecto. Presiona "⚡ Generar Mano de Obra Automática" arriba).
+                            </th>
+                            {% endfor %}
+
+                            <!-- Columna Acciones -->
+                            <th class="px-4 py-3 text-center whitespace-nowrap min-w-[190px] bg-neutral sticky right-0 z-30 shadow-l">
+                                ACCIONES
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-200">
+                        {% for fila in mo_filas_matriz %}
+                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-emerald-50/30{% else %}bg-card{% endif %} hover:bg-emerald-50/60 transition group">
+                            <td class="px-4 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-primary">●</span>
+                                    <span class="text-foreground font-black">{{ fila.apoyo.nodo|default:"Sin Nodo" }}</span>
+                                </div>
+                                {% if fila.materiales_asociados %}
+                                <div class="text-[10px] text-muted-foreground font-sans font-medium mt-0.5 truncate max-w-[180px]" title="{% for m in fila.materiales_asociados %}{{ m.cantidad_requerida|floatformat:0 }}x {{ m.material.descripcion }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                                    📦 {{ fila.materiales_asociados|length }} material{{ fila.materiales_asociados|length|pluralize:"es" }}
+                                </div>
+                                {% else %}
+                                <div class="text-[10px] text-amber-600 font-sans font-medium mt-0.5">
+                                    ⚠️ Sin materiales
+                                </div>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-3 py-2.5 text-center font-semibold text-foreground border-r border-border">
+                                {{ fila.apoyo.numero_apoyo|default:"—" }}
+                            </td>
+
+                            {% for celda in fila.celdas %}
+                            <td class="px-2 py-2 text-center border-r border-border font-bold">
+                                {% if celda.cantidad > 0 %}
+                                    <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat:0 }}</div>
+                                    {% if celda.origen == "MANUAL" %}
+                                        <div class="flex items-center justify-center gap-1 mt-0.5">
+                                            <span class="inline-block text-[9px] font-bold text-amber-700 bg-amber-100 px-1 py-0.2 rounded">
+                                                Manual
+                                            </span>
+                                            {% if celda.amo_id %}
+                                            <form method="POST" action="{% url 'eliminar_mano_obra_apoyo' celda.amo_id %}" onsubmit="return confirm('¿Deseas eliminar esta actividad manual?');" class="inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-500 hover:text-red-700 text-[10px] font-black leading-none" title="Eliminar actividad manual">✕</button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-gray-300 font-normal">-</span>
+                                {% endif %}
+                            </td>
+                            {% empty %}
+                            <td class="px-4 py-2 text-center text-gray-400 italic">-</td>
+                            {% endfor %}
+
+                            <!-- Acciones en cada fila -->
+                            <td class="px-3 py-2 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-emerald-50 transition z-10 border-l border-border shadow-xs">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <!-- Botón modal gestionar materiales -->
+                                    <button type="button"
+                                            onclick="abrirModalGestionMateriales('{{ fila.apoyo.id }}', '{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}')"
+                                            class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
+                                            title="Ver, editar o eliminar materiales puestos en este poste">
+                                        📦 Materiales ({{ fila.materiales_asociados|length }})
+                                    </button>
+
+                                    <!-- Botón editar poste completo -->
+                                    <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
+                                       class="px-2 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs"
+                                       title="Editar poste completo">
+                                        ✏️
+                                    </a>
+
+                                    <!-- Botón eliminar poste -->
+                                    <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}"
+                                          onsubmit="return confirm('¿Estás seguro de que deseas eliminar este poste (Nodo {{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo }})? Los materiales asignados se devolverán al inventario.');"
+                                          class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="tab" value="mano_obra">
+                                        <button type="submit"
+                                                class="px-2 py-1 bg-red-100 text-destructive hover:bg-destructive hover:text-white rounded text-xs font-bold transition"
+                                                title="Eliminar poste completo">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ mo_columnas|length|add:3 }}" class="px-4 py-12 text-center text-muted-foreground">
+                                No hay actividades de mano de obra generadas. Presiona <strong>⚡ Generar Mano de Obra Automática</strong> para liquidar el proyecto.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    {% if mo_fila_totales %}
+                    <tfoot class="sticky bottom-0 z-10 bg-slate-900 text-white font-extrabold border-t-2 border-slate-700 shadow-lg">
+                        <tr>
+                            <td colspan="2" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-emerald-400 font-black border-r border-slate-700">
+                                TOTAL CANTIDADES ACTIVIDAD:
+                            </td>
+                            {% for tot in mo_fila_totales %}
+                            <td class="px-2 py-3 text-center border-r border-slate-700">
+                                {% if tot.total > 0 %}
+                                    <div class="text-emerald-400 font-black text-xs">{{ tot.total|floatformat:0 }}</div>
+                                    <div class="text-[10px] text-amber-300 font-bold">${{ tot.total_pesos|floatformat:0 }}</div>
+                                {% else %}
+                                    <span class="text-slate-500 font-normal">0</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="px-4 py-3 text-center text-slate-400 text-xs sticky right-0 bg-slate-900 z-20">ACCIONES</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
         </div>
     </div>
     {% endif %}
 
-    <!-- MODAL NUEVO APOYO -->
-    <div id="modalApoyo" class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
-         style="background-color: rgba(2, 6, 23, 0.75) !important;" role="dialog" aria-modal="true">
-        <div class="rounded-xl border border-gray-200 shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150"
-             style="background-color: #ffffff !important; color: #0f172a !important;">
+    <!-- ======================================================================= -->
+    <!-- PESTAÑA 3: RESUMEN FINANCIERO Y FACTURACIÓN                             -->
+    <!-- ======================================================================= -->
+    {% if tab_activa == "resumen" %}
+    <div class="space-y-6">
 
-            <div class="flex justify-between items-center border-b border-blue-800 px-6 py-4 flex-shrink-0"
-                 style="background-color: #1e3a8a !important; color: #ffffff !important;">
+        <!-- TARJETAS DE KPIS FINANCIEROS -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="bg-card p-5 rounded-xl border border-border shadow-sm flex items-center justify-between">
                 <div>
-                    <h2 class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
-                        <span>📍</span> Nuevo Nodo / Poste
-                    </h2>
-                    <p class="text-xs text-blue-100 mt-0.5" style="color: #dbeafe !important;">
-                        Registra el apoyo con sus luminarias y materiales asignados para el Proyecto {{ proyecto.numero_emcali }}.
-                    </p>
+                    <span class="text-xs font-bold uppercase text-muted-foreground block">Gran Total Mano de Obra ($)</span>
+                    <div class="text-2xl font-extrabold text-primary mt-1">${{ gran_total_mo_pesos|floatformat:0 }}</div>
+                    <span class="text-[11px] text-emerald-600 font-bold mt-1 inline-block">Liquidación contractual EMCALI</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-primary-soft text-primary flex items-center justify-center text-xl font-black">
+                    💰
+                </div>
+            </div>
+
+            <div class="bg-card p-5 rounded-xl border border-border shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase text-muted-foreground block">Actividades Facturables</span>
+                    <div class="text-2xl font-extrabold text-foreground mt-1">{{ resumen_economico_items|length }}</div>
+                    <span class="text-[11px] text-muted-foreground font-medium mt-1 inline-block">Conceptos liquidados en obra</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-black">
+                    📋
+                </div>
+            </div>
+
+            <div class="bg-card p-5 rounded-xl border border-border shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase text-muted-foreground block">Total Postes Liquidados</span>
+                    <div class="text-2xl font-extrabold text-foreground mt-1">{{ apoyos|length }}</div>
+                    <span class="text-[11px] text-muted-foreground font-medium mt-1 inline-block">Nodos en {{ proyecto.numero_emcali }}</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-black">
+                    📍
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA RESUMEN ECONÓMICO DETALLADO -->
+        <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+            <div class="px-5 py-4 bg-muted/40 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-extrabold text-foreground flex items-center gap-2">
+                        📄 Acta Resumen de Cobro y Facturación de Servicios
+                    </h3>
+                    <p class="text-xs text-muted-foreground">Consolidado oficial de cantidades y valores unitarios para presentar al contratante.</p>
                 </div>
 
-                <button
-                    type="button"
-                    onclick="cerrarModalApoyo()"
-                    class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-blue-800 transition"
-                    style="color: #ffffff !important;">
-                    &times;
+                <a href="{% url 'exportar_liquidacion_proyecto_excel' proyecto.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                    <span>📥</span> Descargar Excel Oficial (.xlsx)
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                            <th class="px-4 py-3 text-center w-16">ITEM</th>
+                            <th class="px-4 py-3 text-center w-24">CÓDIGO</th>
+                            <th class="px-4 py-3">DESCRIPCIÓN DE LA ACTIVIDAD / SERVICIO</th>
+                            <th class="px-3 py-3 text-center w-20">UND</th>
+                            <th class="px-4 py-3 text-right w-32">CANTIDAD TOTAL</th>
+                            <th class="px-4 py-3 text-right w-36">VALOR UNITARIO</th>
+                            <th class="px-5 py-3 text-right w-44">VALOR TOTAL ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for r in resumen_economico_items %}
+                        <tr class="hover:bg-muted/30 transition font-medium">
+                            <td class="px-4 py-2.5 text-center font-mono text-muted-foreground">{{ forloop.counter }}</td>
+                            <td class="px-4 py-2.5 text-center font-mono font-bold text-primary">{{ r.item.codigo }}</td>
+                            <td class="px-4 py-2.5 font-bold text-foreground">{{ r.item.descripcion }}</td>
+                            <td class="px-3 py-2.5 text-center font-mono font-bold">
+                                <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-900 text-[10px]">{{ r.item.unidad }}</span>
+                            </td>
+                            <td class="px-4 py-2.5 text-right font-mono font-black text-foreground">{{ r.cantidad|floatformat:0 }}</td>
+                            <td class="px-4 py-2.5 text-right font-mono text-muted-foreground">${{ r.item.valor_unitario|floatformat:0 }}</td>
+                            <td class="px-5 py-2.5 text-right font-mono font-black text-sm text-foreground">${{ r.subtotal|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-4 py-10 text-center text-muted-foreground italic">
+                                Aún no se han generado actividades para este proyecto. Ve a la pestaña <strong>2. Liquidación de Mano de Obra</strong> y presiona <em>"⚡ Generar Mano de Obra Automática"</em>.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    {% if resumen_economico_items %}
+                    <tfoot class="bg-amber-50 border-t-2 border-amber-300">
+                        <tr>
+                            <td colspan="6" class="px-4 py-3.5 text-right font-extrabold text-xs uppercase tracking-wider text-amber-950">
+                                GRAN TOTAL MANO DE OBRA Y ACTIVIDADES (PESOS COLOMBIANOS):
+                            </td>
+                            <td class="px-5 py-3.5 text-right font-mono font-black text-base text-amber-950">
+                                ${{ gran_total_mo_pesos|floatformat:0 }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ======================================================================= -->
+    <!-- MODAL 1: ASIGNAR ACTIVIDAD MANUAL A UN APOYO                            -->
+    <!-- ======================================================================= -->
+    <div id="modalAsignarMO" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-card w-full max-w-lg rounded-2xl shadow-xl border border-border overflow-hidden">
+            <div class="px-6 py-4 bg-muted/40 border-b border-border flex items-center justify-between">
+                <h3 class="font-extrabold text-foreground text-base">➕ Asignar Servicio Manual a un Poste</h3>
+                <button type="button" onclick="cerrarModalAsignarMO()" class="text-muted-foreground hover:text-foreground text-lg">✕</button>
+            </div>
+            <form id="formAsignarMO" method="POST" action="" class="p-6 space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Seleccionar Poste / Apoyo</label>
+                    <select id="selectApoyoMO" required onchange="actualizarActionMO(this.value)"
+                            class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary font-medium">
+                        <option value="">-- Seleccionar Poste --</option>
+                        {% for ap in apoyos %}
+                            <option value="{{ ap.id }}">Nodo: {{ ap.nodo|default:"Sin Nodo" }} (Apoyo {{ ap.numero_apoyo|default:"—" }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Actividad / Servicio de Mano de Obra</label>
+                    <select name="item_mano_obra_id" required
+                            class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary font-medium">
+                        <option value="">-- Seleccionar Actividad --</option>
+                        {% for item in catalogo_mo_todos %}
+                            <option value="{{ item.id }}">
+                                [{{ item.codigo }}] {{ item.descripcion }} (${{ item.valor_unitario|floatformat:0 }} / {{ item.unidad }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Cantidad</label>
+                        <input type="number" step="any" min="0.01" name="cantidad" required placeholder="1.00"
+                               class="w-full px-3.5 py-2 text-sm font-bold font-mono rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Observación</label>
+                        <input type="text" name="observacion" placeholder="Ej: Zona rocosa, autorización..."
+                               class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-border">
+                    <button type="button" onclick="cerrarModalAsignarMO()" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm">Guardar Servicio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- MODAL 2: NUEVO APOYO / NODO                                            -->
+    <!-- ======================================================================= -->
+    <div id="modalNuevoApoyo"
+         tabindex="-1"
+         aria-hidden="true"
+         style="background-color: rgba(15, 23, 42, 0.65) !important;"
+         class="fixed inset-0 z-50 hidden backdrop-blur-xs flex items-center justify-center p-4">
+
+        <div class="bg-card w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl border-2 border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+
+            <div class="px-6 py-4 flex justify-between items-center border-b border-border bg-neutral flex-shrink-0">
+                <div class="flex items-center gap-2 text-white">
+                    <span class="text-xl">📍</span>
+                    <h3 class="text-base font-extrabold">Nuevo Nodo / Apoyo — Formato Poste a Poste</h3>
+                </div>
+                <button type="button" onclick="cerrarModalApoyo()" class="text-gray-300 hover:text-white text-xl font-bold p-1 rounded-lg">
+                    ✕
                 </button>
             </div>
 
-            <form method="POST"
-                action="{% url 'crear_apoyo' proyecto.id %}"
-                style="background-color: #ffffff !important;"
-                class="flex flex-col flex-1 overflow-hidden">
-
+            <form method="POST" action="{% url 'crear_apoyo' proyecto.id %}" class="flex flex-col flex-1 overflow-hidden bg-card">
                 {% csrf_token %}
-
-                <div class="p-6 overflow-y-auto space-y-5 flex-1" style="background-color: #ffffff !important; color: #0f172a !important;">
-                    <!-- DATOS BÁSICOS Y TÉCNICOS DEL NODO -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- NODO -->
+                <div class="p-6 space-y-6 overflow-y-auto flex-1 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-nodo">
-                                NODO / Identificador <span class="text-red-600">*</span>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Quién Ejecuta (Técnico)
                             </label>
-
-                            <input id="campo-nodo"
-                                type="text"
-                                name="nodo"
-                                required
-                                placeholder="Ej: 29924 o POSTE 8M"
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-black text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                        </div>
-
-                        <!-- NÚMERO DE APOYO -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-numero_apoyo">
-                                Número de Apoyo
-                            </label>
-
-                            <input id="campo-numero_apoyo"
-                                type="number"
-                                name="numero_apoyo"
-                                placeholder="Ej: 1, 2, 3..."
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                        </div>
-
-                        <!-- FECHA -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-fecha">
-                                Fecha
-                            </label>
-
-                            <input id="campo-fecha"
-                                type="date"
-                                name="fecha"
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                        </div>
-
-                        <!-- TIPO DE INSTALACIÓN -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-tipo_instalacion">
-                                Tipo de Instalación
-                            </label>
-
-                            <select id="campo-tipo_instalacion"
-                                name="tipo_instalacion"
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                                <option value="">-- Seleccione --</option>
-                                <option value="Instalación">Instalación</option>
-                                <option value="Retiro">Retiro</option>
-                                <option value="Desmonte">Desmonte</option>
-                                <option value="Instalación y Retiro">Instalación y Retiro</option>
-                                <option value="Instalación y Desmonte">Instalación y Desmonte</option>
-                                <option value="Mantenimiento">Mantenimiento</option>
+                            <select name="quien_ejecuta" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                                <option value="">-- Sin Asignar --</option>
+                                {% for emp in empleados %}
+                                    <option value="{{ emp.id }}">{{ emp.nombre_completo }}</option>
+                                {% endfor %}
                             </select>
                         </div>
 
-                        <!-- DIRECCIÓN -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-direccion">
-                                Dirección / Ubicación
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Nodo / Poste <span class="text-destructive">*</span>
                             </label>
-
-                            <input id="campo-direccion"
-                                type="text"
-                                name="direccion"
-                                placeholder="Ej: Cra 15 # 24-50, Barrio..."
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
+                            <input type="text" name="nodo" required placeholder="Ej: 1, 2, A-1..."
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
-                        <!-- TIPO DE ESTRUCTURA -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-tipo_estructura">
-                                Tipo de Estructura
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Número de Apoyo
                             </label>
-
-                            <input id="campo-tipo_estructura"
-                                type="text"
-                                name="tipo_estructura"
-                                placeholder="Ej: Poste Concreto 12m, Fibra 8m, etc."
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
+                            <input type="number" name="numero_apoyo" placeholder="Ej: 101"
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
-                        <!-- CANTIDAD RETENIDA -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-cantidad_retenida">
-                                Cantidad Retenida
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Fecha de Trabajo
                             </label>
-
-                            <input id="campo-cantidad_retenida"
-                                type="number"
-                                step="any"
-                                min="0"
-                                name="cantidad_retenida"
-                                placeholder="0"
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                        </div>
-
-                        <!-- METROS RETENIDO -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-metros_retenido">
-                                Metros Retenido (m)
-                            </label>
-
-                            <input id="campo-metros_retenido"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                name="metros_retenido"
-                                placeholder="0.00 m"
-                                class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
+                            <input type="date" name="fecha" value="{% now 'Y-m-d' %}"
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
                     </div>
 
-                    <!-- ========================================== -->
-                    <!-- LUMINARIAS -->
-                    <!-- ========================================== -->
-                    <div class="border-t border-gray-200 pt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700">
-                                    Luminarias instaladas
-                                </label>
-                                <p class="text-xs text-gray-500 mt-0.5">
-                                    Agrega las luminarias que pertenecen a este nodo.
-                                </p>
-                            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Tipo de Instalación
+                            </label>
+                            <input type="text" name="tipo_instalacion" placeholder="Ej: Nueva, Cambio..."
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
 
-                            <button
-                                type="button"
-                                id="btnAgregarLuminaria"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs transition">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Dirección / Ubicación
+                            </label>
+                            <input type="text" name="direccion" placeholder="Ej: Calle 5 # 10-20"
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                Tipo de Estructura
+                            </label>
+                            <input type="text" name="tipo_estructura" placeholder="Ej: Concreto 12m, Metálico..."
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
+                    </div>
+
+                    <!-- LUMINARIAS -->
+                    <div class="border-t border-border pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
+                                Luminarias Instaladas en este Apoyo
+                            </label>
+                            <button type="button" id="btnAgregarLuminaria"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition">
                                 <span>➕</span> Agregar luminaria
                             </button>
                         </div>
-
-                        <!-- TABLA DE LUMINARIAS -->
-                        <div class="overflow-x-auto border-2 border-gray-200 rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                                <thead class="bg-slate-800 text-xs font-bold text-white uppercase">
+                        <div class="overflow-x-auto border border-border rounded-lg">
+                            <table class="min-w-full divide-y divide-border text-xs">
+                                <thead class="bg-neutral text-xs font-bold text-white uppercase">
                                     <tr>
                                         <th class="px-3 py-2 text-left">Potencia</th>
                                         <th class="px-3 py-2 text-left">Código luminaria</th>
                                         <th class="px-3 py-2 text-center w-16">Acción</th>
                                     </tr>
                                 </thead>
-
-                                <tbody id="filasLuminarias" class="divide-y divide-gray-200 bg-white">
-                                    <!-- FILA INICIAL -->
+                                <tbody id="filasLuminarias" class="divide-y divide-border bg-card">
                                     <tr class="fila-luminaria">
                                         <td class="px-3 py-2">
-                                            <input
-                                                type="text"
-                                                name="potencia[]"
-                                                placeholder="Ej: 90W"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-gray-900">
+                                            <input type="text" name="potencia[]" placeholder="Ej: 90W"
+                                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                                         </td>
-
                                         <td class="px-3 py-2">
-                                            <input
-                                                type="text"
-                                                name="codigo_luminaria[]"
-                                                placeholder="Ej: 123456"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white text-gray-900">
+                                            <input type="text" name="codigo_luminaria[]" placeholder="Ej: 123456"
+                                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                                         </td>
-
                                         <td class="px-3 py-2 text-center">
-                                            <button
-                                                type="button"
-                                                class="btnEliminarLuminaria text-red-600 hover:text-red-800 text-lg font-bold p-1 rounded hover:bg-red-50"
-                                                title="Eliminar luminaria">
+                                            <button type="button" class="btnEliminarLuminaria text-destructive hover:text-red-800 text-lg font-bold p-1 rounded">
                                                 &times;
                                             </button>
                                         </td>
@@ -538,32 +797,20 @@
                         </div>
                     </div>
 
-                    <!-- ========================================== -->
-                    <!-- MATERIALES ASIGNADOS AL NODO (MÚLTIPLES) -->
-                    <!-- ========================================== -->
-                    <div class="border-t border-gray-200 pt-4">
+                    <!-- MATERIALES -->
+                    <div class="border-t border-border pt-4">
                         <div class="flex items-center justify-between mb-3">
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700">
-                                    Materiales y Herramientas del Nodo
-                                </label>
-                                <p class="text-xs text-gray-500 mt-0.5">
-                                    Asigna uno o varios materiales a instalar (nuevo) o retirar (desmonte) en este apoyo.
-                                </p>
-                            </div>
-
-                            <button
-                                type="button"
-                                id="btnAgregarMaterialNodo"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs transition">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
+                                Materiales y Herramientas del Nodo
+                            </label>
+                            <button type="button" id="btnAgregarMaterialNodo"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition">
                                 <span>➕</span> Agregar material
                             </button>
                         </div>
-
-                        <!-- TABLA DINÁMICA DE MATERIALES DEL NODO -->
-                        <div class="overflow-x-auto border-2 border-gray-200 rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200 text-xs">
-                                <thead class="bg-slate-800 text-xs font-bold text-white uppercase">
+                        <div class="overflow-x-auto border border-border rounded-lg">
+                            <table class="min-w-full divide-y divide-border text-xs">
+                                <thead class="bg-neutral text-xs font-bold text-white uppercase">
                                     <tr>
                                         <th class="px-3 py-2 text-left w-1/2">Material / Herramienta</th>
                                         <th class="px-3 py-2 text-left w-1/4 bg-blue-900 text-white">Cant. Instalada (Nuevo)</th>
@@ -571,12 +818,11 @@
                                         <th class="px-2 py-2 text-center w-12">Quitar</th>
                                     </tr>
                                 </thead>
-                                <tbody id="filasMaterialesNodo" class="divide-y divide-gray-200 bg-white">
-                                    <!-- FILA INICIAL -->
+                                <tbody id="filasMaterialesNodo" class="divide-y divide-border bg-card">
                                     <tr class="fila-material-nodo">
                                         <td class="px-3 py-2">
                                             <select name="material_id[]"
-                                                    class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 bg-white font-medium focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none">
+                                                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
                                                 <option value="">-- Seleccionar material --</option>
                                                 {% for mat in materiales_catalogo %}
                                                     <option value="{{ mat.id }}">
@@ -587,14 +833,14 @@
                                         </td>
                                         <td class="px-3 py-2">
                                             <input type="number" step="any" min="0" name="cantidad_instalada[]" placeholder="0.00"
-                                                   class="w-full border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-blue-50/30">
+                                                   class="w-full border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 focus:ring-2 focus:ring-blue-500 bg-blue-50/40">
                                         </td>
                                         <td class="px-3 py-2">
                                             <input type="number" step="any" min="0" name="cantidad_retirada[]" placeholder="0.00"
-                                                   class="w-full border border-amber-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none bg-amber-50/30">
+                                                   class="w-full border border-amber-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 bg-amber-50/40">
                                         </td>
                                         <td class="px-2 py-2 text-center">
-                                            <button type="button" class="btnEliminarMaterialNodo text-red-600 hover:text-red-800 font-bold text-lg p-1 rounded hover:bg-red-50 transition">
+                                            <button type="button" class="btnEliminarMaterialNodo text-destructive hover:text-red-800 font-bold text-lg p-1 rounded">
                                                 &times;
                                             </button>
                                         </td>
@@ -605,24 +851,118 @@
                     </div>
                 </div>
 
-                <!-- BOTONES -->
-                <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 flex-shrink-0" style="background-color: #f8fafc !important;">
-                    <button
-                        type="button"
-                        onclick="cerrarModalApoyo()"
-                        style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
-                        class="px-4 py-2 text-xs hover:bg-slate-200 font-semibold rounded-lg transition cursor-pointer">
+                <div class="flex justify-end gap-3 border-t border-border px-6 py-4 bg-muted/30">
+                    <button type="button" onclick="cerrarModalApoyo()" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg">
                         Cancelar
                     </button>
-
-                    <button
-                        type="submit"
-                        style="background-color: #1d4ed8 !important; color: #ffffff !important;"
-                        class="px-5 py-2 text-xs hover:bg-blue-800 text-white font-bold rounded-lg shadow-sm transition cursor-pointer">
+                    <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm">
                         Guardar Poste
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- MODAL 3: GESTIONAR MATERIALES DEL POSTE / APOYO                         -->
+    <!-- ======================================================================= -->
+    <div id="modalGestionMateriales" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+        <div class="bg-card w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl border-2 border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- HEADER -->
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📦</span>
+                    <div>
+                        <h3 class="font-extrabold text-base" id="modalMaterialesTitulo">Materiales Puestos en el Poste</h3>
+                        <p class="text-xs text-slate-300">Modifica cantidades, elimina materiales o añade nuevos. La mano de obra se recalculará automáticamente.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="cerrarModalGestionMateriales()" class="text-gray-300 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <!-- LISTADO DE MATERIALES ACTUALES -->
+                <div>
+                    <h4 class="text-xs font-bold uppercase text-muted-foreground mb-2 flex items-center justify-between">
+                        <span>1. Materiales Instalados y Retirados en este Poste</span>
+                        <span id="contadorMaterialesApoyo" class="text-primary font-black"></span>
+                    </h4>
+
+                    <div class="overflow-x-auto border border-border rounded-xl shadow-xs">
+                        <table class="min-w-full divide-y divide-border text-xs">
+                            <thead class="bg-muted text-muted-foreground font-bold uppercase text-[10px]">
+                                <tr>
+                                    <th class="px-3 py-2.5 text-left">ITEM / MATERIAL</th>
+                                    <th class="px-3 py-2.5 text-center w-16">UND</th>
+                                    <th class="px-3 py-2.5 text-center w-28 bg-blue-50/50 text-blue-900">INSTALADO</th>
+                                    <th class="px-3 py-2.5 text-center w-28 bg-amber-50/50 text-amber-900">RETIRADO</th>
+                                    <th class="px-3 py-2.5 text-center w-24">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpoTablaMaterialesApoyo" class="divide-y divide-border bg-card">
+                                <!-- Inyectado vía JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FORMULARIO AGREGAR NUEVO MATERIAL -->
+                <div class="p-4 bg-muted/40 rounded-xl border border-border space-y-3">
+                    <h4 class="text-xs font-extrabold text-foreground uppercase flex items-center gap-1.5">
+                        <span>➕</span> Agregar Otro Material a este Poste
+                    </h4>
+
+                    <form id="formAgregarMaterialRapido" method="POST" action="" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="tab" value="{{ tab_activa|default:'mano_obra' }}">
+
+                        <div class="flex-1 min-w-[220px]">
+                            <label class="block text-[11px] font-bold uppercase text-muted-foreground mb-1">Seleccionar Material del Catálogo</label>
+                            <select name="material_id" required
+                                    class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs bg-card text-foreground font-medium focus:ring-2 focus:ring-primary focus:outline-none h-[38px]">
+                                <option value="">-- Seleccionar material del catálogo --</option>
+                                {% for mat in materiales_catalogo %}
+                                    <option value="{{ mat.id }}">
+                                        [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'U' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'U' }}]{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="w-full sm:w-28 flex-shrink-0">
+                            <label class="block text-[11px] font-bold uppercase text-blue-900 mb-1 text-center">Cant. Inst.</label>
+                            <input type="number" step="any" min="0" name="cantidad_instalada" placeholder="0"
+                                   class="w-full border border-blue-300 rounded-lg px-2.5 py-2 text-xs font-bold text-center text-primary bg-card focus:ring-2 focus:ring-primary focus:outline-none h-[38px]">
+                        </div>
+
+                        <div class="w-full sm:w-28 flex-shrink-0">
+                            <label class="block text-[11px] font-bold uppercase text-amber-900 mb-1 text-center">Cant. Ret.</label>
+                            <input type="number" step="any" min="0" name="cantidad_retirada" placeholder="0"
+                                   class="w-full border border-amber-300 rounded-lg px-2.5 py-2 text-xs font-bold text-center text-amber-900 bg-card focus:ring-2 focus:ring-amber-500 focus:outline-none h-[38px]">
+                        </div>
+
+                        <div class="w-full sm:w-auto flex-shrink-0">
+                            <button type="submit"
+                                    class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 h-[38px] whitespace-nowrap">
+                                <span>➕</span> Agregar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="px-6 py-3.5 bg-muted/30 border-t border-border flex items-center justify-between flex-shrink-0">
+                <a id="btnIrEdicionCompletaPoste" href="#"
+                   class="text-xs text-primary hover:underline font-bold flex items-center gap-1">
+                    <span>🛠️</span> Ir a Edición Completa del Poste (Dirección, Técnico, etc.) &rarr;
+                </a>
+
+                <button type="button" onclick="cerrarModalGestionMateriales()"
+                        class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition">
+                    Cerrar
+                </button>
+            </div>
         </div>
     </div>
 
@@ -631,94 +971,200 @@
 <script src="{% static 'js/ingenieria.js' %}"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+const apoyosMaterialesData = {
+    {% for fila in filas_matriz %}
+    "{{ fila.apoyo.id }}": {
+        "id": "{{ fila.apoyo.id }}",
+        "nodo": "{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}",
+        "numero": "{{ fila.apoyo.numero_apoyo|default:'' }}",
+        "materiales": [
+            {% for m in fila.materiales_asociados %}
+            {
+                "id": "{{ m.id }}",
+                "item": "{{ m.material.item }}",
+                "descripcion": "{{ m.material.descripcion|escapejs }}",
+                "unidad": "{{ m.material.unidad|default:'UN'|escapejs }}",
+                "cant_inst": {{ m.cantidad_requerida|floatformat:0 }},
+                "cant_ret": {{ m.cantidad_retirada|floatformat:0 }}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+};
 
-        const btnAgregarLuminaria = document.getElementById("btnAgregarLuminaria");
-        const filasLuminarias = document.getElementById("filasLuminarias");
+function abrirModalGestionMateriales(apoyoId, nodoLabel) {
+    const data = apoyosMaterialesData[apoyoId] || { nodo: nodoLabel, materiales: [] };
+    document.getElementById('modalMaterialesTitulo').textContent = 'Materiales Puestos en el Poste: ' + (data.nodo || nodoLabel);
+    document.getElementById('contadorMaterialesApoyo').textContent = data.materiales.length + ' materiales';
+    document.getElementById('formAgregarMaterialRapido').action = '/ingenieria/apoyos/' + apoyoId + '/agregar-material-rapido/';
+    document.getElementById('btnIrEdicionCompletaPoste').href = '/ingenieria/apoyo/' + apoyoId + '/';
 
-        // AGREGAR NUEVA LUMINARIA
-        if (btnAgregarLuminaria && filasLuminarias) {
-            btnAgregarLuminaria.addEventListener("click", function () {
-                const nuevaFila = document.createElement("tr");
-                nuevaFila.classList.add("fila-luminaria");
-                nuevaFila.innerHTML = `
-                    <td class="px-3 py-2">
-                        <input
-                            type="text"
-                            name="potencia[]"
-                            placeholder="Ej: 90W"
-                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
-                    </td>
-                    <td class="px-3 py-2">
-                        <input
-                            type="text"
-                            name="codigo_luminaria[]"
-                            placeholder="Ej: 123456"
-                            class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-card">
-                    </td>
-                    <td class="px-3 py-2 text-center">
-                        <button
-                            type="button"
-                            class="btnEliminarLuminaria text-destructive hover:text-red-700 text-lg font-bold p-1 rounded hover:bg-red-50"
-                            title="Eliminar luminaria">
-                            &times;
+    const tbody = document.getElementById('cuerpoTablaMaterialesApoyo');
+    tbody.innerHTML = '';
+
+    if (!data.materiales || data.materiales.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-6 text-center text-muted-foreground italic">
+                    Este poste no tiene materiales asignados actualmente. Usa el formulario de abajo para agregar uno.
+                </td>
+            </tr>
+        `;
+    } else {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const tabActiva = "{{ tab_activa|default:'mano_obra' }}";
+        data.materiales.forEach(m => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-muted/30 transition';
+            tr.innerHTML = `
+                <td class="px-3 py-2.5 font-bold text-foreground">
+                    <span class="font-mono text-primary">[${m.item}]</span> ${m.descripcion}
+                </td>
+                <td class="px-3 py-2.5 text-center font-bold font-mono">
+                    <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px]">${m.unidad}</span>
+                </td>
+                <td class="px-3 py-2 text-center bg-blue-50/20">
+                    <form id="formEditMat-${m.id}" method="POST" action="/ingenieria/apoyos/${apoyoId}/editar-material-rapido/" class="flex items-center justify-center">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                        <input type="hidden" name="tab" value="${tabActiva}">
+                        <input type="hidden" name="apoyo_material_id" value="${m.id}">
+                        <input type="number" step="any" min="0" name="cantidad_instalada" value="${m.cant_inst}"
+                               class="w-20 border border-blue-300 rounded px-2 py-1 text-center font-bold text-xs text-primary bg-card focus:ring-1 focus:ring-primary">
+                </td>
+                <td class="px-3 py-2 text-center bg-amber-50/20">
+                        <input type="number" step="any" min="0" name="cantidad_retirada" value="${m.cant_ret}"
+                               class="w-20 border border-amber-300 rounded px-2 py-1 text-center font-bold text-xs text-amber-900 bg-card focus:ring-1 focus:ring-amber-500">
+                    </form>
+                </td>
+                <td class="px-3 py-2 text-center whitespace-nowrap">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button type="submit" form="formEditMat-${m.id}"
+                                class="px-2 py-1 bg-primary hover:bg-primary-hover text-white rounded text-xs font-bold transition"
+                                title="Guardar cambios de cantidad">
+                            💾
                         </button>
-                    </td>
-                `;
-                filasLuminarias.appendChild(nuevaFila);
-            });
+                        <form method="POST" action="/ingenieria/apoyos-material/${m.id}/eliminar/"
+                              onsubmit="return confirm('¿Estás seguro de eliminar el material ${m.descripcion} de este poste? Se devolverán las cantidades a bodega.');"
+                              class="inline">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                            <input type="hidden" name="tab" value="${tabActiva}">
+                            <button type="submit"
+                                    class="px-2 py-1 bg-red-100 hover:bg-destructive hover:text-white text-destructive rounded text-xs font-bold transition"
+                                    title="Eliminar este material del poste">
+                                🗑️
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
-            // ELIMINAR LUMINARIA
-            filasLuminarias.addEventListener("click", function (event) {
-                const botonEliminar = event.target.closest(".btnEliminarLuminaria");
-                if (botonEliminar) {
-                    const fila = botonEliminar.closest(".fila-luminaria");
-                    if (fila) {
-                        fila.remove();
-                    }
-                }
-            });
+    document.getElementById('modalGestionMateriales').classList.remove('hidden');
+}
+
+function cerrarModalGestionMateriales() {
+    document.getElementById('modalGestionMateriales').classList.add('hidden');
+}
+
+function abrirModalAsignarMO() {
+    document.getElementById('modalAsignarMO').classList.remove('hidden');
+}
+function cerrarModalAsignarMO() {
+    document.getElementById('modalAsignarMO').classList.add('hidden');
+}
+function actualizarActionMO(apoyoId) {
+    if (apoyoId) {
+        document.getElementById('formAsignarMO').action = '/ingenieria/apoyos/' + apoyoId + '/mano-obra-manual/';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btnNuevoApoyo = document.getElementById("btnNuevoApoyo");
+    const modalNuevoApoyo = document.getElementById("modalNuevoApoyo");
+
+    if (btnNuevoApoyo && modalNuevoApoyo) {
+        btnNuevoApoyo.addEventListener("click", function () {
+            modalNuevoApoyo.classList.remove("hidden");
+        });
+    }
+
+    window.cerrarModalApoyo = function() {
+        if (modalNuevoApoyo) {
+            modalNuevoApoyo.classList.add("hidden");
         }
+    };
 
-        // AGREGAR Y ELIMINAR MATERIALES EN EL MODAL DE NODO
-        const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
-        const filasMaterialesNodo = document.getElementById("filasMaterialesNodo");
+    // Luminarias dinámicas
+    const btnAgregarLuminaria = document.getElementById("btnAgregarLuminaria");
+    const filasLuminarias = document.getElementById("filasLuminarias");
+    if (btnAgregarLuminaria && filasLuminarias) {
+        btnAgregarLuminaria.addEventListener("click", function () {
+            const nuevaFila = document.createElement("tr");
+            nuevaFila.classList.add("fila-luminaria");
+            nuevaFila.innerHTML = `
+                <td class="px-3 py-2">
+                    <input type="text" name="potencia[]" placeholder="Ej: 90W"
+                           class="w-full border border-border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-primary bg-background text-foreground">
+                </td>
+                <td class="px-3 py-2">
+                    <input type="text" name="codigo_luminaria[]" placeholder="Ej: 123456"
+                           class="w-full border border-border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-primary bg-background text-foreground">
+                </td>
+                <td class="px-3 py-2 text-center">
+                    <button type="button" class="btnEliminarLuminaria text-destructive hover:text-red-800 text-lg font-bold p-1 rounded">&times;</button>
+                </td>
+            `;
+            filasLuminarias.appendChild(nuevaFila);
+        });
 
-        if (btnAgregarMaterialNodo && filasMaterialesNodo) {
-            btnAgregarMaterialNodo.addEventListener("click", function () {
-                const primeraFila = filasMaterialesNodo.querySelector(".fila-material-nodo");
-                if (primeraFila) {
-                    const nuevaFila = primeraFila.cloneNode(true);
-                    const sel = nuevaFila.querySelector('select[name="material_id[]"]');
+        filasLuminarias.addEventListener("click", function (event) {
+            const botonEliminar = event.target.closest(".btnEliminarLuminaria");
+            if (botonEliminar) {
+                const fila = botonEliminar.closest(".fila-luminaria");
+                if (fila) fila.remove();
+            }
+        });
+    }
+
+    // Materiales dinámicos
+    const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
+    const filasMaterialesNodo = document.getElementById("filasMaterialesNodo");
+    if (btnAgregarMaterialNodo && filasMaterialesNodo) {
+        btnAgregarMaterialNodo.addEventListener("click", function () {
+            const primeraFila = filasMaterialesNodo.querySelector(".fila-material-nodo");
+            if (primeraFila) {
+                const nuevaFila = primeraFila.cloneNode(true);
+                const sel = nuevaFila.querySelector('select[name="material_id[]"]');
+                if (sel) sel.selectedIndex = 0;
+                const inInst = nuevaFila.querySelector('input[name="cantidad_instalada[]"]');
+                if (inInst) inInst.value = '';
+                const inRet = nuevaFila.querySelector('input[name="cantidad_retirada[]"]');
+                if (inRet) inRet.value = '';
+                filasMaterialesNodo.appendChild(nuevaFila);
+            }
+        });
+
+        filasMaterialesNodo.addEventListener("click", function (e) {
+            const btnEliminar = e.target.closest(".btnEliminarMaterialNodo");
+            if (btnEliminar) {
+                const filas = filasMaterialesNodo.querySelectorAll(".fila-material-nodo");
+                if (filas.length > 1) {
+                    btnEliminar.closest(".fila-material-nodo").remove();
+                } else {
+                    const fila = btnEliminar.closest(".fila-material-nodo");
+                    const sel = fila.querySelector('select[name="material_id[]"]');
                     if (sel) sel.selectedIndex = 0;
-                    const inInst = nuevaFila.querySelector('input[name="cantidad_instalada[]"]');
+                    const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
                     if (inInst) inInst.value = '';
-                    const inRet = nuevaFila.querySelector('input[name="cantidad_retirada[]"]');
+                    const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
                     if (inRet) inRet.value = '';
-                    filasMaterialesNodo.appendChild(nuevaFila);
                 }
-            });
-
-            filasMaterialesNodo.addEventListener("click", function (e) {
-                const btnEliminar = e.target.closest(".btnEliminarMaterialNodo");
-                if (btnEliminar) {
-                    const filas = filasMaterialesNodo.querySelectorAll(".fila-material-nodo");
-                    if (filas.length > 1) {
-                        btnEliminar.closest(".fila-material-nodo").remove();
-                    } else {
-                        const fila = btnEliminar.closest(".fila-material-nodo");
-                        const sel = fila.querySelector('select[name="material_id[]"]');
-                        if (sel) sel.selectedIndex = 0;
-                        const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
-                        if (inInst) inInst.value = '';
-                        const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
-                        if (inRet) inRet.value = '';
-                    }
-                }
-            });
-        }
-
-    });
+            }
+        });
+    }
+});
 </script>
-
 {% endblock %}

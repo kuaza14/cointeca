@@ -1,3 +1,4 @@
+from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo, calcular_mano_obra_para_apoyo, actualizar_presupuesto_proyecto
 import io
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -17,6 +18,9 @@ from core.models import (
     Inventario,
     EntradaMaterialProyecto,
     DetalleEntradaMaterial,
+    ItemManoObra,
+    ApoyoManoObra,
+    Presupuesto,
 )
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
@@ -288,11 +292,13 @@ def detalle_proyecto(request, id):
         Apoyo.objects
         .filter(proyecto=proyecto)
         .select_related("quien_ejecuta")
-        .prefetch_related("luminarias")   
+        .prefetch_related("luminarias", "manos_obra", "manos_obra__item_mano_obra")   
         .order_by("numero_apoyo", "id")
     )
 
-    # 1. Obtener todos los materiales únicos asignados a los apoyos de este proyecto
+    tab_activa = request.GET.get("tab", "materiales").strip().lower()
+
+    # 1. MATRIZ DE MATERIALES (POSTE A POSTE)
     apoyo_materiales = ApoyoMaterial.objects.filter(
         apoyo__proyecto=proyecto
     ).select_related("material")
@@ -306,7 +312,6 @@ def detalle_proyecto(request, id):
         cantidades_inst_map[(am.apoyo_id, am.material_id)] = am.cantidad_requerida
         cantidades_ret_map[(am.apoyo_id, am.material_id)] = am.cantidad_retirada
 
-    # 3. Construir filas de la matriz estilo Excel (Filas = Apoyos/Nodos, Columnas = Materiales)
     filas_matriz = []
     totales_inst_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
     totales_ret_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
@@ -327,9 +332,9 @@ def detalle_proyecto(request, id):
         filas_matriz.append({
             "apoyo": ap,
             "celdas": celdas,
+            "materiales_asociados": list(ap.materiales.select_related("material", "material__inventario").all().order_by("material__descripcion")),
         })
 
-    # 4. Fila de Totales Generales
     fila_totales = []
     for mat in materiales_columnas:
         fila_totales.append({
@@ -338,7 +343,6 @@ def detalle_proyecto(request, id):
             "total_retirado": totales_ret_columna.get(mat.id, Decimal("0")),
         })
 
-    # 5. Resumen de Materiales Retirados en el Proyecto
     tabla_resumen_retiros = []
     for mat in materiales_columnas:
         tot_ret = totales_ret_columna.get(mat.id, Decimal("0"))
@@ -348,7 +352,74 @@ def detalle_proyecto(request, id):
                 "cantidad_retirada": tot_ret,
             })
 
+    # 2. MATRIZ DE MANO DE OBRA / LIQUIDACIÓN PROYECCIONES
+    apoyos_mo = ApoyoManoObra.objects.filter(
+        apoyo__proyecto=proyecto
+    ).select_related("item_mano_obra")
+
+    mo_ids = apoyos_mo.values_list('item_mano_obra_id', flat=True).distinct()
+    mo_columnas = list(ItemManoObra.objects.filter(id__in=mo_ids).order_by("codigo"))
+
+    mo_cant_map = {}
+    mo_origen_map = {}
+    mo_id_map = {}
+    for amo in apoyos_mo:
+        mo_cant_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.cantidad
+        mo_origen_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.origen
+        mo_id_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.id
+
+    mo_filas_matriz = []
+    mo_totales_columna = {item.id: Decimal("0") for item in mo_columnas}
+
+    for ap in apoyos:
+        celdas_mo = []
+        for item in mo_columnas:
+            cant_mo = mo_cant_map.get((ap.id, item.id), Decimal("0"))
+            orig = mo_origen_map.get((ap.id, item.id), "CALCULADO")
+            amo_id = mo_id_map.get((ap.id, item.id))
+            celdas_mo.append({
+                "item": item,
+                "cantidad": cant_mo,
+                "origen": orig,
+                "amo_id": amo_id,
+            })
+            mo_totales_columna[item.id] += cant_mo
+
+        mo_filas_matriz.append({
+            "apoyo": ap,
+            "celdas": celdas_mo,
+            "manos_obra_list": ap.manos_obra.all(),
+            "materiales_asociados": list(ap.materiales.select_related("material", "material__inventario").all().order_by("material__descripcion")),
+        })
+
+    mo_fila_totales = []
+    gran_total_mo_pesos = Decimal("0")
+    resumen_economico_items = []
+
+    for item in mo_columnas:
+        tot_c = mo_totales_columna.get(item.id, Decimal("0"))
+        sub_pesos = tot_c * item.valor_unitario
+        gran_total_mo_pesos += sub_pesos
+        mo_fila_totales.append({
+            "item": item,
+            "total": tot_c,
+            "total_pesos": sub_pesos,
+        })
+        if tot_c > 0:
+            resumen_economico_items.append({
+                "item": item,
+                "cantidad": tot_c,
+                "subtotal": sub_pesos,
+            })
+
+    presupuesto, _ = Presupuesto.objects.get_or_create(proyecto=proyecto)
+    if presupuesto.valor_mano_obra != gran_total_mo_pesos:
+        presupuesto.valor_mano_obra = gran_total_mo_pesos
+        presupuesto.valor_total = presupuesto.valor_materiales + presupuesto.valor_mano_obra + presupuesto.otros_costos
+        presupuesto.save()
+
     materiales_catalogo = Material.objects.all().order_by("descripcion")
+    catalogo_mo_todos = ItemManoObra.objects.all().order_by("codigo")
 
     return render(
         request,
@@ -356,11 +427,20 @@ def detalle_proyecto(request, id):
         {
             "proyecto": proyecto,
             "apoyos": apoyos,
+            "tab_activa": tab_activa,
             "materiales_columnas": materiales_columnas,
             "filas_matriz": filas_matriz,
             "fila_totales": fila_totales,
             "tabla_resumen_retiros": tabla_resumen_retiros,
             "materiales_catalogo": materiales_catalogo,
+            # Mano de Obra
+            "mo_columnas": mo_columnas,
+            "mo_filas_matriz": mo_filas_matriz,
+            "mo_fila_totales": mo_fila_totales,
+            "gran_total_mo_pesos": gran_total_mo_pesos,
+            "resumen_economico_items": resumen_economico_items,
+            "catalogo_mo_todos": catalogo_mo_todos,
+            "presupuesto": presupuesto,
         }
     )
 
@@ -551,6 +631,9 @@ def detalle_apoyo(request, apoyo_id):
                             apoyo_mat.cantidad_requerida += cant
                             apoyo_mat.save()
 
+                        calcular_mano_obra_para_apoyo(apoyo)
+                        actualizar_presupuesto_proyecto(apoyo.proyecto)
+
                 except (ValueError, TypeError):
                     pass
 
@@ -605,6 +688,9 @@ def detalle_apoyo(request, apoyo_id):
                         apoyo_mat.cantidad_retirada = max(Decimal("0"), cant_ret)
                         apoyo_mat.save()
 
+                        calcular_mano_obra_para_apoyo(apoyo)
+                        actualizar_presupuesto_proyecto(apoyo.proyecto)
+
             except (ValueError, TypeError, ArithmeticError):
                 pass
 
@@ -627,6 +713,8 @@ def detalle_apoyo(request, apoyo_id):
                         inventario.cantidad += apoyo_mat.cantidad_requerida
                         inventario.save()
                     apoyo_mat.delete()
+                    calcular_mano_obra_para_apoyo(apoyo)
+                    actualizar_presupuesto_proyecto(apoyo.proyecto)
                     messages.success(request, f"Material '{nombre_mat}' eliminado de este apoyo.")
 
             return redirect("detalle_apoyo", apoyo_id=apoyo.id)
@@ -833,6 +921,10 @@ def detalle_apoyo(request, apoyo_id):
         else:
             messages.success(request, "Los datos y materiales del apoyo se han guardado exitosamente.")
 
+        # Recalcular Mano de Obra y Presupuesto
+        calcular_mano_obra_para_apoyo(apoyo)
+        actualizar_presupuesto_proyecto(apoyo.proyecto)
+
         # DECIDIR A DÓNDE VOLVER
         if "guardar_y_volver" in request.POST:
             return redirect("detalle_proyecto", id=apoyo.proyecto.id)
@@ -858,21 +950,148 @@ def eliminar_apoyo(request, apoyo_id):
         id=apoyo_id
     )
 
-    proyecto_id = apoyo.proyecto.id
+    proyecto = apoyo.proyecto
+    nodo_nombre = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
+    tab = request.POST.get("tab", "materiales")
 
     if request.method == "POST":
         # Devolver materiales asignados a la bodega central
         for am in apoyo.materiales.all():
-            inventario, _ = Inventario.objects.get_or_create(material=am.material)
-            inventario.cantidad += am.cantidad_requerida
-            inventario.save()
+            if am.cantidad_requerida > 0:
+                inventario, _ = Inventario.objects.get_or_create(material=am.material)
+                inventario.cantidad += am.cantidad_requerida
+                inventario.save()
 
         apoyo.delete()
+        actualizar_presupuesto_proyecto(proyecto)
+        messages.success(request, f"Poste / Nodo '{nodo_nombre}' eliminado correctamente del proyecto.")
 
-    return redirect(
-        "detalle_proyecto",
-        id=proyecto_id
-    )
+    return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab={tab}")
+
+
+@login_required
+@transaction.atomic
+def agregar_material_apoyo_rapido(request, apoyo_id):
+    """
+    Agrega un material a un poste directamente desde la vista del proyecto (modal rápido),
+    descontando existencias de bodega y recalculando la mano de obra y presupuesto.
+    """
+    apoyo = get_object_or_404(Apoyo, id=apoyo_id)
+    tab = request.POST.get("tab", "mano_obra")
+
+    if request.method == "POST":
+        material_id = request.POST.get("material_id")
+        cant_inst_str = request.POST.get("cantidad_instalada", "0").strip().replace(',', '.')
+        cant_ret_str = request.POST.get("cantidad_retirada", "0").strip().replace(',', '.')
+
+        try:
+            cant_inst = Decimal(cant_inst_str) if cant_inst_str else Decimal("0")
+            cant_ret = Decimal(cant_ret_str) if cant_ret_str else Decimal("0")
+
+            if material_id and (cant_inst > 0 or cant_ret > 0):
+                material = get_object_or_404(Material, id=material_id)
+                inventario, _ = Inventario.objects.get_or_create(material=material)
+
+                if cant_inst > 0:
+                    if inventario.cantidad < cant_inst:
+                        messages.warning(
+                            request,
+                            f"⚠️ Stock insuficiente en bodega para '{material.descripcion}' (Stock disponible: {inventario.cantidad}). Se asignaron {cant_inst} como requerimiento proyectado."
+                        )
+                        inventario.cantidad = Decimal("0")
+                    else:
+                        inventario.cantidad -= cant_inst
+                    inventario.save()
+
+                apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
+                    apoyo=apoyo,
+                    material=material,
+                    defaults={"cantidad_requerida": cant_inst, "cantidad_retirada": cant_ret}
+                )
+                if not created:
+                    apoyo_mat.cantidad_requerida += cant_inst
+                    apoyo_mat.cantidad_retirada += cant_ret
+                    apoyo_mat.save()
+
+                calcular_mano_obra_para_apoyo(apoyo)
+                actualizar_presupuesto_proyecto(apoyo.proyecto)
+                messages.success(request, f"Material '{material.descripcion}' agregado al poste {apoyo.nodo or apoyo.numero_apoyo}.")
+        except Exception as e:
+            messages.error(request, f"Error al agregar material: {e}")
+
+    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab={tab}")
+
+
+@login_required
+@transaction.atomic
+def editar_material_apoyo_rapido(request, apoyo_id):
+    """
+    Edita las cantidades instaladas/retiradas de un material existente en un poste desde el modal rápido,
+    ajustando inventario y recalculando la mano de obra y presupuesto.
+    """
+    apoyo = get_object_or_404(Apoyo, id=apoyo_id)
+    tab = request.POST.get("tab", "mano_obra")
+
+    if request.method == "POST":
+        am_id = request.POST.get("apoyo_material_id")
+        cant_inst_str = request.POST.get("cantidad_instalada", "0").strip().replace(',', '.')
+        cant_ret_str = request.POST.get("cantidad_retirada", "0").strip().replace(',', '.')
+
+        try:
+            cant_inst = Decimal(cant_inst_str) if cant_inst_str else Decimal("0")
+            cant_ret = Decimal(cant_ret_str) if cant_ret_str else Decimal("0")
+
+            apoyo_mat = get_object_or_404(ApoyoMaterial, id=am_id, apoyo=apoyo)
+            inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+
+            diferencia = cant_inst - apoyo_mat.cantidad_requerida
+            if diferencia > 0:
+                if inventario.cantidad < diferencia:
+                    inventario.cantidad = Decimal("0")
+                else:
+                    inventario.cantidad -= diferencia
+                inventario.save()
+            elif diferencia < 0:
+                inventario.cantidad += abs(diferencia)
+                inventario.save()
+
+            apoyo_mat.cantidad_requerida = max(Decimal("0"), cant_inst)
+            apoyo_mat.cantidad_retirada = max(Decimal("0"), cant_ret)
+            apoyo_mat.save()
+
+            calcular_mano_obra_para_apoyo(apoyo)
+            actualizar_presupuesto_proyecto(apoyo.proyecto)
+            messages.success(request, f"Cantidades actualizadas para '{apoyo_mat.material.descripcion}' en el poste {apoyo.nodo or apoyo.numero_apoyo}.")
+        except Exception as e:
+            messages.error(request, f"Error al actualizar material: {e}")
+
+    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab={tab}")
+
+
+@login_required
+@transaction.atomic
+def eliminar_material_apoyo_rapido(request, apoyo_material_id):
+    """
+    Elimina un material de un poste, devuelve lo instalado a la bodega central y recalcula la mano de obra.
+    """
+    apoyo_mat = get_object_or_404(ApoyoMaterial, id=apoyo_material_id)
+    apoyo = apoyo_mat.apoyo
+    tab = request.POST.get("tab", "mano_obra")
+
+    if request.method == "POST":
+        nombre_mat = apoyo_mat.material.descripcion
+        if apoyo_mat.cantidad_requerida > 0:
+            inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+            inventario.cantidad += apoyo_mat.cantidad_requerida
+            inventario.save()
+
+        apoyo_mat.delete()
+        calcular_mano_obra_para_apoyo(apoyo)
+        actualizar_presupuesto_proyecto(apoyo.proyecto)
+        messages.success(request, f"Material '{nombre_mat}' eliminado del poste {apoyo.nodo or apoyo.numero_apoyo} (devuelto a bodega).")
+
+    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab={tab}")
+
 
 
 @login_required
@@ -883,4 +1102,260 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     from core.views.logistica.proyectos_materiales import exportar_materiales_proyecto_excel as exportar_full
     return exportar_full(request, proyecto_id)
 
-
+
+
+
+# ==============================================================================
+# 🛠️ VISTAS DE MANO DE OBRA Y LIQUIDACIÓN AUTOMÁTICA (INGENIERÍA)
+# ==============================================================================
+
+@login_required
+def ejecutar_calculo_mano_obra(request, proyecto_id):
+    """
+    Ejecuta el motor de reglas automáticas para todos los apoyos del proyecto.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    if request.method == "POST":
+        total_creados = calcular_mano_obra_proyecto_completo(proyecto, preservar_manuales=True)
+        messages.success(
+            request,
+            f"⚡ Mano de Obra calculada exitosamente para el Proyecto {proyecto.numero_emcali}. Se actualizaron {total_creados} asignaciones de actividades."
+        )
+    return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab=mano_obra")
+
+
+@login_required
+@transaction.atomic
+def guardar_mano_obra_manual(request, apoyo_id):
+    """
+    Permite agregar o editar una actividad de mano de obra específica en un apoyo.
+    """
+    apoyo = get_object_or_404(Apoyo, id=apoyo_id)
+    if request.method == "POST":
+        item_id = request.POST.get("item_mano_obra_id")
+        cantidad_str = request.POST.get("cantidad", "0").strip().replace(',', '.')
+        observacion = request.POST.get("observacion", "").strip()
+
+        if item_id:
+            try:
+                cantidad = Decimal(cantidad_str) if cantidad_str else Decimal("0")
+                item = get_object_or_404(ItemManoObra, id=item_id)
+
+                if cantidad > 0:
+                    amo, _ = ApoyoManoObra.objects.get_or_create(
+                        apoyo=apoyo,
+                        item_mano_obra=item,
+                        defaults={"cantidad": cantidad, "origen": ApoyoManoObra.Origen.MANUAL, "observacion": observacion}
+                    )
+                    amo.cantidad = cantidad
+                    amo.origen = ApoyoManoObra.Origen.MANUAL
+                    amo.observacion = observacion
+                    amo.save()
+                    messages.success(request, f"Actividad '{item.descripcion}' asignada al apoyo {apoyo.nodo or apoyo.numero_apoyo}.")
+                else:
+                    ApoyoManoObra.objects.filter(apoyo=apoyo, item_mano_obra=item).delete()
+                    messages.info(request, f"Actividad '{item.descripcion}' removida del apoyo.")
+
+                actualizar_presupuesto_proyecto(apoyo.proyecto)
+            except Exception as e:
+                messages.error(request, f"Error al guardar actividad: {e}")
+
+    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab=mano_obra")
+
+
+@login_required
+@transaction.atomic
+def eliminar_mano_obra_apoyo(request, amo_id):
+    """
+    Elimina una asignación de mano de obra de un apoyo.
+    """
+    amo = get_object_or_404(ApoyoManoObra, id=amo_id)
+    proyecto_id = amo.apoyo.proyecto.id
+    if request.method == "POST":
+        desc = amo.item_mano_obra.descripcion
+        amo.delete()
+        actualizar_presupuesto_proyecto(Proyecto.objects.get(id=proyecto_id))
+        messages.success(request, f"Actividad '{desc}' eliminada correctamente.")
+
+    return redirect(f"/ingenieria/proyectos/{proyecto_id}/?tab=mano_obra")
+
+
+@login_required
+def catalogo_mano_obra(request):
+    """
+    Lista administrativa de las 128 actividades de Mano de Obra y tarifas.
+    """
+    query = request.GET.get("q", "").strip()
+    categoria_sel = request.GET.get("categoria", "").strip()
+
+    items = ItemManoObra.objects.all()
+    if query:
+        items = items.filter(
+            Q(codigo__icontains=query) |
+            Q(descripcion__icontains=query)
+        )
+    if categoria_sel:
+        items = items.filter(categoria=categoria_sel)
+
+    items = items.order_by("codigo")
+    categorias = ItemManoObra.Categorias.choices
+
+    return render(
+        request,
+        "ingenieria/mano_obra/catalogo.html",
+        {
+            "items": items,
+            "categorias": categorias,
+            "query": query,
+            "categoria_sel": categoria_sel,
+            "total_items": ItemManoObra.objects.count(),
+            "total_filtrados": items.count(),
+        }
+    )
+
+
+@login_required
+def editar_tarifa_mano_obra(request, item_id):
+    """
+    Actualiza el precio unitario contractual de una actividad.
+    """
+    item = get_object_or_404(ItemManoObra, id=item_id)
+    if request.method == "POST":
+        precio_str = request.POST.get("valor_unitario", "0").strip().replace(',', '.')
+        try:
+            nuevo_precio = Decimal(precio_str)
+            item.valor_unitario = max(Decimal("0"), nuevo_precio)
+            item.save()
+            messages.success(request, f"Tarifa actualizada para '{item.descripcion}': ${item.valor_unitario:,.2f}")
+        except Exception as e:
+            messages.error(request, f"Error al actualizar tarifa: {e}")
+
+    return redirect("catalogo_mano_obra")
+
+
+@login_required
+def exportar_liquidacion_proyecto_excel(request, proyecto_id):
+    """
+    Exporta la liquidación completa del proyecto (Materiales, Mano de Obra y Resumen Económico)
+    en formato Excel oficial idéntico a proyecciones.xlsx.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    apoyos = Apoyo.objects.filter(proyecto=proyecto).order_by("numero_apoyo", "id")
+
+    # Crear libro de Excel
+    wb = openpyxl.Workbook()
+    
+    # 1. HOJA RESUMEN
+    ws_resumen = wb.active
+    ws_resumen.title = "RESUMEN"
+
+    # Encabezados de estilo
+    font_bold = Font(name="Calibri", size=11, bold=True)
+    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    fill_header = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    fill_sub = PatternFill(start_color="3B82F6", end_color="3B82F6", fill_type="solid")
+    border_thin = Border(
+        left=Side(style='thin', color='D1D5DB'),
+        right=Side(style='thin', color='D1D5DB'),
+        top=Side(style='thin', color='D1D5DB'),
+        bottom=Side(style='thin', color='D1D5DB')
+    )
+
+    ws_resumen.append(["", "MICROPROYECTO", proyecto.numero_emcali, "", "FECHA", timezone.now().strftime("%d/%m/%Y")])
+    ws_resumen.append([])
+    ws_resumen.append(["ITEM", "DESCRIPCIÓN DE ACTIVIDAD / SERVICIO", "CÓDIGO", "UND", "CANTIDAD", "VALOR UNITARIO", "VALOR TOTAL"])
+
+    for col in range(1, 8):
+        cell = ws_resumen.cell(row=3, column=col)
+        cell.font = font_header
+        cell.fill = fill_header
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    # Obtener todas las manos de obra calculadas
+    apoyos_ids = apoyos.values_list('id', flat=True)
+    amos = ApoyoManoObra.objects.filter(apoyo_id__in=apoyos_ids).select_related('item_mano_obra')
+    
+    totales_por_item = {}
+    for amo in amos:
+        totales_por_item[amo.item_mano_obra] = totales_por_item.get(amo.item_mano_obra, Decimal("0")) + amo.cantidad
+
+    r_idx = 4
+    grand_total_mo = Decimal("0")
+    for item, cant in sorted(totales_por_item.items(), key=lambda x: x[0].codigo):
+        if cant > 0:
+            v_total = cant * item.valor_unitario
+            grand_total_mo += v_total
+            ws_resumen.append([
+                r_idx - 3,
+                item.descripcion,
+                item.codigo,
+                item.unidad,
+                float(cant),
+                float(item.valor_unitario),
+                float(v_total)
+            ])
+            for c_i in range(1, 8):
+                ws_resumen.cell(row=r_idx, column=c_i).border = border_thin
+            r_idx += 1
+
+    # Fila total
+    ws_resumen.append(["", "TOTAL MANO DE OBRA Y SERVICIOS", "", "", "", "", float(grand_total_mo)])
+    for c_i in range(1, 8):
+        c = ws_resumen.cell(row=r_idx, column=c_i)
+        c.font = font_bold
+        c.fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+        c.border = border_thin
+
+    # Ajustar anchos
+    ws_resumen.column_dimensions['A'].width = 8
+    ws_resumen.column_dimensions['B'].width = 50
+    ws_resumen.column_dimensions['C'].width = 12
+    ws_resumen.column_dimensions['D'].width = 8
+    ws_resumen.column_dimensions['E'].width = 14
+    ws_resumen.column_dimensions['F'].width = 18
+    ws_resumen.column_dimensions['G'].width = 20
+
+    # 2. HOJA DETALLE POSTE A POSTE
+    ws_detalle = wb.create_sheet(title=f"PROY_{proyecto.numero_emcali}")
+    ws_detalle.append(["PROYECTO", proyecto.numero_emcali, "LIQUIDACIÓN POSTE A POSTE"])
+    ws_detalle.append([])
+
+    # Encabezados de postes
+    encabezado_postes = ["CÓDIGO", "DESCRIPCIÓN", "TOTAL"]
+    for ap in apoyos:
+        encabezado_postes.append(ap.nodo or f"P{ap.numero_apoyo}")
+    ws_detalle.append(encabezado_postes)
+
+    for c_i in range(1, len(encabezado_postes) + 1):
+        c = ws_detalle.cell(row=3, column=c_i)
+        c.font = font_header
+        c.fill = fill_header
+        c.alignment = Alignment(horizontal="center", vertical="center")
+
+    r_d = 4
+    for item in ItemManoObra.objects.filter(id__in=[i.id for i in totales_por_item.keys()]).order_by("codigo"):
+        tot = totales_por_item.get(item, Decimal("0"))
+        row_vals = [item.codigo, item.descripcion, float(tot)]
+        for ap in apoyos:
+            amo = ApoyoManoObra.objects.filter(apoyo=ap, item_mano_obra=item).first()
+            row_vals.append(float(amo.cantidad) if amo and amo.cantidad > 0 else 0)
+        ws_detalle.append(row_vals)
+        for c_i in range(1, len(row_vals) + 1):
+            ws_detalle.cell(row=r_d, column=c_i).border = border_thin
+        r_d += 1
+
+    ws_detalle.column_dimensions['A'].width = 12
+    ws_detalle.column_dimensions['B'].width = 45
+    ws_detalle.column_dimensions['C'].width = 12
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename = f"Liquidacion_Ingenieria_Proyecto_{proyecto.numero_emcali}.xlsx"
+    response = HttpResponse(
+        output.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response

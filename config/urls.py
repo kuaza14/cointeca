@@ -45,12 +45,16 @@ from core.views.rrhh.empleados import (
     crear_empleado,
     detalle_empleado,
     eliminar_empleado,
+    retirar_empleado,
+    reintegrar_empleado,
     agregar_dotacion,
     eliminar_dotacion_empleado,
     editar_dotacion_empleado,
     subir_documento,
     eliminar_documento,
 )
+
+from core.views.rrhh.retiro import acuerdo_terminacion
 
 # 🟡 RRHH - CERTIFICACIONES
 # =========================
@@ -188,6 +192,15 @@ from core.views.ingenieria import(
     crear_apoyo,
     detalle_apoyo,
     eliminar_apoyo,
+    ejecutar_calculo_mano_obra,
+    guardar_mano_obra_manual,
+    eliminar_mano_obra_apoyo,
+    catalogo_mano_obra,
+    editar_tarifa_mano_obra,
+    exportar_liquidacion_proyecto_excel,
+    agregar_material_apoyo_rapido,
+    editar_material_apoyo_rapido,
+    eliminar_material_apoyo_rapido,
 )
 
 
@@ -237,6 +250,9 @@ urlpatterns = [
     path('rrhh/empleados/', empleados, name='empleados'),
     path('rrhh/empleados/crear/', crear_empleado, name='crear_empleado'),
     path('rrhh/empleados/<int:id>/', detalle_empleado, name='detalle_empleado'),
+    path('rrhh/empleados/<int:id>/retirar/', retirar_empleado, name='retirar_empleado'),
+    path('rrhh/empleados/<int:id>/reintegrar/', reintegrar_empleado, name='reintegrar_empleado'),
+    path('rrhh/empleados/<int:id>/acuerdo-terminacion/', acuerdo_terminacion, name='acuerdo_terminacion'),
     path('rrhh/empleados/<int:id>/eliminar/', eliminar_empleado, name='eliminar_empleado'),
 
     # DOTACIÓN / EQUIPOS
@@ -396,6 +412,15 @@ urlpatterns = [
     path("ingenieria/apoyo/<int:apoyo_id>/", detalle_apoyo, name="detalle_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/eliminar/", eliminar_apoyo, name="eliminar_apoyo"),
     path("ingenieria/proyectos/<int:proyecto_id>/exportar_excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel"),
+    path("ingenieria/proyectos/<int:proyecto_id>/calcular-mano-obra/", ejecutar_calculo_mano_obra, name="ejecutar_calculo_mano_obra"),
+    path("ingenieria/proyectos/<int:proyecto_id>/exportar-liquidacion/", exportar_liquidacion_proyecto_excel, name="exportar_liquidacion_proyecto_excel"),
+    path("ingenieria/apoyos/<int:apoyo_id>/mano-obra-manual/", guardar_mano_obra_manual, name="guardar_mano_obra_manual"),
+    path("ingenieria/apoyos/mano-obra/<int:amo_id>/eliminar/", eliminar_mano_obra_apoyo, name="eliminar_mano_obra_apoyo"),
+    path("ingenieria/mano-obra/catalogo/", catalogo_mano_obra, name="catalogo_mano_obra"),
+    path("ingenieria/mano-obra/<int:item_id>/editar-tarifa/", editar_tarifa_mano_obra, name="editar_tarifa_mano_obra"),
+    path("ingenieria/apoyos/<int:apoyo_id>/agregar-material-rapido/", agregar_material_apoyo_rapido, name="agregar_material_apoyo_rapido"),
+    path("ingenieria/apoyos/<int:apoyo_id>/editar-material-rapido/", editar_material_apoyo_rapido, name="editar_material_apoyo_rapido"),
+    path("ingenieria/apoyos-material/<int:apoyo_material_id>/eliminar/", eliminar_material_apoyo_rapido, name="eliminar_material_apoyo_rapido"),
 
     
 

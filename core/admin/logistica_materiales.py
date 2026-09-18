@@ -5,6 +5,8 @@ from core.models import (
     DetalleEntradaMaterial,
     ConsumoMaterialProyecto,
     DetalleConsumoMaterial,
+    ItemManoObra,
+    ApoyoManoObra,
 )
 
 
@@ -13,6 +15,21 @@ class MaterialAdmin(admin.ModelAdmin):
     list_display = ["item", "descripcion", "unidad"]
     search_fields = ["item", "descripcion"]
     ordering = ["item"]
+
+
+@admin.register(ItemManoObra)
+class ItemManoObraAdmin(admin.ModelAdmin):
+    list_display = ["codigo", "descripcion", "categoria", "unidad", "valor_unitario", "tipo_calculo"]
+    list_filter = ["categoria", "tipo_calculo"]
+    search_fields = ["codigo", "descripcion"]
+    ordering = ["codigo"]
+
+
+@admin.register(ApoyoManoObra)
+class ApoyoManoObraAdmin(admin.ModelAdmin):
+    list_display = ["apoyo", "item_mano_obra", "cantidad", "origen", "subtotal"]
+    list_filter = ["origen", "item_mano_obra__categoria"]
+    search_fields = ["apoyo__nodo", "apoyo__proyecto__numero_emcali", "item_mano_obra__descripcion", "item_mano_obra__codigo"]
 
 
 class DetalleEntradaMaterialInline(admin.TabularInline):
@@ -41,3 +58,4 @@ class ConsumoMaterialProyectoAdmin(admin.ModelAdmin):
     list_filter = ["fecha_reporte", "proyecto"]
     search_fields = ["supervisor", "numero_planilla", "proyecto__numero_emcali"]
     inlines = [DetalleConsumoMaterialInline]
+

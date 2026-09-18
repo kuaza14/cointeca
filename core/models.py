@@ -1112,6 +1112,62 @@ class Presupuesto(models.Model):
         return f"Presupuesto {self.proyecto.numero_emcali}"
 
 
+class ItemManoObra(models.Model):
+    class Categorias(models.TextChoices):
+        HINCADA_APLOMADA = "Hincada y Aplomada", "Hincada y Aplomada"
+        REDES_CABLES = "Redes y Cables", "Redes y Cables"
+        LUMINARIAS_PROYECTORES = "Luminarias y Proyectores", "Luminarias y Proyectores"
+        TRANSPORTE = "Transporte de Materiales", "Transporte de Materiales"
+        OBRA_CIVIL = "Obra Civil y Excavación", "Obra Civil y Excavación"
+        HERRAJES_ACCESORIOS = "Herrajes y Accesorios", "Herrajes y Accesorios"
+        DESMONTE = "Desmontes y Retiros", "Desmontes y Retiros"
+        OTROS = "Otros Servicios", "Otros Servicios"
+
+    class TiposCalculo(models.TextChoices):
+        AUTOMATICO = "AUTOMATICO", "Cálculo Automático por Fórmula"
+        MANUAL = "MANUAL", "Ingreso Manual en Terreno"
+
+    codigo = models.CharField(max_length=50, unique=True, verbose_name="Código de Actividad")
+    descripcion = models.CharField(max_length=255, verbose_name="Descripción de la Actividad")
+    unidad = models.CharField(max_length=20, default="UN", verbose_name="Unidad de Medida")
+    valor_unitario = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="Valor Unitario ($)")
+    categoria = models.CharField(max_length=50, choices=Categorias.choices, default=Categorias.OTROS, verbose_name="Categoría")
+    tipo_calculo = models.CharField(max_length=20, choices=TiposCalculo.choices, default=TiposCalculo.AUTOMATICO, verbose_name="Tipo de Cálculo")
+
+    class Meta:
+        verbose_name = "Ítem de Mano de Obra"
+        verbose_name_plural = "Ítems de Mano de Obra"
+        ordering = ["codigo"]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion} (${self.valor_unitario:,.0f})"
+
+
+class ApoyoManoObra(models.Model):
+    class Origen(models.TextChoices):
+        CALCULADO = "CALCULADO", "Calculado Automáticamente"
+        MANUAL = "MANUAL", "Agregado / Modificado Manualmente"
+
+    apoyo = models.ForeignKey(Apoyo, on_delete=models.CASCADE, related_name="manos_obra")
+    item_mano_obra = models.ForeignKey(ItemManoObra, on_delete=models.PROTECT, related_name="apoyos")
+    cantidad = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Cantidad Liquidada")
+    origen = models.CharField(max_length=20, choices=Origen.choices, default=Origen.CALCULADO)
+    observacion = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        verbose_name = "Mano de Obra por Apoyo"
+        verbose_name_plural = "Manos de Obra por Apoyo"
+        unique_together = ("apoyo", "item_mano_obra")
+
+    @property
+    def subtotal(self):
+        return self.cantidad * self.item_mano_obra.valor_unitario
+
+    def __str__(self):
+        return f"{self.item_mano_obra.descripcion}: {self.cantidad} {self.item_mano_obra.unidad} en {self.apoyo}"
+
+
+
 ####################################################
 #             LOGÍSTICA - MATERIALES Y PROYECTO
 ####################################################

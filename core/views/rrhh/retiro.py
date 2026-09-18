@@ -37,16 +37,17 @@ def acuerdo_terminacion(request, id):
 
             "ciudad_expedicion": empleado.ciudad_expedicion.upper(),
 
-            "cargo": empleado.cargo.upper(),
-
-            "fecha_ingreso": empleado.fecha_ingreso.strftime("%d/%m/%Y"),
+            "fecha_ingreso": (
+                empleado.fecha_ingreso.strftime("%d/%m/%Y")
+                if empleado.fecha_ingreso else ""
+            ),
 
             "fecha_retiro": (
                 empleado.fecha_retiro.strftime("%d/%m/%Y")
                 if empleado.fecha_retiro else ""
             ),
 
-            "motivo_retiro": empleado.motivo_retiro,
+            "motivo_retiro": empleado.motivo_retiro or "",
 
         },
 

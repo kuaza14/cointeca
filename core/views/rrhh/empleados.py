@@ -1,8 +1,10 @@
+from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q, Sum
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from core.models import (
     Empleado,
@@ -10,6 +12,7 @@ from core.models import (
     DotacionEmpleado,
     DocumentoEmpleado,
     AsignacionEquipo,
+    RetiroEmpleado,
 )
 
 @login_required
@@ -20,49 +23,54 @@ def rrhh_home(request):
 def crear_empleado(request):
     if request.method == 'POST':
         try:
-
-            salario = request.POST.get('salario', '').replace('.', '').replace(',', '')
-
+            salario = request.POST.get('salario', '').replace('.', '').replace(',', '').strip()
             if not salario:
                 salario = 0
 
+            estrato_val = request.POST.get('estrato', '').strip()
+            estrato = int(estrato_val) if estrato_val.isdigit() else None
+
             empleado = Empleado.objects.create(
                 foto=request.FILES.get('foto'),
-                nombre_completo=request.POST['nombre_completo'],
-                documento=request.POST['documento'],
-                ciudad_expedicion=request.POST.get('ciudad_expedicion', ''),
+                nombre_completo=request.POST.get('nombre_completo', '').strip(),
+                documento=request.POST.get('documento', '').strip(),
+                ciudad_expedicion=request.POST.get('ciudad_expedicion', '').strip(),
                 fecha_nacimiento=request.POST.get('fecha_nacimiento') or None,
-                nacionalidad=request.POST['nacionalidad'],
-                direccion=request.POST['direccion'],
-                ciudad_residencia=request.POST.get('ciudad_residencia', ''),
-                barrio=request.POST.get('barrio', ''),
-                estrato=request.POST.get('estrato')or None,
-                telefono=request.POST['telefono'],
-                correo=request.POST['correo'],
-                contacto_emergencia=request.POST.get('contacto_emergencia', ''),
-                telefono_emergencia=request.POST.get('telefono_emergencia', ''),
-                parentesco_emergencia=request.POST.get('parentesco_emergencia', ''),
-                cargo=request.POST['cargo'],
-                area=request.POST['area'],
-                nivel_academico=request.POST['nivel_academico'],
-                profesion=request.POST.get('profesion', ''),
-                habilidades=request.POST.get('habilidades', ''),
-                idiomas=request.POST['idiomas'],
+                nacionalidad=request.POST.get('nacionalidad', 'Colombiano').strip(),
+                direccion=request.POST.get('direccion', '').strip(),
+                ciudad_residencia=request.POST.get('ciudad_residencia', '').strip(),
+                barrio=request.POST.get('barrio', '').strip(),
+                estrato=estrato,
+                telefono=request.POST.get('telefono', '').strip(),
+                correo=request.POST.get('correo', '').strip(),
+                contacto_emergencia=request.POST.get('contacto_emergencia', '').strip(),
+                telefono_emergencia=request.POST.get('telefono_emergencia', '').strip(),
+                parentesco_emergencia=request.POST.get('parentesco_emergencia', '').strip(),
+                cargo=request.POST.get('cargo', '').strip(),
+                area=request.POST.get('area', '').strip(),
+                nivel_academico=request.POST.get('nivel_academico', '').strip(),
+                profesion=request.POST.get('profesion', '').strip(),
+                habilidades=request.POST.get('habilidades', '').strip(),
+                idiomas=request.POST.get('idiomas', 'Español').strip(),
                 fecha_ingreso=request.POST.get('fecha_ingreso') or None,
                 fecha_finalizacion=request.POST.get('fecha_finalizacion') or None,
-                tipo_contrato=request.POST['tipo_contrato'],
+                tipo_contrato=request.POST.get('tipo_contrato', 'indefinido'),
                 salario=int(salario),
-                jornada=request.POST['jornada'],
-                jefe=request.POST['jefe']
+                jornada=request.POST.get('jornada', 'diurna'),
+                jefe=request.POST.get('jefe', '').strip(),
+                estado='activo'
             )
 
             SaludEmpleado.objects.create(
                 empleado=empleado,
-                grupo_sanguineo=request.POST['grupo_sanguineo'],
-                eps=request.POST['eps'],
-                pension=request.POST['pension'],
-                cesantias=request.POST['cesantias'],
-                arl=request.POST['arl']
+                grupo_sanguineo=request.POST.get('grupo_sanguineo', '').strip(),
+                eps=request.POST.get('eps', '').strip(),
+                pension=request.POST.get('pension', '').strip(),
+                cesantias=request.POST.get('cesantias', '').strip(),
+                arl=request.POST.get('arl', '').strip(),
+                alergias=request.POST.get('alergias', '').strip(),
+                contacto_emergencia=request.POST.get('contacto_emergencia', '').strip(),
+                telefono_emergencia=request.POST.get('telefono_emergencia', '').strip()
             )
             messages.success(
                 request,
@@ -72,8 +80,16 @@ def crear_empleado(request):
             return redirect('/rrhh/empleados/')
 
         except IntegrityError:
+            doc = request.POST.get('documento', '').strip()
+            existente = Empleado.objects.filter(documento=doc).first()
+            if existente and existente.estado == 'retirado':
+                error_msg = f'⚠️ El colaborador {existente.nombre_completo} (C.C. {doc}) ya estuvo registrado en la empresa y actualmente se encuentra en estado RETIRADO.'
+            else:
+                error_msg = '⚠️ Ya existe un colaborador activo registrado con ese documento de identidad'
+
             return render(request, 'rrhh/empleados/crear_empleado.html', {
-                'error': '⚠️ Ya existe un empleado con ese documento'
+                'error': error_msg,
+                'empleado_existente': existente
             })
             
     return render(request, 'rrhh/empleados/crear_empleado.html')
@@ -81,28 +97,134 @@ def crear_empleado(request):
 
 @login_required
 def empleados(request):
-    query = request.GET.get('q')
+    query = request.GET.get('q', '').strip()
+    filtro_estado = request.GET.get('estado', 'activo') # 'activo', 'retirado', 'todos'
+
+    # Conteo global de estados
+    total_activos = Empleado.objects.filter(estado='activo').count()
+    total_retirados = Empleado.objects.filter(estado='retirado').count()
+    total_general = Empleado.objects.count()
+
+    # Query base según estado seleccionado
+    if filtro_estado == 'activo':
+        base_qs = Empleado.objects.filter(estado='activo')
+    elif filtro_estado == 'retirado':
+        base_qs = Empleado.objects.filter(estado='retirado')
+    else:
+        base_qs = Empleado.objects.all()
 
     if query:
-        lista = Empleado.objects.filter(
+        lista = base_qs.filter(
             Q(documento__icontains=query) |
-            Q(nombre_completo__icontains=query)
-        )
+            Q(nombre_completo__icontains=query) |
+            Q(cargo__icontains=query)
+        ).order_by('nombre_completo')
     else:
-        lista = Empleado.objects.all()
+        lista = base_qs.order_by('nombre_completo')
 
-    # 📊 ESTADÍSTICAS
-    total = lista.count()
-    promedio_salario = lista.aggregate(Avg('salario'))['salario__avg']
-    por_cargo = lista.values('cargo').annotate(total=Count('id'))
+    # 📊 ESTADÍSTICAS (Calculadas sobre los colaboradores ACTIVOS)
+    activos_qs = Empleado.objects.filter(estado='activo')
+    promedio_salario = activos_qs.aggregate(Avg('salario'))['salario__avg']
+    total_nomina = activos_qs.aggregate(Sum('salario'))['salario__sum'] or 0
+    por_cargo = activos_qs.values('cargo').annotate(total=Count('id')).order_by('-total')
+
+    # TODOS LOS EMPLEADOS ACTIVOS PARA EL DESGLOSE DE SALARIOS (ordenados alfabéticamente)
+    empleados_salarios = activos_qs.order_by('nombre_completo')
+
+    # PAGINACIÓN (10 colaboradores por página)
+    paginator = Paginator(lista, 10)
+    page_number = request.GET.get('page')
+    try:
+        empleados_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        empleados_paginados = paginator.page(1)
+    except EmptyPage:
+        empleados_paginados = paginator.page(paginator.num_pages)
 
     return render(request, 'rrhh/empleados/empleados.html', {
-        'empleados': lista,
+        'empleados': empleados_paginados,
+        'page_obj': empleados_paginados,
+        'paginator': paginator,
         'query': query,
-        'total': total,
+        'filtro_estado': filtro_estado,
+        'total': lista.count(),
+        'total_activos': total_activos,
+        'total_retirados': total_retirados,
+        'total_general': total_general,
         'promedio_salario': promedio_salario,
+        'total_nomina': total_nomina,
+        'empleados_salarios': empleados_salarios,
         'por_cargo': por_cargo
     })
+
+@login_required
+def retirar_empleado(request, id):
+    empleado = get_object_or_404(Empleado, id=id)
+    if request.method == 'POST':
+        fecha_retiro = request.POST.get('fecha_retiro') or str(date.today())
+        motivo = request.POST.get('motivo_retiro', '').strip()
+        observaciones = request.POST.get('observaciones', '').strip()
+
+        empleado.estado = 'retirado'
+        empleado.fecha_retiro = fecha_retiro
+        empleado.motivo_retiro = motivo
+        empleado.save()
+
+        # Registrar o actualizar en RetiroEmpleado
+        RetiroEmpleado.objects.update_or_create(
+            empleado=empleado,
+            defaults={
+                'fecha_retiro': fecha_retiro,
+                'motivo': motivo,
+                'observaciones': observaciones
+            }
+        )
+
+        messages.success(
+            request,
+            f'🚪 Se registró el retiro de {empleado.nombre_completo}. Su historial se conserva intacto.'
+        )
+        return redirect(f'/rrhh/empleados/{id}/')
+
+    return redirect(f'/rrhh/empleados/{id}/')
+
+@login_required
+def reintegrar_empleado(request, id):
+    empleado = get_object_or_404(Empleado, id=id)
+    if request.method == 'POST':
+        nueva_fecha_ingreso = request.POST.get('fecha_ingreso') or str(date.today())
+        nuevo_tipo_contrato = request.POST.get('tipo_contrato', empleado.tipo_contrato)
+        nueva_fecha_finalizacion = request.POST.get('fecha_finalizacion') or None
+        salario = request.POST.get('salario', '').replace('.', '').replace(',', '').strip()
+        nuevo_cargo = request.POST.get('cargo', empleado.cargo).strip()
+        nueva_area = request.POST.get('area', empleado.area).strip()
+        nueva_jornada = request.POST.get('jornada', empleado.jornada)
+
+        empleado.estado = 'activo'
+        empleado.fecha_ingreso = nueva_fecha_ingreso
+        empleado.tipo_contrato = nuevo_tipo_contrato
+        empleado.fecha_finalizacion = nueva_fecha_finalizacion
+        if salario:
+            empleado.salario = int(salario)
+        if nuevo_cargo:
+            empleado.cargo = nuevo_cargo
+        if nueva_area:
+            empleado.area = nueva_area
+        if nueva_jornada:
+            empleado.jornada = nueva_jornada
+
+        # Limpiar fecha y motivo de retiro
+        empleado.fecha_retiro = None
+        empleado.motivo_retiro = ''
+        empleado.save()
+
+        messages.success(
+            request,
+            f'🎉 ¡Colaborador {empleado.nombre_completo} reintegrado exitosamente a la empresa!'
+        )
+        return redirect(f'/rrhh/empleados/{id}/')
+
+    return redirect(f'/rrhh/empleados/{id}/')
 
 @login_required
 def eliminar_empleado(request, id):
@@ -110,6 +232,7 @@ def eliminar_empleado(request, id):
 
     if request.method == 'POST':
         empleado.delete()
+        messages.success(request, f'🗑️ Expediente del colaborador eliminado definitivamente.')
         return redirect('/rrhh/empleados/')
 
     return redirect('/rrhh/empleados/')

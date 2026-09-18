@@ -33,6 +33,15 @@
                     class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg transition shadow-sm">
                 Guardar Cambios
             </button>
+            <form method="POST" action="{% url 'eliminar_apoyo' apoyo.id %}"
+                  onsubmit="return confirm('¿Estás seguro de que deseas eliminar este poste (Nodo {{ apoyo.nodo|default:apoyo.numero_apoyo }})? Todos sus materiales asignados se devolverán al inventario central.');"
+                  class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center px-3.5 py-2 bg-red-100 hover:bg-destructive text-destructive hover:text-white text-sm font-bold rounded-lg transition">
+                    🗑️ Eliminar Poste
+                </button>
+            </form>
             <a href="{% url 'detalle_proyecto' apoyo.proyecto.id %}"
                class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition shadow-sm">
                 Volver al Proyecto
@@ -64,7 +73,7 @@
                     <option value="">-- Seleccione material a despachar --</option>
                     {% for mat in materiales_catalogo %}
                         <option value="{{ mat.id }}">
-                            [{{ mat.item }}] {{ mat.descripcion }} [Stock Bodega: {{ mat.inventario.cantidad|floatformat:1 }} {{ mat.unidad|default:'U' }}]
+                            [{{ mat.item }}] {{ mat.descripcion }} [Stock Bodega: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'U' }}]
                         </option>
                     {% endfor %}
                 </select>
@@ -259,7 +268,7 @@
                                         class="w-full border border-border-strong rounded-lg px-2.5 py-2 text-xs font-semibold text-foreground bg-card focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                     {% for mat in materiales_catalogo %}
                                         <option value="{{ mat.id }}" {% if mat.id == item.material.id %}selected{% endif %} data-unidad="{{ mat.unidad|default:'U' }}" data-stock="{{ mat.inventario.cantidad|default:'0' }}">
-                                            [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:1 }} {{ mat.unidad|default:'U' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'U' }}]{% endif %}
+                                            [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'U' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'U' }}]{% endif %}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -353,7 +362,7 @@
                                     <option value="">-- Seleccionar material del catálogo --</option>
                                     {% for mat in materiales_catalogo %}
                                         <option value="{{ mat.id }}" data-unidad="{{ mat.unidad|default:'U' }}" data-stock="{{ mat.inventario.cantidad|default:'0' }}">
-                                            [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:1 }} {{ mat.unidad|default:'U' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'U' }}]{% endif %}
+                                            [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'U' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'U' }}]{% endif %}
                                         </option>
                                     {% endfor %}
                                 </select>

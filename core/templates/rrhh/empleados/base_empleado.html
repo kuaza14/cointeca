@@ -2,126 +2,160 @@
 
 {% block content %}
 
-<div class="flex">
+<div class="flex gap-6 items-start">
 
-    <!-- SIDEBAR -->
-    <aside class="w-72 bg-neutral text-white min-h-screen overflow-y-auto">
+    <!-- SIDEBAR DEL EMPLEADO -->
+    <aside class="w-72 bg-neutral text-white rounded-lg shadow-md shrink-0 overflow-hidden">
 
         <div class="p-5">
 
-            <h2 class="text-xl font-bold mb-6">
+            <h2 class="text-xl font-bold mb-3 text-center leading-tight">
                 {{ empleado.nombre_completo }}
             </h2>
 
-            <div class="flex justify-center my-4">
-                {% if empleado.foto %}
-                    <img src="{{ empleado.foto.url }}"
-                        alt="Foto de {{ empleado.nombre_completo }}"
-                        class="w-36 h-36 object-cover rounded-full border-4 border-blue-500 shadow">
-                {% else %}
-                    <div class="w-28 h-28 rounded-full bg-neutral flex items-center justify-center text-gray-300 text-sm">
-                        Sin foto
-                    </div>
-                {% endif %}
+            <div class="flex justify-center my-3">
+                <div class="relative shrink-0" style="width: 110px; height: 110px; min-width: 110px; min-height: 110px; max-width: 110px; max-height: 110px;">
+                    {% if empleado.foto %}
+                        <img src="{{ empleado.foto.url }}"
+                            alt=""
+                            style="width: 110px; height: 110px; min-width: 110px; min-height: 110px; max-width: 110px; max-height: 110px; border-radius: 50%; object-fit: cover; display: block;"
+                            class="border-4 border-blue-500 shadow"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="bg-slate-800 text-gray-300 text-lg border-2 border-gray-600 font-bold"
+                             style="width: 110px; height: 110px; min-width: 110px; min-height: 110px; border-radius: 50%; display: none; align-items: center; justify-content: center;">
+                            {{ empleado.nombre_completo|slice:":2"|upper }}
+                        </div>
+                    {% else %}
+                        <div class="bg-slate-800 text-gray-300 text-lg border-2 border-gray-600 font-bold"
+                             style="width: 110px; height: 110px; min-width: 110px; min-height: 110px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            {{ empleado.nombre_completo|slice:":2"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center mb-3">
+                <span class="inline-block px-3 py-0.5 bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs rounded-full uppercase font-semibold">
+                    {{ empleado.cargo|default:"Empleado" }}
+                </span>
+                <p class="text-xs text-gray-400 mt-1 font-mono">C.C. {{ empleado.documento }}</p>
+                <div class="mt-2">
+                    {% if empleado.estado == 'retirado' %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40">
+                            🔴 Retirado
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            🟢 Activo
+                        </span>
+                    {% endif %}
+                </div>
             </div>
 
             <a href="{% url 'detalle_empleado' empleado.id %}"
-               class="block px-4 py-3 rounded hover:bg-neutral-hover mb-2">
+               class="block px-4 py-2 rounded bg-primary hover:bg-primary-hover text-white text-center font-bold mb-2 shadow transition text-sm">
                 Información General
             </a>
 
-            <hr class="my-4 border-gray-600">
+            <a href="/rrhh/empleados/"
+               class="block px-4 py-1.5 rounded bg-neutral-hover hover:bg-slate-700 text-gray-200 text-center text-xs mb-3 transition">
+                ← Volver a Directorio
+            </a>
 
-            <h3 class="font-bold text-gray-300 mb-2">
+            <hr class="my-3 border-gray-600">
+
+            <h3 class="font-bold text-gray-300 mb-2 text-xs uppercase tracking-wider">
                 Recursos Humanos
             </h3>
 
-            <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Certificación Laboral
-            </a>
+            <div class="space-y-0.5 text-xs">
+                <a href="/rrhh/empleados/{{ empleado.id }}/certificacion/"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Certificación Laboral
+                </a>
 
-            <a href="/rrhh/empleados/{{ empleado.id }}/contrato/"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Contrato
-            </a>
+                <a href="/rrhh/empleados/{{ empleado.id }}/contrato/"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Contrato
+                </a>
 
-            <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Vacaciones
-            </a>
+                <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Vacaciones
+                </a>
 
-            <a href="/rrhh/{{ empleado.id }}/permiso/"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Permisos
-            </a>
+                <a href="/rrhh/{{ empleado.id }}/permiso/"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Permisos
+                </a>
 
-            <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Acta Equipos
-            </a>
+                <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Acta Equipos
+                </a>
 
-            <a href="{% url 'descargos_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Descargos
-            </a>
+                <a href="{% url 'descargos_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Descargos
+                </a>
 
-            <a href="{% url 'retiros_cesantias_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Cesantías
-            </a>
+                <a href="{% url 'retiros_cesantias_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Cesantías
+                </a>
 
-            <a href="{% url 'inducciones_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Inducciones
-            </a>
+                <a href="{% url 'inducciones_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Inducciones
+                </a>
 
-            <a href="{% url 'compromisos_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Compromiso daños
-            </a>
+                <a href="{% url 'compromisos_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Compromiso daños
+                </a>
 
-            <a href="{% url 'suspensiones_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Suspensiones
-            </a>
+                <a href="{% url 'suspensiones_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Suspensiones
+                </a>
 
-            <a href="{% url 'contratos_aprendiz_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Contrato Aprendiz
-            </a>
+                <a href="{% url 'contratos_aprendiz_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Contrato Aprendiz
+                </a>
 
-            <a href="{% url 'generar_no_prorroga_contrato' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                No Prorroga Contrato
-            </a>
+                <a href="{% url 'generar_no_prorroga_contrato' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    No Prórroga Contrato
+                </a>
 
-            <a href="{% url 'generar_no_superacion_periodo_prueba' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                No Superación Periodo de Prueba
-            </a>
+                <a href="{% url 'generar_no_superacion_periodo_prueba' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    No Superación Periodo Prueba
+                </a>
 
-            <a href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}"
-               class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Suspensión disciplinaria
-            </a>
+                <a href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Suspensión Disciplinaria
+                </a>
 
-            <a href="{% url 'generar_historia_clinica_laboral' empleado.id %}"
-            class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Historia Clínica Laboral
-            </a>
+                <a href="{% url 'generar_historia_clinica_laboral' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Historia Clínica Laboral
+                </a>
 
-            <a href="{% url 'generar_acuerdo_responsabilidad' empleado.id %}"
-            class="block px-4 py-2 hover:bg-neutral-hover rounded">
-                Acuerdo de Responsabilida
-            </a>
+                <a href="{% url 'generar_acuerdo_responsabilidad' empleado.id %}"
+                   class="block px-2.5 py-1.5 hover:bg-neutral-hover rounded transition text-gray-200 hover:text-white">
+                    Acuerdo de Responsabilidad
+                </a>
+            </div>
 
         </div>
 
     </aside>
 
-    <!-- CONTENIDO -->
-    <main class="flex-1 p-8">
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 min-w-0">
 
         {% block empleado_content %}
         {% endblock %}

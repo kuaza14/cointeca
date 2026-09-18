@@ -2,77 +2,101 @@
 
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-6">RRHH</h1>
+<div class="max-w-7xl mx-auto space-y-6">
 
-<div class="mb-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-bold text-foreground">Recursos Humanos</h1>
 
-    <a
-        href="{% url 'dashboard' %}"
-        class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded">
-        Volver
-    </a>
-
-</div>
-
-<div class="grid grid-cols-3 gap-6">
-
-    <!-- Empleados -->
-    <div class="bg-card p-6 rounded shadow hover:shadow-lg">
-        <h2 class="text-xl font-bold">Empleados</h2>
-        <p class="text-muted-foreground">Gestión del personal</p>
-
-        <a href="/rrhh/empleados/" class="mt-4 inline-block bg-success text-white px-4 py-2 rounded">
-            Entrar
+        <a href="{% url 'dashboard' %}"
+           class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded shadow transition font-medium">
+            ← Volver al Menú
         </a>
     </div>
 
-    <!-- Inventario Equipos -->
-    <div class="bg-card p-6 rounded shadow hover:shadow-lg">
-        <h2 class="text-xl font-bold">Inventario Equipos</h2>
-        <p class="text-muted-foreground">Control de equipos tecnológicos</p>
+    <!-- TARJETAS DE MÓDULOS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        <a href="/rrhh/inventario/" class="mt-4 inline-block bg-success text-white px-4 py-2 rounded">
-            Entrar
-        </a>
+        <!-- 1. Empleados -->
+        <div class="bg-card p-6 rounded shadow hover:shadow-lg transition border border-border flex flex-col justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-foreground">Directorio de Empleados</h2>
+                <p class="text-muted-foreground mt-2 text-sm">
+                    Gestión del personal, hojas de vida, contratos, dotaciones y expedientes individuales.
+                </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border">
+                <a href="/rrhh/empleados/" 
+                   class="inline-block bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded font-semibold text-sm shadow transition">
+                    Entrar a Empleados
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Inventario Equipos -->
+        <div class="bg-card p-6 rounded shadow hover:shadow-lg transition border border-border flex flex-col justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-foreground">Inventario de Equipos</h2>
+                <p class="text-muted-foreground mt-2 text-sm">
+                    Control de computadores, celulares y activos tecnológicos asignados a colaboradores.
+                </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border">
+                <a href="/rrhh/inventario/" 
+                   class="inline-block bg-success hover:bg-success-hover text-white px-4 py-2 rounded font-semibold text-sm shadow transition">
+                    Ver Inventario
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. Vacaciones -->
+        <div class="bg-card p-6 rounded shadow hover:shadow-lg transition border border-border flex flex-col justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-foreground">Vacaciones & Permisos</h2>
+                <p class="text-muted-foreground mt-2 text-sm">
+                    Control de ausencias, solicitudes de vacaciones, permisos y cálculo de días acumulados.
+                </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border">
+                <a href="/rrhh/vacaciones/" 
+                   class="inline-block bg-success hover:bg-success-hover text-white px-4 py-2 rounded font-semibold text-sm shadow transition">
+                    Gestionar Vacaciones
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Documentos -->
+        <div class="bg-card p-6 rounded shadow hover:shadow-lg transition border border-border flex flex-col justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-foreground">Documentos Institucionales</h2>
+                <p class="text-muted-foreground mt-2 text-sm">
+                    Generación de certificaciones laborales, contratos, descargos, acuerdos y formatos oficiales.
+                </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border">
+                <a href="{% url 'documentos_rrhh' %}" 
+                   class="inline-block bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded font-semibold text-sm shadow transition">
+                    Abrir Documentos
+                </a>
+            </div>
+        </div>
+
+        <!-- 5. Nómina -->
+        <div class="bg-card p-6 rounded shadow border border-border flex flex-col justify-between opacity-60">
+            <div>
+                <h2 class="text-xl font-bold text-foreground">Nómina & Liquidaciones</h2>
+                <p class="text-muted-foreground mt-2 text-sm">
+                    Cálculo y seguimiento de pagos de nómina y prestaciones sociales.
+                </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border">
+                <span class="inline-block bg-neutral text-white px-4 py-2 rounded text-sm cursor-not-allowed opacity-75">
+                    Próximamente
+                </span>
+            </div>
+        </div>
+
     </div>
 
-        <!-- Vacaciones -->
-    <div class="bg-card p-6 rounded shadow hover:shadow-lg">
-        <h2 class="text-xl font-bold">Vacaciones</h2>
-        <p class="text-muted-foreground">Control de vacaciones</p>
-
-        <a href="/rrhh/vacaciones/" 
-        class="mt-4 inline-block bg-success text-white px-4 py-2 rounded">
-            Entrar </a>
-        
-    </div>
-
-    <!-- Nómina -->
-    <div class="bg-card p-6 rounded shadow opacity-60">
-        <h2 class="text-xl font-bold">Nómina</h2>
-        <p class="text-muted-foreground">Próximamente</p>
-    </div>
-
-    <!-- Documentos -->
-    <div class="bg-card p-6 rounded shadow">
-
-        <h2 class="text-xl font-bold mb-2">
-            Documentos
-        </h2>
-
-        <p class="text-muted-foreground mb-4">
-            Generación de documentos institucionales y formatos de RRHH.
-        </p>
-
-        <a
-            href="{% url 'documentos_rrhh' %}"
-            class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded">
-
-            Abrir documentos
-
-        </a>
-
-    </div>
 </div>
 
 {% endblock %}

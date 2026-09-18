@@ -1,134 +1,540 @@
-{% extends 'rrhh/base_rrhh.html' %}
+{% extends 'base.html' %}
 
-{% block rrhh_content %}
+{% block content %}
 
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Ficha Técnica del Trabajador</h1>
+<div class="max-w-5xl mx-auto space-y-6">
 
-    
-        <a href="{% url 'empleados' %}" class="bg-neutral text-white px-6 py-2 rounded hover:bg-neutral-hover">
-            Volver
-        </a>
-</div>
-{% if error %}
-<div class="bg-red-100 text-destructive p-3 rounded mb-4">
-    {{ error }}
-</div>
-{% endif %}
+    <!-- ENCABEZADO Y BREADCRUMB -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+                <span>/</span>
+                <a href="{% url 'empleados' %}" class="hover:text-primary transition">Directorio</a>
+                <span>/</span>
+                <span class="text-foreground font-medium">Nuevo Colaborador</span>
+            </div>
+            <h1 class="text-3xl font-bold text-foreground">Registrar Nuevo Colaborador</h1>
+            <p class="text-sm text-muted-foreground mt-1">Completa los datos de la ficha técnica, vinculación laboral y seguridad social.</p>
+        </div>
 
-
-<form method="POST" enctype="multipart/form-data" class="bg-card p-6 rounded shadow space-y-6">
-    {% csrf_token %}
-
-    <!-- 1. INFORMACIÓN PERSONAL -->
-    <h2 class="text-xl font-semibold border-b pb-2">1. Información Personal</h2>
-
-    <div>
-        <label class="block font-semibold mb-1" for="campo-foto">
-            Foto del empleado
-        </label>
-
-        <input id="campo-foto" type="file"
-            name="foto"
-            accept="image/*"
-            class="border p-2 rounded w-full">
+        <div class="flex items-center gap-2.5">
+            <a href="{% url 'empleados' %}" 
+               class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow font-medium text-sm transition flex items-center gap-1.5">
+                ← Volver al Directorio
+            </a>
+        </div>
     </div>
 
-    <input name="nombre_completo" placeholder="Nombre completo" class="w-full border p-2 rounded">
-    <input name="documento" placeholder="Documento"  class="w-full border p-2 rounded">
-    <input name="ciudad_expedicion" placeholder="Lugar expedición"  class="w-full border p-2 rounded">
+    <!-- ALERTA DE ERROR SI EXISTE -->
+    {% if error %}
+    <div class="bg-red-500/10 border border-destructive/30 text-destructive px-5 py-4 rounded-xl text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-start sm:items-center gap-3">
+            <span class="text-xl shrink-0">⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+        {% if empleado_existente and empleado_existente.estado == 'retirado' %}
+        <a href="{% url 'detalle_empleado' empleado_existente.id %}" 
+           class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap shadow transition flex items-center gap-1.5 self-start sm:self-auto">
+            <span>🔄 Ir a Ficha y Reintegrar</span>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 
-    <label class="block font-medium mb-1" for="campo-fecha_nacimiento">
-        Fecha de nacimiento
-    </label>
-    <input id="campo-fecha_nacimiento" type="date" name="fecha_nacimiento"  class="w-full border p-2 rounded">
-    <input name="nacionalidad" value="Colombiano" class="w-full border p-2 rounded">
+    <!-- FORMULARIO -->
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
 
-    <input name="direccion" placeholder="Dirección" class="w-full border p-2 rounded">
-    <input name="barrio" placeholder="Barrio" class="w-full border p-2 rounded">
-    <input name="ciudad_residencia" placeholder="Ciudad"  class="w-full border p-2 rounded">
-    <input name="estrato" name="estrato" placeholder="Estrato" min="1" max="6"  class="w-full border p-2 rounded">
-    <input name="telefono" placeholder="Teléfono"  class="w-full border p-2 rounded">
-    <input name="correo" name="correo" placeholder="Correo" class="w-full border p-2 rounded">
+        <!-- 1. INFORMACIÓN PERSONAL Y FOTO -->
+        <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div class="bg-primary text-white px-6 py-3.5 flex items-center gap-2 font-bold text-sm uppercase tracking-wider">
+                <span>👤 1. Información Personal y de Contacto</span>
+            </div>
 
-    <!-- 2. PERFIL -->
-    <h2 class="text-xl font-semibold border-b pb-2">2. Perfil Profesional</h2>
+            <div class="p-6 space-y-5">
 
-    <input name="cargo" placeholder="Cargo"  class="w-full border p-2 rounded">
-    <input name="area" placeholder="Área" class="w-full border p-2 rounded">
-    <input name="nivel_academico" placeholder="Nivel académico" class="w-full border p-2 rounded">
-    <input name="profesion" placeholder="Profesión"  class="w-full border p-2 rounded">
+                <!-- SUBIR FOTO CON PREVIEW -->
+                <div class="flex flex-col sm:flex-row items-center gap-5 p-4 bg-muted/40 rounded-xl border border-border">
+                    <div class="relative shrink-0">
+                        <img id="previewAvatar" 
+                             src="" 
+                             alt="" 
+                             style="width: 80px; height: 80px; display: none;"
+                             class="rounded-full object-cover border-2 border-primary shadow-md">
+                        <div id="placeholderAvatar" 
+                             style="width: 80px; height: 80px;"
+                             class="rounded-full bg-primary/10 border-2 border-dashed border-primary/30 flex items-center justify-center text-primary text-2xl font-bold">
+                            👤
+                        </div>
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block font-semibold text-xs text-foreground uppercase tracking-wide mb-1" for="campo-foto">
+                            Fotografía del Colaborador
+                        </label>
+                        <p class="text-xs text-muted-foreground mb-2">Formato JPG, PNG o WEBP. Recomendado tamaño cuadrado tipo carné.</p>
+                        <input id="campo-foto" 
+                               type="file"
+                               name="foto"
+                               accept="image/*"
+                               onchange="previsualizarFoto(this)"
+                               class="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-hover file:cursor-pointer cursor-pointer border border-border rounded-lg bg-background p-1">
+                    </div>
+                </div>
 
-    <textarea name="habilidades" placeholder="Habilidades" class="w-full border p-2 rounded"></textarea>
-    <input name="idiomas" value="Español" class="w-full border p-2 rounded">
+                <!-- GRID DE CAMPOS PERSONALES -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Nombre Completo <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="nombre_completo" 
+                               required 
+                               placeholder="Ej. Juan Carlos Pérez Gómez" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none uppercase">
+                    </div>
 
-    <!-- 3. CONTRATO -->
-    <h2 class="text-xl font-semibold border-b pb-2">3. Información Contractual</h2>
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Documento de Identidad (C.C.) <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="documento" 
+                               required 
+                               placeholder="Ej. 1020304050" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <label class="block font-medium mb-1" for="campo-fecha_ingreso">
-        Fecha de ingreso
-    </label>
-    <input id="campo-fecha_ingreso" type="date" name="fecha_ingreso" class="w-full border p-2 rounded">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Lugar de Expedición
+                        </label>
+                        <input type="text" 
+                               name="ciudad_expedicion" 
+                               placeholder="Ej. Bogotá D.C." 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <select name="tipo_contrato" class="w-full border p-2 rounded">
-        <option value="fijo">Fijo</option>
-        <option value="indefinido">Indefinido</option>
-        <option value="obra">Obra o labor</option>
-    </select>
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Fecha de Nacimiento
+                        </label>
+                        <input type="date" 
+                               name="fecha_nacimiento" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <label class="block font-medium mb-1" for="campo-fecha_finalizacion">
-        Fecha finalización del contrato
-    </label>
-    <input id="campo-fecha_finalizacion" type="date" name="fecha_finalizacion" class="w-full border p-2 rounded" placeholder="Solo para contratos a término fijo">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Nacionalidad
+                        </label>
+                        <input type="text" 
+                               name="nacionalidad" 
+                               value="Colombiano" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <input
-    id="salario"
-    name="salario"
-    placeholder="Salario"
-    class="w-full border p-2 rounded">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Dirección de Residencia <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="direccion" 
+                               required 
+                               placeholder="Ej. Calle 45 # 12-34 Apto 301" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
 
-    <select name="jornada" class="w-full border p-2 rounded">
-        <option value="diurna">Diurna</option>
-        <option value="nocturna">Nocturna</option>
-    </select>
+                <!-- SUBGRID UBICACIÓN Y ESTRATO -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Ciudad de Residencia
+                        </label>
+                        <input type="text" 
+                               name="ciudad_residencia" 
+                               placeholder="Ej. Medellín" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <input name="jefe" placeholder="Jefe inmediato" class="w-full border p-2 rounded">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Barrio
+                        </label>
+                        <input type="text" 
+                               name="barrio" 
+                               placeholder="Ej. Laureles" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <!-- 4. SALUD -->
-    <h2 class="text-xl font-semibold border-b pb-2">4. Seguridad y Salud</h2>
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Estrato Socioeconómico
+                        </label>
+                        <select name="estrato" class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">Seleccione...</option>
+                            <option value="1">Estrato 1</option>
+                            <option value="2">Estrato 2</option>
+                            <option value="3">Estrato 3</option>
+                            <option value="4">Estrato 4</option>
+                            <option value="5">Estrato 5</option>
+                            <option value="6">Estrato 6</option>
+                        </select>
+                    </div>
+                </div>
 
-    <input name="grupo_sanguineo" placeholder="Grupo sanguíneo" class="w-full border p-2 rounded">
-    <input name="eps" placeholder="EPS" class="w-full border p-2 rounded">
-    <input name="pension" placeholder="Pensión" class="w-full border p-2 rounded">
-    <input name="cesantias" placeholder="Cesantías" class="w-full border p-2 rounded">
-    <input name="arl" placeholder="ARL" class="w-full border p-2 rounded">
+                <!-- SUBGRID CONTACTO -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Teléfono / Celular <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="telefono" 
+                               required 
+                               placeholder="Ej. 300 123 4567" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-    <textarea name="alergias" placeholder="Alergias" class="w-full border p-2 rounded"></textarea>
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Correo Electrónico <span class="text-destructive">*</span>
+                        </label>
+                        <input type="email" 
+                               name="correo" 
+                               required 
+                               placeholder="ejemplo@cointeca.com" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
 
-    <input name="contacto_emergencia" placeholder="Contacto emergencia" class="w-full border p-2 rounded">
-    <input name="telefono_emergencia" placeholder="Teléfono emergencia" class="w-full border p-2 rounded">
-    <input name="parentesco_emergencia" placeholder="Parentesco emergencia" class="w-full border p-2 rounded">
+            </div>
+        </div>
 
-    <!-- BOTÓN -->
-    <button class="bg-primary text-white px-6 py-2 rounded hover:bg-primary-hover">
-        Guardar empleado
-    </button>
-    <!--Boton volver-->
-    <a href="{% url 'empleados' %}" class="bg-neutral text-white px-6 py-2 rounded hover:bg-neutral-hover">
-        Volver
-    </a>
-</form>
+        <!-- 2. PERFIL PROFESIONAL -->
+        <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div class="bg-primary text-white px-6 py-3.5 flex items-center gap-2 font-bold text-sm uppercase tracking-wider">
+                <span>💼 2. Perfil Profesional y Académico</span>
+            </div>
 
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Cargo / Puesto <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="cargo" 
+                               required 
+                               placeholder="Ej. Ingeniero de Proyectos" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none uppercase">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Área / Departamento <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="area" 
+                               required 
+                               placeholder="Ej. Operaciones / Ingeniería" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none uppercase">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Nivel Académico <span class="text-destructive">*</span>
+                        </label>
+                        <select name="nivel_academico" required class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">Seleccione nivel...</option>
+                            <option value="Bachiller">Bachiller</option>
+                            <option value="Técnico">Técnico</option>
+                            <option value="Tecnólogo">Tecnólogo</option>
+                            <option value="Profesional">Profesional</option>
+                            <option value="Especialista">Especialista</option>
+                            <option value="Magíster / Maestría">Magíster / Maestría</option>
+                            <option value="Doctorado">Doctorado</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Profesión / Título
+                        </label>
+                        <input type="text" 
+                               name="profesion" 
+                               placeholder="Ej. Ingeniero Civil" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Idiomas
+                        </label>
+                        <input type="text" 
+                               name="idiomas" 
+                               value="Español" 
+                               placeholder="Ej. Español, Inglés B2" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                        Habilidades y Competencias
+                    </label>
+                    <textarea name="habilidades" 
+                              rows="2" 
+                              placeholder="Ej. Manejo de AutoCAD, Liderazgo de cuadrillas, Trabajo en alturas, Excel avanzado..." 
+                              class="w-full border border-border-strong rounded-lg p-3 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. INFORMACIÓN CONTRACTUAL -->
+        <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div class="bg-primary text-white px-6 py-3.5 flex items-center gap-2 font-bold text-sm uppercase tracking-wider">
+                <span>📄 3. Información Contractual y Salario</span>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Tipo de Contrato <span class="text-destructive">*</span>
+                        </label>
+                        <select name="tipo_contrato" required class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="indefinido">Término Indefinido</option>
+                            <option value="fijo">Término Fijo</option>
+                            <option value="obra">Obra o Labor</option>
+                            <option value="aprendizaje">Contrato de Aprendizaje</option>
+                            <option value="prestacion">Prestación de Servicios</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Salario Mensual (COP) <span class="text-destructive">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-2 text-sm font-bold text-muted-foreground font-mono">$</span>
+                            <input type="text" 
+                                   id="salario" 
+                                   name="salario" 
+                                   required 
+                                   placeholder="0" 
+                                   class="w-full border border-border-strong rounded-lg pl-8 pr-4 py-2 text-sm bg-background text-foreground font-mono font-bold text-success focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Fecha de Ingreso
+                        </label>
+                        <input type="date" 
+                               name="fecha_ingreso" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Fecha de Finalización <span class="text-xs text-muted-foreground font-normal">(si aplica)</span>
+                        </label>
+                        <input type="date" 
+                               name="fecha_finalizacion" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Jornada Laboral <span class="text-destructive">*</span>
+                        </label>
+                        <select name="jornada" required class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="diurna">Diurna</option>
+                            <option value="nocturna">Nocturna</option>
+                            <option value="mixta">Mixta</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Jefe Inmediato
+                        </label>
+                        <input type="text" 
+                               name="jefe" 
+                               placeholder="Ej. Gerente de Operaciones" 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SEGURIDAD SOCIAL Y CONTACTO DE EMERGENCIA -->
+        <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div class="bg-primary text-white px-6 py-3.5 flex items-center gap-2 font-bold text-sm uppercase tracking-wider">
+                <span>🏥 4. Seguridad Social y Contacto de Emergencia</span>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Grupo Sanguíneo / RH
+                        </label>
+                        <select name="grupo_sanguineo" class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">Seleccione RH...</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            EPS
+                        </label>
+                        <input type="text" 
+                               name="eps" 
+                               placeholder="Ej. Sura, Sanitas, Nueva EPS..." 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Fondo de Pensión
+                        </label>
+                        <input type="text" 
+                               name="pension" 
+                               placeholder="Ej. Porvenir, Protección, Colpensiones..." 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Fondo de Cesantías
+                        </label>
+                        <input type="text" 
+                               name="cesantias" 
+                               placeholder="Ej. Porvenir, Protección, FNA..." 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            ARL
+                        </label>
+                        <input type="text" 
+                               name="arl" 
+                               placeholder="Ej. Positiva, Sura, Bolívar..." 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                            Alergias o Restricciones Médicas
+                        </label>
+                        <input type="text" 
+                               name="alergias" 
+                               placeholder="Ej. Ninguna / Penicilina / Polvo..." 
+                               class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- CONTACTO DE EMERGENCIA -->
+                <div class="pt-3 border-t border-border mt-4">
+                    <p class="text-xs font-bold text-foreground uppercase tracking-wider mb-3">Contacto de Emergencia</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                                Nombre del Contacto
+                            </label>
+                            <input type="text" 
+                                   name="contacto_emergencia" 
+                                   placeholder="Ej. María Gómez" 
+                                   class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                                Teléfono de Emergencia
+                            </label>
+                            <input type="text" 
+                                   name="telefono_emergencia" 
+                                   placeholder="Ej. 310 987 6543" 
+                                   class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-muted-foreground uppercase mb-1">
+                                Parentesco
+                            </label>
+                            <input type="text" 
+                                   name="parentesco_emergencia" 
+                                   placeholder="Ej. Cónyuge / Madre / Hermano" 
+                                   class="w-full border border-border-strong rounded-lg px-3.5 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN FLOTANTES / AL PIE -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{% url 'empleados' %}" 
+               class="bg-neutral hover:bg-neutral-hover text-white px-5 py-2.5 rounded-lg shadow font-medium text-sm transition">
+                Cancelar
+            </a>
+            <button type="submit" 
+                    class="bg-success hover:bg-success-hover text-white px-6 py-2.5 rounded-lg shadow font-semibold text-sm transition flex items-center gap-2">
+                <span>✓ Guardar Empleado</span>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<!-- SCRIPTS DE INTERACCIÓN -->
 <script>
-const salario = document.getElementById('salario');
+// Formateo en tiempo real de salario a pesos colombianos
+const salarioInput = document.getElementById('salario');
+if (salarioInput) {
+    salarioInput.addEventListener('input', function() {
+        let valor = this.value.replace(/\D/g, '');
+        if (valor) {
+            this.value = Number(valor).toLocaleString('es-CO');
+        } else {
+            this.value = '';
+        }
+    });
+}
 
-salario.addEventListener('input', function() {
-
-    let valor = this.value.replace(/\D/g, '');
-
-    this.value = Number(valor).toLocaleString('es-CO');
-
-});
+// Previsualización de foto seleccionada
+function previsualizarFoto(input) {
+    const preview = document.getElementById('previewAvatar');
+    const placeholder = document.getElementById('placeholderAvatar');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.style.display = 'none';
+        placeholder.style.display = 'flex';
+    }
+}
 </script>
 
 {% endblock %}

@@ -1,16 +1,14 @@
 from datetime import date, timedelta
-from core.models import Vacacion, Empleado
 from django.db.models import Sum
+from core.models import Vacacion, Empleado
 
 
 def obtener_alertas_vacaciones():
-
     hoy = date.today()
 
     # ==========================
-    # VACACIONES EN CURSO
+    # 1. VACACIONES EN CURSO (Empleados actualmente en descanso)
     # ==========================
-
     vacaciones_actuales = (
         Vacacion.objects.select_related("empleado")
         .filter(
@@ -21,30 +19,18 @@ def obtener_alertas_vacaciones():
     )
 
     actuales = []
-    pendientes_programar = []
-
     for vacacion in vacaciones_actuales:
-
         actuales.append({
-
-                "id": vacacion.empleado.id,
-
-                "empleado": vacacion.empleado.nombre_completo,
-
-                "inicio": vacacion.fecha_inicio,
-
-                "regreso": vacacion.fecha_regreso,
-
-                "dias_restantes": (
-                    vacacion.fecha_regreso - hoy
-                ).days,
-
-            })
+            "id": vacacion.empleado.id,
+            "empleado": vacacion.empleado.nombre_completo,
+            "inicio": vacacion.fecha_inicio,
+            "regreso": vacacion.fecha_regreso,
+            "dias_restantes": (vacacion.fecha_regreso - hoy).days,
+        })
 
     # ==========================
-    # PRÓXIMAS VACACIONES
+    # 2. PRÓXIMAS VACACIONES (Salen en los próximos 15 días)
     # ==========================
-
     vacaciones_proximas = (
         Vacacion.objects.select_related("empleado")
         .filter(
@@ -55,54 +41,47 @@ def obtener_alertas_vacaciones():
     )
 
     proximas = []
-
     for vacacion in vacaciones_proximas:
-
         proximas.append({
             "id": vacacion.empleado.id,
-
             "empleado": vacacion.empleado.nombre_completo,
-
             "inicio": vacacion.fecha_inicio,
-
-            "dias_para_salir": (
-                vacacion.fecha_inicio - hoy
-            ).days,
+            "dias_para_salir": (vacacion.fecha_inicio - hoy).days,
         })
 
     # ==========================
-    # PROGRAMAR VACACIONES
+    # 3. PROGRAMAR VACACIONES (Cumplen año en 1 o 2 meses / hasta 60 días)
     # ==========================
-
     cumplen_anio = []
-
     pendientes_programar = []
 
-    empleados = Empleado.objects.all()
+    empleados = Empleado.objects.all().order_by("nombre_completo")
 
     for empleado in empleados:
+        if not empleado.fecha_ingreso:
+            continue
 
         # Próximo aniversario laboral
-        aniversario = empleado.fecha_ingreso.replace(year=hoy.year)
+        try:
+            aniversario = empleado.fecha_ingreso.replace(year=hoy.year)
+        except ValueError:
+            # Caso 29 de febrero en años no bisiestos
+            aniversario = empleado.fecha_ingreso.replace(year=hoy.year, day=28)
 
         if aniversario < hoy:
-            aniversario = aniversario.replace(year=hoy.year + 1)
+            try:
+                aniversario = empleado.fecha_ingreso.replace(year=hoy.year + 1)
+            except ValueError:
+                aniversario = empleado.fecha_ingreso.replace(year=hoy.year + 1, day=28)
 
         dias_para_aniversario = (aniversario - hoy).days
 
-        # Tiempo trabajado
-        anios_trabajados = (
-            hoy.year - empleado.fecha_ingreso.year
-        )
-
-        if (
-            (hoy.month, hoy.day)
-            <
-            (empleado.fecha_ingreso.month, empleado.fecha_ingreso.day)
-        ):
+        # Antigüedad en años trabajados cumplidos
+        anios_trabajados = hoy.year - empleado.fecha_ingreso.year
+        if (hoy.month, hoy.day) < (empleado.fecha_ingreso.month, empleado.fecha_ingreso.day):
             anios_trabajados -= 1
 
-        dias_acumulados = anios_trabajados * 15
+        dias_acumulados = max(0, anios_trabajados * 15)
 
         dias_tomados = (
             Vacacion.objects.filter(
@@ -112,58 +91,45 @@ def obtener_alertas_vacaciones():
             )["total"] or 0
         )
 
-        dias_pendientes = dias_acumulados - dias_tomados
+        dias_pendientes = max(0, dias_acumulados - dias_tomados)
+        proximo_anio_num = anios_trabajados + 1
 
-        # ==========================
-        # Cumple aniversario en menos de 30 días
-        # ==========================
-
-        if 0 <= dias_para_aniversario <= 30:
-
+        # =======================================================
+        # ALERTA: Cumple aniversario laboral en 1 o 2 meses (0 a 60 días)
+        # =======================================================
+        if 0 <= dias_para_aniversario <= 60:
             cumplen_anio.append({
-
                 "id": empleado.id,
-
                 "empleado": empleado.nombre_completo,
-
                 "fecha": aniversario,
-
                 "dias": dias_para_aniversario,
-
+                "anio_num": proximo_anio_num,
                 "pendientes": dias_pendientes,
-
             })
 
-        # ==========================
-        # Ya tiene vacaciones acumuladas
-        # ==========================
-
+        # =======================================================
+        # ALERTA: Ya tiene vacaciones acumuladas sin programar
+        # =======================================================
         elif anios_trabajados >= 1 and dias_pendientes > 0:
-
             pendientes_programar.append({
-
+                "id": empleado.id,
                 "empleado": empleado.nombre_completo,
-
+                "anios_trabajados": anios_trabajados,
                 "pendientes": dias_pendientes,
-
             })
+
+    # Ordenar por el que está más próximo a cumplir
+    cumplen_anio.sort(key=lambda x: x["dias"])
 
     return {
-
         "vacaciones_actuales": actuales,
-
         "vacaciones_proximas": proximas,
-
         "cumplen_anio": cumplen_anio,
-
         "pendientes_programar": pendientes_programar,
-
-        # Lo consume el contador de la campana en base.html
         "total_alertas": (
             len(actuales)
             + len(proximas)
             + len(cumplen_anio)
             + len(pendientes_programar)
         ),
-
     }

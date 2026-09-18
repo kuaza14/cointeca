@@ -4,828 +4,908 @@
 
 {% block empleado_content %}
 
-<h1 class="text-3xl font-bold mb-6">Ficha Técnica del Trabajador</h1>
+<div class="space-y-6">
 
-<div class="mb-4 flex gap-2">
-    <a href="?edit=1" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-        Editar
-    </a>
-
-    <a href="/rrhh/empleados/" class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-        Volver
-    </a>
-
-</div>
-
-{% if error %}
-<div class="bg-red-100 border border-red-400 text-destructive px-4 py-3 rounded mb-4">
-    {{ error }}
-</div>
-{% endif %}
-
-<div class="bg-card shadow rounded p-6 space-y-6">
-    {% if editando %}
-    <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% endif %}
-
-        <!-- FOTO DEL EMPLEADO -->
-        {% if editando %}
-        <div class="mb-4">
-            <label class="block font-semibold mb-2" for="campo-foto">
-                Cambiar foto del empleado
-            </label>
-
-            <input id="campo-foto" type="file"
-                name="foto"
-                accept="image/*"
-                class="border p-2 rounded">
-
-            {% if empleado.foto %}
-                <label class="flex items-center gap-2 mt-3" for="campo-nombre_completo">
-                    <input type="checkbox" name="eliminar_foto">
-                    Eliminar foto actual
-                </label>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-bold text-foreground">Ficha Técnica del Trabajador</h1>
+            {% if empleado.estado == 'retirado' %}
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 shadow-sm">
+                    🔴 Retirado
+                </span>
+            {% else %}
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
+                    🟢 Activo
+                </span>
             {% endif %}
         </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            {% if not editando %}
+                {% if empleado.estado == 'retirado' %}
+                    <button type="button" 
+                            onclick="abrirModalReintegrar()" 
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow font-semibold text-sm transition flex items-center gap-1.5">
+                        <span>🔄 Reintegrar Colaborador</span>
+                    </button>
+                {% else %}
+                    <button type="button" 
+                            onclick="abrirModalRetirar()" 
+                            class="bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white border border-red-600/30 px-3.5 py-2 rounded-lg shadow-sm font-semibold text-sm transition flex items-center gap-1.5">
+                        <span>🚪 Registrar Retiro</span>
+                    </button>
+                {% endif %}
+
+                <a href="?edit=1" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow font-semibold text-sm transition">
+                    Editar Ficha
+                </a>
+            {% else %}
+                <a href="/rrhh/empleados/{{ empleado.id }}/" class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow font-semibold text-sm transition">
+                    Cancelar Edición
+                </a>
+            {% endif %}
+
+            <a href="/rrhh/empleados/" class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow font-semibold text-sm transition">
+                Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- BANNER DE RETIRADO SI APLICA -->
+    {% if empleado.estado == 'retirado' %}
+    <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-start sm:items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center text-xl shrink-0">
+                🚪
+            </div>
+            <div>
+                <p class="font-bold text-sm text-red-600 dark:text-red-400">Colaborador en estado RETIRADO</p>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Fecha de Retiro: <strong class="text-foreground font-mono">{{ empleado.fecha_retiro|default:"No registrada" }}</strong> 
+                    {% if empleado.motivo_retiro %} | Motivo: <strong class="text-foreground">{{ empleado.motivo_retiro }}</strong>{% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <button type="button" 
+                    onclick="abrirModalReintegrar()" 
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-1.5">
+                <span>🔄 Reintegrar Colaborador</span>
+            </button>
+            <a href="{% url 'acuerdo_terminacion' empleado.id %}" target="_blank" class="bg-card hover:bg-muted border border-border text-foreground px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1">
+                <span>📄 Ver Acuerdo</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-destructive px-4 py-3 rounded">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="bg-card shadow rounded-lg p-6 space-y-6 border border-border">
+        {% if editando %}
+        <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
         {% endif %}
 
-        <!-- 1. INFORMACIÓN PERSONAL -->
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">1. Información Personal</h2>
-            <div class="grid grid-cols-2 gap-4 mt-3">
-                
-                <p>
-                <strong>Nombre:</strong>
-                {% if editando %}
-                <input id="campo-nombre_completo" type="text" name="nombre_completo" value="{{ empleado.nombre_completo }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.nombre_completo }}
-                {% endif %}
-                </p>
+            <!-- FOTO DEL EMPLEADO -->
+            {% if editando %}
+            <div class="mb-4 p-4 bg-muted/40 rounded border border-border">
+                <label class="block font-semibold mb-2 text-sm text-foreground" for="campo-foto">
+                    Cambiar foto del empleado
+                </label>
 
-                <p>
-                <strong>Documento:</strong>
-                {% if editando %}
-                <input type="text" name="documento" value="{{ empleado.documento }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.documento }}
-                {% endif %}
-                </p>
+                <input id="campo-foto" type="file"
+                    name="foto"
+                    accept="image/*"
+                    class="border border-border p-2 rounded w-full bg-background text-sm">
 
-                <p>
-                <strong>Ciudad de Expedición:</strong>
-                {% if editando %}
-                <input type="text" name="ciudad_expedicion" value="{{ empleado.ciudad_expedicion }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.ciudad_expedicion }}
+                {% if empleado.foto %}
+                    <label class="flex items-center gap-2 mt-3 text-sm text-destructive cursor-pointer">
+                        <input type="checkbox" name="eliminar_foto">
+                        Eliminar foto actual
+                    </label>
                 {% endif %}
-                </p>
-
-                <p>
-                <strong>Fecha Nacimiento:</strong>
-                {% if editando %}
-                <input type="date" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.fecha_nacimiento }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Nacionalidad:</strong>
-                {% if editando %}
-                <input type="text" name="nacionalidad" value="{{ empleado.nacionalidad }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.nacionalidad }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Dirección:</strong>
-                {% if editando %}
-                <input type="text" name="direccion" value="{{ empleado.direccion }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.direccion }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Barrio:</strong>
-                {% if editando %}
-                <input type="text" name="barrio" value="{{ empleado.barrio|default_if_none:'' }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.barrio }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Estrato:</strong>
-                {% if editando %}
-                <input type="number" name="estrato" value="{{ empleado.estrato }}" min="1" max="6" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.estrato }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Ciudad de Residencia:</strong>
-                {% if editando %}
-                <input type="text" name="ciudad_residencia" value="{{ empleado.ciudad_residencia }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.ciudad_residencia }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Teléfono:</strong>
-                {% if editando %}
-                <input type="text" name="telefono" value="{{ empleado.telefono }}" class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.telefono }}
-                {% endif %}
-                </p>
-
-                <p>
-                <strong>Correo:</strong>
-                {% if editando %}
-                <input type="email" name="correo" value="{{ empleado.correo }}"  class="border p-1 rounded w-full">
-                {% else %}
-                {{ empleado.correo }}
-                {% endif %}
-                </p>
-
             </div>
-        </div>
+            {% endif %}
 
-        <!-- 2. PERFIL PROFESIONAL -->
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">2. Perfil Profesional</h2>
-            <div class="grid grid-cols-2 gap-4 mt-3">
-                <p><strong>Cargo:</strong>
-                    {% if editando %}
-                    <input type="text" name="cargo" value="{{ empleado.cargo }}"  class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.cargo }}
-                    {% endif %}
-                </p>
-                <p><strong>Área:</strong>
-                    {% if editando %}
-                    <input type="text" name="area" value="{{ empleado.area }}"  class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.area }}
-                    {% endif %}
-                </p>
-                <p><strong>Nivel:</strong>
-                    {% if editando %}
-                    <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}"   class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.nivel_academico }}
-                    {% endif %}
-                </p>
-                <p><strong>Profesión:</strong>
-                    {% if editando %}
-                    <input type="text" name="profesion" value="{{ empleado.profesion }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.profesion }}
-                    {% endif %}
-                </p>
-                <p><strong>Habilidades:</strong>
-                    {% if editando %}
-                    <input type="text" name="habilidades" value="{{ empleado.habilidades }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.habilidades }}
-                    {% endif %}
-                </p>
-                <p><strong>Idiomas:</strong>
-                    {% if editando %}
-                    <input type="text" name="idiomas" value="{{ empleado.idiomas }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.idiomas }}
-                    {% endif %}
-                </p>
+            <!-- 1. INFORMACIÓN PERSONAL -->
+            <div>
+                <h2 class="bg-primary text-white px-3 py-2 font-bold rounded-t text-sm uppercase tracking-wide">1. Información Personal</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-t-0 border-border rounded-b text-sm">
+                    
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Nombre:</strong>
+                        {% if editando %}
+                        <input id="campo-nombre_completo" type="text" name="nombre_completo" value="{{ empleado.nombre_completo }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="font-semibold text-foreground uppercase mt-1">{{ empleado.nombre_completo }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Documento:</strong>
+                        {% if editando %}
+                        <input type="text" name="documento" value="{{ empleado.documento }}" class="border border-border p-1.5 rounded w-full bg-background mt-1 font-mono">
+                        {% else %}
+                        <p class="font-mono text-foreground mt-1">{{ empleado.documento }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Ciudad de Expedición:</strong>
+                        {% if editando %}
+                        <input type="text" name="ciudad_expedicion" value="{{ empleado.ciudad_expedicion }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.ciudad_expedicion|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Fecha Nacimiento:</strong>
+                        {% if editando %}
+                        <input type="date" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.fecha_nacimiento|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Nacionalidad:</strong>
+                        {% if editando %}
+                        <input type="text" name="nacionalidad" value="{{ empleado.nacionalidad }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.nacionalidad|default:"Colombiana" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Dirección:</strong>
+                        {% if editando %}
+                        <input type="text" name="direccion" value="{{ empleado.direccion }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.direccion|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Barrio:</strong>
+                        {% if editando %}
+                        <input type="text" name="barrio" value="{{ empleado.barrio|default_if_none:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.barrio|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Estrato:</strong>
+                        {% if editando %}
+                        <input type="number" name="estrato" value="{{ empleado.estrato }}" min="1" max="6" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.estrato|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Ciudad de Residencia:</strong>
+                        {% if editando %}
+                        <input type="text" name="ciudad_residencia" value="{{ empleado.ciudad_residencia }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.ciudad_residencia|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Teléfono:</strong>
+                        {% if editando %}
+                        <input type="text" name="telefono" value="{{ empleado.telefono }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground font-mono mt-1">{{ empleado.telefono|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <strong class="text-muted-foreground block text-xs uppercase">Correo Electrónico:</strong>
+                        {% if editando %}
+                        <input type="email" name="correo" value="{{ empleado.correo }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.correo|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        <!-- 3. INFORMACIÓN CONTRACTUAL -->
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">3. Información Contractual</h2>
-            <div class="grid grid-cols-2 gap-4 mt-3">
-                <p><strong>Ingreso:</strong>
-                    {% if editando %}
-                    <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" required class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.fecha_ingreso }}
-                    {% endif %}
-                </p>
+            <!-- 2. PERFIL PROFESIONAL -->
+            <div>
+                <h2 class="bg-primary text-white px-3 py-2 font-bold rounded-t text-sm uppercase tracking-wide">2. Perfil Profesional</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-t-0 border-border rounded-b text-sm">
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Cargo:</strong>
+                        {% if editando %}
+                        <input type="text" name="cargo" value="{{ empleado.cargo }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="font-semibold text-foreground uppercase mt-1">{{ empleado.cargo|default:"---" }}</p>
+                        {% endif %}
+                    </div>
 
-                <p><strong>Finaliza:</strong>
-                    {% if editando %}
-                    <input type="date" name="fecha_finalizacion" value="{{ empleado.fecha_finalizacion|date:'Y-m-d' }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.fecha_finalizacion }}
-                    {% endif %}
-                </p>
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Área:</strong>
+                        {% if editando %}
+                        <input type="text" name="area" value="{{ empleado.area }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ empleado.area|default:"---" }}</p>
+                        {% endif %}
+                    </div>
 
-                <p><strong>Contrato:</strong> 
-                    {% if editando %}
-                    <input type="text" name="tipo_contrato" value="{{ empleado.tipo_contrato }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.tipo_contrato }}
-                    {% endif %}
-                </p>
-                <p><strong>Salario:</strong> 
-                    {% if editando %}
-                    <input type="text" id="salario" name="salario" value="{{ empleado.salario|floatformat:0 }}" class="border p-1 rounded w-full moneda-col">
-                    {% else %}
-                    ${{ empleado.salario|pesos_colombianos }}
-                    {% endif %}
-                </p>
-                <p><strong>Jornada:</strong> 
-                    {% if editando %}
-                    <input type="text" name="jornada" value="{{ empleado.jornada }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.jornada }}
-                    {% endif %}
-                </p>
-                <p><strong>Jefe:</strong> 
-                    {% if editando %}
-                    <input type="text" name="jefe" value="{{ empleado.jefe }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ empleado.jefe }}
-                    {% endif %}
-                </p>
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Nivel Académico:</strong>
+                        {% if editando %}
+                        <input type="text" name="nivel_academico" value="{{ empleado.nivel_academico }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.nivel_academico|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Profesión:</strong>
+                        {% if editando %}
+                        <input type="text" name="profesion" value="{{ empleado.profesion }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.profesion|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Idiomas:</strong>
+                        {% if editando %}
+                        <input type="text" name="idiomas" value="{{ empleado.idiomas }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.idiomas|default:"Español" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Habilidades:</strong>
+                        {% if editando %}
+                        <input type="text" name="habilidades" value="{{ empleado.habilidades }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.habilidades|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- 4. SEGURIDAD Y SALUD -->
-        {% if salud %}
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">4. Seguridad y Salud</h2>
-            <div class="grid grid-cols-2 gap-4 mt-3">
-                <p><strong>RH:</strong>
-                    {% if editando %}
-                    <input type="text" name="salud_grupo_sanguineo" value="{{ salud.grupo_sanguineo }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ salud.grupo_sanguineo }}
-                    {% endif %}
-                </p>
-                <p><strong>EPS:</strong>
-                    {% if editando %}
-                    <input type="text" name="salud_eps" value="{{ salud.eps }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ salud.eps }}
-                    {% endif %}
-                </p>
-                <p><strong>Pensión:</strong>
-                    {% if editando %}
-                    <input type="text" name="salud_pension" value="{{ salud.pension }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ salud.pension }}
-                    {% endif %}
-                </p>
-                <p><strong>ARL:</strong>
-                    {% if editando %}
-                    <input type="text" name="salud_arl" value="{{ salud.arl }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ salud.arl }}
-                    {% endif %}
-                </p>
-                <p><strong>Alergias:</strong>
-                    {% if editando %}
-                    <input type="text" name="salud_alergias" value="{{ salud.alergias }}" class="border p-1 rounded w-full">
-                    {% else %}
-                    {{ salud.alergias }}
-                    {% endif %}
-                </p>
+            <!-- 3. INFORMACIÓN CONTRACTUAL -->
+            <div>
+                <h2 class="bg-primary text-white px-3 py-2 font-bold rounded-t text-sm uppercase tracking-wide">3. Información Contractual</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-t-0 border-border rounded-b text-sm">
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Fecha Ingreso:</strong>
+                        {% if editando %}
+                        <input type="date" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" required class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="font-semibold text-foreground mt-1">{{ empleado.fecha_ingreso|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Fecha Finalización:</strong>
+                        {% if editando %}
+                        <input type="date" name="fecha_finalizacion" value="{{ empleado.fecha_finalizacion|date:'Y-m-d' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ empleado.fecha_finalizacion|default:"Indefinido / Vigente" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Tipo Contrato:</strong>
+                        {% if editando %}
+                        <input type="text" name="tipo_contrato" value="{{ empleado.tipo_contrato }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ empleado.tipo_contrato|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Salario:</strong>
+                        {% if editando %}
+                        <input type="text" id="salario" name="salario" value="{{ empleado.salario|floatformat:0 }}" class="border border-border p-1.5 rounded w-full moneda-col bg-background mt-1">
+                        {% else %}
+                        <p class="font-semibold text-success font-mono mt-1">${{ empleado.salario|pesos_colombianos }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Jornada:</strong>
+                        {% if editando %}
+                        <input type="text" name="jornada" value="{{ empleado.jornada }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ empleado.jornada|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Jefe Inmediato:</strong>
+                        {% if editando %}
+                        <input type="text" name="jefe" value="{{ empleado.jefe }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ empleado.jefe|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- 4. SEGURIDAD Y SALUD -->
+            <div>
+                <h2 class="bg-primary text-white px-3 py-2 font-bold rounded-t text-sm uppercase tracking-wide">4. Seguridad y Salud</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-t-0 border-border rounded-b text-sm">
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Grupo Sanguíneo (RH):</strong>
+                        {% if editando %}
+                        <input type="text" name="salud_grupo_sanguineo" value="{{ salud.grupo_sanguineo|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="font-bold text-destructive mt-1">{{ salud.grupo_sanguineo|default:"No registrado" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">EPS:</strong>
+                        {% if editando %}
+                        <input type="text" name="salud_eps" value="{{ salud.eps|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ salud.eps|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Pensión:</strong>
+                        {% if editando %}
+                        <input type="text" name="salud_pension" value="{{ salud.pension|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ salud.pension|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">ARL:</strong>
+                        {% if editando %}
+                        <input type="text" name="salud_arl" value="{{ salud.arl|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ salud.arl|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <strong class="text-muted-foreground block text-xs uppercase">Alergias / Restricciones:</strong>
+                        {% if editando %}
+                        <input type="text" name="salud_alergias" value="{{ salud.alergias|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground mt-1">{{ salud.alergias|default:"Ninguna reportada" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. CONTACTO DE EMERGENCIA -->
+            <div>
+                <h2 class="bg-primary text-white px-3 py-2 font-bold rounded-t text-sm uppercase tracking-wide">5. Contacto de Emergencia</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border border-t-0 border-border rounded-b text-sm">
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Nombre:</strong>
+                        {% if editando %}
+                        <input type="text" name="contacto_emergencia" value="{{ empleado.contacto_emergencia|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="font-semibold text-foreground uppercase mt-1">{{ empleado.contacto_emergencia|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Parentesco:</strong>
+                        {% if editando %}
+                        <input type="text" name="parentesco_emergencia" value="{{ empleado.parentesco_emergencia|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="text-foreground uppercase mt-1">{{ empleado.parentesco_emergencia|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong class="text-muted-foreground block text-xs uppercase">Teléfono:</strong>
+                        {% if editando %}
+                        <input type="text" name="telefono_emergencia" value="{{ empleado.telefono_emergencia|default:'' }}" class="border border-border p-1.5 rounded w-full bg-background mt-1">
+                        {% else %}
+                        <p class="font-mono text-foreground mt-1">{{ empleado.telefono_emergencia|default:"---" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. OBSERVACIONES -->
+            <div>
+                <h2 class="bg-primary text-white px-3 py-2 font-bold rounded-t text-sm uppercase tracking-wide">6. Observaciones</h2>
+                <div class="p-4 border border-t-0 border-border rounded-b text-sm">
+                    {% if editando %}
+                    <textarea name="observaciones" rows="3" class="border border-border p-2 rounded w-full bg-background">{{ empleado.observaciones }}</textarea>
+                    {% else %}
+                    <p class="text-foreground">{{ empleado.observaciones|default:"No hay observaciones registradas." }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% if editando %}
+            <div class="pt-2">
+                <button type="submit" class="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded shadow font-semibold transition">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
         {% endif %}
-
-        <!-- 5. CONTACTO EMERGENCIA -->
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">5. Contacto de Emergencia</h2>
-
-            <div class="grid grid-cols-2 gap-4 mt-3">
-
-                <p>
-                    <strong>Nombre contacto:</strong>
-
-                    {% if editando %}
-                    <input type="text"
-                        name="contacto_emergencia"
-                        value="{{ empleado.contacto_emergencia }}"
-                        class="border p-1 rounded w-full">
-                    {% else %}
-                        {{ empleado.contacto_emergencia }}
-                    {% endif %}
-                </p>
-
-                <p>
-                    <strong>Parentesco:</strong>
-
-                    {% if editando %}
-                    <input type="text"
-                        name="parentesco_emergencia"
-                        value="{{ empleado.parentesco_emergencia }}"
-                        class="border p-1 rounded w-full">
-                    {% else %}
-                        {{ empleado.parentesco_emergencia }}
-                    {% endif %}
-                </p>
-
-                <p>
-                    <strong>Teléfono:</strong>
-
-                    {% if editando %}
-                    <input type="text"
-                        name="telefono_emergencia"
-                        value="{{ empleado.telefono_emergencia }}"
-                        class="border p-1 rounded w-full">
-                    {% else %}
-                        {{ empleado.telefono_emergencia }}
-                    {% endif %}
-                </p>
-
-            </div>
-        </div>
-
-        <!-- 6. OBSERVACIONES -->
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">6. Observaciones</h2>
-
-            <div class="mt-3">
-
-                {% if editando %}
-                <textarea
-                    name="observaciones"
-                    rows="4"
-                    class="border p-2 rounded w-full"
-                >{{ empleado.observaciones }}</textarea>
-
-                {% else %}
-                <p>{{ empleado.observaciones }}</p>
-                {% endif %}
-
-            </div>
-        </div>
 
         <!-- 7. DOTACIÓN -->
-        <div>
-            <div class="mb-4 flex justify-end">
-                <a href="{% url 'agregar_dotacion' empleado.id %}"
-                class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded">
-                    Agregar dotación
+        <div class="mt-8">
+            <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
+                <span class="uppercase tracking-wide">7. Dotación</span>
+                <a href="{% url 'agregar_dotacion' empleado.id %}" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
+                    + Agregar Dotación
                 </a>
             </div>
 
-            <div class="overflow-x-auto">
-<table class="w-full border shadow">
-                <thead class="bg-neutral text-white">
-                    <tr>
-                        <th class="p-2 text-center">Elemento</th>
-                        <th class="p-2 text-center">Descripción / Serial</th>
-                        <th class="p-2 text-center">Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for d in dotaciones %}
-                    <tr class="border-b hover:bg-muted">
-
-                        <td class="p-2">
-                            <span id="elemento-texto-{{ d.id }}">
-                                {{ d.elemento }}
-                            </span>
-
-                            <input
-                                type="text"
-                                id="elemento-input-{{ d.id }}"
-                                value="{{ d.elemento }}"
-                                class="hidden border p-2 rounded w-full"
-                                form="form-editar-{{ d.id }}"
-                                name="elemento"
-                            >
-                        </td>
-
-                        <td class="p-2">
-                            <span id="descripcion-texto-{{ d.id }}">
-                                {{ d.descripcion }}
-                            </span>
-
-                            <input
-                                type="text"
-                                id="descripcion-input-{{ d.id }}"
-                                value="{{ d.descripcion }}"
-                                class="hidden border p-2 rounded w-full"
-                                form="form-editar-{{ d.id }}"
-                                name="descripcion"
-                            >
-                        </td>
-
-                        <td class="p-2">
-                            <div class="flex justify-center gap-2">
-
-                                <!-- FORMULARIO EDITAR DOTACIÓN -->
-                                <form
-                                    id="form-editar-{{ d.id }}"
-                                    method="POST"
-                                    action="{% url 'editar_dotacion_empleado' d.id %}"
-                                >
+            <div class="overflow-x-auto border border-t-0 border-border rounded-b shadow-sm">
+                <table class="w-full text-sm text-foreground">
+                    <thead class="bg-neutral text-white text-xs uppercase">
+                        <tr>
+                            <th class="p-3 text-left">Detalle / Observación</th>
+                            <th class="p-3 text-center">Fecha Entrega</th>
+                            <th class="p-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for d in dotaciones %}
+                        <tr class="hover:bg-muted transition">
+                            <td class="p-3 font-medium">
+                                {{ d.observacion|default:"Dotación entregada" }}
+                            </td>
+                            <td class="p-3 text-center font-mono text-xs">
+                                {{ d.fecha_entrega }}
+                            </td>
+                            <td class="p-3 text-center">
+                                <form method="POST" action="{% url 'eliminar_dotacion_empleado' d.id %}" onsubmit="return confirm('¿Seguro que deseas eliminar esta dotación?');" class="inline">
                                     {% csrf_token %}
-
-                                    <button
-                                        type="button"
-                                        id="boton-editar-{{ d.id }}"
-                                        onclick="editarDotacion('{{ d.id }}')"
-                                        class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded"
-                                    >
-                                        Editar
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        id="boton-guardar-{{ d.id }}"
-                                        class="hidden bg-success hover:bg-success-hover text-white px-3 py-1 rounded"
-                                    >
-                                        Guardar
-                                    </button>
-                                </form>
-
-                                <!-- FORMULARIO ELIMINAR DOTACIÓN -->
-                                <form
-                                    method="POST"
-                                    action="{% url 'eliminar_dotacion_empleado' d.id %}"
-                                    onsubmit="return confirm('¿Seguro que deseas eliminar esta dotación?');"
-                                >
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded"
-                                    >
+                                    <button type="submit" class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition">
                                         Eliminar
                                     </button>
                                 </form>
-
-                            </div>
-                        </td>
-
-                    </tr>
-
-                    {% empty %}
-
-                    <tr>
-                        <td colspan="3" class="text-center p-4 text-muted-foreground">
-                            No hay elementos registrados
-                        </td>
-                    </tr>
-
-                    {% endfor %}
-                </tbody>
-            </table>
-</div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center p-4 text-muted-foreground">
+                                No hay dotaciones asignadas.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- 8. EQUIPOS TECNOLÓGICOS -->
-        <div>
-            <h2 class="bg-primary text-white px-3 py-2 font-bold">8. Equipos Tecnológicos</h2>
-
-            <div class="mt-3 mb-3 flex gap-2">
-                <a
-                    href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/"
-                    class="bg-success text-white px-3 py-2 rounded hover:bg-success-hover">
-                    + Asignar equipo
-                </a>
-                <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/"
-                    class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover">
-                    Acta Equipos
-                </a>
+        <div class="mt-8">
+            <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
+                <span class="uppercase tracking-wide">8. Equipos Tecnológicos</span>
+                <div class="flex gap-2">
+                    <a href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
+                        + Asignar Equipo
+                    </a>
+                    <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/" class="bg-neutral hover:bg-neutral-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
+                        Acta Equipos
+                    </a>
+                </div>
             </div>
 
-            {% with request.GET.edit_equipo as edit_equipo %}
-
-            <div class="overflow-x-auto">
-<table class="w-full border mt-3 rounded overflow-hidden shadow">
-                <thead class="bg-neutral text-white">
-                    <tr>
-                        <th class="p-2 text-center">Equipo</th>
-                        <th class="p-2 text-center">Referencia</th>
-                        <th class="p-2 text-center">Serial</th>
-                        <th class="p-2 text-center">Fecha entrega</th>
-                        <th class="p-2 text-center">Observaciones</th>
-                        <th class="p-2 text-center">Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for e in equipos %}
-                        {% if edit_equipo == e.id|stringformat:"s" %}
-                        <form method="POST" action="/rrhh/equipos/{{ e.id }}/editar/">
-                            {% csrf_token %}
-
-                            <tr class="border-b">
-
-                                <td class="p-2">
-                                    <input
-                                        type="text"
-                                        name="equipo"
-                                        value="{{ e.equipo }}"
-                                        class="border p-1 rounded w-full"
-                                    >
-                                </td>
-
-                                <td class="p-2">
-                                    <input
-                                        type="text"
-                                        value="{{ e.equipo_inventario.referencia }}"
-                                        class="border p-1 rounded w-full bg-muted"
-                                        readonly
-                                    >
-                                </td>
-
-                                <td class="p-2">
-                                    <input
-                                        type="text"
-                                        value="{{ e.equipo_inventario.serial }}"
-                                        class="border p-1 rounded w-full bg-muted"
-                                        readonly
-                                    >
-                                </td>
-
-                                <td class="p-2">
-                                    <input
-                                        type="date"
-                                        name="fecha_entrega"
-                                        value="{{ e.fecha_entrega|date:'Y-m-d' }}"
-                                        class="border p-1 rounded w-full"
-                                    >
-                                </td>
-
-                                <td class="p-2">
-                                    <input
-                                        type="text"
-                                        name="observaciones"
-                                        value="{{ e.observaciones }}"
-                                        class="border p-1 rounded w-full"
-                                    >
-                                </td>
-
-                                <td class="p-2">
-                                    <div class="flex gap-2">
-
-                                        <button
-                                            type="submit"
-                                            class="bg-primary text-white px-3 py-1 rounded text-sm"
-                                        >
-                                            Guardar
-                                        </button>
-
-                                        <a
-                                            href="/rrhh/empleados/{{ empleado.id }}/"
-                                            class="bg-neutral text-white px-3 py-1 rounded text-sm"
-                                        >
-                                            Cancelar
-                                        </a>
-
-                                    </div>
-                                </td>
-
-                            </tr>
-
-                        </form>
-
-                        {% else %}
-
-                        <tr class="border-b">
-
-                            <td class="p-2">
-                                {{ e.equipo_inventario.equipo }}
-                            </td>
-
-                            <td class="p-2">
-                                {{ e.equipo_inventario.referencia }}
-                            </td>
-
-                            <td class="p-2">
-                                {{ e.equipo_inventario.serial }}
-                            </td>
-
-                            <td class="p-2">
-                                {{ e.fecha_entrega }}
-                            </td>
-
-                            <td class="p-2">
-                                {{ e.observaciones }}
-                            </td>
-
-                            <td class="p-2">
-
-                                <div class="flex gap-2">
-
-                                    <a
-                                        href="?edit_equipo={{ e.id }}"
-                                        class="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
-                                    >
-                                        Editar
-                                    </a>
-
-                                    <a
-                                        href="/rrhh/equipos/{{ e.id }}/eliminar/"
-                                        class="bg-destructive text-white px-3 py-1 rounded text-sm"
-                                    >
-                                        Eliminar
-                                    </a>
-
-                                </div>
-
-                            </td>
-
+            <div class="overflow-x-auto border border-t-0 border-border rounded-b shadow-sm">
+                <table class="w-full text-sm text-foreground">
+                    <thead class="bg-neutral text-white text-xs uppercase">
+                        <tr>
+                            <th class="p-3 text-left">Equipo</th>
+                            <th class="p-3 text-left">Referencia</th>
+                            <th class="p-3 text-left">Serial</th>
+                            <th class="p-3 text-center">Fecha Entrega</th>
+                            <th class="p-3 text-left">Observaciones</th>
+                            <th class="p-3 text-center">Acciones</th>
                         </tr>
-
-                        {% endif %}
-
-                    {% empty %}
-
-                    <tr>
-                        <td colspan="6" class="text-center p-4 text-muted-foreground">
-                            No hay equipos asignados
-                        </td>
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-            </table>
-</div>
-
-            {% endwith %}
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for e in equipos %}
+                        <tr class="hover:bg-muted transition">
+                            <td class="p-3 font-semibold">
+                                {{ e.equipo_inventario.equipo|default:"Equipo asignado" }}
+                            </td>
+                            <td class="p-3 font-mono text-xs">
+                                {{ e.equipo_inventario.referencia|default:"---" }}
+                            </td>
+                            <td class="p-3 font-mono text-xs">
+                                {{ e.equipo_inventario.serial|default:"---" }}
+                            </td>
+                            <td class="p-3 text-center font-mono text-xs">
+                                {{ e.fecha_entrega|default:"---" }}
+                            </td>
+                            <td class="p-3 text-muted-foreground text-xs">
+                                {{ e.observaciones|default:"---" }}
+                            </td>
+                            <td class="p-3 text-center">
+                                <a href="/rrhh/equipos/{{ e.id }}/eliminar/" 
+                                   class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block"
+                                   onclick="return confirm('¿Seguro que quieres eliminar esta asignación?');">
+                                    Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center p-4 text-muted-foreground">
+                                No hay equipos tecnológicos asignados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- 9. DOCUMENTOS -->
-        <div class="mt-6">
-
-            <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
-
-                <span>9. Contratos y Documentos</span>
-
-                <a
-                    href="/rrhh/empleados/{{ empleado.id }}/subir-documento/"
-                    class="bg-success text-white px-3 py-1 rounded hover:bg-success-hover text-sm"
-                >
-                    + Subir documento
+        <div class="mt-8">
+            <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
+                <span class="uppercase tracking-wide">9. Contratos y Documentos</span>
+                <a href="/rrhh/empleados/{{ empleado.id }}/subir-documento/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
+                    + Subir Documento
                 </a>
-
             </div>
 
-            <div class="overflow-x-auto">
-<table class="w-full border shadow">
-
-                <thead class="bg-neutral text-white">
-
-                    <tr>
-                        <th class="p-2 text-center">Documento</th>
-                        <th class="p-2 text-center">Fecha</th>
-                        <th class="p-2 text-center">Archivo</th>
-                        <th class="p-2 text-center">Acciones</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for d in documentos %}
-
-                    <tr class="border-b hover:bg-muted">
-
-                        <td class="p-2">
-                            {{ d.nombre }}
-                        </td>
-
-                        <td class="p-2 text-center">
-                            {{ d.fecha }}
-                        </td>
-
-                        <td class="p-2 text-center">
-
-                            <a href="{{ d.archivo.url }}"target="_blank" class="bg-primary text-white px-3 py-1 rounded hover:bg-primary-hover"
-                            >Ver documento
-                            </a>
-                        </td>
-                        <td class="p-2 text-center">
-                            <a href="/rrhh/documentos/{{ d.id }}/eliminar/" class="bg-destructive text-white px-3 py-1 rounded hover:bg-destructive-hover"
-                            >Eliminar
-                            </a>
-                        </td>
-
-                    </tr>
-
-                    {% empty %}
-
-                    <tr>
-
-                        <td colspan="4" class="text-center p-4 text-muted-foreground">
-                            No hay documentos cargados
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-</div>
-
+            <div class="overflow-x-auto border border-t-0 border-border rounded-b shadow-sm">
+                <table class="w-full text-sm text-foreground">
+                    <thead class="bg-neutral text-white text-xs uppercase">
+                        <tr>
+                            <th class="p-3 text-left">Documento</th>
+                            <th class="p-3 text-center">Fecha</th>
+                            <th class="p-3 text-center">Archivo</th>
+                            <th class="p-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for d in documentos %}
+                        <tr class="hover:bg-muted transition">
+                            <td class="p-3 font-semibold">
+                                {{ d.nombre }}
+                            </td>
+                            <td class="p-3 text-center font-mono text-xs">
+                                {{ d.fecha }}
+                            </td>
+                            <td class="p-3 text-center">
+                                <a href="{{ d.archivo.url }}" target="_blank" class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block">
+                                    Ver documento
+                                </a>
+                            </td>
+                            <td class="p-3 text-center">
+                                <a href="/rrhh/documentos/{{ d.id }}/eliminar/" 
+                                   class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block"
+                                   onclick="return confirm('¿Seguro que deseas eliminar este documento?');">
+                                    Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center p-4 text-muted-foreground">
+                                No hay documentos cargados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- 10. VACACIONES -->
-        <div class="mt-6">
-
-            <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center">
-
-                <span>10. Vacaciones</span>
-
-                <a
-                    href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
-                    class="bg-success text-white px-3 py-1 rounded hover:bg-success-hover text-sm"
-                >
-                    + Registrar vacaciones
+        <div class="mt-8">
+            <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
+                <span class="uppercase tracking-wide">10. Vacaciones</span>
+                <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
+                    + Registrar Vacaciones
                 </a>
-
             </div>
-
-            <!-- Aquí va el contenido de vacaciones -->
-
+            <div class="p-4 border border-t-0 border-border rounded-b text-sm text-muted-foreground">
+                Para consultar el historial completo y solicitudes de vacaciones de este colaborador, diríjase al módulo de <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/" class="text-primary hover:underline font-semibold">Vacaciones del Empleado</a>.
+            </div>
         </div>
 
-    {% if editando %}
-    <button type="submit"
-        class="bg-primary text-white px-4 py-2 rounded mt-4 hover:bg-primary-hover">
-        Guardar cambios
-    </button>
-    </form>
-    {% endif %}
+    </div>
 
 </div>
 
+<!-- MODAL REGISTRAR RETIRO -->
+<div id="modalRetiro" 
+     class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+     onclick="if(event.target === this) cerrarModalRetirar()">
+    
+    <div class="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden transform transition-all">
+        <form method="POST" action="{% url 'retirar_empleado' empleado.id %}">
+            {% csrf_token %}
+            
+            <!-- CABECERA -->
+            <div class="px-6 py-4 bg-red-500/10 border-b border-red-500/20 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">🚪</span>
+                    <h3 class="font-bold text-foreground text-base">Registrar Retiro del Colaborador</h3>
+                </div>
+                <button type="button" onclick="cerrarModalRetirar()" class="text-muted-foreground hover:text-foreground p-1 text-lg">✕</button>
+            </div>
+
+            <!-- CUERPO -->
+            <div class="p-6 space-y-4 text-sm">
+                <div class="bg-muted/40 p-3 rounded-lg border border-border flex items-center gap-3">
+                    <span class="text-lg">👤</span>
+                    <div>
+                        <p class="font-bold text-foreground uppercase text-xs">{{ empleado.nombre_completo }}</p>
+                        <p class="text-xs text-muted-foreground font-mono">C.C. {{ empleado.documento }} | {{ empleado.cargo|default:"Sin cargo" }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 p-3 rounded-lg text-xs leading-relaxed">
+                    💡 <strong>Nota:</strong> El colaborador no será eliminado. Pasará a la pestaña de <em>Retirados</em> y todo su expediente, historial de dotaciones, documentos y certificados se conservarán intactos.
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                        Fecha de Retiro <span class="text-destructive">*</span>
+                    </label>
+                    <input type="date" 
+                           name="fecha_retiro" 
+                           required 
+                           value="{% now 'Y-m-d' %}" 
+                           class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-sm focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                        Motivo de Retiro <span class="text-destructive">*</span>
+                    </label>
+                    <select name="motivo_retiro" 
+                            required 
+                            class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-sm focus:ring-2 focus:ring-red-500 outline-none">
+                        <option value="">-- Selecciona el motivo --</option>
+                        <option value="Renuncia voluntaria">Renuncia voluntaria</option>
+                        <option value="Terminación de contrato por vencimiento de término">Terminación de contrato por vencimiento de término</option>
+                        <option value="Terminación por mutuo acuerdo">Terminación por mutuo acuerdo</option>
+                        <option value="Terminación de obra o labor contratada">Terminación de obra o labor contratada</option>
+                        <option value="Despido sin justa causa">Despido sin justa causa</option>
+                        <option value="Despido con justa causa">Despido con justa causa</option>
+                        <option value="No superación del periodo de prueba">No superación del periodo de prueba</option>
+                        <option value="Jubilación o pensión">Jubilación o pensión</option>
+                        <option value="Otro motivo">Otro motivo</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                        Observaciones Adicionales
+                    </label>
+                    <textarea name="observaciones" 
+                              rows="2" 
+                              placeholder="Observaciones adicionales sobre el retiro o liquidación..."
+                              class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-red-500 outline-none"></textarea>
+                </div>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="px-6 py-3.5 bg-muted/40 border-t border-border flex justify-end gap-2">
+                <button type="button" 
+                        onclick="cerrarModalRetirar()" 
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-neutral hover:bg-neutral-hover text-white transition">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 rounded-lg text-xs font-bold bg-destructive hover:bg-destructive-hover text-white shadow transition flex items-center gap-1.5">
+                    <span>🚪 Confirmar Retiro</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL REINTEGRAR COLABORADOR -->
+<div id="modalReintegrar" 
+     class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+     onclick="if(event.target === this) cerrarModalReintegrar()">
+    
+    <div class="bg-card w-full max-w-xl rounded-2xl shadow-2xl border border-border overflow-hidden transform transition-all">
+        <form method="POST" action="{% url 'reintegrar_empleado' empleado.id %}">
+            {% csrf_token %}
+            
+            <!-- CABECERA -->
+            <div class="px-6 py-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">🔄</span>
+                    <h3 class="font-bold text-foreground text-base">Reintegrar Colaborador a la Empresa</h3>
+                </div>
+                <button type="button" onclick="cerrarModalReintegrar()" class="text-muted-foreground hover:text-foreground p-1 text-lg">✕</button>
+            </div>
+
+            <!-- CUERPO -->
+            <div class="p-6 space-y-4 text-sm max-h-[75vh] overflow-y-auto">
+                <div class="bg-muted/40 p-3 rounded-lg border border-border flex items-center gap-3">
+                    <span class="text-lg">👤</span>
+                    <div>
+                        <p class="font-bold text-foreground uppercase text-xs">{{ empleado.nombre_completo }}</p>
+                        <p class="text-xs text-muted-foreground font-mono">C.C. {{ empleado.documento }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 p-3 rounded-lg text-xs leading-relaxed">
+                    ✨ <strong>¡Excelente!</strong> El colaborador volverá al estado <strong>Activo</strong>. Actualiza a continuación las condiciones de su nuevo contrato. Su historial previo se mantendrá vinculado.
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Nueva Fecha de Ingreso <span class="text-destructive">*</span>
+                        </label>
+                        <input type="date" 
+                               name="fecha_ingreso" 
+                               required 
+                               value="{% now 'Y-m-d' %}" 
+                               class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Tipo de Contrato <span class="text-destructive">*</span>
+                        </label>
+                        <select name="tipo_contrato" 
+                                required 
+                                class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="indefinido" {% if empleado.tipo_contrato == 'indefinido' %}selected{% endif %}>Término Indefinido</option>
+                            <option value="fijo" {% if empleado.tipo_contrato == 'fijo' %}selected{% endif %}>Término Fijo</option>
+                            <option value="obra_labor" {% if empleado.tipo_contrato == 'obra_labor' %}selected{% endif %}>Obra o Labor</option>
+                            <option value="aprendizaje" {% if empleado.tipo_contrato == 'aprendizaje' %}selected{% endif %}>Contrato de Aprendizaje</option>
+                            <option value="prestacion_servicios" {% if empleado.tipo_contrato == 'prestacion_servicios' %}selected{% endif %}>Prestación de Servicios</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Fecha Finalización (si aplica)
+                        </label>
+                        <input type="date" 
+                               name="fecha_finalizacion" 
+                               value="{{ empleado.fecha_finalizacion|date:'Y-m-d' }}" 
+                               class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Jornada Laboral
+                        </label>
+                        <select name="jornada" 
+                                class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="diurna" {% if empleado.jornada == 'diurna' %}selected{% endif %}>Diurna</option>
+                            <option value="nocturna" {% if empleado.jornada == 'nocturna' %}selected{% endif %}>Nocturna</option>
+                            <option value="mixta" {% if empleado.jornada == 'mixta' %}selected{% endif %}>Mixta</option>
+                            <option value="medio_tiempo" {% if empleado.jornada == 'medio_tiempo' %}selected{% endif %}>Medio Tiempo</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Cargo / Puesto <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="cargo" 
+                               required 
+                               value="{{ empleado.cargo|default:'' }}" 
+                               class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-emerald-500 outline-none uppercase">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Área / Departamento <span class="text-destructive">*</span>
+                        </label>
+                        <input type="text" 
+                               name="area" 
+                               required 
+                               value="{{ empleado.area|default:'' }}" 
+                               class="w-full border border-border-strong rounded-lg p-2 bg-background text-foreground text-xs focus:ring-2 focus:ring-emerald-500 outline-none uppercase">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">
+                            Nuevo Salario Mensual (COP) <span class="text-destructive">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-muted-foreground font-mono font-bold">$</span>
+                            <input type="text" 
+                                   name="salario" 
+                                   required 
+                                   value="{{ empleado.salario|floatformat:0 }}" 
+                                   class="w-full border border-border-strong rounded-lg pl-7 pr-3 py-2 bg-background text-foreground text-sm font-mono font-bold text-success moneda-col focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="px-6 py-3.5 bg-muted/40 border-t border-border flex justify-end gap-2">
+                <button type="button" 
+                        onclick="cerrarModalReintegrar()" 
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-neutral hover:bg-neutral-hover text-white transition">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow transition flex items-center gap-1.5">
+                    <span>🔄 Confirmar Reingreso</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+function abrirModalRetirar() {
+    const modal = document.getElementById("modalRetiro");
+    if (modal) {
+        modal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+    }
+}
+
+function cerrarModalRetirar() {
+    const modal = document.getElementById("modalRetiro");
+    if (modal) {
+        modal.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
+}
+
+function abrirModalReintegrar() {
+    const modal = document.getElementById("modalReintegrar");
+    if (modal) {
+        modal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+    }
+}
+
+function cerrarModalReintegrar() {
+    const modal = document.getElementById("modalReintegrar");
+    if (modal) {
+        modal.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        cerrarModalRetirar();
+        cerrarModalReintegrar();
+    }
+});
 
 document.querySelectorAll('.moneda-col').forEach(campo => {
-
-    // Formatear al cargar la página
     if (campo.value !== '') {
         let valor = campo.value.replace(/\D/g, '');
         campo.value = Number(valor).toLocaleString('es-CO');
     }
-
-    // Formatear mientras escribe
     campo.addEventListener('input', function() {
-
         let valor = this.value.replace(/\D/g, '');
-
         if (valor !== '') {
             this.value = Number(valor).toLocaleString('es-CO');
         } else {
             this.value = '';
         }
-
     });
-
 });
-
-function editarDotacion(id) {
-    // Ocultar los textos
-    document.getElementById(
-        'elemento-texto-' + id
-    ).classList.add('hidden');
-
-    document.getElementById(
-        'descripcion-texto-' + id
-    ).classList.add('hidden');
-
-
-    // Mostrar los campos para editar
-    document.getElementById(
-        'elemento-input-' + id
-    ).classList.remove('hidden');
-
-    document.getElementById(
-        'descripcion-input-' + id
-    ).classList.remove('hidden');
-
-
-    // Ocultar botón Editar
-    document.getElementById(
-        'boton-editar-' + id
-    ).classList.add('hidden');
-
-
-    // Mostrar botón Guardar
-    document.getElementById(
-        'boton-guardar-' + id
-    ).classList.remove('hidden');
-}
-
 </script>
 
 {% endblock %}

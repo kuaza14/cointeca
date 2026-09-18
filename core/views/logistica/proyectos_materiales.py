@@ -1777,10 +1777,8 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
         else:
             es_consolidado = True
     elif todos_proyectos_raw.exists():
-        proyecto_seleccionado = todos_proyectos_raw.first()
-        proyectos_scope = Proyecto.objects.filter(id=proyecto_seleccionado.id).select_related("macroproyecto")
-        if proyecto_seleccionado.macroproyecto:
-            macro_seleccionado = proyecto_seleccionado.macroproyecto
+        es_consolidado = True
+        proyectos_scope = Proyecto.objects.all().select_related("macroproyecto").order_by("numero_emcali")
     else:
         proyectos_scope = Proyecto.objects.none()
 
@@ -1958,6 +1956,25 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             .order_by("-fecha", "-id")
         )
 
+        # D. Resumen de Entradas / Suministros por material y por proyecto
+        tabla_resumen_entradas = [item for item in balance_materiales if item["entrada"] > 0]
+        entradas_por_proyecto = []
+        for p in proyectos_scope:
+            p_ents = [e for e in entradas if e.proyecto_id == p.id]
+            if p_ents:
+                p_unidades = sum(
+                    sum(d.cantidad for d in e.detalles.all())
+                    for e in p_ents
+                )
+                entradas_por_proyecto.append({
+                    "proyecto": p,
+                    "num_remisiones": len(p_ents),
+                    "total_unidades": p_unidades,
+                })
+    else:
+        tabla_resumen_entradas = []
+        entradas_por_proyecto = []
+
     maniobra_emcali_display = ""
     maniobra_cointeca_display = ""
     if macro_seleccionado:
@@ -1991,6 +2008,8 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             "filas_matriz": filas_matriz,
             "fila_totales": fila_totales,
             "tabla_resumen_retiros": tabla_resumen_retiros,
+            "tabla_resumen_entradas": tabla_resumen_entradas,
+            "entradas_por_proyecto": entradas_por_proyecto,
             "balance_materiales": balance_materiales,
             "materiales_devolucion": materiales_devolucion,
             "total_devolucion": total_devolucion,

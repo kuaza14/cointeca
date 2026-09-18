@@ -44,28 +44,3 @@ def dashboard(request):
         }
     )
 
-def obtener_alertas_vacaciones():
-
-    hoy = date.today()
-    limite = hoy + timedelta(days=15)
-
-    vacaciones = Vacacion.objects.select_related(
-        'empleado'
-    ).filter(
-        fecha_inicio__gte=hoy,
-        fecha_inicio__lte=limite
-    ).order_by('fecha_inicio')
-
-    alertas = []
-
-    for vacacion in vacaciones:
-
-        dias = (vacacion.fecha_inicio - hoy).days
-
-        alertas.append({
-            "empleado": vacacion.empleado.nombre_completo,
-            "fecha": vacacion.fecha_inicio,
-            "dias": dias,
-        })
-
-    return alertas

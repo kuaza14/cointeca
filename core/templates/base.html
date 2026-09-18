@@ -348,54 +348,71 @@
                         {% endif %}
 
                         {% if vacaciones_proximas %}
-                            <h2 class="sticky top-0 bg-warning-soft px-4 py-2 text-sm font-semibold text-warning">
-                                Próximas vacaciones
+                            <h2 class="sticky top-0 bg-warning-soft px-4 py-2 text-xs font-bold uppercase tracking-wider text-warning flex items-center justify-between border-b border-border">
+                                <span>Próximas vacaciones (15 días)</span>
+                                <span class="bg-warning/20 text-warning px-2 py-0.5 rounded-full text-[11px]">{{ vacaciones_proximas|length }}</span>
                             </h2>
                             {% for alerta in vacaciones_proximas %}
-                                <div class="border-b border-border px-4 py-3">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Sale: <strong class="tabular">{{ alerta.inicio }}</strong>
+                                <a href="{% url 'vacaciones_empleado' alerta.id %}"
+                                   class="block border-b border-border px-4 py-3 transition-colors duration-150 hover:bg-warning-soft/30">
+                                    <span class="block font-semibold text-foreground uppercase text-xs">{{ alerta.empleado }}</span>
+                                    <span class="block text-xs text-muted-foreground mt-0.5">
+                                        Fecha de salida: <strong class="tabular text-foreground">{{ alerta.inicio }}</strong>
                                     </span>
-                                    <span class="block text-sm text-warning">
-                                        Sale dentro de {{ alerta.dias_para_salir }} día{{ alerta.dias_para_salir|pluralize }}
+                                    <span class="block text-xs font-semibold text-warning mt-1">
+                                        ⏳ Sale dentro de {{ alerta.dias_para_salir }} día{{ alerta.dias_para_salir|pluralize }}
                                     </span>
-                                </div>
+                                </a>
                             {% endfor %}
                         {% endif %}
 
                         {% if cumplen_anio %}
-                            <h2 class="sticky top-0 bg-info-soft px-4 py-2 text-sm font-semibold text-info">
-                                Programar vacaciones
+                            <h2 class="sticky top-0 bg-info-soft px-4 py-2 text-xs font-bold uppercase tracking-wider text-info flex items-center justify-between border-b border-border">
+                                <span>Próximos a cumplir año (1 a 2 meses)</span>
+                                <span class="bg-info/20 text-info px-2 py-0.5 rounded-full text-[11px]">{{ cumplen_anio|length }}</span>
                             </h2>
                             {% for alerta in cumplen_anio %}
-                                <div class="border-b border-border px-4 py-3">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Aniversario: <strong class="tabular">{{ alerta.fecha }}</strong> ·
-                                        faltan {{ alerta.dias }} día{{ alerta.dias|pluralize }}
+                                <a href="{% url 'vacaciones_empleado' alerta.id %}"
+                                   class="block border-b border-border px-4 py-3 transition-colors duration-150 hover:bg-info-soft/30">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-foreground uppercase text-xs">{{ alerta.empleado }}</span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-info/10 text-info border border-info/30">
+                                            Año #{{ alerta.anio_num }}
+                                        </span>
+                                    </div>
+                                    <span class="block text-xs text-muted-foreground mt-0.5">
+                                        Aniversario laboral: <strong class="tabular text-foreground">{{ alerta.fecha }}</strong>
                                     </span>
-                                    <span class="block text-sm font-semibold text-destructive">
-                                        Días pendientes: {{ alerta.pendientes }}
-                                    </span>
-                                </div>
+                                    <div class="flex items-center justify-between mt-1 text-xs">
+                                        <span class="font-semibold text-info">
+                                            ⏳ Faltan {{ alerta.dias }} día{{ alerta.dias|pluralize }}
+                                        </span>
+                                        <span class="font-bold text-success text-[11px]">
+                                            +15 días causados
+                                        </span>
+                                    </div>
+                                </a>
                             {% endfor %}
                         {% endif %}
 
                         {% if pendientes_programar %}
-                            <h2 class="sticky top-0 bg-destructive-soft px-4 py-2 text-sm font-semibold text-destructive">
-                                Pendientes por programar
+                            <h2 class="sticky top-0 bg-destructive-soft px-4 py-2 text-xs font-bold uppercase tracking-wider text-destructive flex items-center justify-between border-b border-border">
+                                <span>Vacaciones acumuladas por programar</span>
+                                <span class="bg-destructive/20 text-destructive px-2 py-0.5 rounded-full text-[11px]">{{ pendientes_programar|length }}</span>
                             </h2>
                             {% for alerta in pendientes_programar %}
-                                <div class="border-b border-border px-4 py-3">
-                                    <span class="block font-semibold">{{ alerta.empleado }}</span>
-                                    <span class="block text-sm text-muted-foreground">
-                                        Último aniversario: <strong class="tabular">{{ alerta.fecha }}</strong>
-                                    </span>
-                                    <span class="block text-sm font-semibold text-destructive">
-                                        Días pendientes: {{ alerta.pendientes }} — revisar programación
-                                    </span>
-                                </div>
+                                <a href="{% url 'vacaciones_empleado' alerta.id %}"
+                                   class="block border-b border-border px-4 py-3 transition-colors duration-150 hover:bg-destructive-soft/30">
+                                    <span class="block font-semibold text-foreground uppercase text-xs">{{ alerta.empleado }}</span>
+                                    <div class="flex items-center justify-between mt-1 text-xs">
+                                        <span class="text-muted-foreground">
+                                            Antigüedad: {{ alerta.anios_trabajados }} año{{ alerta.anios_trabajados|pluralize }}
+                                        </span>
+                                        <span class="font-bold text-destructive">
+                                            {{ alerta.pendientes }} día{{ alerta.pendientes|pluralize }} pendiente{{ alerta.pendientes|pluralize }}
+                                        </span>
+                                    </div>
+                                </a>
                             {% endfor %}
                         {% endif %}
 

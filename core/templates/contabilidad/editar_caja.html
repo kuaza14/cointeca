@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Editar Caja Menor | Contabilidad Cointeca S.A.S.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-5">
+
+    <!-- BREADCRUMB -->
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'caja_menor' %}" class="hover:text-primary transition">Caja Menor</a>
+        <span>/</span>
+        <a href="{% url 'detalle_caja' caja.id %}" class="hover:text-primary transition">Caja #{{ caja.id }}</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Editar Trámite</span>
+    </nav>
+
+    <!-- FORMULARIO -->
+    <div class="tarjeta p-6 sm:p-8">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
+                ✏️
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-[#1F2937]">Editar Trámite de Caja Menor #{{ caja.id }}</h1>
+                <p class="text-xs text-[#64748B]">Actualiza las fechas o el fondo asignado para este periodo</p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha_tramite">
+                        Fecha de Trámite / Apertura <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-fecha_tramite" type="date" name="fecha_tramite" required
+                           value="{{ caja.fecha_tramite|date:'Y-m-d' }}"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha_cierre">
+                        Fecha de Cierre (Opcional)
+                    </label>
+                    <input id="campo-fecha_cierre" type="date" name="fecha_cierre"
+                           value="{{ caja.fecha_cierre|date:'Y-m-d' }}"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-valor_inicial">
+                    Valor Inicial Asignado ($ COP) <span class="text-red-500">*</span>
+                </label>
+                <input id="campo-valor_inicial" type="text" name="valor_inicial" required
+                       value="{{ caja.valor_inicial|floatformat:0 }}"
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                <p class="text-[10px] text-slate-400 mt-1">El saldo restante se recalculará automáticamente restando los gastos</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <a href="{% url 'detalle_caja' caja.id %}"
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Guardar Cambios</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.getElementById("campo-valor_inicial").addEventListener("input", function (e) {
+    const soloDigitos = e.target.value.replace(/\D/g, "");
+    e.target.value = soloDigitos
+        ? new Intl.NumberFormat("es-CO").format(soloDigitos)
+        : "";
+});
+</script>
+{% endblock %}

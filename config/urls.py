@@ -13,7 +13,11 @@ from core.views import (
     logout_view,
     dashboard,
     caja_menor,
+    crear_caja,
     detalle_caja,
+    editar_caja,
+    eliminar_caja,
+    exportar_caja_menor_excel,
     agregar_movimiento,
     eliminar_movimiento,
     editar_movimiento,
@@ -215,9 +219,13 @@ urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),
     path('logout/', logout_view, name='logout'),
 
-    # CAJA MENOR
+    # CAJA MENOR (CONTABILIDAD & RRHH-FOR-12)
     path('caja-menor/', caja_menor, name='caja_menor'),
+    path('caja-menor/crear/', crear_caja, name='crear_caja'),
     path('caja-menor/<int:id>/', detalle_caja, name='detalle_caja'),
+    path('caja-menor/<int:id>/editar/', editar_caja, name='editar_caja'),
+    path('caja-menor/<int:id>/eliminar/', eliminar_caja, name='eliminar_caja'),
+    path('caja-menor/<int:id>/exportar-excel/', exportar_caja_menor_excel, name='exportar_caja_menor_excel'),
     path('caja-menor/<int:id>/agregar/', agregar_movimiento, name='agregar_movimiento'),
     path('movimiento/<int:id>/eliminar/', eliminar_movimiento, name='eliminar_movimiento'),
     path('movimiento/<int:id>/editar/', editar_movimiento, name='editar_movimiento'),

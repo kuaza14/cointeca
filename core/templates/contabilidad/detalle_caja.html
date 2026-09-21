@@ -1,98 +1,198 @@
 {% extends 'base.html' %}
 
-{% block titulo %}Detalle de caja | Cointeca S.A.S{% endblock %}
-{% block encabezado %}Contabilidad{% endblock %}
+{% block titulo %}Detalle de Caja Menor #{{ caja.id }} | Contabilidad Cointeca S.A.S.{% endblock %}
 
 {% block content %}
+<div class="space-y-6">
 
-<h1 class="titulo-pagina">Detalle de caja</h1>
-<p class="subtitulo-pagina">Movimientos registrados de la caja menor.</p>
+    <!-- BREADCRUMB & ENCABEZADO -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'caja_menor' %}" class="hover:text-primary transition">Caja Menor</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Trámite #{{ caja.id }}</span>
+            </nav>
+            <div class="flex items-center gap-2.5">
+                <span class="text-2xl">📋</span>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                        Caja Menor #{{ caja.id }}
+                    </h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[10px] font-mono bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-md">
+                            CÓDIGO: RRHH-FOR-12
+                        </span>
+                        <span class="text-xs text-slate-500 font-medium">
+                            Apertura: {{ caja.fecha_tramite|date:"d/m/Y" }} 
+                            {% if caja.fecha_cierre %}· Cierre: {{ caja.fecha_cierre|date:"d/m/Y" }}{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- RESUMEN -->
-<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-    <div class="tarjeta tarjeta-cuerpo">
-        <p class="text-sm text-muted-foreground">Valor inicial</p>
-        <p class="mt-1 text-xl font-bold tabular">
-            ${{ caja.valor_inicial|floatformat:0 }}
-        </p>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{% url 'agregar_movimiento' caja.id %}" 
+               class="btn btn-primario bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>+ Agregar Gasto</span>
+            </a>
+            <a href="{% url 'exportar_caja_menor_excel' caja.id %}" 
+               title="Descargar formato Excel oficial con firmas y fórmulas"
+               class="btn btn-secundario bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                <svg class="size-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6h10.5a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0017.25 4.5H6.75A2.25 2.25 0 004.5 6.75v10.5A2.25 2.25 0 006.75 19.5z"/></svg>
+                <span>Exportar Excel (RRHH-FOR-12)</span>
+            </a>
+            <a href="{% url 'editar_caja' caja.id %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                <span>Editar Trámite</span>
+            </a>
+            <a href="{% url 'caja_menor' %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                <span>← Volver a Cajas</span>
+            </a>
+        </div>
     </div>
 
-    <div class="tarjeta tarjeta-cuerpo">
-        <p class="text-sm text-muted-foreground">Total gastado</p>
-        <p class="mt-1 text-xl font-bold tabular text-destructive">
-            ${{ caja.total_gastado|floatformat:0 }}
-        </p>
+    <!-- TARJETAS DE BALANCE FINANCIERO -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- 1. Valor Inicial -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50/20 to-transparent">
+            <p class="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Fondo Fijo Asignado</p>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                    ${{ caja.valor_inicial|floatformat:0 }}
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">COP</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Monto de apertura del trámite</p>
+        </div>
+
+        <!-- 2. Total Gastado -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-red-500 bg-gradient-to-br from-red-50/20 to-transparent">
+            <p class="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Total Gastado / Legalizado</p>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-red-600 tracking-tight">
+                    ${{ caja.total_gastado|floatformat:0 }}
+                </span>
+                <span class="text-[10px] text-red-500/70 font-medium">{{ porcentaje_consumido }}% consumido</span>
+            </div>
+            <!-- Barra de progreso -->
+            <div class="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                <div class="h-1.5 rounded-full bg-red-500" 
+                     style="width: {% if porcentaje_consumido > 100 %}100{% else %}{{ porcentaje_consumido }}{% endif %}%;"></div>
+            </div>
+        </div>
+
+        <!-- 3. Valor Restante -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/20 to-transparent">
+            <p class="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Valor Restante en Caja</p>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-emerald-700 tracking-tight">
+                    ${{ caja.valor_restante|floatformat:0 }}
+                </span>
+                <span class="text-[10px] text-emerald-600/70 font-medium">Disponible</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Efectivo remanente para gastos</p>
+        </div>
     </div>
 
-    <div class="tarjeta tarjeta-cuerpo">
-        <p class="text-sm text-muted-foreground">Restante</p>
-        <p class="mt-1 text-xl font-bold tabular text-success">
-            ${{ caja.valor_restante|floatformat:0 }}
-        </p>
+    <!-- TABLA DE MOVIMIENTOS / GASTOS -->
+    <div class="tarjeta overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+            <div>
+                <h2 class="text-sm font-bold text-[#1F2937]">Relación de Gastos y Facturas (Formato RRHH-FOR-12)</h2>
+                <p class="text-[11px] text-[#64748B]">Detalle individual de facturas, proveedores y conceptos soportados</p>
+            </div>
+            <span class="etiqueta etiqueta-info text-[11px]">{{ movimientos|length }} gastos registrados</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="tabla w-full text-xs text-left">
+                <thead class="bg-slate-50 text-slate-600 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-3">Fecha</th>
+                        <th class="px-4 py-3">Nº Factura</th>
+                        <th class="px-4 py-3">NIT / Cédula</th>
+                        <th class="px-4 py-3">Pagado a</th>
+                        <th class="px-4 py-3">Concepto</th>
+                        <th class="px-4 py-3 text-right">Valor ($)</th>
+                        <th class="px-4 py-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for m in movimientos %}
+                    <tr class="hover:bg-slate-50/70 transition">
+                        <td class="px-4 py-3 font-semibold text-[#1F2937] whitespace-nowrap">
+                            {{ m.fecha|date:"d/m/Y" }}
+                        </td>
+                        <td class="px-4 py-3 font-mono text-slate-700 font-bold whitespace-nowrap">
+                            {{ m.numero_factura }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-500 font-mono whitespace-nowrap">
+                            {% if m.nit %}{{ m.nit }}{% else %}<span class="text-slate-300">-</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-3 font-semibold text-[#1F2937]">
+                            {{ m.pagado_a }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 max-w-sm">
+                            {{ m.concepto }}
+                        </td>
+                        <td class="px-4 py-3 text-right font-bold text-red-600 font-mono whitespace-nowrap">
+                            ${{ m.valor|floatformat:0 }}
+                        </td>
+                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <a href="{% url 'editar_movimiento' m.id %}"
+                                   title="Editar Gasto"
+                                   class="size-7 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 flex items-center justify-center transition">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                                </a>
+                                <a href="{% url 'eliminar_movimiento' m.id %}"
+                                   onclick="return confirm('¿Seguro que deseas eliminar este gasto de ${{ m.valor|floatformat:0 }}?')"
+                                   title="Eliminar Gasto"
+                                   class="size-7 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 flex items-center justify-center transition">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-3xl mb-2">🧾</span>
+                                <p class="text-sm font-semibold text-slate-600">No hay gastos registrados en esta caja</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Agrega las facturas y compras realizadas para llevar el control.</p>
+                                <a href="{% url 'agregar_movimiento' caja.id %}" class="btn btn-primario mt-3 text-xs bg-emerald-600 hover:bg-emerald-700">
+                                    + Agregar Primer Gasto
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if movimientos %}
+                <tfoot class="bg-slate-50 font-bold border-t-2 border-slate-200">
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-right uppercase text-[11px] text-slate-600">Total Gastado:</td>
+                        <td class="px-4 py-3 text-right text-red-600 font-mono text-sm">${{ caja.total_gastado|floatformat:0 }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-right uppercase text-[11px] text-slate-600">Saldo Restante:</td>
+                        <td class="px-4 py-3 text-right text-emerald-700 font-mono text-sm">${{ caja.valor_restante|floatformat:0 }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
     </div>
 
 </div>
-
-<div class="mt-6">
-    <a href="{% url 'agregar_movimiento' caja.id %}" class="btn btn-primario">
-        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-        </svg>
-        Agregar gasto
-    </a>
-</div>
-
-<!-- MOVIMIENTOS -->
-<div class="tabla-caja mt-4">
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th scope="col">Fecha</th>
-                <th scope="col">Factura</th>
-                <th scope="col">Pagado a</th>
-                <th scope="col">Concepto</th>
-                <th scope="col" class="num">Valor</th>
-                <th scope="col">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for m in movimientos %}
-                <tr>
-                    <td class="tabular whitespace-nowrap">{{ m.fecha }}</td>
-                    <td>{{ m.numero_factura }}</td>
-                    <td>{{ m.pagado_a }}</td>
-                    <td class="max-w-xs">{{ m.concepto }}</td>
-                    <td class="num text-destructive font-semibold">${{ m.valor|floatformat:0 }}</td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'editar_movimiento' m.id %}"
-                               class="btn btn-secundario">
-                                Editar
-                                <span class="sr-only">el gasto del {{ m.fecha }}</span>
-                            </a>
-                            <a href="{% url 'eliminar_movimiento' m.id %}"
-                               onclick="return confirm('¿Eliminar este gasto? Esta acción no se puede deshacer.')"
-                               class="btn btn-peligro">
-                                Eliminar
-                                <span class="sr-only">el gasto del {{ m.fecha }}</span>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="6" class="estado-vacio">
-                        Esta caja todavía no tiene movimientos registrados.
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<div class="mt-6">
-    <a href="{% url 'caja_menor' %}" class="btn btn-secundario">Volver a caja menor</a>
-</div>
-
 {% endblock %}

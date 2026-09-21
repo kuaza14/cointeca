@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Aperturar Caja Menor | Contabilidad Cointeca S.A.S.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-5">
+
+    <!-- BREADCRUMB -->
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'caja_menor' %}" class="hover:text-primary transition">Caja Menor</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Aperturar Trámite</span>
+    </nav>
+
+    <!-- FORMULARIO -->
+    <div class="tarjeta p-6 sm:p-8">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div class="size-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
+                💵
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-[#1F2937]">Aperturar Trámite de Caja Menor</h1>
+                <p class="text-xs text-[#64748B]">Formato Institucional RRHH-FOR-12 · Asignación de fondo fijo</p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha_tramite">
+                        Fecha de Trámite / Apertura <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-fecha_tramite" type="date" name="fecha_tramite" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Fecha de inicio del fondo</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha_cierre">
+                        Fecha de Cierre (Opcional)
+                    </label>
+                    <input id="campo-fecha_cierre" type="date" name="fecha_cierre"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Dejar vacío si la caja está en curso</p>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-valor_inicial">
+                    Valor Inicial de la Caja Menor ($ COP) <span class="text-red-500">*</span>
+                </label>
+                <input id="campo-valor_inicial" type="text" name="valor_inicial" required
+                       placeholder="Ej: 1.000.000"
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                <p class="text-[10px] text-slate-400 mt-1">Monto total asignado para compras y gastos menores (se formatea automáticamente)</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <a href="{% url 'caja_menor' %}"
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primario bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Guardar y Aperturar Caja</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.getElementById("campo-valor_inicial").addEventListener("input", function (e) {
+    const soloDigitos = e.target.value.replace(/\D/g, "");
+    e.target.value = soloDigitos
+        ? new Intl.NumberFormat("es-CO").format(soloDigitos)
+        : "";
+});
+</script>
+{% endblock %}

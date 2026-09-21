@@ -1,76 +1,117 @@
 {% extends 'base.html' %}
 
-{% block titulo %}Editar gasto | Cointeca S.A.S{% endblock %}
-{% block encabezado %}Contabilidad{% endblock %}
+{% block titulo %}Editar Gasto de Caja Menor #{{ m.caja.id }} | Contabilidad Cointeca S.A.S.{% endblock %}
 
 {% block content %}
+<div class="max-w-2xl mx-auto space-y-5">
 
-<div class="mx-auto max-w-2xl">
+    <!-- BREADCRUMB -->
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'caja_menor' %}" class="hover:text-primary transition">Caja Menor</a>
+        <span>/</span>
+        <a href="{% url 'detalle_caja' m.caja.id %}" class="hover:text-primary transition">Caja #{{ m.caja.id }}</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Editar Gasto</span>
+    </nav>
 
-    <h1 class="titulo-pagina">Editar gasto</h1>
-    <p class="subtitulo-pagina">
-        Los campos marcados con <span class="text-destructive">*</span> son obligatorios.
-    </p>
+    <!-- FORMULARIO -->
+    <div class="tarjeta p-6 sm:p-8">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
+                ✏️
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-[#1F2937]">Editar Gasto / Factura #{{ m.numero_factura }}</h1>
+                <p class="text-xs text-[#64748B]">Modifica los datos del comprobante para la Caja Menor #{{ m.caja.id }}</p>
+            </div>
+        </div>
 
-    <div class="tarjeta tarjeta-cuerpo mt-6">
-        <form method="POST" class="space-y-5">
+        <form method="POST" class="space-y-4">
             {% csrf_token %}
 
-            <div>
-                <label for="fecha" class="campo campo-req">Fecha</label>
-                <input type="date" id="fecha" name="fecha" required
-                       value="{{ m.fecha|date:'Y-m-d' }}" class="entrada">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha">
+                        Fecha del Gasto <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-fecha" type="date" name="fecha" required
+                           value="{{ m.fecha|date:'Y-m-d' }}"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-numero_factura">
+                        Nº de Factura / Recibo <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-numero_factura" type="text" name="numero_factura" required
+                           value="{{ m.numero_factura }}"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-nit">
+                        NIT / Cédula del Proveedor
+                    </label>
+                    <input id="campo-nit" type="text" name="nit"
+                           value="{{ m.nit }}"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-pagado_a">
+                        Pagado a (Establecimiento / Beneficiario) <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-pagado_a" type="text" name="pagado_a" required
+                           value="{{ m.pagado_a }}"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
             </div>
 
             <div>
-                <label for="numero_factura" class="campo campo-req">Número de factura</label>
-                <input type="text" id="numero_factura" name="numero_factura" required
-                       value="{{ m.numero_factura }}" class="entrada">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-concepto">
+                    Concepto / Descripción del Gasto <span class="text-red-500">*</span>
+                </label>
+                <textarea id="campo-concepto" name="concepto" required rows="3"
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">{{ m.concepto }}</textarea>
             </div>
 
             <div>
-                <label for="nit" class="campo">NIT</label>
-                <input type="text" id="nit" name="nit" value="{{ m.nit }}" class="entrada">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-valor">
+                    Valor del Gasto ($ COP) <span class="text-red-500">*</span>
+                </label>
+                <input id="campo-valor" type="text" name="valor" required
+                       value="{{ m.valor|floatformat:0 }}"
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                <p class="text-[10px] text-slate-400 mt-1">Se recalculará automáticamente el total gastado y el saldo restante</p>
             </div>
 
-            <div>
-                <label for="pagado_a" class="campo campo-req">Pagado a</label>
-                <input type="text" id="pagado_a" name="pagado_a" required
-                       value="{{ m.pagado_a }}" class="entrada">
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <a href="{% url 'detalle_caja' m.caja.id %}"
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Guardar Cambios</span>
+                </button>
             </div>
 
-            <div>
-                <label for="concepto" class="campo campo-req">Concepto</label>
-                <textarea id="concepto" name="concepto" required class="area-texto">{{ m.concepto }}</textarea>
-            </div>
-
-            <div>
-                <label for="valor" class="campo campo-req">Valor</label>
-                <input type="text" id="valor" name="valor" required
-                       inputmode="numeric"
-                       value="{{ m.valor }}"
-                       aria-describedby="ayuda-valor"
-                       class="entrada tabular">
-                <p id="ayuda-valor" class="ayuda-campo">
-                    Se separa en miles automáticamente. Ejemplo: 50.000
-                </p>
-            </div>
-
-            <div class="flex flex-wrap gap-3 pt-2">
-                <button type="submit" class="btn btn-primario">Guardar cambios</button>
-                <a href="{% url 'detalle_caja' m.caja.id %}" class="btn btn-secundario">Cancelar</a>
-            </div>
         </form>
     </div>
+
 </div>
 
 <script>
-document.getElementById("valor").addEventListener("input", function (evento) {
-    const soloDigitos = evento.target.value.replace(/\D/g, "");
-    evento.target.value = soloDigitos
+document.getElementById("campo-valor").addEventListener("input", function (e) {
+    const soloDigitos = e.target.value.replace(/\D/g, "");
+    e.target.value = soloDigitos
         ? new Intl.NumberFormat("es-CO").format(soloDigitos)
         : "";
 });
 </script>
-
 {% endblock %}

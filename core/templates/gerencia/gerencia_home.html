@@ -72,24 +72,27 @@
             </div>
         </div>
 
-        <!-- 3. Informes Gerenciales y Rendición de Cuentas (Próximamente) -->
-        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-75">
+        <!-- 3. Seguimiento de Facturación & Metas -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/20 to-transparent">
             <div>
-                <div class="size-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4 text-2xl">
-                    📈
+                <div class="size-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 text-2xl">
+                    💰
                 </div>
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-[#1F2937]">Informes Ejecutivos</h2>
-                    <span class="etiqueta etiqueta-info">Próximamente</span>
+                    <h2 class="text-lg font-bold text-[#1F2937]">Seguimiento de Facturación</h2>
+                    {% if total_proyectos_facturacion %}
+                        <span class="etiqueta etiqueta-exito">{{ total_proyectos_facturacion }} proyectos</span>
+                    {% endif %}
                 </div>
                 <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
-                    Consolidados automáticos de gestión gerencial, estados de avance y reportes para socios y junta de accionistas.
+                    Control mensual de metas comerciales vs facturación real ejecutada por proyecto y cálculo de porcentaje de cumplimiento.
                 </p>
             </div>
             <div class="mt-6">
-                <button disabled class="btn btn-secundario w-full opacity-60 cursor-not-allowed">
-                    <span>En desarrollo</span>
-                </button>
+                <a href="{% url 'facturacion' %}" class="btn btn-primario w-full">
+                    <span>Gestionar Facturación</span>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
             </div>
         </div>
 

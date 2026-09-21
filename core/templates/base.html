@@ -272,10 +272,10 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'facturacion' %}"
-                           class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 {% if '/facturacion/' in request.path %}bg-[#1E63F0] text-white shadow-md{% else %}text-slate-200 hover:bg-white/10 hover:text-white{% endif %}">
-                            <span class="text-base">💰</span>
-                            <span>Facturación</span>
+                        <a href="{% url 'logistica_home' %}"
+                           class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 {% if '/logistica/' in request.path %}bg-[#1E63F0] text-white shadow-md{% else %}text-slate-200 hover:bg-white/10 hover:text-white{% endif %}">
+                            <span class="text-base">📦</span>
+                            <span>Logística & Stock</span>
                         </a>
                     </li>
 
@@ -288,16 +288,8 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'logistica_home' %}"
-                           class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 {% if '/logistica/' in request.path %}bg-[#1E63F0] text-white shadow-md{% else %}text-slate-200 hover:bg-white/10 hover:text-white{% endif %}">
-                            <span class="text-base">📦</span>
-                            <span>Logística & Stock</span>
-                        </a>
-                    </li>
-
-                    <li>
                         <a href="{% url 'gerencia_home' %}"
-                           class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 {% if '/gerencia/' in request.path or '/actas/' in request.path or '/indicadores/' in request.path %}bg-[#1E63F0] text-white shadow-md{% else %}text-slate-200 hover:bg-white/10 hover:text-white{% endif %}">
+                           class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 {% if '/gerencia/' in request.path or '/actas/' in request.path or '/indicadores/' in request.path or '/facturacion/' in request.path %}bg-[#1E63F0] text-white shadow-md{% else %}text-slate-200 hover:bg-white/10 hover:text-white{% endif %}">
                             <span class="text-base">🏛️</span>
                             <span>Gerencia</span>
                         </a>

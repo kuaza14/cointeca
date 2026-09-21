@@ -31,7 +31,7 @@ from core.views import (
     editar_seguimiento,
     eliminar_seguimiento,
     facturacion,
-    crear_proyecto,
+    crear_proyecto_facturacion,
     registrar_facturacion,
     eliminar_facturacion,
     editar_facturacion,
@@ -242,9 +242,9 @@ urlpatterns = [
     path('seguimiento/<int:id>/editar/', editar_seguimiento, name='editar_seguimiento'),
     path('seguimiento/<int:id>/eliminar/', eliminar_seguimiento, name='eliminar_seguimiento'),
 
-    # FACTURACIÓN
+    # GERENCIA - FACTURACIÓN
     path('facturacion/', facturacion, name='facturacion'),
-    path('facturacion/crear-proyecto/', crear_proyecto, name='crear_proyecto'),
+    path('facturacion/crear-proyecto/', crear_proyecto_facturacion, name='crear_proyecto_facturacion'),
     path('facturacion/registrar/', registrar_facturacion, name='registrar_facturacion'),
     path('facturacion/<int:id>/editar/', editar_facturacion, name='editar_facturacion'),
     path('facturacion/<int:id>/eliminar/', eliminar_facturacion, name='eliminar_facturacion'),

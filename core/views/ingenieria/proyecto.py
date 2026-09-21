@@ -444,6 +444,7 @@ def detalle_proyecto(request, id):
 
     materiales_catalogo = list(Material.objects.select_related('inventario').all().order_by("descripcion"))
     catalogo_mo_todos = list(ItemManoObra.objects.all().order_by("codigo"))
+    empleados = list(Empleado.objects.filter(estado="activo").order_by("nombre_completo"))
 
     return render(
         request,
@@ -457,6 +458,7 @@ def detalle_proyecto(request, id):
             "fila_totales": fila_totales,
             "tabla_resumen_retiros": tabla_resumen_retiros,
             "materiales_catalogo": materiales_catalogo,
+            "empleados": empleados,
             # Mano de Obra
             "mo_columnas": mo_columnas,
             "mo_filas_matriz": mo_filas_matriz,

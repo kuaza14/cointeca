@@ -1,3 +1,4 @@
+from collections import defaultdict
 from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo, calcular_mano_obra_para_apoyo, actualizar_presupuesto_proyecto
 import io
 import openpyxl
@@ -288,29 +289,37 @@ def eliminar_proyecto(request, id):
 def detalle_proyecto(request, id):
     proyecto = get_object_or_404(Proyecto, id=id)
 
-    apoyos = (
+    # 1. Cargar apoyos con sus relaciones principales en 1 sola consulta
+    apoyos = list(
         Apoyo.objects
         .filter(proyecto=proyecto)
         .select_related("quien_ejecuta")
-        .prefetch_related("luminarias", "manos_obra", "manos_obra__item_mano_obra")   
+        .prefetch_related("luminarias")
         .order_by("numero_apoyo", "id")
     )
 
     tab_activa = request.GET.get("tab", "materiales").strip().lower()
 
-    # 1. MATRIZ DE MATERIALES (POSTE A POSTE)
-    apoyo_materiales = ApoyoMaterial.objects.filter(
-        apoyo__proyecto=proyecto
-    ).select_related("material")
+    # 2. Cargar TODOS los materiales de los apoyos del proyecto en 1 sola consulta (sin N+1)
+    apoyo_materiales = list(
+        ApoyoMaterial.objects.filter(
+            apoyo__proyecto=proyecto
+        ).select_related("material", "material__inventario").order_by("material__descripcion")
+    )
 
-    materiales_ids = apoyo_materiales.values_list('material_id', flat=True).distinct()
-    materiales_columnas = list(Material.objects.filter(id__in=materiales_ids).order_by("item", "descripcion"))
-
+    materiales_dict = {}
     cantidades_inst_map = {}
     cantidades_ret_map = {}
+    apoyo_materiales_map = defaultdict(list)
+
     for am in apoyo_materiales:
         cantidades_inst_map[(am.apoyo_id, am.material_id)] = am.cantidad_requerida
         cantidades_ret_map[(am.apoyo_id, am.material_id)] = am.cantidad_retirada
+        apoyo_materiales_map[am.apoyo_id].append(am)
+        if am.material_id not in materiales_dict:
+            materiales_dict[am.material_id] = am.material
+
+    materiales_columnas = sorted(materiales_dict.values(), key=lambda m: (m.item or "", m.descripcion or ""))
 
     filas_matriz = []
     totales_inst_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
@@ -332,7 +341,7 @@ def detalle_proyecto(request, id):
         filas_matriz.append({
             "apoyo": ap,
             "celdas": celdas,
-            "materiales_asociados": list(ap.materiales.select_related("material", "material__inventario").all().order_by("material__descripcion")),
+            "materiales_asociados": apoyo_materiales_map.get(ap.id, []),
         })
 
     fila_totales = []
@@ -352,21 +361,28 @@ def detalle_proyecto(request, id):
                 "cantidad_retirada": tot_ret,
             })
 
-    # 2. MATRIZ DE MANO DE OBRA / LIQUIDACIÓN PROYECCIONES
-    apoyos_mo = ApoyoManoObra.objects.filter(
-        apoyo__proyecto=proyecto
-    ).select_related("item_mano_obra")
+    # 3. Cargar TODA la Mano de Obra del proyecto en 1 sola consulta (sin N+1)
+    apoyos_mo = list(
+        ApoyoManoObra.objects.filter(
+            apoyo__proyecto=proyecto
+        ).select_related("item_mano_obra")
+    )
 
-    mo_ids = apoyos_mo.values_list('item_mano_obra_id', flat=True).distinct()
-    mo_columnas = list(ItemManoObra.objects.filter(id__in=mo_ids).order_by("codigo"))
-
+    mo_dict = {}
     mo_cant_map = {}
     mo_origen_map = {}
     mo_id_map = {}
+    apoyo_mo_map = defaultdict(list)
+
     for amo in apoyos_mo:
         mo_cant_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.cantidad
         mo_origen_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.origen
         mo_id_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.id
+        apoyo_mo_map[amo.apoyo_id].append(amo)
+        if amo.item_mano_obra_id not in mo_dict:
+            mo_dict[amo.item_mano_obra_id] = amo.item_mano_obra
+
+    mo_columnas = sorted(mo_dict.values(), key=lambda item: item.codigo or "")
 
     mo_filas_matriz = []
     mo_totales_columna = {item.id: Decimal("0") for item in mo_columnas}
@@ -388,8 +404,8 @@ def detalle_proyecto(request, id):
         mo_filas_matriz.append({
             "apoyo": ap,
             "celdas": celdas_mo,
-            "manos_obra_list": ap.manos_obra.all(),
-            "materiales_asociados": list(ap.materiales.select_related("material", "material__inventario").all().order_by("material__descripcion")),
+            "manos_obra_list": apoyo_mo_map.get(ap.id, []),
+            "materiales_asociados": apoyo_materiales_map.get(ap.id, []),
         })
 
     mo_fila_totales = []
@@ -416,10 +432,10 @@ def detalle_proyecto(request, id):
     if presupuesto.valor_mano_obra != gran_total_mo_pesos:
         presupuesto.valor_mano_obra = gran_total_mo_pesos
         presupuesto.valor_total = presupuesto.valor_materiales + presupuesto.valor_mano_obra + presupuesto.otros_costos
-        presupuesto.save()
+        presupuesto.save(update_fields=['valor_mano_obra', 'valor_total'])
 
-    materiales_catalogo = Material.objects.all().order_by("descripcion")
-    catalogo_mo_todos = ItemManoObra.objects.all().order_by("codigo")
+    materiales_catalogo = list(Material.objects.select_related('inventario').all().order_by("descripcion"))
+    catalogo_mo_todos = list(ItemManoObra.objects.all().order_by("codigo"))
 
     return render(
         request,

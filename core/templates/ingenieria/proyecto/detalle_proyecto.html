@@ -65,38 +65,37 @@
         </div>
     </div>
 
-    <!-- PESTAÑAS DE NAVEGACIÓN MODERNA -->
-    <div class="flex border-b border-border bg-card rounded-xl p-1.5 shadow-xs gap-2">
-        <a href="?tab=materiales"
-           class="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition {% if tab_activa == 'materiales' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
-            📦 <span>1. Matriz de Materiales (Poste a Poste)</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'materiales' %}bg-white/20 text-white{% else %}bg-muted text-foreground{% endif %}">
+    <!-- PESTAÑAS DE NAVEGACIÓN INSTANTÁNEA (SIN RECARGA LENTA) -->
+    <div class="flex border-b border-border bg-card rounded-xl p-1.5 shadow-xs gap-2 flex-wrap sm:flex-nowrap">
+        <button type="button" onclick="cambiarPestana('materiales')" id="btn-tab-materiales"
+           class="pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer {% if tab_activa == 'materiales' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
+            <span>📦</span> <span>1. Matriz de Materiales (Poste a Poste)</span>
+            <span class="badge-pestana px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'materiales' %}bg-white/20 text-white{% else %}bg-muted text-foreground{% endif %}">
                 {{ apoyos|length }} postes
             </span>
-        </a>
+        </button>
 
-        <a href="?tab=mano_obra"
-           class="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition {% if tab_activa == 'mano_obra' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
-            🛠️ <span>2. Liquidación de Mano de Obra (Proyecciones)</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'mano_obra' %}bg-white/20 text-white{% else %}bg-muted text-foreground{% endif %}">
+        <button type="button" onclick="cambiarPestana('mano_obra')" id="btn-tab-mano_obra"
+           class="pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer {% if tab_activa == 'mano_obra' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
+            <span>🛠️</span> <span>2. Liquidación de Mano de Obra (Proyecciones)</span>
+            <span class="badge-pestana px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'mano_obra' %}bg-white/20 text-white{% else %}bg-muted text-foreground{% endif %}">
                 {{ mo_columnas|length }} actividades
             </span>
-        </a>
+        </button>
 
-        <a href="?tab=resumen"
-           class="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition {% if tab_activa == 'resumen' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
-            💰 <span>3. Resumen Financiero & Facturación</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'resumen' %}bg-amber-300 text-amber-900 font-extrabold{% else %}bg-amber-100 text-amber-800 font-bold{% endif %}">
+        <button type="button" onclick="cambiarPestana('resumen')" id="btn-tab-resumen"
+           class="pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer {% if tab_activa == 'resumen' %}bg-primary text-white shadow-sm{% else %}text-muted-foreground hover:bg-muted hover:text-foreground{% endif %}">
+            <span>💰</span> <span>3. Resumen Financiero & Facturación</span>
+            <span class="badge-pestana px-2 py-0.5 rounded-full text-[10px] {% if tab_activa == 'resumen' %}bg-amber-300 text-amber-900 font-extrabold{% else %}bg-amber-100 text-amber-800 font-bold{% endif %}">
                 ${{ gran_total_mo_pesos|floatformat:0 }}
             </span>
-        </a>
+        </button>
     </div>
 
     <!-- ======================================================================= -->
     <!-- PESTAÑA 1: MATRIZ DE MATERIALES POSTE A POSTE                          -->
     <!-- ======================================================================= -->
-    {% if tab_activa == "materiales" %}
-    <div class="space-y-6">
+    <div id="panel-tab-materiales" class="tab-panel space-y-6 {% if tab_activa != 'materiales' %}hidden{% endif %}">
         <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
             <div class="overflow-x-auto max-h-[70vh]">
                 <table class="min-w-full border-collapse text-left text-xs">
@@ -296,13 +295,11 @@
         </div>
         {% endif %}
     </div>
-    {% endif %}
 
     <!-- ======================================================================= -->
     <!-- PESTAÑA 2: LIQUIDACIÓN DE MANO DE OBRA (PROYECCIONES)                   -->
     <!-- ======================================================================= -->
-    {% if tab_activa == "mano_obra" %}
-    <div class="space-y-6">
+    <div id="panel-tab-mano_obra" class="tab-panel space-y-6 {% if tab_activa != 'mano_obra' %}hidden{% endif %}">
 
         <!-- Barra de Acciones de Mano de Obra -->
         <div class="bg-card rounded-xl p-4 shadow-sm border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -499,13 +496,11 @@
             </div>
         </div>
     </div>
-    {% endif %}
 
     <!-- ======================================================================= -->
     <!-- PESTAÑA 3: RESUMEN FINANCIERO Y FACTURACIÓN                             -->
     <!-- ======================================================================= -->
-    {% if tab_activa == "resumen" %}
-    <div class="space-y-6">
+    <div id="panel-tab-resumen" class="tab-panel space-y-6 {% if tab_activa != 'resumen' %}hidden{% endif %}">
 
         <!-- TARJETAS DE KPIS FINANCIEROS -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -610,7 +605,6 @@
             </div>
         </div>
     </div>
-    {% endif %}
 
     <!-- ======================================================================= -->
     <!-- MODAL 1: ASIGNAR ACTIVIDAD MANUAL A UN APOYO                            -->
@@ -971,6 +965,39 @@
 <script src="{% static 'js/ingenieria.js' %}"></script>
 
 <script>
+function cambiarPestana(tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+    const target = document.getElementById('panel-tab-' + tabName);
+    if (target) target.classList.remove('hidden');
+
+    ['materiales', 'mano_obra', 'resumen'].forEach(t => {
+        const btn = document.getElementById('btn-tab-' + t);
+        if (!btn) return;
+        const badge = btn.querySelector('.badge-pestana');
+        if (t === tabName) {
+            btn.className = 'pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer bg-primary text-white shadow-sm';
+            if (badge) {
+                badge.className = (t === 'resumen')
+                    ? 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-amber-300 text-amber-900 font-extrabold'
+                    : 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-white/20 text-white';
+            }
+        } else {
+            btn.className = 'pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer text-muted-foreground hover:bg-muted hover:text-foreground';
+            if (badge) {
+                badge.className = (t === 'resumen')
+                    ? 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-bold'
+                    : 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-muted text-foreground';
+            }
+        }
+    });
+
+    try {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabName);
+        window.history.replaceState(null, '', url);
+    } catch (e) {}
+}
+
 const apoyosMaterialesData = {
     {% for fila in filas_matriz %}
     "{{ fila.apoyo.id }}": {

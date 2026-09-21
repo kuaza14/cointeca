@@ -152,7 +152,15 @@
                             </td>
 
                             <td class="px-4 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
-                                <span class="text-primary">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
+                                <div class="flex items-center gap-1.5 font-bold font-mono">
+                                    <span class="text-primary">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
+                                </div>
+                                {% if fila.apoyo.observacion %}
+                                    <div class="mt-1 flex items-center gap-1 text-[11px] font-sans font-normal text-amber-900 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 max-w-[210px]" title="{{ fila.apoyo.observacion }}">
+                                        <span class="shrink-0 text-xs">💬</span>
+                                        <span class="truncate">{{ fila.apoyo.observacion }}</span>
+                                    </div>
+                                {% endif %}
                             </td>
 
                             <td class="px-3 py-2.5 text-center font-semibold text-foreground border-r border-border">
@@ -390,6 +398,12 @@
                                     <span class="text-primary">●</span>
                                     <span class="text-foreground font-black">{{ fila.apoyo.nodo|default:"Sin Nodo" }}</span>
                                 </div>
+                                {% if fila.apoyo.observacion %}
+                                    <div class="mt-1 flex items-center gap-1 text-[11px] font-sans font-normal text-amber-900 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 max-w-[210px]" title="{{ fila.apoyo.observacion }}">
+                                        <span class="shrink-0 text-xs">💬</span>
+                                        <span class="truncate">{{ fila.apoyo.observacion }}</span>
+                                    </div>
+                                {% endif %}
                                 {% if fila.materiales_asociados %}
                                 <div class="text-[10px] text-muted-foreground font-sans font-medium mt-0.5 truncate max-w-[180px]" title="{% for m in fila.materiales_asociados %}{{ m.cantidad_requerida|floatformat:0 }}x {{ m.material.descripcion }}{% if not forloop.last %}, {% endif %}{% endfor %}">
                                     📦 {{ fila.materiales_asociados|length }} material{{ fila.materiales_asociados|length|pluralize:"es" }}
@@ -750,6 +764,14 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            Observaciones / Notas Técnicas del Poste
+                        </label>
+                        <textarea name="observacion" rows="2" placeholder="Ej: Zona rocosa, requiere grúa canasta, autorización especial de predio..."
+                                  class="w-full border border-border rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground"></textarea>
+                    </div>
+
                     <!-- LUMINARIAS -->
                     <div class="border-t border-border pt-4">
                         <div class="flex items-center justify-between mb-3">
@@ -875,6 +897,15 @@
             </div>
 
             <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <!-- NOTA / OBSERVACIÓN DEL POSTE -->
+                <div id="modalMaterialesObsBox" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2 shadow-xs">
+                    <span class="text-base leading-none">💬</span>
+                    <div>
+                        <span class="font-bold block uppercase text-[10px] text-amber-800">Observación / Nota Técnica del Poste:</span>
+                        <span id="modalMaterialesObsTexto" class="font-medium"></span>
+                    </div>
+                </div>
+
                 <!-- LISTADO DE MATERIALES ACTUALES -->
                 <div>
                     <h4 class="text-xs font-bold uppercase text-muted-foreground mb-2 flex items-center justify-between">
@@ -1004,6 +1035,7 @@ const apoyosMaterialesData = {
         "id": "{{ fila.apoyo.id }}",
         "nodo": "{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}",
         "numero": "{{ fila.apoyo.numero_apoyo|default:'' }}",
+        "observacion": "{{ fila.apoyo.observacion|default:''|escapejs }}",
         "materiales": [
             {% for m in fila.materiales_asociados %}
             {
@@ -1026,6 +1058,17 @@ function abrirModalGestionMateriales(apoyoId, nodoLabel) {
     document.getElementById('contadorMaterialesApoyo').textContent = data.materiales.length + ' materiales';
     document.getElementById('formAgregarMaterialRapido').action = '/ingenieria/apoyos/' + apoyoId + '/agregar-material-rapido/';
     document.getElementById('btnIrEdicionCompletaPoste').href = '/ingenieria/apoyo/' + apoyoId + '/';
+
+    const obsBox = document.getElementById('modalMaterialesObsBox');
+    const obsTexto = document.getElementById('modalMaterialesObsTexto');
+    if (obsBox && obsTexto) {
+        if (data.observacion && data.observacion.trim()) {
+            obsTexto.textContent = data.observacion;
+            obsBox.classList.remove('hidden');
+        } else {
+            obsBox.classList.add('hidden');
+        }
+    }
 
     const tbody = document.getElementById('cuerpoTablaMaterialesApoyo');
     tbody.innerHTML = '';

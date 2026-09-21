@@ -486,6 +486,9 @@ def crear_apoyo(request, proyecto_id):
         tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
         direccion = request.POST.get("direccion", "").strip()
         tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+        observacion = request.POST.get("observacion", "").strip()
+        quien_ejecuta_id = request.POST.get("quien_ejecuta")
+        quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
 
         cant_ret_val = request.POST.get("cantidad_retenida")
         try:
@@ -501,6 +504,7 @@ def crear_apoyo(request, proyecto_id):
 
         apoyo = Apoyo.objects.create(
             proyecto=proyecto,
+            quien_ejecuta_id=quien_ejecuta_id,
             numero_apoyo=numero_apoyo,
             nodo=request.POST.get("nodo", "").strip(),
             fecha=fecha,
@@ -509,6 +513,7 @@ def crear_apoyo(request, proyecto_id):
             tipo_estructura=tipo_estructura,
             cantidad_retenida=cantidad_retenida,
             metros_retenido=metros_retenido,
+            observacion=observacion,
             estado="Pendiente"
         )
 
@@ -563,6 +568,10 @@ def crear_apoyo(request, proyecto_id):
                 materiales_creados += 1
             except (ValueError, TypeError, ArithmeticError):
                 continue
+
+        # Recalcular Mano de Obra y Presupuesto
+        calcular_mano_obra_para_apoyo(apoyo)
+        actualizar_presupuesto_proyecto(proyecto)
 
         messages.success(
             request,

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Módulo de Gerencia & Gobernanza | COINTECA S.A.S.{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Encabezado -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                Gerencia & Gobernanza Corporativa
+            </h1>
+            <p class="text-xs text-[#64748B] mt-1">
+                Seguimiento de decisiones directivas, actas de junta, metas corporativas e indicadores estratégicos (KPIs).
+            </p>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-secundario self-start sm:self-auto text-xs">
+            <span>← Volver al Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Grid de Tarjetas de Módulos de Gerencia -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        <!-- 1. Indicadores Estratégicos -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50/20 to-transparent">
+            <div>
+                <div class="size-12 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center mb-4 text-2xl">
+                    📊
+                </div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#1F2937]">Indicadores Estratégicos</h2>
+                    {% if total_indicadores %}
+                        <span class="etiqueta etiqueta-info">{{ total_indicadores }} métricas</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                    Balanced Scorecard: perspectivas Financiera, Clientes, Procesos Internos y Aprendizaje con metas anuales y seguimientos periódicos.
+                </p>
+            </div>
+            <div class="mt-6">
+                <a href="{% url 'indicadores' %}" class="btn btn-primario w-full">
+                    <span>Gestionar Indicadores</span>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Actas de Junta Directiva -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50/20 to-transparent">
+            <div>
+                <div class="size-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 text-2xl">
+                    📋
+                </div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#1F2937]">Actas de Junta Directiva</h2>
+                    {% if total_actas %}
+                        <span class="etiqueta etiqueta-morado">{{ total_actas }} actas</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                    Registro formal de reuniones directivas, órdenes del día, proposiciones, acuerdos, compromisos y firmas oficiales.
+                </p>
+            </div>
+            <div class="mt-6">
+                <a href="{% url 'actas' %}" class="btn btn-primario w-full">
+                    <span>Ver Actas de Junta</span>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. Informes Gerenciales y Rendición de Cuentas (Próximamente) -->
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-75">
+            <div>
+                <div class="size-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4 text-2xl">
+                    📈
+                </div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-[#1F2937]">Informes Ejecutivos</h2>
+                    <span class="etiqueta etiqueta-info">Próximamente</span>
+                </div>
+                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                    Consolidados automáticos de gestión gerencial, estados de avance y reportes para socios y junta de accionistas.
+                </p>
+            </div>
+            <div class="mt-6">
+                <button disabled class="btn btn-secundario w-full opacity-60 cursor-not-allowed">
+                    <span>En desarrollo</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -35,6 +35,7 @@ from core.views import (
     registrar_facturacion,
     eliminar_facturacion,
     editar_facturacion,
+    gerencia_home,
 )
 
 # 🟢 RRHH - EMPLEADOS
@@ -220,6 +221,9 @@ urlpatterns = [
     path('caja-menor/<int:id>/agregar/', agregar_movimiento, name='agregar_movimiento'),
     path('movimiento/<int:id>/eliminar/', eliminar_movimiento, name='eliminar_movimiento'),
     path('movimiento/<int:id>/editar/', editar_movimiento, name='editar_movimiento'),
+
+    # GERENCIA & GOBERNANZA
+    path('gerencia/', gerencia_home, name='gerencia_home'),
 
     # ACTAS
     path('actas/', actas, name='actas'),

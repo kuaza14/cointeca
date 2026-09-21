@@ -135,7 +135,11 @@ def editar_macroproyecto(request, id):
 @login_required
 @transaction.atomic
 def eliminar_macroproyecto(request, id):
-    macro = get_object_or_404(Macroproyecto, id=id)
+    macro = Macroproyecto.objects.filter(id=id).first()
+    if not macro:
+        messages.warning(request, "El macroproyecto que intentas eliminar ya no existe.")
+        return redirect("lista_macroproyectos")
+
     if request.method == "POST":
         nombre = macro.nombre
         macro.delete()
@@ -274,7 +278,11 @@ def editar_proyecto(request, id):
 @login_required
 @transaction.atomic
 def eliminar_proyecto(request, id):
-    proyecto = get_object_or_404(Proyecto, id=id)
+    proyecto = Proyecto.objects.filter(id=id).first()
+    if not proyecto:
+        messages.warning(request, "El proyecto que intentas eliminar ya no existe.")
+        return redirect("lista_proyectos")
+
     macro_id = proyecto.macroproyecto_id
     if request.method == "POST":
         nombre = proyecto.numero_emcali
@@ -570,7 +578,10 @@ def crear_apoyo(request, proyecto_id):
 @login_required
 @transaction.atomic
 def detalle_apoyo(request, apoyo_id):
-    apoyo = get_object_or_404(Apoyo, id=apoyo_id)
+    apoyo = Apoyo.objects.filter(id=apoyo_id).first()
+    if not apoyo:
+        messages.warning(request, "El poste o apoyo seleccionado no existe o fue removido previamente.")
+        return redirect("lista_proyectos")
 
     materiales_asociados = ApoyoMaterial.objects.filter(
         apoyo=apoyo
@@ -961,10 +972,10 @@ def detalle_apoyo(request, apoyo_id):
 @login_required
 @transaction.atomic
 def eliminar_apoyo(request, apoyo_id):
-    apoyo = get_object_or_404(
-        Apoyo,
-        id=apoyo_id
-    )
+    apoyo = Apoyo.objects.filter(id=apoyo_id).first()
+    if not apoyo:
+        messages.warning(request, "El poste o nodo que intentas eliminar ya no existe o fue removido previamente.")
+        return redirect("lista_proyectos")
 
     proyecto = apoyo.proyecto
     nodo_nombre = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
@@ -979,10 +990,13 @@ def eliminar_apoyo(request, apoyo_id):
                 inventario.save()
 
         apoyo.delete()
-        actualizar_presupuesto_proyecto(proyecto)
+        if proyecto:
+            actualizar_presupuesto_proyecto(proyecto)
         messages.success(request, f"Poste / Nodo '{nodo_nombre}' eliminado correctamente del proyecto.")
 
-    return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab={tab}")
+    if proyecto:
+        return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab={tab}")
+    return redirect("lista_proyectos")
 
 
 @login_required
@@ -1090,23 +1104,32 @@ def eliminar_material_apoyo_rapido(request, apoyo_material_id):
     """
     Elimina un material de un poste, devuelve lo instalado a la bodega central y recalcula la mano de obra.
     """
-    apoyo_mat = get_object_or_404(ApoyoMaterial, id=apoyo_material_id)
+    apoyo_mat = ApoyoMaterial.objects.filter(id=apoyo_material_id).first()
+    if not apoyo_mat:
+        messages.warning(request, "El material seleccionado ya no existe en el poste.")
+        return redirect("lista_proyectos")
+
     apoyo = apoyo_mat.apoyo
+    proyecto = apoyo.proyecto if apoyo else None
     tab = request.POST.get("tab", "mano_obra")
 
     if request.method == "POST":
-        nombre_mat = apoyo_mat.material.descripcion
-        if apoyo_mat.cantidad_requerida > 0:
+        nombre_mat = apoyo_mat.material.descripcion if apoyo_mat.material else "Material"
+        if apoyo_mat.cantidad_requerida > 0 and apoyo_mat.material:
             inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
             inventario.cantidad += apoyo_mat.cantidad_requerida
             inventario.save()
 
         apoyo_mat.delete()
-        calcular_mano_obra_para_apoyo(apoyo)
-        actualizar_presupuesto_proyecto(apoyo.proyecto)
-        messages.success(request, f"Material '{nombre_mat}' eliminado del poste {apoyo.nodo or apoyo.numero_apoyo} (devuelto a bodega).")
+        if apoyo:
+            calcular_mano_obra_para_apoyo(apoyo)
+        if proyecto:
+            actualizar_presupuesto_proyecto(proyecto)
+        messages.success(request, f"Material '{nombre_mat}' eliminado del poste {apoyo.nodo or apoyo.numero_apoyo if apoyo else ''} (devuelto a bodega).")
 
-    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab={tab}")
+    if proyecto:
+        return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab={tab}")
+    return redirect("lista_proyectos")
 
 
 
@@ -1130,7 +1153,11 @@ def ejecutar_calculo_mano_obra(request, proyecto_id):
     """
     Ejecuta el motor de reglas automáticas para todos los apoyos del proyecto.
     """
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    proyecto = Proyecto.objects.filter(id=proyecto_id).first()
+    if not proyecto:
+        messages.warning(request, "El proyecto indicado ya no existe.")
+        return redirect("lista_proyectos")
+
     if request.method == "POST":
         total_creados = calcular_mano_obra_proyecto_completo(proyecto, preservar_manuales=True)
         messages.success(
@@ -1146,7 +1173,11 @@ def guardar_mano_obra_manual(request, apoyo_id):
     """
     Permite agregar o editar una actividad de mano de obra específica en un apoyo.
     """
-    apoyo = get_object_or_404(Apoyo, id=apoyo_id)
+    apoyo = Apoyo.objects.filter(id=apoyo_id).first()
+    if not apoyo:
+        messages.warning(request, "El poste o apoyo seleccionado ya no existe.")
+        return redirect("lista_proyectos")
+
     if request.method == "POST":
         item_id = request.POST.get("item_mano_obra_id")
         cantidad_str = request.POST.get("cantidad", "0").strip().replace(',', '.')
@@ -1155,7 +1186,10 @@ def guardar_mano_obra_manual(request, apoyo_id):
         if item_id:
             try:
                 cantidad = Decimal(cantidad_str) if cantidad_str else Decimal("0")
-                item = get_object_or_404(ItemManoObra, id=item_id)
+                item = ItemManoObra.objects.filter(id=item_id).first()
+                if not item:
+                    messages.error(request, "La actividad de mano de obra seleccionada no es válida.")
+                    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab=mano_obra" if apoyo.proyecto else "lista_proyectos")
 
                 if cantidad > 0:
                     amo, _ = ApoyoManoObra.objects.get_or_create(
@@ -1172,11 +1206,14 @@ def guardar_mano_obra_manual(request, apoyo_id):
                     ApoyoManoObra.objects.filter(apoyo=apoyo, item_mano_obra=item).delete()
                     messages.info(request, f"Actividad '{item.descripcion}' removida del apoyo.")
 
-                actualizar_presupuesto_proyecto(apoyo.proyecto)
+                if apoyo.proyecto:
+                    actualizar_presupuesto_proyecto(apoyo.proyecto)
             except Exception as e:
                 messages.error(request, f"Error al guardar actividad: {e}")
 
-    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab=mano_obra")
+    if apoyo.proyecto:
+        return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab=mano_obra")
+    return redirect("lista_proyectos")
 
 
 @login_required
@@ -1185,15 +1222,22 @@ def eliminar_mano_obra_apoyo(request, amo_id):
     """
     Elimina una asignación de mano de obra de un apoyo.
     """
-    amo = get_object_or_404(ApoyoManoObra, id=amo_id)
-    proyecto_id = amo.apoyo.proyecto.id
+    amo = ApoyoManoObra.objects.filter(id=amo_id).first()
+    if not amo:
+        messages.warning(request, "La actividad de mano de obra seleccionada ya no existe.")
+        return redirect("lista_proyectos")
+
+    proyecto = amo.apoyo.proyecto if (amo.apoyo and amo.apoyo.proyecto) else None
     if request.method == "POST":
-        desc = amo.item_mano_obra.descripcion
+        desc = amo.item_mano_obra.descripcion if amo.item_mano_obra else "Actividad"
         amo.delete()
-        actualizar_presupuesto_proyecto(Proyecto.objects.get(id=proyecto_id))
+        if proyecto:
+            actualizar_presupuesto_proyecto(proyecto)
         messages.success(request, f"Actividad '{desc}' eliminada correctamente.")
 
-    return redirect(f"/ingenieria/proyectos/{proyecto_id}/?tab=mano_obra")
+    if proyecto:
+        return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab=mano_obra")
+    return redirect("lista_proyectos")
 
 
 @login_required

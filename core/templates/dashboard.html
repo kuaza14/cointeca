@@ -239,44 +239,6 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- Columna Derecha: Tarjeta Callout Corporativa Oficial (Col 9-12) -->
-        <div class="lg:col-span-4 flex flex-col justify-between">
-            <div class="relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white shadow-md flex flex-col justify-between h-full min-h-[210px]"
-                 style="background: linear-gradient(135deg, #0B2A6B 0%, #081B44 100%) !important;">
-                <!-- Imagen de fondo oficial content1.png con montañas y camello -->
-                <div class="absolute inset-0 opacity-35 pointer-events-none" style="overflow: hidden;">
-                    <img src="{% static 'img/content1.png' %}" alt="" class="w-full h-full object-cover object-bottom" style="width: 100%; height: 100%; object-fit: cover; object-position: bottom;">
-                </div>
-
-                <div class="relative z-10">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 mb-2.5">
-                        <span class="size-1.5 rounded-full bg-[#FFC107]"></span>
-                        COINTECA S.A.S.
-                    </span>
-                    <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug">
-                        Soluciones de ingeniería para un futuro sostenible
-                    </h3>
-                    <p class="text-xs text-blue-100/90 mt-1.5 leading-relaxed">
-                        Combinamos experiencia, tecnología y compromiso para desarrollar proyectos de infraestructura, energía y telecomunicaciones de alto impacto.
-                    </p>
-                </div>
-
-                <div class="relative z-10 mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                    <a href="{% url 'ingenieria_inicio' %}" 
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC107] text-[#0B2D6B] font-bold text-xs hover:bg-yellow-400 transition-all shadow-md">
-                        <span>Explorar Ingeniería</span>
-                        <svg class="size-3.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </a>
-                    <span class="text-[9px] font-bold text-blue-200 tracking-wider uppercase">Plataforma Segura</span>
-                </div>
-            </div>
-        </div>
-
     </div>
-
 </div>
 {% endblock %}

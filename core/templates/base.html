@@ -15,8 +15,76 @@
 
     <style>
         /* =========================================================================
+           LAYOUT PRINCIPAL: SIDEBAR Y CONTENIDO PRINCIPAL ADYACENTES (SIN SUPERPOSICIÓN)
+           ========================================================================= */
+        .app-layout-wrapper {
+            display: flex !important;
+            flex-direction: row !important;
+            min-height: 100vh !important;
+            width: 100% !important;
+            align-items: stretch !important;
+        }
+
+        #barraLateral {
+            width: 16rem !important; /* 256px */
+            min-width: 16rem !important;
+            max-width: 16rem !important;
+            flex-shrink: 0 !important;
+            background-color: #0b2d6b !important;
+            color: #ffffff !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            overflow-y: auto !important;
+            box-sizing: border-box !important;
+        }
+
+        .app-main-content {
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            background-color: #f8fafc !important;
+        }
+
+        /* En pantallas de escritorio (>= 1024px) */
+        @media (min-width: 1024px) {
+            #barraLateral {
+                position: sticky !important;
+                top: 0 !important;
+                height: 100vh !important;
+                transform: none !important;
+                z-index: 30 !important;
+                box-shadow: 4px 0 15px -3px rgba(0, 0, 0, 0.08) !important;
+            }
+            .app-main-content {
+                width: calc(100% - 16rem) !important;
+            }
+        }
+
+        /* En pantallas móviles y tablets (< 1024px) */
+        @media (max-width: 1023px) {
+            #barraLateral {
+                position: fixed !important;
+                top: 0 !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                height: 100vh !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.25s ease-in-out !important;
+                z-index: 50 !important;
+                box-shadow: 10px 0 25px -5px rgba(0, 0, 0, 0.4) !important;
+            }
+            #barraLateral.menu-abierto {
+                transform: translateX(0) !important;
+            }
+            .app-main-content {
+                width: 100% !important;
+            }
+        }
+
+        /* =========================================================================
            ESTILOS CRÍTICOS INLINE: MODALES, FONDOS, BOTONES Y FORMULARIOS
-           Garantiza 100% solidez y opacidad sin depender de caché de archivos CSS
            ========================================================================= */
 
         /* Fondo oscuro de superposición */
@@ -158,14 +226,12 @@
 
 <a href="#contenido" class="skip-link sr-only focus:not-sr-only">Saltar al contenido</a>
 
-<div class="flex min-h-screen">
+<div class="app-layout-wrapper flex min-h-screen">
 
     <!-- ==================================================================
          BARRA LATERAL / SIDEBAR MODERNO (AZUL CORPORATIVO OFICIAL)
          ================================================================== -->
-    <aside id="barraLateral"
-           style="background-color: #0B2D6B !important;"
-           class="fixed inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full overflow-y-auto bg-[#0B2D6B] text-white transition-transform duration-200 lg:static lg:translate-x-0 shadow-xl flex flex-col justify-between">
+    <aside id="barraLateral" class="shrink-0 flex flex-col justify-between">
 
         <div>
             <!-- LOGOTIPO INSTITUCIONAL -->
@@ -266,13 +332,13 @@
 
     <!-- Capa oscura detrás del menú en móvil -->
     <div id="fondoBarraLateral"
-         class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"
+         class="fixed inset-0 z-40 hidden bg-black/50 lg:hidden"
          aria-hidden="true"></div>
 
     <!-- ==================================================================
-         COLUMNA PRINCIPAL
+         COLUMNA PRINCIPAL (OCUPA EL RESTO DEL ANCHO, SIN TRASLAPE)
          ================================================================== -->
-    <div class="flex min-w-0 flex-1 flex-col">
+    <div class="app-main-content flex min-w-0 flex-1 flex-col">
 
         <!-- CABECERA SUPERIOR / HEADER -->
         <header class="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 sm:px-6 shadow-xs">
@@ -283,7 +349,7 @@
                         id="btnMenu"
                         aria-controls="barraLateral"
                         aria-expanded="false"
-                        class="flex size-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 lg:hidden">
+                        class="flex size-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 lg:hidden cursor-pointer">
                     <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -305,7 +371,7 @@
                             id="btnAlertas"
                             aria-controls="panelAlertas"
                             aria-expanded="false"
-                            class="relative flex size-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors">
+                            class="relative flex size-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer">
                         <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -495,21 +561,25 @@
     const fondo = document.getElementById("fondoBarraLateral");
     const btnMenu = document.getElementById("btnMenu");
 
+    function abrirMenu() {
+        if (barra) barra.classList.add("menu-abierto");
+        if (fondo) fondo.classList.remove("hidden");
+        if (btnMenu) btnMenu.setAttribute("aria-expanded", "true");
+    }
+
     function cerrarMenu() {
-        if (barra) barra.classList.add("-translate-x-full");
+        if (barra) barra.classList.remove("menu-abierto");
         if (fondo) fondo.classList.add("hidden");
         if (btnMenu) btnMenu.setAttribute("aria-expanded", "false");
     }
 
     if (btnMenu) {
         btnMenu.addEventListener("click", function () {
-            const abierto = btnMenu.getAttribute("aria-expanded") === "true";
+            const abierto = barra && barra.classList.contains("menu-abierto");
             if (abierto) {
                 cerrarMenu();
             } else {
-                barra.classList.remove("-translate-x-full");
-                fondo.classList.remove("hidden");
-                btnMenu.setAttribute("aria-expanded", "true");
+                abrirMenu();
             }
         });
     }

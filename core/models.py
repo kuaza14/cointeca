@@ -1025,7 +1025,7 @@ class ApoyoLuminaria(models.Model):
 class Material(models.Model):
     item = models.IntegerField(unique=True)
     descripcion = models.CharField(max_length=250)
-    unidad = models.CharField(max_length=20, blank=True, null=True)
+    unidad = models.CharField(max_length=20, default="UN", blank=True, null=True)
 
     class Meta:
         verbose_name = "Material"

@@ -25,6 +25,8 @@ def materiales_home(request):
                     nueva_cantidad = Decimal(nueva_cantidad_str.strip() or "0")
 
                     if nueva_unidad:
+                        if nueva_unidad.upper() == "U":
+                            nueva_unidad = "UN"
                         material.unidad = nueva_unidad
                         material.save()
 
@@ -40,7 +42,9 @@ def materiales_home(request):
         elif accion == "crear_material":
             item_str = request.POST.get("item", "").strip()
             descripcion = request.POST.get("descripcion", "").strip()
-            unidad = request.POST.get("unidad", "U").strip()
+            unidad = request.POST.get("unidad", "UN").strip()
+            if unidad.upper() == "U":
+                unidad = "UN"
             cantidad_str = request.POST.get("cantidad_inicial", "0")
 
             if descripcion:
@@ -49,7 +53,7 @@ def materiales_home(request):
                     material = Material.objects.create(
                         item=item_num,
                         descripcion=descripcion,
-                        unidad=unidad
+                        unidad=unidad or "UN"
                     )
                     cant_inicial = Decimal(cantidad_str.strip() or "0")
                     Inventario.objects.create(

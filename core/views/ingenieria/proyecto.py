@@ -608,7 +608,7 @@ def detalle_apoyo(request, apoyo_id):
                         material = get_object_or_404(Material, id=material_id)
                         inventario, _ = Inventario.objects.get_or_create(material=material)
                         stock_previo = inventario.cantidad
-                        unidad_str = material.unidad or "U"
+                        unidad_str = material.unidad or "UN"
 
                         # Descontar del inventario general de bodega
                         if stock_previo <= 0:
@@ -684,7 +684,7 @@ def detalle_apoyo(request, apoyo_id):
 
                     if apoyo_mat:
                         diferencia = cant_inst - apoyo_mat.cantidad_requerida
-                        unidad_str = apoyo_mat.material.unidad or "U"
+                        unidad_str = apoyo_mat.material.unidad or "UN"
                         inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
 
                         if diferencia > 0:
@@ -843,7 +843,7 @@ def detalle_apoyo(request, apoyo_id):
 
                 inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
                 mat_obj = inventario.material
-                unidad_str = mat_obj.unidad or "U"
+                unidad_str = mat_obj.unidad or "UN"
 
                 diferencia = c_inst - apoyo_mat.cantidad_requerida
                 if diferencia > 0:
@@ -892,7 +892,7 @@ def detalle_apoyo(request, apoyo_id):
 
                 inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
                 mat_obj = inventario.material
-                unidad_str = mat_obj.unidad or "U"
+                unidad_str = mat_obj.unidad or "UN"
 
                 apoyo_mat = ApoyoMaterial.objects.filter(
                     apoyo=apoyo,

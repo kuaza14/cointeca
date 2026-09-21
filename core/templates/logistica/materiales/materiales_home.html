@@ -78,13 +78,13 @@
                         </td>
 
                         <td class="px-4 py-3 text-center">
-                            <span class="px-2 py-0.5 rounded text-xs font-bold {% if material.unidad == 'M' %}bg-purple-100 text-purple-800 border border-purple-200{% else %}bg-primary-soft text-primary border border-blue-200{% endif %}">
-                                {% if material.unidad == 'M' %}
-                                    M (Metros)
+                            <span class="px-2 py-0.5 rounded text-xs font-bold {% if material.unidad == 'M' or material.unidad == 'MT' %}bg-purple-100 text-purple-800 border border-purple-200{% else %}bg-primary-soft text-primary border border-blue-200{% endif %}">
+                                {% if material.unidad == 'M' or material.unidad == 'MT' %}
+                                    {{ material.unidad }}
                                 {% elif material.unidad == 'UN' or material.unidad == 'U' %}
-                                    U (Unidad)
+                                    UN
                                 {% else %}
-                                    {{ material.unidad|default:"U" }}
+                                    {{ material.unidad|default:"UN" }}
                                 {% endif %}
                             </span>
                         </td>
@@ -95,7 +95,7 @@
 
                         <td class="px-6 py-3 text-center">
                             <button type="button"
-                                    onclick="abrirModalAjuste('{{ material.id }}', '{{ material.descripcion|escapejs }}', '{{ material.inventario.cantidad|floatformat:1 }}', '{{ material.unidad|default:'U'|escapejs }}')"
+                                    onclick="abrirModalAjuste('{{ material.id }}', '{{ material.descripcion|escapejs }}', '{{ material.inventario.cantidad|floatformat:1 }}', '{{ material.unidad|default:'UN'|escapejs }}')"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary text-xs font-bold rounded-lg border border-blue-200 transition">
                                 Cargar Stock
                             </button>
@@ -146,11 +146,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="modalMaterialUnidad">Unidad (M / U)</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="modalMaterialUnidad">Unidad (UN / M)</label>
                     <select name="unidad" id="modalMaterialUnidad"
                             class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                        <option value="U">U (Unidad)</option>
+                        <option value="UN">UN (Unidad)</option>
                         <option value="M">M (Metros)</option>
+                        <option value="MT">MT (Metros)</option>
                         <option value="KG">KG (Kilos)</option>
                         <option value="JGO">JGO (Juego)</option>
                     </select>
@@ -197,11 +198,12 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-unidad">Unidad (M / U) *</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="campo-unidad">Unidad (UN / M) *</label>
                     <select id="campo-unidad" name="unidad" required
                             class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
-                        <option value="U">U (Unidad)</option>
+                        <option value="UN">UN (Unidad)</option>
                         <option value="M">M (Metros)</option>
+                        <option value="MT">MT (Metros)</option>
                         <option value="KG">KG (Kilos)</option>
                         <option value="JGO">JGO (Juego)</option>
                     </select>
@@ -246,7 +248,9 @@
         document.getElementById('modalMaterialId').value = id;
         document.getElementById('modalMaterialNombre').value = nombre;
         document.getElementById('modalMaterialCantidad').value = cantidad;
-        document.getElementById('modalMaterialUnidad').value = (unidad === 'M' || unidad === 'U' || unidad === 'KG' || unidad === 'JGO') ? unidad : 'U';
+        let uVal = (unidad || '').toUpperCase();
+        if (uVal === 'U') uVal = 'UN';
+        document.getElementById('modalMaterialUnidad').value = (['M', 'MT', 'UN', 'KG', 'JGO'].includes(uVal)) ? uVal : 'UN';
 
         const modal = document.getElementById('modalAjusteStock');
         modal.classList.remove('hidden');

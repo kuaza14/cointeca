@@ -820,7 +820,7 @@
                                                 <option value="">-- Seleccionar material --</option>
                                                 {% for mat in materiales_catalogo %}
                                                     <option value="{{ mat.id }}">
-                                                        [{{ mat.item }}] {{ mat.descripcion }} ({{ mat.unidad|default:'U' }})
+                                                        [{{ mat.item }}] {{ mat.descripcion }} ({{ mat.unidad|default:'UN' }})
                                                     </option>
                                                 {% endfor %}
                                             </select>
@@ -917,7 +917,7 @@
                                 <option value="">-- Seleccionar material del catálogo --</option>
                                 {% for mat in materiales_catalogo %}
                                     <option value="{{ mat.id }}">
-                                        [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'U' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'U' }}]{% endif %}
+                                        [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                                     </option>
                                 {% endfor %}
                             </select>

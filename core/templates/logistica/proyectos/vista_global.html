@@ -627,12 +627,12 @@
                         <span>↩️</span> Materiales de Devolución / Reintegro a Bodega
                     </h3>
                     <p class="text-xs text-amber-800 mt-0.5">
-                        Materiales suministrados a la obra que sobraron tras la instalación en los apoyos técnicos (<span class="font-semibold">Suministrado &gt; Instalado</span>) y deben ser reintegrados al inventario de bodega.
+                        Materiales suministrados a la obra que sobraron (<span class="font-semibold">Suministrado &gt; Instalado</span>) y/o materiales retirados/desmontados en terreno que deben ser reintegrados al inventario de bodega.
                     </p>
                 </div>
                 {% if materiales_devolucion %}
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold shrink-0">
-                    <span>⚠️</span> {{ materiales_devolucion|length }} material{{ materiales_devolucion|pluralize }} sobrante{{ materiales_devolucion|pluralize }} (Total: {{ total_devolucion|floatformat }})
+                    <span>⚠️</span> {{ materiales_devolucion|length }} material{{ materiales_devolucion|pluralize }} para devolución (Total: {{ total_devolucion|floatformat }})
                 </span>
                 {% endif %}
             </div>
@@ -647,7 +647,9 @@
                             <th class="px-3 py-3 text-center w-20">Unidad</th>
                             <th class="px-4 py-3 text-right bg-emerald-950/80">Suministrado (Entradas)</th>
                             <th class="px-4 py-3 text-right bg-indigo-950/80">Instalado en Obra</th>
-                            <th class="px-4 py-3 text-right bg-amber-950 font-black text-amber-200">Cantidad a Devolver</th>
+                            <th class="px-4 py-3 text-right bg-blue-950/80">Material Sobrante</th>
+                            <th class="px-4 py-3 text-right bg-amber-950/90 font-bold text-amber-200">Material Desinstalado</th>
+                            <th class="px-4 py-3 text-right bg-amber-950 font-black text-amber-200">Total a Devolver</th>
                             <th class="px-4 py-3 text-right bg-slate-900">Stock Actual en Bodega</th>
                             <th class="px-4 py-3 text-center w-36">Estado</th>
                         </tr>
@@ -659,14 +661,20 @@
                             <td class="px-5 py-3 font-semibold text-foreground text-sm">{{ fila.material.descripcion }}</td>
                             <td class="px-3 py-3 text-center font-bold text-muted-foreground">{{ fila.material.unidad|default:"UN" }}</td>
                             <td class="px-4 py-3 text-right font-bold text-emerald-700 bg-emerald-50/20 text-sm">
-                                {{ fila.entrada|floatformat }}
+                                {% if fila.entrada > 0 %}{{ fila.entrada|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-indigo-700 bg-indigo-50/20 text-sm">
-                                {{ fila.instalado|floatformat }}
+                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-blue-700 bg-blue-50/20 text-sm">
+                                {% if fila.material_sobrante_positivo > 0 %}{{ fila.material_sobrante_positivo|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-amber-800 bg-amber-50/30 text-sm">
+                                {% if fila.material_desinstalado > 0 %}{{ fila.material_desinstalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
                             </td>
                             <td class="px-4 py-3 text-right font-black text-amber-900 bg-amber-100/70 text-sm">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-300 font-extrabold text-amber-950">
-                                    ↩️ {{ fila.material_sobrante|floatformat }}
+                                    ↩️ {{ fila.devolucion|floatformat }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-right font-medium text-foreground bg-muted/30">
@@ -691,6 +699,12 @@
                             <td class="px-4 py-3 text-right text-indigo-200 font-black">
                                 {{ total_items_instalados|floatformat }}
                             </td>
+                            <td class="px-4 py-3 text-right text-blue-200 font-black">
+                                {{ total_sobrante_devolucion|floatformat }}
+                            </td>
+                            <td class="px-4 py-3 text-right text-amber-200 font-black">
+                                {{ total_desinstalado_devolucion|floatformat }}
+                            </td>
                             <td class="px-4 py-3 text-right text-amber-300 font-black text-sm bg-amber-950">
                                 ↩️ {{ total_devolucion|floatformat }}
                             </td>
@@ -709,9 +723,9 @@
                 <div class="size-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
                     ✓
                 </div>
-                <h4 class="font-bold text-foreground text-sm">No hay materiales sobrantes pendientes de devolución</h4>
+                <h4 class="font-bold text-foreground text-sm">No hay materiales sobrantes ni desinstalados pendientes de devolución</h4>
                 <p class="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-                    Todo el material suministrado a la obra coincide exactamente con las cantidades instaladas en los postes técnicos o no registra sobrantes.
+                    Todo el material suministrado a la obra coincide exactamente con las cantidades instaladas y no se registraron materiales retirados de terreno pendientes de reintegro.
                 </p>
             </div>
             {% endif %}

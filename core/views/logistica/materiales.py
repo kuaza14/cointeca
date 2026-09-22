@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
-from core.models import Material, Inventario
+from core.models import Material, Inventario, DevolucionMaterialProyecto, ApoyoMaterial
 
 
 @login_required
@@ -69,11 +69,24 @@ def materiales_home(request):
         "inventario"
     ).order_by("descripcion")
 
+    devoluciones_recientes = (
+        DevolucionMaterialProyecto.objects.prefetch_related("proyecto", "detalles__material")
+        .order_by("-fecha", "-id")
+    )
+
+    retiros_apoyos = (
+        ApoyoMaterial.objects.filter(cantidad_retirada__gt=0)
+        .select_related("apoyo", "apoyo__proyecto", "material")
+        .order_by("-apoyo__id", "material__descripcion")
+    )
+
     return render(
         request,
         "logistica/materiales/materiales_home.html",
         {
             "materiales": materiales,
             "total_materiales": materiales.count(),
+            "devoluciones_recientes": devoluciones_recientes,
+            "retiros_apoyos": retiros_apoyos,
         }
     )

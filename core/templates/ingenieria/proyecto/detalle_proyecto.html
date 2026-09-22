@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load static %}
+{% load l10n %}
 
 {% block title %}Formato Poste a Poste - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
 
@@ -27,7 +28,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <button id="btnNuevoApoyo" type="button"
+            <button id="btnNuevoApoyo" type="button" onclick="abrirModalNuevoApoyo()"
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
                 <span>+</span> Nuevo Nodo / Poste
             </button>
@@ -212,26 +213,21 @@
                                     </div>
                                 {% endif %}
                                 {% if celda.cantidad <= 0 and celda.cantidad_retirada <= 0 %}
-                                    <span class="text-gray-300 font-normal">-</span>
+                                    <span class="text-gray-400 font-normal text-xs">0</span>
                                 {% endif %}
                             </td>
                             {% empty %}
-                            <td class="px-4 py-2 text-center text-gray-400 italic">-</td>
+                            <td class="px-4 py-2 text-center text-gray-400 text-xs">0</td>
                             {% endfor %}
 
                             <td class="px-4 py-2.5 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <button type="button"
-                                            onclick="abrirModalGestionMateriales('{{ fila.apoyo.id }}', '{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}')"
-                                            class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
-                                            title="Ver, editar o eliminar materiales puestos en este poste">
-                                        📦 Materiales ({{ fila.materiales_asociados|length }})
-                                    </button>
-                                    <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
-                                       class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs"
-                                       title="Editar materiales y datos del poste">
+                                            onclick="abrirModalEditarApoyo('{{ fila.apoyo.id }}')"
+                                            class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
+                                            title="Editar datos y materiales del poste">
                                         ✏️ Editar
-                                    </a>
+                                    </button>
                                     <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}"
                                           onsubmit="return confirm('¿Estás seguro de que deseas eliminar este poste (Nodo {{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo }})? Los materiales asignados se devolverán al inventario.');"
                                           class="inline">
@@ -437,30 +433,23 @@
                                         </div>
                                     {% endif %}
                                 {% else %}
-                                    <span class="text-gray-300 font-normal">-</span>
+                                    <span class="text-gray-400 font-normal text-xs">0</span>
                                 {% endif %}
                             </td>
                             {% empty %}
-                            <td class="px-4 py-2 text-center text-gray-400 italic">-</td>
+                            <td class="px-4 py-2 text-center text-gray-400 text-xs">0</td>
                             {% endfor %}
 
                             <!-- Acciones en cada fila -->
                             <td class="px-3 py-2 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-emerald-50 transition z-10 border-l border-border shadow-xs">
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <!-- Botón modal gestionar materiales -->
+                                    <!-- Botón editar poste completo en modal -->
                                     <button type="button"
-                                            onclick="abrirModalGestionMateriales('{{ fila.apoyo.id }}', '{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}')"
-                                            class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
-                                            title="Ver, editar o eliminar materiales puestos en este poste">
-                                        📦 Materiales ({{ fila.materiales_asociados|length }})
+                                            onclick="abrirModalEditarApoyo('{{ fila.apoyo.id }}')"
+                                            class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
+                                            title="Editar datos y materiales del poste">
+                                        ✏️ Editar
                                     </button>
-
-                                    <!-- Botón editar poste completo -->
-                                    <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
-                                       class="px-2 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs"
-                                       title="Editar poste completo">
-                                        ✏️
-                                    </a>
 
                                     <!-- Botón eliminar poste -->
                                     <form method="POST" action="{% url 'eliminar_apoyo' fila.apoyo.id %}"
@@ -677,7 +666,7 @@
     </div>
 
     <!-- ======================================================================= -->
-    <!-- MODAL 2: NUEVO APOYO / NODO                                            -->
+    <!-- MODAL UNIFICADO: CREAR / EDITAR APOYO O NODO                           -->
     <!-- ======================================================================= -->
     <div id="modalNuevoApoyo"
          tabindex="-1"
@@ -689,23 +678,26 @@
 
             <div class="px-6 py-4 flex justify-between items-center border-b border-border bg-neutral flex-shrink-0">
                 <div class="flex items-center gap-2 text-white">
-                    <span class="text-xl">📍</span>
-                    <h3 class="text-base font-extrabold">Nuevo Nodo / Apoyo — Formato Poste a Poste</h3>
+                    <span id="modalApoyoIcono" class="text-xl">📍</span>
+                    <h3 id="modalApoyoTitulo" class="text-base font-extrabold">Nuevo Nodo / Apoyo — Formato Poste a Poste</h3>
                 </div>
                 <button type="button" onclick="cerrarModalApoyo()" class="text-gray-300 hover:text-white text-xl font-bold p-1 rounded-lg">
                     ✕
                 </button>
             </div>
 
-            <form method="POST" action="{% url 'crear_apoyo' proyecto.id %}" class="flex flex-col flex-1 overflow-hidden bg-card">
+            <form id="formModalApoyo" method="POST" action="{% url 'crear_apoyo' proyecto.id %}" class="flex flex-col flex-1 overflow-hidden bg-card">
                 {% csrf_token %}
+                <input type="hidden" name="tab" value="{{ tab_activa|default:'materiales' }}">
+
                 <div class="p-6 space-y-6 overflow-y-auto flex-1 text-xs">
+                    <!-- FILA 1: PRINCIPAL -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_quien_ejecuta">
                                 Quién Ejecuta (Técnico)
                             </label>
-                            <select name="quien_ejecuta" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                            <select id="modalApoyo_quien_ejecuta" name="quien_ejecuta" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                                 <option value="">-- Sin Asignar --</option>
                                 {% for emp in empleados %}
                                     <option value="{{ emp.id }}">{{ emp.nombre_completo }}</option>
@@ -714,62 +706,93 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_nodo">
                                 Nodo / Poste <span class="text-destructive">*</span>
                             </label>
-                            <input type="text" name="nodo" required placeholder="Ej: 1, 2, A-1..."
+                            <input id="modalApoyo_nodo" type="text" name="nodo" required placeholder="Ej: 1, 2, A-1..."
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_numero_apoyo">
                                 Número de Apoyo
                             </label>
-                            <input type="number" name="numero_apoyo" placeholder="Ej: 101"
+                            <input id="modalApoyo_numero_apoyo" type="number" name="numero_apoyo" placeholder="Ej: 101"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_fecha">
                                 Fecha de Trabajo
                             </label>
-                            <input type="date" name="fecha" value="{% now 'Y-m-d' %}"
+                            <input id="modalApoyo_fecha" type="date" name="fecha" value="{% now 'Y-m-d' %}"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- FILA 2: ESPECIFICACIONES & ESTADO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_tipo_instalacion">
                                 Tipo de Instalación
                             </label>
-                            <input type="text" name="tipo_instalacion" placeholder="Ej: Nueva, Cambio..."
+                            <input id="modalApoyo_tipo_instalacion" type="text" name="tipo_instalacion" placeholder="Ej: Nueva, Cambio..."
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_direccion">
                                 Dirección / Ubicación
                             </label>
-                            <input type="text" name="direccion" placeholder="Ej: Calle 5 # 10-20"
+                            <input id="modalApoyo_direccion" type="text" name="direccion" placeholder="Ej: Calle 5 # 10-20"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_tipo_estructura">
                                 Tipo de Estructura
                             </label>
-                            <input type="text" name="tipo_estructura" placeholder="Ej: Concreto 12m, Metálico..."
+                            <input id="modalApoyo_tipo_estructura" type="text" name="tipo_estructura" placeholder="Ej: Concreto 12m, Metálico..."
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_estado">
+                                Estado del Poste
+                            </label>
+                            <select id="modalApoyo_estado" name="estado" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En ejecución">En ejecución</option>
+                                <option value="Finalizado">Finalizado</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                            Observaciones / Notas Técnicas del Poste
-                        </label>
-                        <textarea name="observacion" rows="2" placeholder="Ej: Zona rocosa, requiere grúa canasta, autorización especial de predio..."
-                                  class="w-full border border-border rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground"></textarea>
+                    <!-- FILA 3: RETENIDOS & OBSERVACIONES -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_cantidad_retenida">
+                                Cantidad Retenida
+                            </label>
+                            <input id="modalApoyo_cantidad_retenida" type="number" step="any" min="0" name="cantidad_retenida" placeholder="0"
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_metros_retenido">
+                                Metros Retenido (m)
+                            </label>
+                            <input id="modalApoyo_metros_retenido" type="number" step="0.01" min="0" name="metros_retenido" placeholder="0.00 m"
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_observacion">
+                                Observaciones / Notas Técnicas
+                            </label>
+                            <textarea id="modalApoyo_observacion" name="observacion" rows="2" placeholder="Ej: Zona rocosa, requiere autorización..."
+                                      class="w-full border border-border rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground"></textarea>
+                        </div>
                     </div>
 
                     <!-- LUMINARIAS -->
@@ -784,7 +807,7 @@
                             </button>
                         </div>
                         <div class="overflow-x-auto border border-border rounded-lg">
-                            <table class="min-w-full divide-y divide-border text-xs">
+                            <table class="min-w-full divide-y border-border text-xs">
                                 <thead class="bg-neutral text-xs font-bold text-white uppercase">
                                     <tr>
                                         <th class="px-3 py-2 text-left">Potencia</th>
@@ -793,34 +816,73 @@
                                     </tr>
                                 </thead>
                                 <tbody id="filasLuminarias" class="divide-y divide-border bg-card">
-                                    <tr class="fila-luminaria">
-                                        <td class="px-3 py-2">
-                                            <input type="text" name="potencia[]" placeholder="Ej: 90W"
-                                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="text" name="codigo_luminaria[]" placeholder="Ej: 123456"
-                                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
-                                        </td>
-                                        <td class="px-3 py-2 text-center">
-                                            <button type="button" class="btnEliminarLuminaria text-destructive hover:text-red-800 text-lg font-bold p-1 rounded">
-                                                &times;
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <!-- Inyectado dinámicamente -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
+                    <!-- RECUADRO ÁMBAR: DESPACHO DIRECTO DESDE BODEGA CENTRAL (MODO EDICIÓN) -->
+                    <div id="seccionDespachoBodega" class="border-t border-amber-200 pt-4 hidden">
+                        <div class="p-4 bg-amber-50/90 border border-amber-300 rounded-xl space-y-3 shadow-xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-amber-200 pb-2">
+                                <div>
+                                    <h4 class="text-xs font-black text-amber-900 uppercase flex items-center gap-1.5">
+                                        <span>📦</span> Sacar / Despachar Material desde Bodega Central
+                                    </h4>
+                                    <p class="text-[11px] text-amber-800">
+                                        Descuenta del stock disponible de bodega central y lo asigna directamente al poste sin recargar ni cerrar la ventana.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Mensaje de Feedback Dinámico (AJAX) -->
+                            <div id="alertaDespachoBodega" class="hidden p-3 rounded-lg text-xs font-semibold flex items-center justify-between transition-all duration-300">
+                                <span id="alertaDespachoTexto"></span>
+                                <button type="button" onclick="document.getElementById('alertaDespachoBodega').classList.add('hidden')" class="text-sm font-bold ml-2 opacity-70 hover:opacity-100 cursor-pointer">✕</button>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full">
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="block text-[11px] font-bold uppercase text-amber-900 mb-1" for="despacho_material_id">Seleccionar Material de Bodega</label>
+                                    <select id="despacho_material_id" name="material_id_despacho"
+                                            class="w-full border border-amber-300 rounded-lg px-3 py-2 text-xs bg-card text-foreground font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none h-[38px]">
+                                        <option value="">-- Seleccionar material a despachar --</option>
+                                        {% for mat in materiales_catalogo %}
+                                            <option value="{{ mat.id }}">
+                                                [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="w-full sm:w-28 flex-shrink-0">
+                                    <label class="block text-[11px] font-bold uppercase text-amber-900 mb-1 text-center" for="despacho_cantidad">Cantidad</label>
+                                    <input id="despacho_cantidad" type="number" step="any" min="0.01" placeholder="0.00"
+                                           class="w-full border border-amber-300 rounded-lg px-2.5 py-2 text-xs font-bold text-center text-amber-900 bg-card focus:ring-2 focus:ring-amber-500 focus:outline-none h-[38px]">
+                                </div>
+
+                                <div class="w-full sm:w-auto flex-shrink-0">
+                                    <button type="button" id="btnEjecutarDespachoBodega"
+                                            class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 h-[38px] whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span id="iconoBtnDespacho">⚡</span> <span id="textoBtnDespacho">Despachar al Poste</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- MATERIALES -->
                     <div class="border-t border-border pt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
-                                Materiales y Herramientas del Nodo
-                            </label>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
+                                    Materiales y Herramientas del Nodo (Instalación y Retiro)
+                                </label>
+                                <p class="text-[11px] text-muted-foreground">Listado de materiales instalados y retirados en este poste.</p>
+                            </div>
                             <button type="button" id="btnAgregarMaterialNodo"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition">
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition self-start sm:self-auto">
                                 <span>➕</span> Agregar material
                             </button>
                         </div>
@@ -828,39 +890,14 @@
                             <table class="min-w-full divide-y divide-border text-xs">
                                 <thead class="bg-neutral text-xs font-bold text-white uppercase">
                                     <tr>
-                                        <th class="px-3 py-2 text-left w-1/2">Material / Herramienta</th>
+                                        <th class="px-3 py-2 text-left w-1/2">Material / Herramienta (Stock Bodega)</th>
                                         <th class="px-3 py-2 text-left w-1/4 bg-blue-900 text-white">Cant. Instalada (Nuevo)</th>
                                         <th class="px-3 py-2 text-left w-1/4 bg-amber-900 text-white">Cant. Retirada (Desmonte)</th>
                                         <th class="px-2 py-2 text-center w-12">Quitar</th>
                                     </tr>
                                 </thead>
                                 <tbody id="filasMaterialesNodo" class="divide-y divide-border bg-card">
-                                    <tr class="fila-material-nodo">
-                                        <td class="px-3 py-2">
-                                            <select name="material_id[]"
-                                                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
-                                                <option value="">-- Seleccionar material --</option>
-                                                {% for mat in materiales_catalogo %}
-                                                    <option value="{{ mat.id }}">
-                                                        [{{ mat.item }}] {{ mat.descripcion }} ({{ mat.unidad|default:'UN' }})
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" step="any" min="0" name="cantidad_instalada[]" placeholder="0.00"
-                                                   class="w-full border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 focus:ring-2 focus:ring-blue-500 bg-blue-50/40">
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" step="any" min="0" name="cantidad_retirada[]" placeholder="0.00"
-                                                   class="w-full border border-amber-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 bg-amber-50/40">
-                                        </td>
-                                        <td class="px-2 py-2 text-center">
-                                            <button type="button" class="btnEliminarMaterialNodo text-destructive hover:text-red-800 font-bold text-lg p-1 rounded">
-                                                &times;
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <!-- Inyectado dinámicamente -->
                                 </tbody>
                             </table>
                         </div>
@@ -871,7 +908,7 @@
                     <button type="button" onclick="cerrarModalApoyo()" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg">
                         Cancelar
                     </button>
-                    <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm">
+                    <button id="btnSubmitModalApoyo" type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm">
                         Guardar Poste
                     </button>
                 </div>
@@ -879,116 +916,16 @@
         </div>
     </div>
 
-    <!-- ======================================================================= -->
-    <!-- MODAL 3: GESTIONAR MATERIALES DEL POSTE / APOYO                         -->
-    <!-- ======================================================================= -->
-    <div id="modalGestionMateriales" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
-        <div class="bg-card w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl border-2 border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <!-- HEADER -->
-            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📦</span>
-                    <div>
-                        <h3 class="font-extrabold text-base" id="modalMaterialesTitulo">Materiales Puestos en el Poste</h3>
-                        <p class="text-xs text-slate-300">Modifica cantidades, elimina materiales o añade nuevos. La mano de obra se recalculará automáticamente.</p>
-                    </div>
-                </div>
-                <button type="button" onclick="cerrarModalGestionMateriales()" class="text-gray-300 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
-            </div>
-
-            <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                <!-- NOTA / OBSERVACIÓN DEL POSTE -->
-                <div id="modalMaterialesObsBox" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2 shadow-xs">
-                    <span class="text-base leading-none">💬</span>
-                    <div>
-                        <span class="font-bold block uppercase text-[10px] text-amber-800">Observación / Nota Técnica del Poste:</span>
-                        <span id="modalMaterialesObsTexto" class="font-medium"></span>
-                    </div>
-                </div>
-
-                <!-- LISTADO DE MATERIALES ACTUALES -->
-                <div>
-                    <h4 class="text-xs font-bold uppercase text-muted-foreground mb-2 flex items-center justify-between">
-                        <span>1. Materiales Instalados y Retirados en este Poste</span>
-                        <span id="contadorMaterialesApoyo" class="text-primary font-black"></span>
-                    </h4>
-
-                    <div class="overflow-x-auto border border-border rounded-xl shadow-xs">
-                        <table class="min-w-full divide-y divide-border text-xs">
-                            <thead class="bg-muted text-muted-foreground font-bold uppercase text-[10px]">
-                                <tr>
-                                    <th class="px-3 py-2.5 text-left">ITEM / MATERIAL</th>
-                                    <th class="px-3 py-2.5 text-center w-16">UND</th>
-                                    <th class="px-3 py-2.5 text-center w-28 bg-blue-50/50 text-blue-900">INSTALADO</th>
-                                    <th class="px-3 py-2.5 text-center w-28 bg-amber-50/50 text-amber-900">RETIRADO</th>
-                                    <th class="px-3 py-2.5 text-center w-24">ACCIONES</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpoTablaMaterialesApoyo" class="divide-y divide-border bg-card">
-                                <!-- Inyectado vía JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- FORMULARIO AGREGAR NUEVO MATERIAL -->
-                <div class="p-4 bg-muted/40 rounded-xl border border-border space-y-3">
-                    <h4 class="text-xs font-extrabold text-foreground uppercase flex items-center gap-1.5">
-                        <span>➕</span> Agregar Otro Material a este Poste
-                    </h4>
-
-                    <form id="formAgregarMaterialRapido" method="POST" action="" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full">
-                        {% csrf_token %}
-                        <input type="hidden" name="tab" value="{{ tab_activa|default:'mano_obra' }}">
-
-                        <div class="flex-1 min-w-[220px]">
-                            <label class="block text-[11px] font-bold uppercase text-muted-foreground mb-1">Seleccionar Material del Catálogo</label>
-                            <select name="material_id" required
-                                    class="w-full border border-border-strong rounded-lg px-3 py-2 text-xs bg-card text-foreground font-medium focus:ring-2 focus:ring-primary focus:outline-none h-[38px]">
-                                <option value="">-- Seleccionar material del catálogo --</option>
-                                {% for mat in materiales_catalogo %}
-                                    <option value="{{ mat.id }}">
-                                        [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="w-full sm:w-28 flex-shrink-0">
-                            <label class="block text-[11px] font-bold uppercase text-blue-900 mb-1 text-center">Cant. Inst.</label>
-                            <input type="number" step="any" min="0" name="cantidad_instalada" placeholder="0"
-                                   class="w-full border border-blue-300 rounded-lg px-2.5 py-2 text-xs font-bold text-center text-primary bg-card focus:ring-2 focus:ring-primary focus:outline-none h-[38px]">
-                        </div>
-
-                        <div class="w-full sm:w-28 flex-shrink-0">
-                            <label class="block text-[11px] font-bold uppercase text-amber-900 mb-1 text-center">Cant. Ret.</label>
-                            <input type="number" step="any" min="0" name="cantidad_retirada" placeholder="0"
-                                   class="w-full border border-amber-300 rounded-lg px-2.5 py-2 text-xs font-bold text-center text-amber-900 bg-card focus:ring-2 focus:ring-amber-500 focus:outline-none h-[38px]">
-                        </div>
-
-                        <div class="w-full sm:w-auto flex-shrink-0">
-                            <button type="submit"
-                                    class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 h-[38px] whitespace-nowrap">
-                                <span>➕</span> Agregar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- FOOTER -->
-            <div class="px-6 py-3.5 bg-muted/30 border-t border-border flex items-center justify-between flex-shrink-0">
-                <a id="btnIrEdicionCompletaPoste" href="#"
-                   class="text-xs text-primary hover:underline font-bold flex items-center gap-1">
-                    <span>🛠️</span> Ir a Edición Completa del Poste (Dirección, Técnico, etc.) &rarr;
-                </a>
-
-                <button type="button" onclick="cerrarModalGestionMateriales()"
-                        class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition">
-                    Cerrar
-                </button>
-            </div>
-        </div>
+    <!-- Template base oculto para selects de material -->
+    <div id="templateSelectMaterial" class="hidden">
+        <select class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+            <option value="">-- Seleccionar material de bodega --</option>
+            {% for mat in materiales_catalogo %}
+                <option value="{{ mat.id }}">
+                    [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
+                </option>
+            {% endfor %}
+        </select>
     </div>
 
 </div>
@@ -1029,22 +966,35 @@ function cambiarPestana(tabName) {
     } catch (e) {}
 }
 
-const apoyosMaterialesData = {
+const apoyosData = {
     {% for fila in filas_matriz %}
     "{{ fila.apoyo.id }}": {
         "id": "{{ fila.apoyo.id }}",
-        "nodo": "{{ fila.apoyo.nodo|default:fila.apoyo.numero_apoyo|escapejs }}",
-        "numero": "{{ fila.apoyo.numero_apoyo|default:'' }}",
+        "nodo": "{{ fila.apoyo.nodo|default:''|escapejs }}",
+        "numero_apoyo": "{{ fila.apoyo.numero_apoyo|default:'' }}",
+        "fecha": "{{ fila.apoyo.fecha|date:'Y-m-d'|default:'' }}",
+        "tipo_instalacion": "{{ fila.apoyo.tipo_instalacion|default:''|escapejs }}",
+        "direccion": "{{ fila.apoyo.direccion|default:''|escapejs }}",
+        "tipo_estructura": "{{ fila.apoyo.tipo_estructura|default:''|escapejs }}",
+        "cantidad_retenida": "{{ fila.apoyo.cantidad_retenida|unlocalize|default:'' }}",
+        "metros_retenido": "{{ fila.apoyo.metros_retenido|unlocalize|default:'' }}",
+        "estado": "{{ fila.apoyo.estado|default:'Pendiente'|escapejs }}",
+        "quien_ejecuta_id": "{{ fila.apoyo.quien_ejecuta_id|default:'' }}",
         "observacion": "{{ fila.apoyo.observacion|default:''|escapejs }}",
+        "luminarias": [
+            {% for lum in fila.apoyo.luminarias.all %}
+            {
+                "potencia": "{{ lum.potencia|escapejs }}",
+                "codigo": "{{ lum.codigo|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
         "materiales": [
             {% for m in fila.materiales_asociados %}
             {
-                "id": "{{ m.id }}",
-                "item": "{{ m.material.item }}",
-                "descripcion": "{{ m.material.descripcion|escapejs }}",
-                "unidad": "{{ m.material.unidad|default:'UN'|escapejs }}",
-                "cant_inst": {{ m.cantidad_requerida|floatformat:0 }},
-                "cant_ret": {{ m.cantidad_retirada|floatformat:0 }}
+                "material_id": "{{ m.material_id }}",
+                "cant_inst": "{{ m.cantidad_requerida|unlocalize|default:'' }}",
+                "cant_ret": "{{ m.cantidad_retirada|unlocalize|default:'' }}"
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ]
@@ -1052,91 +1002,199 @@ const apoyosMaterialesData = {
     {% endfor %}
 };
 
-function abrirModalGestionMateriales(apoyoId, nodoLabel) {
-    const data = apoyosMaterialesData[apoyoId] || { nodo: nodoLabel, materiales: [] };
-    document.getElementById('modalMaterialesTitulo').textContent = 'Materiales Puestos en el Poste: ' + (data.nodo || nodoLabel);
-    document.getElementById('contadorMaterialesApoyo').textContent = data.materiales.length + ' materiales';
-    document.getElementById('formAgregarMaterialRapido').action = '/ingenieria/apoyos/' + apoyoId + '/agregar-material-rapido/';
-    document.getElementById('btnIrEdicionCompletaPoste').href = '/ingenieria/apoyo/' + apoyoId + '/';
+function crearFilaLuminaria(potencia = '', codigo = '') {
+    const tr = document.createElement('tr');
+    tr.className = 'fila-luminaria';
+    tr.innerHTML = `
+        <td class="px-3 py-2">
+            <input type="text" name="potencia[]" value="${potencia}" placeholder="Ej: 90W"
+                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+        </td>
+        <td class="px-3 py-2">
+            <input type="text" name="codigo_luminaria[]" value="${codigo}" placeholder="Ej: 123456"
+                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+        </td>
+        <td class="px-3 py-2 text-center">
+            <button type="button" class="btnEliminarLuminaria text-destructive hover:text-red-800 text-lg font-bold p-1 rounded">&times;</button>
+        </td>
+    `;
+    return tr;
+}
 
-    const obsBox = document.getElementById('modalMaterialesObsBox');
-    const obsTexto = document.getElementById('modalMaterialesObsTexto');
-    if (obsBox && obsTexto) {
-        if (data.observacion && data.observacion.trim()) {
-            obsTexto.textContent = data.observacion;
-            obsBox.classList.remove('hidden');
-        } else {
-            obsBox.classList.add('hidden');
-        }
-    }
+function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '') {
+    const tr = document.createElement('tr');
+    tr.className = 'fila-material-nodo';
 
-    const tbody = document.getElementById('cuerpoTablaMaterialesApoyo');
-    tbody.innerHTML = '';
-
-    if (!data.materiales || data.materiales.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="px-4 py-6 text-center text-muted-foreground italic">
-                    Este poste no tiene materiales asignados actualmente. Usa el formulario de abajo para agregar uno.
-                </td>
-            </tr>
-        `;
-    } else {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const tabActiva = "{{ tab_activa|default:'mano_obra' }}";
-        data.materiales.forEach(m => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-muted/30 transition';
-            tr.innerHTML = `
-                <td class="px-3 py-2.5 font-bold text-foreground">
-                    <span class="font-mono text-primary">[${m.item}]</span> ${m.descripcion}
-                </td>
-                <td class="px-3 py-2.5 text-center font-bold font-mono">
-                    <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px]">${m.unidad}</span>
-                </td>
-                <td class="px-3 py-2 text-center bg-blue-50/20">
-                    <form id="formEditMat-${m.id}" method="POST" action="/ingenieria/apoyos/${apoyoId}/editar-material-rapido/" class="flex items-center justify-center">
-                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-                        <input type="hidden" name="tab" value="${tabActiva}">
-                        <input type="hidden" name="apoyo_material_id" value="${m.id}">
-                        <input type="number" step="any" min="0" name="cantidad_instalada" value="${m.cant_inst}"
-                               class="w-20 border border-blue-300 rounded px-2 py-1 text-center font-bold text-xs text-primary bg-card focus:ring-1 focus:ring-primary">
-                </td>
-                <td class="px-3 py-2 text-center bg-amber-50/20">
-                        <input type="number" step="any" min="0" name="cantidad_retirada" value="${m.cant_ret}"
-                               class="w-20 border border-amber-300 rounded px-2 py-1 text-center font-bold text-xs text-amber-900 bg-card focus:ring-1 focus:ring-amber-500">
-                    </form>
-                </td>
-                <td class="px-3 py-2 text-center whitespace-nowrap">
-                    <div class="flex items-center justify-center gap-1.5">
-                        <button type="submit" form="formEditMat-${m.id}"
-                                class="px-2 py-1 bg-primary hover:bg-primary-hover text-white rounded text-xs font-bold transition"
-                                title="Guardar cambios de cantidad">
-                            💾
-                        </button>
-                        <form method="POST" action="/ingenieria/apoyos-material/${m.id}/eliminar/"
-                              onsubmit="return confirm('¿Estás seguro de eliminar el material ${m.descripcion} de este poste? Se devolverán las cantidades a bodega.');"
-                              class="inline">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-                            <input type="hidden" name="tab" value="${tabActiva}">
-                            <button type="submit"
-                                    class="px-2 py-1 bg-red-100 hover:bg-destructive hover:text-white text-destructive rounded text-xs font-bold transition"
-                                    title="Eliminar este material del poste">
-                                🗑️
-                            </button>
-                        </form>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
+    const templateSelect = document.querySelector('#templateSelectMaterial select');
+    let optionsHtml = '';
+    if (templateSelect) {
+        Array.from(templateSelect.options).forEach(opt => {
+            const selected = (materialId && String(opt.value) === String(materialId)) ? 'selected' : '';
+            optionsHtml += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
         });
     }
 
-    document.getElementById('modalGestionMateriales').classList.remove('hidden');
+    tr.innerHTML = `
+        <td class="px-3 py-2">
+            <select name="material_id[]"
+                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+                ${optionsHtml}
+            </select>
+        </td>
+        <td class="px-3 py-2">
+            <input type="number" step="any" min="0" name="cantidad_instalada[]" value="${cantInst}" placeholder="0.00"
+                   class="w-full border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 focus:ring-2 focus:ring-blue-500 bg-blue-50/40">
+        </td>
+        <td class="px-3 py-2">
+            <input type="number" step="any" min="0" name="cantidad_retirada[]" value="${cantRet}" placeholder="0.00"
+                   class="w-full border border-amber-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 bg-amber-50/40">
+        </td>
+        <td class="px-2 py-2 text-center">
+            <button type="button" class="btnEliminarMaterialNodo text-destructive hover:text-red-800 font-bold text-lg p-1 rounded">
+                &times;
+            </button>
+        </td>
+    `;
+    return tr;
 }
 
-function cerrarModalGestionMateriales() {
-    document.getElementById('modalGestionMateriales').classList.add('hidden');
+let currentEditingApoyoId = null;
+let huboDespachoEnModal = false;
+
+function actualizarStockEnTodosLosSelects(materialId, stockRestante, item, descripcion, unidad) {
+    const stockLabel = stockRestante > 0
+        ? `[Stock: ${stockRestante} ${unidad}]`
+        : `[⚠️ Sin stock: 0 ${unidad}]`;
+    const nuevoTexto = `[${item}] ${descripcion} ${stockLabel}`;
+
+    // 1. Actualizar en el selector de despacho de bodega
+    const optDespacho = document.querySelector(`#despacho_material_id option[value="${materialId}"]`);
+    if (optDespacho) {
+        optDespacho.textContent = nuevoTexto;
+    }
+
+    // 2. Actualizar en el template base oculto
+    const optTemplate = document.querySelector(`#templateSelectMaterial select option[value="${materialId}"]`);
+    if (optTemplate) {
+        optTemplate.textContent = nuevoTexto;
+    }
+
+    // 3. Actualizar en todos los selects existentes en la tabla de materiales
+    document.querySelectorAll(`#filasMaterialesNodo select[name="material_id[]"] option[value="${materialId}"]`).forEach(opt => {
+        opt.textContent = nuevoTexto;
+    });
+}
+
+function abrirModalNuevoApoyo() {
+    currentEditingApoyoId = null;
+    huboDespachoEnModal = false;
+    const modal = document.getElementById('modalNuevoApoyo');
+    const form = document.getElementById('formModalApoyo');
+    if (!modal || !form) return;
+
+    form.action = "{% url 'crear_apoyo' proyecto.id %}";
+    document.getElementById('modalApoyoIcono').textContent = '📍';
+    document.getElementById('modalApoyoTitulo').textContent = 'Nuevo Nodo / Apoyo — Formato Poste a Poste';
+    document.getElementById('btnSubmitModalApoyo').textContent = 'Guardar Poste';
+
+    const seccionBodega = document.getElementById('seccionDespachoBodega');
+    if (seccionBodega) seccionBodega.classList.add('hidden');
+
+    const alertaDespacho = document.getElementById('alertaDespachoBodega');
+    if (alertaDespacho) alertaDespacho.classList.add('hidden');
+
+    document.getElementById('modalApoyo_quien_ejecuta').value = '';
+    document.getElementById('modalApoyo_nodo').value = '';
+    document.getElementById('modalApoyo_numero_apoyo').value = '';
+    document.getElementById('modalApoyo_fecha').value = "{% now 'Y-m-d' %}";
+    document.getElementById('modalApoyo_tipo_instalacion').value = '';
+    document.getElementById('modalApoyo_direccion').value = '';
+    document.getElementById('modalApoyo_tipo_estructura').value = '';
+    document.getElementById('modalApoyo_estado').value = 'Pendiente';
+    document.getElementById('modalApoyo_cantidad_retenida').value = '';
+    document.getElementById('modalApoyo_metros_retenido').value = '';
+    document.getElementById('modalApoyo_observacion').value = '';
+
+    const tbodyLum = document.getElementById('filasLuminarias');
+    tbodyLum.innerHTML = '';
+    tbodyLum.appendChild(crearFilaLuminaria());
+
+    const tbodyMat = document.getElementById('filasMaterialesNodo');
+    tbodyMat.innerHTML = '';
+    tbodyMat.appendChild(crearFilaMaterial());
+
+    modal.classList.remove('hidden');
+}
+
+function abrirModalEditarApoyo(apoyoId) {
+    currentEditingApoyoId = apoyoId;
+    huboDespachoEnModal = false;
+    const data = apoyosData[apoyoId];
+    if (!data) return;
+
+    const modal = document.getElementById('modalNuevoApoyo');
+    const form = document.getElementById('formModalApoyo');
+    if (!modal || !form) return;
+
+    form.action = '/ingenieria/apoyo/' + apoyoId + '/editar/';
+    document.getElementById('modalApoyoIcono').textContent = '✏️';
+    document.getElementById('modalApoyoTitulo').textContent = 'Editar Nodo / Apoyo — ' + (data.nodo ? 'Nodo ' + data.nodo : 'Apoyo #' + (data.numero_apoyo || apoyoId));
+    document.getElementById('btnSubmitModalApoyo').textContent = 'Guardar Cambios';
+
+    const seccionBodega = document.getElementById('seccionDespachoBodega');
+    if (seccionBodega) {
+        seccionBodega.classList.remove('hidden');
+        document.getElementById('despacho_material_id').selectedIndex = 0;
+        document.getElementById('despacho_cantidad').value = '';
+    }
+
+    const alertaDespacho = document.getElementById('alertaDespachoBodega');
+    if (alertaDespacho) alertaDespacho.classList.add('hidden');
+
+    document.getElementById('modalApoyo_quien_ejecuta').value = data.quien_ejecuta_id || '';
+    document.getElementById('modalApoyo_nodo').value = data.nodo || '';
+    document.getElementById('modalApoyo_numero_apoyo').value = data.numero_apoyo || '';
+    document.getElementById('modalApoyo_fecha').value = data.fecha || '';
+    document.getElementById('modalApoyo_tipo_instalacion').value = data.tipo_instalacion || '';
+    document.getElementById('modalApoyo_direccion').value = data.direccion || '';
+    document.getElementById('modalApoyo_tipo_estructura').value = data.tipo_estructura || '';
+    document.getElementById('modalApoyo_estado').value = data.estado || 'Pendiente';
+    document.getElementById('modalApoyo_cantidad_retenida').value = data.cantidad_retenida || '';
+    document.getElementById('modalApoyo_metros_retenido').value = data.metros_retenido || '';
+    document.getElementById('modalApoyo_observacion').value = data.observacion || '';
+
+    const tbodyLum = document.getElementById('filasLuminarias');
+    tbodyLum.innerHTML = '';
+    if (data.luminarias && data.luminarias.length > 0) {
+        data.luminarias.forEach(lum => {
+            tbodyLum.appendChild(crearFilaLuminaria(lum.potencia, lum.codigo));
+        });
+    } else {
+        tbodyLum.appendChild(crearFilaLuminaria());
+    }
+
+    const tbodyMat = document.getElementById('filasMaterialesNodo');
+    tbodyMat.innerHTML = '';
+    if (data.materiales && data.materiales.length > 0) {
+        data.materiales.forEach(m => {
+            tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret));
+        });
+    } else {
+        tbodyMat.appendChild(crearFilaMaterial());
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function cerrarModalApoyo() {
+    const modal = document.getElementById('modalNuevoApoyo');
+    if (modal) modal.classList.add('hidden');
+    if (huboDespachoEnModal) {
+        // Refrescar la página para actualizar todas las tablas de balance y logística
+        const url = new URL(window.location);
+        url.searchParams.set('tab', 'materiales');
+        window.location.href = url.toString();
+    }
 }
 
 function abrirModalAsignarMO() {
@@ -1153,68 +1211,220 @@ function actualizarActionMO(apoyoId) {
 
 document.addEventListener("DOMContentLoaded", function () {
     const btnNuevoApoyo = document.getElementById("btnNuevoApoyo");
-    const modalNuevoApoyo = document.getElementById("modalNuevoApoyo");
+    if (btnNuevoApoyo) {
+        btnNuevoApoyo.addEventListener("click", abrirModalNuevoApoyo);
+    }
 
-    if (btnNuevoApoyo && modalNuevoApoyo) {
-        btnNuevoApoyo.addEventListener("click", function () {
-            modalNuevoApoyo.classList.remove("hidden");
+    // Despacho Asíncrono desde Bodega Central (Sin cerrar modal)
+    const btnEjecutarDespacho = document.getElementById('btnEjecutarDespachoBodega');
+    const inputDespachoCantidad = document.getElementById('despacho_cantidad');
+
+    async function ejecutarDespachoBodegaAsync() {
+        if (!currentEditingApoyoId) {
+            alert('Debes estar editando un nodo para despachar desde bodega.');
+            return;
+        }
+        const selectMat = document.getElementById('despacho_material_id');
+        const matId = selectMat ? selectMat.value : '';
+        const cant = inputDespachoCantidad ? inputDespachoCantidad.value : '';
+
+        if (!matId || !cant || parseFloat(cant) <= 0) {
+            alert('Por favor selecciona un material de bodega e ingresa una cantidad válida.');
+            return;
+        }
+
+        const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+        const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
+
+        const iconoBtn = document.getElementById('iconoBtnDespacho');
+        const textoBtn = document.getElementById('textoBtnDespacho');
+        const alertaDespacho = document.getElementById('alertaDespachoBodega');
+        const textoAlerta = document.getElementById('alertaDespachoTexto');
+
+        // Estado cargando
+        btnEjecutarDespacho.disabled = true;
+        if (iconoBtn) iconoBtn.textContent = '⏳';
+        if (textoBtn) textoBtn.textContent = 'Despachando...';
+
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        formData.append('material_id', matId);
+        formData.append('cantidad', cant);
+        formData.append('ajax', '1');
+
+        try {
+            const resp = await fetch('/ingenieria/apoyo/' + currentEditingApoyoId + '/despachar-bodega/', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await resp.json();
+
+            if (resp.ok && data.success) {
+                huboDespachoEnModal = true;
+
+                // 1. Actualizar textos de stock en todos los selects
+                actualizarStockEnTodosLosSelects(
+                    data.material_id,
+                    data.stock_restante,
+                    data.material_item,
+                    data.material_descripcion,
+                    data.unidad
+                );
+
+                // 2. Actualizar o insertar fila en la tabla de materiales del nodo
+                const tbodyMat = document.getElementById('filasMaterialesNodo');
+                let filaEncontrada = null;
+
+                if (tbodyMat) {
+                    const filas = tbodyMat.querySelectorAll('.fila-material-nodo');
+                    filas.forEach(f => {
+                        const sel = f.querySelector('select[name="material_id[]"]');
+                        if (sel && String(sel.value) === String(data.material_id)) {
+                            filaEncontrada = f;
+                        }
+                    });
+
+                    if (filaEncontrada) {
+                        const inpInst = filaEncontrada.querySelector('input[name="cantidad_instalada[]"]');
+                        if (inpInst) {
+                            inpInst.value = data.cantidad_total_instalada;
+                        }
+                        filaEncontrada.classList.add('bg-emerald-100');
+                        setTimeout(() => filaEncontrada.classList.remove('bg-emerald-100'), 2500);
+                    } else {
+                        // Verificar si hay una fila vacía para reutilizar
+                        let filaVacia = null;
+                        if (filas.length === 1) {
+                            const sel = filas[0].querySelector('select[name="material_id[]"]');
+                            const inpInst = filas[0].querySelector('input[name="cantidad_instalada[]"]');
+                            const inpRet = filas[0].querySelector('input[name="cantidad_retirada[]"]');
+                            if (sel && (!sel.value || sel.value === '') && (!inpInst || !inpInst.value) && (!inpRet || !inpRet.value)) {
+                                filaVacia = filas[0];
+                            }
+                        }
+
+                        if (filaVacia) {
+                            const sel = filaVacia.querySelector('select[name="material_id[]"]');
+                            const inpInst = filaVacia.querySelector('input[name="cantidad_instalada[]"]');
+                            if (sel) sel.value = data.material_id;
+                            if (inpInst) inpInst.value = data.cantidad_despachada;
+                            filaVacia.classList.add('bg-emerald-100');
+                            setTimeout(() => filaVacia.classList.remove('bg-emerald-100'), 2500);
+                        } else {
+                            const nuevaFila = crearFilaMaterial(data.material_id, data.cantidad_despachada, 0);
+                            tbodyMat.appendChild(nuevaFila);
+                            nuevaFila.classList.add('bg-emerald-100');
+                            setTimeout(() => nuevaFila.classList.remove('bg-emerald-100'), 2500);
+                        }
+                    }
+                }
+
+                // 3. Actualizar datos en memoria apoyosData
+                if (apoyosData[currentEditingApoyoId]) {
+                    const mats = apoyosData[currentEditingApoyoId].materiales || [];
+                    const matObj = mats.find(m => String(m.material_id) === String(data.material_id));
+                    if (matObj) {
+                        matObj.cant_inst = String(data.cantidad_total_instalada);
+                    } else {
+                        mats.push({
+                            material_id: String(data.material_id),
+                            cant_inst: String(data.cantidad_despachada),
+                            cant_ret: "0"
+                        });
+                    }
+                    apoyosData[currentEditingApoyoId].materiales = mats;
+                }
+
+                // 4. Mostrar feedback en el banner
+                if (alertaDespacho && textoAlerta) {
+                    if (data.warning) {
+                        alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-amber-100 text-amber-900 border border-amber-300 transition-all';
+                        textoAlerta.innerHTML = data.warning;
+                    } else {
+                        alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-emerald-100 text-emerald-900 border border-emerald-300 transition-all';
+                        textoAlerta.innerHTML = `✅ <strong>¡Despacho Exitoso!</strong> Se despacharon <strong>${data.cantidad_despachada} ${data.unidad}</strong> de <em>${data.material_descripcion}</em> al poste. (Stock restante en bodega: <strong>${data.stock_restante} ${data.unidad}</strong>). ¡Puedes despachar otro material!`;
+                    }
+                    alertaDespacho.classList.remove('hidden');
+                }
+
+                // 5. Limpiar campos y dar foco al select para permitir despachar otro material inmediatamente
+                if (inputDespachoCantidad) inputDespachoCantidad.value = '';
+                if (selectMat) {
+                    selectMat.selectedIndex = 0;
+                    selectMat.focus();
+                }
+
+            } else {
+                const errMsg = data.error || 'Ocurrió un error al despachar el material.';
+                if (alertaDespacho && textoAlerta) {
+                    alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-red-100 text-red-900 border border-red-300 transition-all';
+                    textoAlerta.innerHTML = `❌ <strong>Error:</strong> ${errMsg}`;
+                    alertaDespacho.classList.remove('hidden');
+                } else {
+                    alert(errMsg);
+                }
+            }
+        } catch (err) {
+            console.error('Error en despacho AJAX:', err);
+            if (alertaDespacho && textoAlerta) {
+                alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-red-100 text-red-900 border border-red-300 transition-all';
+                textoAlerta.innerHTML = `❌ <strong>Error de conexión:</strong> No se pudo completar el despacho. Intenta de nuevo.`;
+                alertaDespacho.classList.remove('hidden');
+            } else {
+                alert('No se pudo conectar con el servidor para despachar.');
+            }
+        } finally {
+            btnEjecutarDespacho.disabled = false;
+            if (iconoBtn) iconoBtn.textContent = '⚡';
+            if (textoBtn) textoBtn.textContent = 'Despachar al Poste';
+        }
+    }
+
+    if (btnEjecutarDespacho) {
+        btnEjecutarDespacho.addEventListener('click', ejecutarDespachoBodegaAsync);
+    }
+
+    if (inputDespachoCantidad) {
+        inputDespachoCantidad.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                ejecutarDespachoBodegaAsync();
+            }
         });
     }
 
-    window.cerrarModalApoyo = function() {
-        if (modalNuevoApoyo) {
-            modalNuevoApoyo.classList.add("hidden");
-        }
-    };
-
-    // Luminarias dinámicas
+    // Luminarias dinámicas (Botón agregar)
     const btnAgregarLuminaria = document.getElementById("btnAgregarLuminaria");
     const filasLuminarias = document.getElementById("filasLuminarias");
     if (btnAgregarLuminaria && filasLuminarias) {
         btnAgregarLuminaria.addEventListener("click", function () {
-            const nuevaFila = document.createElement("tr");
-            nuevaFila.classList.add("fila-luminaria");
-            nuevaFila.innerHTML = `
-                <td class="px-3 py-2">
-                    <input type="text" name="potencia[]" placeholder="Ej: 90W"
-                           class="w-full border border-border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-primary bg-background text-foreground">
-                </td>
-                <td class="px-3 py-2">
-                    <input type="text" name="codigo_luminaria[]" placeholder="Ej: 123456"
-                           class="w-full border border-border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-primary bg-background text-foreground">
-                </td>
-                <td class="px-3 py-2 text-center">
-                    <button type="button" class="btnEliminarLuminaria text-destructive hover:text-red-800 text-lg font-bold p-1 rounded">&times;</button>
-                </td>
-            `;
-            filasLuminarias.appendChild(nuevaFila);
+            filasLuminarias.appendChild(crearFilaLuminaria());
         });
 
         filasLuminarias.addEventListener("click", function (event) {
             const botonEliminar = event.target.closest(".btnEliminarLuminaria");
             if (botonEliminar) {
                 const fila = botonEliminar.closest(".fila-luminaria");
-                if (fila) fila.remove();
+                const totalFilas = filasLuminarias.querySelectorAll(".fila-luminaria");
+                if (totalFilas.length > 1) {
+                    if (fila) fila.remove();
+                } else if (fila) {
+                    fila.querySelectorAll('input').forEach(inp => inp.value = '');
+                }
             }
         });
     }
 
-    // Materiales dinámicos
+    // Materiales dinámicos (Botón agregar)
     const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
     const filasMaterialesNodo = document.getElementById("filasMaterialesNodo");
     if (btnAgregarMaterialNodo && filasMaterialesNodo) {
         btnAgregarMaterialNodo.addEventListener("click", function () {
-            const primeraFila = filasMaterialesNodo.querySelector(".fila-material-nodo");
-            if (primeraFila) {
-                const nuevaFila = primeraFila.cloneNode(true);
-                const sel = nuevaFila.querySelector('select[name="material_id[]"]');
-                if (sel) sel.selectedIndex = 0;
-                const inInst = nuevaFila.querySelector('input[name="cantidad_instalada[]"]');
-                if (inInst) inInst.value = '';
-                const inRet = nuevaFila.querySelector('input[name="cantidad_retirada[]"]');
-                if (inRet) inRet.value = '';
-                filasMaterialesNodo.appendChild(nuevaFila);
-            }
+            filasMaterialesNodo.appendChild(crearFilaMaterial());
         });
 
         filasMaterialesNodo.addEventListener("click", function (e) {
@@ -1225,15 +1435,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     btnEliminar.closest(".fila-material-nodo").remove();
                 } else {
                     const fila = btnEliminar.closest(".fila-material-nodo");
-                    const sel = fila.querySelector('select[name="material_id[]"]');
-                    if (sel) sel.selectedIndex = 0;
-                    const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
-                    if (inInst) inInst.value = '';
-                    const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
-                    if (inRet) inRet.value = '';
+                    if (fila) {
+                        const sel = fila.querySelector('select[name="material_id[]"]');
+                        if (sel) sel.selectedIndex = 0;
+                        const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
+                        if (inInst) inInst.value = '';
+                        const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
+                        if (inRet) inRet.value = '';
+                    }
                 }
             }
         });
+    }
+
+    // Inicializar con 1 fila si están vacíos al cargar
+    if (filasLuminarias && filasLuminarias.children.length === 0) {
+        filasLuminarias.appendChild(crearFilaLuminaria());
+    }
+    if (filasMaterialesNodo && filasMaterialesNodo.children.length === 0) {
+        filasMaterialesNodo.appendChild(crearFilaMaterial());
     }
 });
 </script>

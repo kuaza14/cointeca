@@ -21,6 +21,8 @@ from core.models import (
     DetalleRetiroMaterial,
     MaterialRequeridoProyecto,
     Inventario,
+    DevolucionMaterialProyecto,
+    DetalleDevolucionMaterial,
 )
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
@@ -175,6 +177,73 @@ def detalle_proyecto_logistica(request, proyecto_id):
                 MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).delete()
             return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
 
+        elif accion == "registrar_devolucion":
+            material_ids = request.POST.getlist("material_id[]")
+            cantidades = request.POST.getlist("cantidad[]")
+            responsable = request.POST.get("responsable", "").strip()
+            numero_acta = request.POST.get("numero_acta", "").strip()
+            observaciones = request.POST.get("observaciones", "").strip()
+            fecha_str = request.POST.get("fecha", "").strip()
+
+            fecha_dev = timezone.now().date()
+            if fecha_str:
+                try:
+                    fecha_dev = timezone.datetime.strptime(fecha_str, "%Y-%m-%d").date()
+                except Exception:
+                    pass
+
+            items_to_create = []
+            for m_id, c_str in zip(material_ids, cantidades):
+                if not m_id or not c_str:
+                    continue
+                try:
+                    cant_dec = Decimal(str(c_str).strip().replace(',', '.'))
+                    if cant_dec > 0:
+                        mat = Material.objects.filter(id=int(m_id)).first()
+                        if mat:
+                            items_to_create.append((mat, cant_dec))
+                except Exception:
+                    continue
+
+            if items_to_create:
+                dev_obj = DevolucionMaterialProyecto.objects.create(
+                    proyecto=proyecto,
+                    fecha=fecha_dev,
+                    responsable=responsable or "Cuadrilla Terreno",
+                    numero_acta=numero_acta,
+                    observaciones=observaciones
+                )
+                total_unidades = Decimal("0")
+                for mat, cant_dec in items_to_create:
+                    DetalleDevolucionMaterial.objects.create(
+                        devolucion=dev_obj,
+                        material=mat,
+                        cantidad=cant_dec
+                    )
+                    inventario, _ = Inventario.objects.get_or_create(material=mat)
+                    inventario.cantidad += cant_dec
+                    inventario.save()
+                    total_unidades += cant_dec
+
+                messages.success(request, f"¡Éxito! Se registraron {len(items_to_create)} material(es) en el historial de devolución y se sumaron +{total_unidades} unidades a Bodega Central.")
+            else:
+                messages.warning(request, "No se ingresaron cantidades mayores a 0 para devolver.")
+            return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
+
+        elif accion == "eliminar_devolucion":
+            dev_id = request.POST.get("devolucion_id")
+            if dev_id:
+                dev_obj = DevolucionMaterialProyecto.objects.filter(id=dev_id, proyecto=proyecto).first()
+                if dev_obj:
+                    for det in dev_obj.detalles.all():
+                        inv = Inventario.objects.filter(material=det.material).first()
+                        if inv:
+                            inv.cantidad = max(Decimal("0"), inv.cantidad - det.cantidad)
+                            inv.save()
+                    dev_obj.delete()
+                    messages.warning(request, "Se eliminó el registro de devolución y se descontó el stock reintegrado en Bodega Central.")
+            return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
+
     # 1. Instalado en Apoyos (Ingeniería)
     apoyo_inst_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
@@ -191,13 +260,8 @@ def detalle_proyecto_logistica(request, proyecto_id):
     )
     req_directo_map = {item["material_id"]: item["total"] for item in mat_req_extra}
 
-    # Mapa consolidado de requeridos
-    req_map = {}
-    for m_id, cant in req_directo_map.items():
-        req_map[m_id] = cant
-    for m_id, cant in inst_map.items():
-        if m_id not in req_map:
-            req_map[m_id] = cant
+    # Mapa de requeridos
+    req_map = {m_id: cant for m_id, cant in req_directo_map.items()}
 
     # 3. Entradas Suministradas (compras de proveedor o despachos de bodega)
     ent_qs = (
@@ -215,8 +279,16 @@ def detalle_proyecto_logistica(request, proyecto_id):
     )
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
+    # 4.5. Devoluciones ya reintegradas a Bodega Central
+    dev_qs = (
+        DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
     # 5. Obtener todos los materiales involucrados en el proyecto
-    all_material_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys())
+    all_material_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys()) | set(dev_map.keys())
     materiales_db = Material.objects.filter(id__in=all_material_ids).select_related("inventario").order_by("item", "descripcion")
 
     balance_materiales = []
@@ -231,10 +303,14 @@ def detalle_proyecto_logistica(request, proyecto_id):
         sum_inst = inst_map.get(mat.id, Decimal("0"))
         sum_ent = ent_map.get(mat.id, Decimal("0"))
         sum_ret = ret_map.get(mat.id, Decimal("0"))
-        material_sobrante = sum_ent - sum_inst
-        material_sobrante_positivo = max(Decimal("0"), material_sobrante)
+        sum_dev_hecha = dev_map.get(mat.id, Decimal("0"))
+
+        material_sobrante = max(Decimal("0"), sum_ent - sum_inst)
+        material_sobrante_positivo = material_sobrante
         material_desinstalado = sum_ret
-        devolucion = material_sobrante_positivo + material_desinstalado
+        total_a_devolver_teorico = material_sobrante + material_desinstalado
+        devolucion_pendiente = max(Decimal("0"), total_a_devolver_teorico - sum_dev_hecha)
+
         stock_bodega = getattr(mat, "inventario", None)
         stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
 
@@ -248,7 +324,10 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "material_sobrante": material_sobrante,
             "material_sobrante_positivo": material_sobrante_positivo,
             "material_desinstalado": material_desinstalado,
-            "devolucion": devolucion,
+            "devolucion": devolucion_pendiente,
+            "devolucion_str": str(devolucion_pendiente),
+            "devolucion_realizada": sum_dev_hecha,
+            "devolucion_teorica": total_a_devolver_teorico,
         })
 
         total_items_requeridos += sum_req
@@ -256,7 +335,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
         total_items_entrados += sum_ent
         total_items_retirados += sum_ret
 
-    total_material_sobrante = total_items_entrados - total_items_instalados
+    total_material_sobrante = sum(item["material_sobrante"] for item in balance_materiales)
     materiales_devolucion = [item for item in balance_materiales if item["devolucion"] > 0]
     total_devolucion = sum(item["devolucion"] for item in materiales_devolucion)
     total_sobrante_devolucion = sum(item["material_sobrante_positivo"] for item in materiales_devolucion)
@@ -286,6 +365,12 @@ def detalle_proyecto_logistica(request, proyecto_id):
         .order_by("apoyo__numero_apoyo", "material__descripcion")
     )
 
+    devoluciones = (
+        DevolucionMaterialProyecto.objects.filter(proyecto=proyecto)
+        .prefetch_related("detalles__material")
+        .order_by("-fecha", "-id")
+    )
+
     materiales_catalogo = Material.objects.all().order_by("descripcion")
 
     return render(
@@ -295,6 +380,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "proyecto": proyecto,
             "balance_materiales": balance_materiales,
             "materiales_devolucion": materiales_devolucion,
+            "devoluciones": devoluciones,
             "entradas": entradas,
             "requeridos_proyecto": requeridos_proyecto,
             "instalados_apoyo": instalados_apoyo,
@@ -904,38 +990,18 @@ def materiales_requeridos_proyecto(request, proyecto_id):
             return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
 
 
-    # Consolidar requerimientos (de MaterialRequeridoProyecto y de ApoyoMaterial)
-    req_directos = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material")
+    # Requerimientos directos del Proyecto (MaterialRequeridoProyecto)
+    req_directos = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material").order_by("material__descripcion")
     
-    req_apoyos = (
-        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id", "material__item", "material__descripcion", "material__unidad")
-        .annotate(total_apoyo=Sum("cantidad_requerida"))
-    )
-
-    mapa_requeridos = {}
+    lista_requeridos = []
     for r in req_directos:
-        mapa_requeridos[r.material.id] = {
+        lista_requeridos.append({
             "id": r.id,
             "material": r.material,
             "cantidad": r.cantidad_requerida,
             "origen": "Requerido General",
-        }
+        })
 
-    for a in req_apoyos:
-        m_id = a["material_id"]
-        if m_id in mapa_requeridos:
-            mapa_requeridos[m_id]["cantidad"] += a["total_apoyo"]
-        else:
-            mat = Material.objects.get(id=m_id)
-            mapa_requeridos[m_id] = {
-                "id": None,
-                "material": mat,
-                "cantidad": a["total_apoyo"],
-                "origen": "Apoyos Ingeniería",
-            }
-
-    lista_requeridos = sorted(mapa_requeridos.values(), key=lambda x: x["material"].descripcion)
     total_cantidad = sum(x["cantidad"] for x in lista_requeridos)
 
     return render(
@@ -975,13 +1041,8 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     )
     req_directo_map = {item["material_id"]: item["total"] for item in mat_req_extra}
 
-    # Consolidar mapa de requeridos
-    req_map = {}
-    for m_id, cant in req_directo_map.items():
-        req_map[m_id] = cant
-    for m_id, cant in inst_map.items():
-        if m_id not in req_map:
-            req_map[m_id] = cant
+    # Mapa de requeridos directos
+    req_map = {m_id: cant for m_id, cant in req_directo_map.items()}
 
     # 3. Entradas Suministradas (EntradaMaterialProyecto)
     ent_qs = (
@@ -999,8 +1060,16 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     )
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
+    # 4.5. Devoluciones ya reintegradas a Bodega Central
+    dev_qs = (
+        DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
     # 5. Materiales involucrados
-    all_material_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys())
+    all_material_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys()) | set(dev_map.keys())
     materiales_db = list(Material.objects.filter(id__in=all_material_ids).select_related("inventario").order_by("item", "descripcion"))
 
     wb = openpyxl.Workbook()
@@ -1085,7 +1154,8 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
         c_inst = inst_map.get(mat.id, Decimal("0"))
         c_ret = ret_map.get(mat.id, Decimal("0"))
         c_sob_pos = max(Decimal("0"), c_ent - c_inst)
-        c_dev = c_sob_pos + c_ret
+        c_dev_hecha = dev_map.get(mat.id, Decimal("0"))
+        c_dev = max(Decimal("0"), (c_sob_pos + c_ret) - c_dev_hecha)
         stock_obj = getattr(mat, "inventario", None)
         c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
@@ -1240,8 +1310,16 @@ def informe_consolidado_proyectos(request):
     )
     req_map = {item["material_id"]: item["total"] for item in req_qs}
 
+    # 4.5. Devoluciones ya reintegradas a Bodega Central
+    dev_qs = (
+        DetalleDevolucionMaterial.objects.filter(devolucion__proyecto__in=proyectos_seleccionados)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
     # 5. Todos los materiales involucrados
-    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys()) | set(req_map.keys())
+    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys()) | set(req_map.keys()) | set(dev_map.keys())
     materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
 
     tabla_consolidada = []
@@ -1256,9 +1334,12 @@ def informe_consolidado_proyectos(request):
         cant_inst = inst_map.get(mat.id, Decimal("0"))
         cant_ret = ret_map.get(mat.id, Decimal("0"))
         cant_req = req_map.get(mat.id, Decimal("0"))
-        saldo = cant_ent - cant_inst
-        sobrante_pos = max(Decimal("0"), saldo)
-        devolucion = sobrante_pos + cant_ret
+        cant_dev_hecha = dev_map.get(mat.id, Decimal("0"))
+
+        saldo = max(Decimal("0"), cant_ent - cant_inst)
+        sobrante_pos = saldo
+        total_a_devolver_teorico = sobrante_pos + cant_ret
+        devolucion = max(Decimal("0"), total_a_devolver_teorico - cant_dev_hecha)
 
         stock_bodega = getattr(mat, "inventario", None)
         stock_disponible = stock_bodega.cantidad if stock_bodega else Decimal("0")
@@ -1270,9 +1351,11 @@ def informe_consolidado_proyectos(request):
             "retirado": cant_ret,
             "requerido": cant_req,
             "saldo": saldo,
+            "material_sobrante": saldo,
             "material_sobrante_positivo": sobrante_pos,
             "material_desinstalado": cant_ret,
             "devolucion": devolucion,
+            "devolucion_realizada": cant_dev_hecha,
             "stock_bodega": stock_disponible,
         })
 
@@ -1294,7 +1377,10 @@ def informe_consolidado_proyectos(request):
         p_ret_qs = ApoyoMaterial.objects.filter(apoyo__proyecto=p).values("material_id").annotate(total=Sum("cantidad_retirada"))
         p_ret_map = {x["material_id"]: x["total"] for x in p_ret_qs if x["total"] > 0}
 
-        p_mat_ids = set(p_ent_map.keys()) | set(p_inst_map.keys()) | set(p_ret_map.keys())
+        p_dev_qs = DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=p).values("material_id").annotate(total=Sum("cantidad"))
+        p_dev_map = {x["material_id"]: x["total"] for x in p_dev_qs if x["total"] > 0}
+
+        p_mat_ids = set(p_ent_map.keys()) | set(p_inst_map.keys()) | set(p_ret_map.keys()) | set(p_dev_map.keys())
         p_materiales = Material.objects.filter(id__in=p_mat_ids).order_by("descripcion")
 
         items_proyecto = []
@@ -1307,8 +1393,9 @@ def informe_consolidado_proyectos(request):
             c_ent = p_ent_map.get(mat.id, Decimal("0"))
             c_inst = p_inst_map.get(mat.id, Decimal("0"))
             c_ret = p_ret_map.get(mat.id, Decimal("0"))
+            c_dev_hecha = p_dev_map.get(mat.id, Decimal("0"))
             c_sob_pos = max(Decimal("0"), c_ent - c_inst)
-            c_dev = c_sob_pos + c_ret
+            c_dev = max(Decimal("0"), (c_sob_pos + c_ret) - c_dev_hecha)
             items_proyecto.append({
                 "material": mat,
                 "entrado": c_ent,
@@ -1318,6 +1405,7 @@ def informe_consolidado_proyectos(request):
                 "material_sobrante_positivo": c_sob_pos,
                 "material_desinstalado": c_ret,
                 "devolucion": c_dev,
+                "devolucion_realizada": c_dev_hecha,
             })
             p_tot_ent += c_ent
             p_tot_inst += c_inst
@@ -1389,7 +1477,10 @@ def exportar_informe_consolidado_excel(request):
     req_qs = MaterialRequeridoProyecto.objects.filter(proyecto__in=proyectos_seleccionados).values("material_id").annotate(total=Sum("cantidad_requerida"))
     req_map = {item["material_id"]: item["total"] for item in req_qs}
 
-    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys()) | set(req_map.keys())
+    dev_qs = DetalleDevolucionMaterial.objects.filter(devolucion__proyecto__in=proyectos_seleccionados).values("material_id").annotate(total=Sum("cantidad"))
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
+    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys()) | set(req_map.keys()) | set(dev_map.keys())
     materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
 
     wb = openpyxl.Workbook()
@@ -1471,8 +1562,9 @@ def exportar_informe_consolidado_excel(request):
         c_ent = ent_map.get(mat.id, Decimal("0"))
         c_inst = inst_map.get(mat.id, Decimal("0"))
         c_ret = ret_map.get(mat.id, Decimal("0"))
+        c_dev_hecha = dev_map.get(mat.id, Decimal("0"))
         c_sob_pos = max(Decimal("0"), c_ent - c_inst)
-        c_dev = c_sob_pos + c_ret
+        c_dev = max(Decimal("0"), (c_sob_pos + c_ret) - c_dev_hecha)
         stock_obj = getattr(mat, "inventario", None)
         c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
@@ -1945,7 +2037,14 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
         )
         ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
-        all_mat_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys())
+        dev_qs = (
+            DetalleDevolucionMaterial.objects.filter(devolucion__proyecto__in=proyectos_scope)
+            .values("material_id")
+            .annotate(total=Sum("cantidad"))
+        )
+        dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
+        all_mat_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys()) | set(dev_map.keys())
         materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
 
         if query:
@@ -1959,10 +2058,12 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             sum_inst = inst_map.get(mat.id, Decimal("0"))
             sum_ent = ent_map.get(mat.id, Decimal("0"))
             sum_ret = ret_map.get(mat.id, Decimal("0"))
-            material_sobrante = sum_ent - sum_inst
-            material_sobrante_positivo = max(Decimal("0"), material_sobrante)
+            sum_dev_hecha = dev_map.get(mat.id, Decimal("0"))
+
+            material_sobrante = max(Decimal("0"), sum_ent - sum_inst)
+            material_sobrante_positivo = material_sobrante
             material_desinstalado = sum_ret
-            devolucion = material_sobrante_positivo + material_desinstalado
+            devolucion = max(Decimal("0"), (material_sobrante + material_desinstalado) - sum_dev_hecha)
             stock_bodega = getattr(mat, "inventario", None)
             stock_disp = stock_bodega.cantidad if stock_bodega else Decimal("0")
 
@@ -1984,7 +2085,7 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             total_items_entrados += sum_ent
             total_items_retirados += sum_ret
 
-        total_material_sobrante = total_items_entrados - total_items_instalados
+        total_material_sobrante = sum(item["material_sobrante"] for item in balance_materiales)
 
         # C. Materiales con saldo sobrante o desinstalados que deben reintegrarse/devolverse a bodega
         materiales_devolucion = [item for item in balance_materiales if item["devolucion"] > 0]
@@ -2123,7 +2224,10 @@ def exportar_vista_global_excel(request):
     ret_qs = ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope).values("material_id").annotate(total=Sum("cantidad_retirada"))
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
-    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys())
+    dev_qs = DetalleDevolucionMaterial.objects.filter(devolucion__proyecto__in=proyectos_scope).values("material_id").annotate(total=Sum("cantidad"))
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
+    all_mat_ids = set(ent_map.keys()) | set(inst_map.keys()) | set(ret_map.keys()) | set(dev_map.keys())
     materiales_db = Material.objects.filter(id__in=all_mat_ids).select_related("inventario").order_by("item", "descripcion")
 
     wb = openpyxl.Workbook()
@@ -2198,9 +2302,10 @@ def exportar_vista_global_excel(request):
         c_ent = ent_map.get(mat.id, Decimal("0"))
         c_inst = inst_map.get(mat.id, Decimal("0"))
         c_ret = ret_map.get(mat.id, Decimal("0"))
+        c_dev_hecha = dev_map.get(mat.id, Decimal("0"))
         c_sob = c_ent - c_inst
         c_sob_pos = max(Decimal("0"), c_sob)
-        c_dev = c_sob_pos + c_ret
+        c_dev = max(Decimal("0"), (c_sob_pos + c_ret) - c_dev_hecha)
         stock_obj = getattr(mat, "inventario", None)
         c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 

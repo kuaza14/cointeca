@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Sum
+from django.utils import timezone
 
 class CajaMenor(models.Model):
     fecha_tramite = models.DateField()
@@ -1395,4 +1396,66 @@ class DetalleRetiroMaterial(models.Model):
         verbose_name_plural = "Detalles Retiro Material"
 
     def __str__(self):
-        return f"{self.material.descripcion}: {self.cantidad} ({self.estado_material})"
+        return f"{self.material.descripcion}: {self.cantidad} ({self.estado_material})"
+
+
+class DevolucionMaterialProyecto(models.Model):
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="devoluciones_material"
+    )
+    fecha = models.DateField(default=timezone.now)
+    responsable = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+        verbose_name="Responsable / Quien entrega"
+    )
+    numero_acta = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="N° Acta / Comprobante de Devolución"
+    )
+    observaciones = models.TextField(
+        blank=True,
+        default=""
+    )
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Devolución / Reintegro de Material a Bodega"
+        verbose_name_plural = "Devoluciones / Reintegros de Material a Bodega"
+        ordering = ["-fecha", "-id"]
+
+    def __str__(self):
+        return f"Devolución {self.proyecto.numero_emcali} - {self.fecha} ({self.numero_acta})"
+
+
+class DetalleDevolucionMaterial(models.Model):
+    devolucion = models.ForeignKey(
+        DevolucionMaterialProyecto,
+        on_delete=models.CASCADE,
+        related_name="detalles"
+    )
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.PROTECT,
+        related_name="devoluciones_proyecto"
+    )
+    cantidad = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Cantidad Devuelta a Bodega"
+    )
+
+    class Meta:
+        verbose_name = "Detalle Devolución Material"
+        verbose_name_plural = "Detalles Devolución Material"
+
+    def __str__(self):
+        return f"{self.material.descripcion}: {self.cantidad}"
+

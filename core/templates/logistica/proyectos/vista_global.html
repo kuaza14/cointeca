@@ -661,16 +661,16 @@
                             <td class="px-5 py-3 font-semibold text-foreground text-sm">{{ fila.material.descripcion }}</td>
                             <td class="px-3 py-3 text-center font-bold text-muted-foreground">{{ fila.material.unidad|default:"UN" }}</td>
                             <td class="px-4 py-3 text-right font-bold text-emerald-700 bg-emerald-50/20 text-sm">
-                                {% if fila.entrada > 0 %}{{ fila.entrada|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.entrada|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-indigo-700 bg-indigo-50/20 text-sm">
-                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.instalado|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-blue-700 bg-blue-50/20 text-sm">
-                                {% if fila.material_sobrante_positivo > 0 %}{{ fila.material_sobrante_positivo|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.material_sobrante_positivo|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-amber-800 bg-amber-50/30 text-sm">
-                                {% if fila.material_desinstalado > 0 %}{{ fila.material_desinstalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.material_desinstalado|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-black text-amber-900 bg-amber-100/70 text-sm">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-300 font-extrabold text-amber-950">
@@ -678,7 +678,7 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-right font-medium text-foreground bg-muted/30">
-                                {{ fila.stock_bodega|floatformat }}
+                                {{ fila.stock_bodega|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
@@ -777,27 +777,27 @@
 
                             <!-- Entradas -->
                             <td class="px-4 py-3 text-right font-black text-emerald-700 bg-emerald-50/30 text-sm">
-                                {% if fila.entrada > 0 %}{{ fila.entrada|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.entrada|default:0|floatformat }}
                             </td>
 
                             <!-- Instalado en Apoyos -->
                             <td class="px-4 py-3 text-right font-black text-indigo-700 bg-indigo-50/30 text-sm">
-                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.instalado|default:0|floatformat }}
                             </td>
 
                             <!-- Retirado / Desmonte -->
                             <td class="px-4 py-3 text-right font-black text-amber-800 bg-amber-50/40 text-sm">
-                                {% if fila.retirado > 0 %}{{ fila.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.retirado|default:0|floatformat }}
                             </td>
 
                             <!-- Material que Sobra -->
-                            <td class="px-4 py-3 text-right font-black text-sm {% if fila.material_sobrante < 0 %}text-amber-700 bg-amber-50/30{% elif fila.material_sobrante == 0 %}text-emerald-700 bg-emerald-50/20{% else %}text-primary bg-primary-soft/30{% endif %}">
-                                {{ fila.material_sobrante|floatformat }}
+                            <td class="px-4 py-3 text-right font-black text-sm text-primary bg-primary-soft/30">
+                                {{ fila.material_sobrante|default:0|floatformat }}
                             </td>
 
                             <!-- Stock Bodega -->
-                            <td class="px-4 py-3 text-right font-medium text-muted-foreground bg-muted/40 text-xs">
-                                {{ fila.stock_bodega|floatformat }}
+                            <td class="px-4 py-3 text-right font-medium text-foreground bg-muted/40 text-xs">
+                                {{ fila.stock_bodega|default:0|floatformat }}
                             </td>
                         </tr>
                         {% empty %}

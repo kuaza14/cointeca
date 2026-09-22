@@ -155,17 +155,17 @@
 
                             <!-- Entradas -->
                             <td class="px-4 py-3 text-right font-black text-emerald-700 bg-emerald-50/30 text-sm">
-                                {% if fila.entrado > 0 %}{{ fila.entrado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.entrado|default:0|floatformat }}
                             </td>
 
                             <!-- Instalado en Apoyos -->
                             <td class="px-4 py-3 text-right font-black text-indigo-700 bg-indigo-50/30 text-sm">
-                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.instalado|default:0|floatformat }}
                             </td>
 
                             <!-- Retirado / Desmonte -->
                             <td class="px-4 py-3 text-right font-black text-amber-800 bg-amber-50/40 text-sm">
-                                {% if fila.retirado > 0 %}{{ fila.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.retirado|default:0|floatformat }}
                             </td>
 
                             <!-- Devolución / Sobrante -->
@@ -174,14 +174,18 @@
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-200 text-amber-950 border border-amber-300">
                                         <span>↩️</span> {{ fila.devolucion|floatformat }}
                                     </span>
+                                {% elif fila.devolucion_realizada > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300" title="Reintegrado en su totalidad a Bodega Central ({{ fila.devolucion_realizada|floatformat }} devueltos)">
+                                        ✓ Devuelto ({{ fila.devolucion_realizada|floatformat }})
+                                    </span>
                                 {% else %}
-                                    <span class="text-gray-300 font-normal">—</span>
+                                    0
                                 {% endif %}
                             </td>
 
                             <!-- Stock Bodega -->
-                            <td class="px-4 py-3 text-right font-medium text-muted-foreground bg-muted/40 text-xs">
-                                {{ fila.stock_bodega|floatformat }}
+                            <td class="px-4 py-3 text-right font-medium text-foreground bg-muted/40 text-xs">
+                                {{ fila.stock_bodega|default:0|floatformat }}
                             </td>
                         </tr>
                         {% empty %}
@@ -267,21 +271,25 @@
                                 <td class="px-5 py-2.5 font-medium text-foreground">{{ item.material.descripcion }}</td>
                                 <td class="px-3 py-2.5 text-center text-muted-foreground">{{ item.material.unidad|default:"UN" }}</td>
                                 <td class="px-4 py-2.5 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                    {% if item.entrado > 0 %}{{ item.entrado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                    {{ item.entrado|default:0|floatformat }}
                                 </td>
                                 <td class="px-4 py-2.5 text-right font-bold text-indigo-700 bg-indigo-50/20">
-                                    {% if item.instalado > 0 %}{{ item.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                    {{ item.instalado|default:0|floatformat }}
                                 </td>
                                 <td class="px-4 py-2.5 text-right font-bold text-amber-800 bg-amber-50/30">
-                                    {% if item.retirado > 0 %}{{ item.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                    {{ item.retirado|default:0|floatformat }}
                                 </td>
                                 <td class="px-4 py-2.5 text-right font-black">
                                     {% if item.devolucion > 0 %}
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300 text-xs">
                                             <span>↩️</span> {{ item.devolucion|floatformat }}
                                         </span>
+                                    {% elif item.devolucion_realizada > 0 %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300" title="Reintegrado en su totalidad a Bodega Central ({{ item.devolucion_realizada|floatformat }} devueltos)">
+                                            ✓ Devuelto ({{ item.devolucion_realizada|floatformat }})
+                                        </span>
                                     {% else %}
-                                        <span class="text-gray-300 font-normal">—</span>
+                                        0
                                     {% endif %}
                                 </td>
                             </tr>

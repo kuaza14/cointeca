@@ -174,43 +174,47 @@
 
                             <!-- 1. Materiales Requeridos -->
                             <td class="px-4 py-3.5 text-right font-bold text-blue-700 bg-blue-50/20">
-                                {% if fila.requerido > 0 %}{{ fila.requerido|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.requerido|default:0|floatformat }}
                             </td>
 
                             <!-- 4. Suministrado (Entradas) -->
                             <td class="px-4 py-3.5 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                {% if fila.entrada > 0 %}{{ fila.entrada|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.entrada|default:0|floatformat }}
                             </td>
 
                             <!-- 2. Materiales Instalados -->
                             <td class="px-4 py-3.5 text-right font-bold text-indigo-700 bg-indigo-50/20">
-                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.instalado|default:0|floatformat }}
                             </td>
 
                             <!-- Materiales Sobrantes (Suministrado - Instalado) -->
-                            <td class="px-4 py-3.5 text-right font-black text-sm {% if fila.material_sobrante < 0 %}text-amber-700 bg-amber-50/30{% elif fila.material_sobrante == 0 %}text-emerald-700 bg-emerald-50/20{% else %}text-blue-700 bg-blue-50/30{% endif %}">
-                                {{ fila.material_sobrante|floatformat }}
+                            <td class="px-4 py-3.5 text-right font-black text-sm text-blue-700 bg-blue-50/30">
+                                {{ fila.material_sobrante|default:0|floatformat }}
                             </td>
 
                             <!-- 3. Materiales Retirados -->
                             <td class="px-4 py-3.5 text-right font-bold text-amber-800 bg-amber-50/30">
-                                {% if fila.retirado > 0 %}{{ fila.retirado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.retirado|default:0|floatformat }}
                             </td>
 
                             <!-- 6. Material de Devolución -->
-                            <td class="px-4 py-3.5 text-right bg-orange-50/30">
+                            <td class="px-4 py-3.5 text-right bg-orange-50/30 font-bold">
                                 {% if fila.devolucion > 0 %}
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs" title="Suministrado ({{ fila.entrada|floatformat }}) vs Instalado ({{ fila.instalado|floatformat }}) + Desinstalado ({{ fila.material_desinstalado|floatformat }}). Toca devolver a bodega.">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs" title="Pendiente por devolver a bodega central: {{ fila.devolucion|floatformat }}{% if fila.devolucion_realizada > 0 %} (Ya se reintegraron {{ fila.devolucion_realizada|floatformat }} previamente){% endif %}">
                                         <span>↩️</span> {{ fila.devolucion|floatformat }}
                                     </span>
+                                {% elif fila.devolucion_realizada > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300" title="Reintegrado en su totalidad a Bodega Central ({{ fila.devolucion_realizada|floatformat }} devueltos)">
+                                        ✓ Devuelto ({{ fila.devolucion_realizada|floatformat }})
+                                    </span>
                                 {% else %}
-                                    <span class="text-gray-300 font-normal">—</span>
+                                    0
                                 {% endif %}
                             </td>
 
                             <!-- 5. Stock en Bodega -->
                             <td class="px-4 py-3.5 text-right font-medium text-foreground bg-muted">
-                                {{ fila.stock_bodega|floatformat }}
+                                {{ fila.stock_bodega|default:0|floatformat }}
                             </td>
                         </tr>
                         {% empty %}
@@ -240,10 +244,12 @@
                     </p>
                 </div>
                 {% if materiales_devolucion %}
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold">
-                        <span>⚠️</span> {{ materiales_devolucion|length }} material{{ materiales_devolucion|pluralize }} para devolución (Total: {{ total_devolucion|floatformat }})
-                    </span>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.remove('hidden'); document.getElementById('modalRegistrarDevolucion').classList.add('flex');"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+                            title="Reintegrar y sumar estos materiales a la Bodega Central">
+                        <span>↩️</span> Reintegrar / Devolver a Bodega
+                    </button>
                     <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
                        title="Descargar este reporte y balance en Excel">
@@ -275,16 +281,16 @@
                             <td class="px-5 py-3 font-semibold text-foreground text-sm">{{ fila.material.descripcion }}</td>
                             <td class="px-3 py-3 text-center font-bold text-muted-foreground">{{ fila.material.unidad|default:"UN" }}</td>
                             <td class="px-4 py-3 text-right font-bold text-emerald-700 bg-emerald-50/20 text-sm">
-                                {% if fila.entrada > 0 %}{{ fila.entrada|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.entrada|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-indigo-700 bg-indigo-50/20 text-sm">
-                                {% if fila.instalado > 0 %}{{ fila.instalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.instalado|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-blue-700 bg-blue-50/20 text-sm">
-                                {% if fila.material_sobrante_positivo > 0 %}{{ fila.material_sobrante_positivo|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.material_sobrante_positivo|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-bold text-amber-800 bg-amber-50/30 text-sm">
-                                {% if fila.material_desinstalado > 0 %}{{ fila.material_desinstalado|floatformat }}{% else %}<span class="text-gray-300 font-normal">—</span>{% endif %}
+                                {{ fila.material_desinstalado|default:0|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-right font-black text-amber-900 bg-amber-100/70 text-sm">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-300 font-extrabold text-amber-950">
@@ -307,6 +313,86 @@
                 </p>
             </div>
             {% endif %}
+
+            <!-- HISTORIAL DE DEVOLUCIONES / REINTEGROS PROCESADOS -->
+            <div class="mt-8 pt-6 border-t border-border space-y-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-foreground text-sm flex items-center gap-2">
+                            <span>📦</span> Historial de Reintegros Recibidos en Bodega Central
+                        </h4>
+                        <p class="text-xs text-muted-foreground">Registro de actas y devoluciones que ya ingresaron formalmente al stock de bodega.</p>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-muted text-foreground">
+                        {{ devoluciones|length }} registro{{ devoluciones|pluralize }}
+                    </span>
+                </div>
+
+                {% if devoluciones %}
+                <div class="space-y-3">
+                    {% for dev in devoluciones %}
+                    <div class="bg-card border border-border rounded-xl p-4 shadow-xs space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-2">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="px-2.5 py-0.5 rounded-md text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
+                                    📅 {{ dev.fecha|date:"d/m/Y" }}
+                                </span>
+                                {% if dev.numero_acta %}
+                                <span class="text-xs font-bold text-foreground">
+                                    Acta / Comprobante: <strong class="font-mono text-primary">{{ dev.numero_acta }}</strong>
+                                </span>
+                                {% endif %}
+                                {% if dev.responsable %}
+                                <span class="text-xs text-muted-foreground">
+                                    Entregó: <strong class="text-foreground">{{ dev.responsable }}</strong>
+                                </span>
+                                {% endif %}
+                            </div>
+                            <form method="POST" action="{% url 'detalle_proyecto_logistica' proyecto.id %}" onsubmit="return confirm('¿Deseas anular esta devolución? Se restarán las cantidades del stock de Bodega Central.')">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="eliminar_devolucion">
+                                <input type="hidden" name="devolucion_id" value="{{ dev.id }}">
+                                <button type="submit" class="text-xs text-destructive hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded transition cursor-pointer">
+                                    ✕ Anular Reintegro
+                                </button>
+                            </form>
+                        </div>
+
+                        {% if dev.observaciones %}
+                        <p class="text-xs text-muted-foreground italic">"{{ dev.observaciones }}"</p>
+                        {% endif %}
+
+                        <div class="overflow-x-auto border border-border/60 rounded-lg">
+                            <table class="min-w-full text-xs divide-y divide-gray-200">
+                                <thead class="bg-muted text-muted-foreground font-semibold">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left w-16">Ítem</th>
+                                        <th class="px-3 py-2 text-left">Material Devuelto</th>
+                                        <th class="px-3 py-2 text-center w-20">Unidad</th>
+                                        <th class="px-3 py-2 text-right w-36">Cantidad Reintegrada</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 bg-card">
+                                    {% for det in dev.detalles.all %}
+                                    <tr>
+                                        <td class="px-3 py-1.5 font-mono text-muted-foreground font-bold">{{ det.material.item }}</td>
+                                        <td class="px-3 py-1.5 font-medium text-foreground">{{ det.material.descripcion }}</td>
+                                        <td class="px-3 py-1.5 text-center text-muted-foreground">{{ det.material.unidad|default:"UN" }}</td>
+                                        <td class="px-3 py-1.5 text-right font-black text-emerald-700">+{{ det.cantidad|floatformat }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-6 text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border text-xs">
+                    No se han procesado devoluciones previas para este proyecto.
+                </div>
+                {% endif %}
+            </div>
         </div>
 
         <!-- TAB 2: MATERIALES REQUERIDOS -->
@@ -674,8 +760,124 @@
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5">
+                        class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer">
                     <span>💾</span> Guardar Requerimientos
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: REINTEGRAR / DEVOLVER MATERIALES A BODEGA -->
+<div id="modalRegistrarDevolucion" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+    <div class="w-full max-w-3xl rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        <!-- Cabecera Ámbar / Naranja -->
+        <div class="flex items-center justify-between border-b border-amber-950 px-6 py-4 bg-amber-900 text-white">
+            <div>
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span>↩️</span> Reintegrar / Devolver Materiales a Bodega Central
+                </h2>
+                <p class="text-xs text-amber-100 mt-0.5">
+                    Proyecto {{ proyecto.numero_emcali }} — Al confirmar, estas cantidades se sumarán directamente al inventario de Bodega Central.
+                </p>
+            </div>
+            <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
+                    class="flex size-8 items-center justify-center rounded-lg text-amber-200 hover:text-white hover:bg-white/10 transition text-xl font-bold cursor-pointer">
+                ✕
+            </button>
+        </div>
+
+        <form method="POST" action="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="flex flex-col flex-1 overflow-hidden">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="registrar_devolucion">
+
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 bg-slate-50">
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                    <p class="font-bold mb-0.5">ℹ️ Información de Devolución:</p>
+                    <p>Los materiales a continuación corresponden al <strong>Sobrante de Compras + Materiales Desmontados en Apoyos</strong>. Al confirmar, estas cantidades se sumarán al inventario de Bodega Central y quedará registrada el acta de devolución.</p>
+                </div>
+
+                <!-- Datos del Acta / Devolución -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3.5 rounded-xl border border-gray-200 text-xs">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Fecha de Devolución:</label>
+                        <input type="date" name="fecha" value="{% now 'Y-m-d' %}" required
+                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Responsable / Entrega:</label>
+                        <input type="text" name="responsable" placeholder="Ej: Cuadrilla Juan Pérez"
+                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">N° Acta / Planilla:</label>
+                        <input type="text" name="numero_acta" placeholder="Ej: DEV-2026-001"
+                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block font-bold text-gray-700 mb-1">Observaciones / Motivo (Opcional):</label>
+                        <input type="text" name="observaciones" placeholder="Ej: Reintegro de sobrantes tras finalización de obra"
+                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-gray-300 rounded-xl bg-white shadow-xs">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-amber-950 text-xs font-bold text-white uppercase">
+                            <tr>
+                                <th class="px-4 py-3 text-left w-16">Ítem</th>
+                                <th class="px-4 py-3 text-left">Material a Reintegrar</th>
+                                <th class="px-3 py-3 text-center w-16">Unidad</th>
+                                <th class="px-4 py-3 text-right w-44">Cantidad a Devolver</th>
+                                <th class="px-3 py-3 text-center w-12">Quitar</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white" id="filasModalDevolucion">
+                            {% for fila in materiales_devolucion %}
+                            <tr class="fila-modal-devolucion hover:bg-amber-50/40 transition">
+                                <td class="px-4 py-2.5 font-mono text-xs font-bold text-gray-700">
+                                    {{ fila.material.item }}
+                                </td>
+                                <td class="px-4 py-2.5">
+                                    <input type="hidden" name="material_id[]" value="{{ fila.material.id }}">
+                                    <span class="font-semibold text-xs text-gray-900">{{ fila.material.descripcion }}</span>
+                                    <div class="text-[10px] text-gray-500 mt-0.5">
+                                        Sobrante: {{ fila.material_sobrante_positivo|floatformat }} | Retirado: {{ fila.material_desinstalado|floatformat }}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-2.5 text-center font-bold text-xs text-gray-600">
+                                    {{ fila.material.unidad|default:"UN" }}
+                                </td>
+                                <td class="px-4 py-2.5">
+                                    <input type="number" step="any" min="0" name="cantidad[]" value="{{ fila.devolucion_str|default:fila.devolucion }}" required
+                                           class="w-full border-2 border-amber-300 focus:border-amber-600 rounded-lg px-3 py-1.5 text-xs font-extrabold text-amber-950 bg-amber-50/30 text-right focus:outline-none">
+                                </td>
+                                <td class="px-3 py-2.5 text-center">
+                                    <button type="button" onclick="this.closest('tr').remove();" class="text-red-600 hover:text-red-800 font-black text-xl p-1 rounded hover:bg-red-50 transition cursor-pointer" title="Quitar este material de la devolución">
+                                        &times;
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-6 text-center text-xs text-gray-500">
+                                    No hay materiales pendientes de devolución en este momento.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 bg-gray-100">
+                <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
+                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg border border-gray-300 transition cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="submit" {% if not materiales_devolucion %}disabled{% endif %}
+                        class="px-5 py-2 bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <span>✅</span> Confirmar Reintegro (Sumar a Bodega)
                 </button>
             </div>
         </form>
@@ -769,10 +971,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("keydown", function (e) {
         if (e.key === "Escape") {
-            const m = document.getElementById("modalPedirRequerido");
-            if (m && !m.classList.contains("hidden")) {
-                m.classList.add("hidden");
-                m.classList.remove("flex");
+            const mReq = document.getElementById("modalPedirRequerido");
+            if (mReq && !mReq.classList.contains("hidden")) {
+                mReq.classList.add("hidden");
+                mReq.classList.remove("flex");
+            }
+            const mDev = document.getElementById("modalRegistrarDevolucion");
+            if (mDev && !mDev.classList.contains("hidden")) {
+                mDev.classList.add("hidden");
+                mDev.classList.remove("flex");
             }
         }
     });

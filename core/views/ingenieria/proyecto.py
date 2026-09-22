@@ -4,7 +4,8 @@ import io
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.urls import reverse
+from django.http import HttpResponse, JsonResponse
 from decimal import Decimal
 from django.db.models import Sum, Q
 from django.utils import timezone
@@ -504,6 +505,9 @@ def crear_apoyo(request, proyecto_id):
         except (ValueError, TypeError, ArithmeticError):
             metros_retenido = Decimal("0")
 
+        estado_val = request.POST.get("estado", "Pendiente").strip()
+        estado = estado_val if estado_val else "Pendiente"
+
         apoyo = Apoyo.objects.create(
             proyecto=proyecto,
             quien_ejecuta_id=quien_ejecuta_id,
@@ -516,7 +520,7 @@ def crear_apoyo(request, proyecto_id):
             cantidad_retenida=cantidad_retenida,
             metros_retenido=metros_retenido,
             observacion=observacion,
-            estado="Pendiente"
+            estado=estado
         )
 
         potencias = request.POST.getlist("potencia[]")
@@ -559,7 +563,11 @@ def crear_apoyo(request, proyecto_id):
                         inventario.cantidad -= c_inst
                     else:
                         inventario.cantidad = Decimal("0")
-                    inventario.save()
+
+                if c_ret > 0:
+                    inventario.cantidad += c_ret
+
+                inventario.save()
 
                 ApoyoMaterial.objects.create(
                     apoyo=apoyo,
@@ -580,10 +588,269 @@ def crear_apoyo(request, proyecto_id):
             f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' creado correctamente con {materiales_creados} material(es) asignado(s)."
         )
 
+        tab = request.POST.get("tab", "materiales").strip()
+        url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})
+        if tab:
+            url += f"?tab={tab}"
+        return redirect(url)
+
     return redirect(
         "detalle_proyecto",
         id=proyecto.id        
     )
+
+
+@login_required
+@transaction.atomic
+def editar_apoyo(request, apoyo_id):
+    apoyo = get_object_or_404(
+        Apoyo.objects.select_related("proyecto"),
+        id=apoyo_id
+    )
+    proyecto = apoyo.proyecto
+
+    if request.method == "POST":
+        numero_apoyo_val = request.POST.get("numero_apoyo")
+        apoyo.numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
+
+        fecha_val = request.POST.get("fecha")
+        apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
+
+        apoyo.nodo = request.POST.get("nodo", "").strip()
+        apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
+        apoyo.direccion = request.POST.get("direccion", "").strip()
+        apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+        apoyo.observacion = request.POST.get("observacion", "").strip()
+        
+        estado_val = request.POST.get("estado", apoyo.estado or "Pendiente").strip()
+        apoyo.estado = estado_val if estado_val else "Pendiente"
+
+        quien_ejecuta_id = request.POST.get("quien_ejecuta")
+        apoyo.quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
+
+        cant_ret_val = request.POST.get("cantidad_retenida")
+        try:
+            apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
+        except (ValueError, TypeError, ArithmeticError):
+            apoyo.cantidad_retenida = Decimal("0")
+
+        m_ret_val = request.POST.get("metros_retenido")
+        try:
+            apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
+        except (ValueError, TypeError, ArithmeticError):
+            apoyo.metros_retenido = Decimal("0")
+
+        apoyo.save()
+
+        # Actualizar Luminarias
+        apoyo.luminarias.all().delete()
+        potencias = request.POST.getlist("potencia[]")
+        codigos = request.POST.getlist("codigo_luminaria[]")
+        for potencia, codigo in zip(potencias, codigos):
+            if potencia.strip() or codigo.strip():
+                ApoyoLuminaria.objects.create(
+                    apoyo=apoyo,
+                    potencia=potencia.strip(),
+                    codigo=codigo.strip()
+                )
+
+        # Sincronizar Materiales
+        materiales_ids = request.POST.getlist("material_id[]")
+        cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
+        cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+
+        materiales_actuales = {am.material_id: am for am in apoyo.materiales.all()}
+        materiales_nuevos_procesados = set()
+
+        for i, mat_id in enumerate(materiales_ids):
+            if not mat_id or not str(mat_id).isdigit():
+                continue
+            mat_id_int = int(mat_id)
+
+            try:
+                c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
+                c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
+
+                c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
+                c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
+
+                c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
+                c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+
+                if c_inst <= 0 and c_ret <= 0:
+                    continue
+
+                inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
+
+                if mat_id_int in materiales_actuales:
+                    am = materiales_actuales[mat_id_int]
+                    diferencia = c_inst - am.cantidad_requerida
+                    if diferencia > 0:
+                        if inventario.cantidad >= diferencia:
+                            inventario.cantidad -= diferencia
+                        else:
+                            inventario.cantidad = Decimal("0")
+                    elif diferencia < 0:
+                        inventario.cantidad += abs(diferencia)
+
+                    diferencia_ret = c_ret - am.cantidad_retirada
+                    if diferencia_ret != 0:
+                        inventario.cantidad += diferencia_ret
+                        inventario.cantidad = max(Decimal("0"), inventario.cantidad)
+
+                    inventario.save()
+
+                    am.cantidad_requerida = max(Decimal("0"), c_inst)
+                    am.cantidad_retirada = max(Decimal("0"), c_ret)
+                    am.save()
+                else:
+                    if c_inst > 0:
+                        if inventario.cantidad >= c_inst:
+                            inventario.cantidad -= c_inst
+                        else:
+                            inventario.cantidad = Decimal("0")
+
+                    if c_ret > 0:
+                        inventario.cantidad += c_ret
+
+                    inventario.save()
+
+                    ApoyoMaterial.objects.create(
+                        apoyo=apoyo,
+                        material_id=mat_id_int,
+                        cantidad_requerida=max(Decimal("0"), c_inst),
+                        cantidad_retirada=max(Decimal("0"), c_ret),
+                    )
+
+                materiales_nuevos_procesados.add(mat_id_int)
+            except (ValueError, TypeError, ArithmeticError):
+                continue
+
+        # Eliminar materiales que se hayan removido
+        for mat_id_antiguo, am in materiales_actuales.items():
+            if mat_id_antiguo not in materiales_nuevos_procesados:
+                inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
+                if am.cantidad_requerida > 0:
+                    inv_del.cantidad += am.cantidad_requerida
+                if am.cantidad_retirada > 0:
+                    inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - am.cantidad_retirada)
+                inv_del.save()
+                am.delete()
+
+        # Recalcular Mano de Obra y Presupuesto
+        calcular_mano_obra_para_apoyo(apoyo)
+        actualizar_presupuesto_proyecto(proyecto)
+
+        messages.success(
+            request,
+            f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' actualizado correctamente."
+        )
+
+        tab = request.POST.get("tab", "materiales").strip()
+        url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})
+        if tab:
+            url += f"?tab={tab}"
+        return redirect(url)
+
+    return redirect("detalle_proyecto", id=proyecto.id)
+
+
+@login_required
+@transaction.atomic
+def despachar_bodega_apoyo(request, apoyo_id):
+    apoyo = get_object_or_404(
+        Apoyo.objects.select_related("proyecto", "quien_ejecuta"),
+        id=apoyo_id
+    )
+    proyecto = apoyo.proyecto
+
+    is_ajax = (
+        request.headers.get("x-requested-with") == "XMLHttpRequest"
+        or request.POST.get("ajax") == "1"
+        or "application/json" in request.headers.get("Accept", "")
+    )
+
+    if request.method == "POST":
+        material_id = request.POST.get("material_id")
+        cantidad_str = request.POST.get("cantidad", "0")
+
+        if not material_id:
+            if is_ajax:
+                return JsonResponse({"success": False, "error": "Selecciona un material de bodega válido."}, status=400)
+            return redirect("detalle_proyecto", id=proyecto.id)
+
+        try:
+            cant = Decimal(str(cantidad_str).strip().replace(',', '.'))
+            if cant <= 0:
+                if is_ajax:
+                    return JsonResponse({"success": False, "error": "La cantidad debe ser un número mayor a cero."}, status=400)
+                return redirect("detalle_proyecto", id=proyecto.id)
+        except (ValueError, TypeError, ArithmeticError):
+            if is_ajax:
+                return JsonResponse({"success": False, "error": "La cantidad ingresada no es válida."}, status=400)
+            return redirect("detalle_proyecto", id=proyecto.id)
+
+        material = get_object_or_404(Material, id=material_id)
+        inventario, _ = Inventario.objects.get_or_create(material=material)
+        stock_previo = inventario.cantidad or Decimal("0")
+        unidad_str = material.unidad or "UN"
+
+        warning_msg = None
+        # Descontar del inventario general de bodega
+        if stock_previo <= 0:
+            warning_msg = f"⚠️ Advertencia: '{material.descripcion}' no tiene existencias en bodega central (Stock: 0 {unidad_str}). Se despacharon {cant} {unidad_str} al poste como requerimiento pendiente de compra."
+            if not is_ajax:
+                messages.warning(request, warning_msg)
+        elif stock_previo < cant:
+            inventario.cantidad = Decimal("0")
+            inventario.save()
+            warning_msg = f"⚠️ Advertencia: Stock insuficiente en bodega para '{material.descripcion}'. Había {stock_previo} {unidad_str} y se solicitaron {cant} {unidad_str}. Se agotó el stock disponible en bodega."
+            if not is_ajax:
+                messages.warning(request, warning_msg)
+        else:
+            inventario.cantidad -= cant
+            inventario.save()
+            if not is_ajax:
+                messages.success(
+                    request,
+                    f"Se despacharon exitosamente {cant} {unidad_str} de '{material.descripcion}' desde Bodega Central al poste (Stock restante en bodega: {inventario.cantidad} {unidad_str})."
+                )
+
+        # Asignar / sumar el material a este apoyo en la obra
+        apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
+            apoyo=apoyo,
+            material=material,
+            defaults={"cantidad_requerida": cant}
+        )
+        if not created:
+            apoyo_mat.cantidad_requerida += cant
+            apoyo_mat.save()
+
+        calcular_mano_obra_para_apoyo(apoyo)
+        actualizar_presupuesto_proyecto(proyecto)
+
+        if is_ajax:
+            return JsonResponse({
+                "success": True,
+                "message": f"Se despacharon {cant} {unidad_str} de '{material.descripcion}' al poste.",
+                "warning": warning_msg,
+                "material_id": material.id,
+                "material_item": material.item,
+                "material_descripcion": material.descripcion,
+                "unidad": unidad_str,
+                "cantidad_despachada": float(cant),
+                "cantidad_total_instalada": float(apoyo_mat.cantidad_requerida),
+                "cantidad_retirada": float(apoyo_mat.cantidad_retirada),
+                "stock_restante": float(inventario.cantidad),
+            })
+
+        tab = request.POST.get("tab", "materiales").strip()
+        url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})
+        if tab:
+            url += f"?tab={tab}"
+        return redirect(url)
+
+    return redirect("detalle_proyecto", id=proyecto.id)
 
 
 @login_required
@@ -642,23 +909,6 @@ def detalle_apoyo(request, apoyo_id):
                                 f"Se despacharon {cant} {unidad_str} de '{material.descripcion}' al poste. Stock disponible restante: {inventario.cantidad} {unidad_str}."
                             )
 
-                        # Registrar la entrada al proyecto desde bodega
-                        fecha_hoy = timezone.now().date()
-                        nodo_label = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
-                        entrada = EntradaMaterialProyecto.objects.create(
-                            proyecto=apoyo.proyecto,
-                            fecha=fecha_hoy,
-                            proveedor="Bodega Central (Despacho)",
-                            numero_remision=f"DESP-BOD-NODO-{nodo_label}",
-                            recibido_por=apoyo.quien_ejecuta.nombre_completo if apoyo.quien_ejecuta else "Técnico en Terreno",
-                            observaciones=f"Material despachado desde bodega central para el Nodo {nodo_label}"
-                        )
-                        DetalleEntradaMaterial.objects.create(
-                            entrada=entrada,
-                            material=material,
-                            cantidad=cant
-                        )
-
                         # Asignar / sumar el material a este apoyo en la obra
                         apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
                             apoyo=apoyo,
@@ -710,17 +960,18 @@ def detalle_apoyo(request, apoyo_id):
                                     f"⚠️ Advertencia: Stock insuficiente en bodega para '{apoyo_mat.material.descripcion}'. Se consumió el remanente de {inventario.cantidad} {unidad_str}."
                                 )
                                 inventario.cantidad = Decimal("0")
-                                inventario.save()
                             else:
                                 inventario.cantidad -= diferencia
-                                inventario.save()
-                                messages.success(request, f"Cantidades actualizadas para '{apoyo_mat.material.descripcion}'.")
                         elif diferencia < 0:
                             inventario.cantidad += abs(diferencia)
-                            inventario.save()
-                            messages.success(request, f"Cantidades actualizadas para '{apoyo_mat.material.descripcion}' (se devolvieron {abs(diferencia)} {unidad_str} a bodega).")
-                        else:
-                            messages.success(request, f"Cantidades actualizadas para '{apoyo_mat.material.descripcion}'.")
+
+                        diferencia_ret = cant_ret - apoyo_mat.cantidad_retirada
+                        if diferencia_ret != 0:
+                            inventario.cantidad += diferencia_ret
+                            inventario.cantidad = max(Decimal("0"), inventario.cantidad)
+
+                        inventario.save()
+                        messages.success(request, f"Cantidades actualizadas para '{apoyo_mat.material.descripcion}'.")
 
                         apoyo_mat.cantidad_requerida = max(Decimal("0"), cant_inst)
                         apoyo_mat.cantidad_retirada = max(Decimal("0"), cant_ret)
@@ -746,10 +997,13 @@ def detalle_apoyo(request, apoyo_id):
 
                 if apoyo_mat:
                     nombre_mat = apoyo_mat.material.descripcion
+                    inv_del, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
                     if apoyo_mat.cantidad_requerida > 0:
-                        inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
-                        inventario.cantidad += apoyo_mat.cantidad_requerida
-                        inventario.save()
+                        inv_del.cantidad += apoyo_mat.cantidad_requerida
+                    if apoyo_mat.cantidad_retirada > 0:
+                        inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - apoyo_mat.cantidad_retirada)
+                    inv_del.save()
+
                     apoyo_mat.delete()
                     calcular_mano_obra_para_apoyo(apoyo)
                     actualizar_presupuesto_proyecto(apoyo.proyecto)
@@ -842,15 +1096,18 @@ def detalle_apoyo(request, apoyo_id):
 
                 if str(mat_id_nuevo) != str(apoyo_mat.material_id):
                     # Devolver stock anterior
+                    inv_ant, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
                     if apoyo_mat.cantidad_requerida > 0:
-                        inv_ant, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
                         inv_ant.cantidad += apoyo_mat.cantidad_requerida
-                        inv_ant.save()
+                    if apoyo_mat.cantidad_retirada > 0:
+                        inv_ant.cantidad = max(Decimal("0"), inv_ant.cantidad - apoyo_mat.cantidad_retirada)
+                    inv_ant.save()
 
                     nuevo_mat = Material.objects.filter(id=mat_id_nuevo).first()
                     if nuevo_mat:
                         apoyo_mat.material = nuevo_mat
                         apoyo_mat.cantidad_requerida = Decimal("0")
+                        apoyo_mat.cantidad_retirada = Decimal("0")
 
                 inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
                 mat_obj = inventario.material
@@ -869,6 +1126,12 @@ def detalle_apoyo(request, apoyo_id):
                         inventario.save()
                 elif diferencia < 0:
                     inventario.cantidad += abs(diferencia)
+                    inventario.save()
+
+                diferencia_ret = c_ret - apoyo_mat.cantidad_retirada
+                if diferencia_ret != 0:
+                    inventario.cantidad += diferencia_ret
+                    inventario.cantidad = max(Decimal("0"), inventario.cantidad)
                     inventario.save()
 
                 apoyo_mat.cantidad_requerida = max(Decimal("0"), c_inst)
@@ -918,10 +1181,13 @@ def detalle_apoyo(request, apoyo_id):
                         elif inventario.cantidad < diferencia:
                             materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: {inventario.cantidad}, Solicitado: {c_inst} {unidad_str})")
                             inventario.cantidad = Decimal("0")
-                            inventario.save()
                         else:
                             inventario.cantidad -= diferencia
-                            inventario.save()
+
+                    if c_ret > 0:
+                        inventario.cantidad += c_ret
+
+                    inventario.save()
 
                     apoyo_mat.cantidad_requerida += c_inst
                     apoyo_mat.cantidad_retirada += c_ret
@@ -933,10 +1199,13 @@ def detalle_apoyo(request, apoyo_id):
                         elif inventario.cantidad < c_inst:
                             materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: {inventario.cantidad}, Asignado: {c_inst} {unidad_str})")
                             inventario.cantidad = Decimal("0")
-                            inventario.save()
                         else:
                             inventario.cantidad -= c_inst
-                            inventario.save()
+
+                    if c_ret > 0:
+                        inventario.cantidad += c_ret
+
+                    inventario.save()
 
                     ApoyoMaterial.objects.create(
                         apoyo=apoyo,
@@ -1042,7 +1311,11 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
                         inventario.cantidad = Decimal("0")
                     else:
                         inventario.cantidad -= cant_inst
-                    inventario.save()
+
+                if cant_ret > 0:
+                    inventario.cantidad += cant_ret
+
+                inventario.save()
 
                 apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
                     apoyo=apoyo,
@@ -1091,10 +1364,15 @@ def editar_material_apoyo_rapido(request, apoyo_id):
                     inventario.cantidad = Decimal("0")
                 else:
                     inventario.cantidad -= diferencia
-                inventario.save()
             elif diferencia < 0:
                 inventario.cantidad += abs(diferencia)
-                inventario.save()
+
+            diferencia_ret = cant_ret - apoyo_mat.cantidad_retirada
+            if diferencia_ret != 0:
+                inventario.cantidad += diferencia_ret
+                inventario.cantidad = max(Decimal("0"), inventario.cantidad)
+
+            inventario.save()
 
             apoyo_mat.cantidad_requerida = max(Decimal("0"), cant_inst)
             apoyo_mat.cantidad_retirada = max(Decimal("0"), cant_ret)
@@ -1126,17 +1404,20 @@ def eliminar_material_apoyo_rapido(request, apoyo_material_id):
 
     if request.method == "POST":
         nombre_mat = apoyo_mat.material.descripcion if apoyo_mat.material else "Material"
-        if apoyo_mat.cantidad_requerida > 0 and apoyo_mat.material:
-            inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
-            inventario.cantidad += apoyo_mat.cantidad_requerida
-            inventario.save()
+        if apoyo_mat.material:
+            inv_del, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+            if apoyo_mat.cantidad_requerida > 0:
+                inv_del.cantidad += apoyo_mat.cantidad_requerida
+            if apoyo_mat.cantidad_retirada > 0:
+                inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - apoyo_mat.cantidad_retirada)
+            inv_del.save()
 
         apoyo_mat.delete()
         if apoyo:
             calcular_mano_obra_para_apoyo(apoyo)
         if proyecto:
             actualizar_presupuesto_proyecto(proyecto)
-        messages.success(request, f"Material '{nombre_mat}' eliminado del poste {apoyo.nodo or apoyo.numero_apoyo if apoyo else ''} (devuelto a bodega).")
+        messages.success(request, f"Material '{nombre_mat}' eliminado del poste {apoyo.nodo or apoyo.numero_apoyo if apoyo else ''}.")
 
     if proyecto:
         return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab={tab}")

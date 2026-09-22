@@ -7,6 +7,8 @@ from core.models import (
     DetalleConsumoMaterial,
     ItemManoObra,
     ApoyoManoObra,
+    DevolucionMaterialProyecto,
+    DetalleDevolucionMaterial,
 )
 
 
@@ -58,4 +60,19 @@ class ConsumoMaterialProyectoAdmin(admin.ModelAdmin):
     list_filter = ["fecha_reporte", "proyecto"]
     search_fields = ["supervisor", "numero_planilla", "proyecto__numero_emcali"]
     inlines = [DetalleConsumoMaterialInline]
+
+
+class DetalleDevolucionMaterialInline(admin.TabularInline):
+    model = DetalleDevolucionMaterial
+    extra = 1
+    autocomplete_fields = ["material"]
+
+
+@admin.register(DevolucionMaterialProyecto)
+class DevolucionMaterialProyectoAdmin(admin.ModelAdmin):
+    list_display = ["proyecto", "fecha", "numero_acta", "responsable", "fecha_creacion"]
+    list_filter = ["fecha", "proyecto"]
+    search_fields = ["numero_acta", "responsable", "proyecto__numero_emcali"]
+    inlines = [DetalleDevolucionMaterialInline]
+
 

@@ -1365,7 +1365,7 @@ def exportar_informe_consolidado_excel(request):
     1. Balance General Consolidado (Entradas, Instalado, Retirado, Devolución, Stock).
     2. Materiales de Devolución a Bodega.
     """
-    ids_param = request.GET.get("proyectos", "")
+    ids_param = request.GET.get("proyectos", "") or request.GET.get("ids", "")
     if not ids_param:
         messages.error(request, "No seleccionaste ningún proyecto para exportar el informe.")
         return redirect("informe_consolidado_proyectos")

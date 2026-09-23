@@ -221,11 +221,11 @@ def detalle_proyecto_logistica(request, proyecto_id):
                         cantidad=cant_dec
                     )
                     inventario, _ = Inventario.objects.get_or_create(material=mat)
-                    inventario.cantidad += cant_dec
+                    inventario.cantidad = max(Decimal("0"), inventario.cantidad - cant_dec)
                     inventario.save()
                     total_unidades += cant_dec
 
-                messages.success(request, f"¡Éxito! Se registraron {len(items_to_create)} material(es) en el historial de devolución y se sumaron +{total_unidades} unidades a Bodega Central.")
+                messages.success(request, f"¡Éxito! Se registró el acta de devolución de {len(items_to_create)} material(es) y se descontaron {total_unidades} unidades de Bodega Central.")
             else:
                 messages.warning(request, "No se ingresaron cantidades mayores a 0 para devolver.")
             return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
@@ -238,10 +238,10 @@ def detalle_proyecto_logistica(request, proyecto_id):
                     for det in dev_obj.detalles.all():
                         inv = Inventario.objects.filter(material=det.material).first()
                         if inv:
-                            inv.cantidad = max(Decimal("0"), inv.cantidad - det.cantidad)
+                            inv.cantidad += det.cantidad
                             inv.save()
                     dev_obj.delete()
-                    messages.warning(request, "Se eliminó el registro de devolución y se descontó el stock reintegrado en Bodega Central.")
+                    messages.warning(request, "Se eliminó el registro de devolución y se restableció el stock en Bodega Central.")
             return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
 
     # 1. Instalado en Apoyos (Ingeniería)
@@ -1236,6 +1236,283 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     buffer.seek(0)
 
     filename = f"Balance_Materiales_Proyecto_{proyecto.numero_emcali}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@login_required
+def exportar_materiales_devolucion_excel(request, proyecto_id):
+    """
+    Genera y descarga un archivo Excel (.xlsx) con el formato oficial
+    de Materiales a Devolver (Sobrantes y Retiros de Terreno) del proyecto,
+    así como el historial de actas de devoluciones registradas.
+    """
+    proyecto = get_object_or_404(Proyecto.objects.select_related("macroproyecto"), id=proyecto_id)
+
+    # 1. Instalado en Apoyos (Ingeniería)
+    apoyo_inst_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
+    )
+    inst_map = {item["material_id"]: item["total"] for item in apoyo_inst_qs}
+
+    # 2. Materiales Requeridos directos
+    mat_req_extra = (
+        MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_requerida"))
+    )
+    req_map = {item["material_id"]: item["total"] for item in mat_req_extra}
+
+    # 3. Entradas Suministradas (EntradaMaterialProyecto)
+    ent_qs = (
+        DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    ent_map = {item["material_id"]: item["total"] for item in ent_qs}
+
+    # 4. Retiros / Desmontes del proyecto (desde ApoyoMaterial)
+    ret_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad_retirada"))
+    )
+    ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
+
+    # 5. Devoluciones ya procesadas
+    dev_qs = (
+        DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
+
+    # Si hay devoluciones procesadas, filtramos ÚNICAMENTE los materiales devueltos (c_dev_proc > 0)
+    # Si aún no se ha guardado ninguna devolución, filtramos ÚNICAMENTE los materiales que tienen saldo a devolver (c_total_dev > 0)
+    if dev_map:
+        mat_ids_filtrados = set(dev_map.keys())
+    else:
+        mat_ids_filtrados = set()
+        for m_id, c_ent in ent_map.items():
+            c_inst = inst_map.get(m_id, Decimal("0"))
+            if c_ent > c_inst:
+                mat_ids_filtrados.add(m_id)
+        mat_ids_filtrados.update(ret_map.keys())
+
+    materiales_db = list(
+        Material.objects.filter(id__in=mat_ids_filtrados).select_related("inventario").order_by("item", "descripcion")
+    )
+
+    wb = openpyxl.Workbook()
+    ws1 = wb.active
+    ws1.title = "Materiales Devueltos"
+
+    font_titulo = Font(name="Calibri", size=13, bold=True, color="92400E")
+    font_subtitulo = Font(name="Calibri", size=10, bold=True, color="4B5563")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=10, color="111827")
+    font_total = Font(name="Calibri", size=10, bold=True, color="92400E")
+
+    fill_header = PatternFill(start_color="B45309", end_color="B45309", fill_type="solid")
+    fill_total = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    fill_zebra = PatternFill(start_color="FFFBEB", end_color="FFFBEB", fill_type="solid")
+
+    thin_border_side = Side(border_style="thin", color="CBD5E1")
+    border_cell = Border(left=thin_border_side, right=thin_border_side, top=thin_border_side, bottom=thin_border_side)
+    border_total = Border(
+        top=Side(border_style="medium", color="B45309"),
+        bottom=Side(border_style="double", color="B45309"),
+        left=thin_border_side,
+        right=thin_border_side
+    )
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    def fmt_v(v):
+        if v is None:
+            return 0
+        return int(v) if v % 1 == 0 else float(v)
+
+    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else "Sin Macroproyecto"
+    fecha_hoy = timezone.now().strftime('%d/%m/%Y')
+
+    # ENCABEZADO INSTITUCIONAL
+    ws1.merge_cells("A1:D1")
+    ws1["A1"] = f"COINTECA S.A.S. — MATERIALES A DEVOLVER (PROYECTO {proyecto.numero_emcali})"
+    ws1["A1"].font = font_titulo
+    ws1["A1"].alignment = align_left
+
+    ws1.merge_cells("A2:D2")
+    ws1["A2"] = f"PROYECTO: {proyecto.numero_emcali}  |  MACROPROYECTO: {macro_nom}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {fecha_hoy}"
+    ws1["A2"].font = font_subtitulo
+    ws1["A2"].alignment = align_left
+
+    ws1.append([])
+    headers1 = [
+        "ÍTEM",
+        "DESCRIPCIÓN DEL MATERIAL",
+        "UNIDAD",
+        "CANTIDAD A DEVOLVER",
+    ]
+    ws1.append(headers1)
+
+    for col in range(1, 5):
+        c = ws1.cell(row=4, column=col)
+        c.font = font_header
+        c.fill = fill_header
+        c.alignment = align_center if col not in [2] else align_left
+        c.border = border_cell
+
+    row_idx = 5
+    tot_cantidad = Decimal("0")
+    filas_generadas = 0
+
+    for mat in materiales_db:
+        c_ent = ent_map.get(mat.id, Decimal("0"))
+        c_inst = inst_map.get(mat.id, Decimal("0"))
+        c_ret = ret_map.get(mat.id, Decimal("0"))
+        c_sob_pos = max(Decimal("0"), c_ent - c_inst)
+        c_total_dev = c_sob_pos + c_ret
+        c_dev_proc = dev_map.get(mat.id, Decimal("0"))
+
+        # Si hay devoluciones registradas, SOLO incluir los que fueron devueltos
+        if dev_map and c_dev_proc <= 0:
+            continue
+        # Si no hay devoluciones registradas aún, SOLO incluir los que tienen saldo a devolver
+        if not dev_map and c_total_dev <= 0:
+            continue
+
+        cant_mostrar = c_dev_proc if (dev_map and c_dev_proc > 0) else c_total_dev
+        if cant_mostrar <= 0:
+            continue
+
+        filas_generadas += 1
+        tot_cantidad += cant_mostrar
+
+        ws1.append([
+            mat.item or "",
+            mat.descripcion,
+            mat.unidad or "UN",
+            fmt_v(cant_mostrar),
+        ])
+
+        for col in range(1, 5):
+            c = ws1.cell(row=row_idx, column=col)
+            c.font = font_data
+            c.border = border_cell
+            if filas_generadas % 2 == 0:
+                c.fill = fill_zebra
+            if col in [1, 3]:
+                c.alignment = align_center
+            elif col == 2:
+                c.alignment = align_left
+            else:
+                c.alignment = align_right
+                c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+        row_idx += 1
+
+    # Fila de Totales
+    ws1.append([
+        "",
+        "TOTAL MATERIALES A DEVOLVER",
+        f"{filas_generadas} ÍTEMS",
+        fmt_v(tot_cantidad),
+    ])
+    for col in range(1, 5):
+        c = ws1.cell(row=row_idx, column=col)
+        c.font = font_total
+        c.fill = fill_total
+        c.border = border_total
+        if col in [1, 3]:
+            c.alignment = align_center
+        elif col == 2:
+            c.alignment = align_left
+        else:
+            c.alignment = align_right
+            c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+
+    ws1.column_dimensions["A"].width = 14
+    ws1.column_dimensions["B"].width = 55
+    ws1.column_dimensions["C"].width = 14
+    ws1.column_dimensions["D"].width = 24
+
+    # HOJA 2: HISTORIAL DE ACTAS DE DEVOLUCIÓN (SI EXISTEN)
+    devoluciones_db = DevolucionMaterialProyecto.objects.filter(proyecto=proyecto).prefetch_related("detalles__material").order_by("-fecha", "-id")
+    if devoluciones_db.exists():
+        ws2 = wb.create_sheet(title="Historial de Actas")
+        ws2.merge_cells("A1:H1")
+        ws2["A1"] = f"HISTORIAL DE ACTAS Y COMPROBANTES DE DEVOLUCIÓN — PROYECTO {proyecto.numero_emcali}"
+        ws2["A1"].font = font_titulo
+        ws2["A1"].alignment = align_left
+
+        ws2.append([])
+        headers2 = [
+            "FECHA",
+            "NRO ACTA",
+            "RESPONSABLE / CUADRILLA",
+            "ÍTEM",
+            "MATERIAL",
+            "UNIDAD",
+            "CANTIDAD DEVUELTA",
+            "OBSERVACIONES",
+        ]
+        ws2.append(headers2)
+
+        for col in range(1, 9):
+            c = ws2.cell(row=3, column=col)
+            c.font = font_header
+            c.fill = fill_header
+            c.alignment = align_center if col not in [3, 5, 8] else align_left
+            c.border = border_cell
+
+        r2_idx = 4
+        for dev in devoluciones_db:
+            for det in dev.detalles.all():
+                ws2.append([
+                    dev.fecha.strftime('%d/%m/%Y') if dev.fecha else "",
+                    dev.numero_acta or "—",
+                    dev.responsable or "—",
+                    det.material.item or "",
+                    det.material.descripcion,
+                    det.material.unidad or "UN",
+                    fmt_v(det.cantidad),
+                    dev.observaciones or "",
+                ])
+                for col in range(1, 9):
+                    c = ws2.cell(row=r2_idx, column=col)
+                    c.font = font_data
+                    c.border = border_cell
+                    if col in [1, 2, 4, 6]:
+                        c.alignment = align_center
+                    elif col in [3, 5, 8]:
+                        c.alignment = align_left
+                    else:
+                        c.alignment = align_right
+                        c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+                r2_idx += 1
+
+        ws2.column_dimensions["A"].width = 15
+        ws2.column_dimensions["B"].width = 18
+        ws2.column_dimensions["C"].width = 28
+        ws2.column_dimensions["D"].width = 12
+        ws2.column_dimensions["E"].width = 44
+        ws2.column_dimensions["F"].width = 12
+        ws2.column_dimensions["G"].width = 20
+        ws2.column_dimensions["H"].width = 35
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"Materiales_Devolucion_Proyecto_{proyecto.numero_emcali}.xlsx"
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

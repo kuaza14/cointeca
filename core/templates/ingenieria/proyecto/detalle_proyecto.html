@@ -33,36 +33,14 @@
                 <span>+</span> Nuevo Nodo / Poste
             </button>
             <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-               class="inline-flex items-center px-4 py-2.5 text-sm font-semibold rounded-lg transition border"
-               style="background-color: #07df36; color: #0f172a !important; border-color: #94a3b8;">
+               class="inline-flex items-center px-4 py-2.5 text-sm font-bold rounded-lg transition border shadow-xs"
+               style="background-color: #15803d; color: #ffffff !important; border-color: #166534;">
                 ← Volver a materiales de proyecto
             </a>
             <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}"
                class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
                 ← Volver
             </a>
-        </div>
-    </div>
-
-    <!-- ENCABEZADO OFICIAL TIPO EXCEL (ING-FR-08) -->
-    <div class="bg-card rounded-xl shadow-sm border border-border-strong p-4 print:border-black">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-semibold uppercase text-foreground">
-            <div class="border-b sm:border-b-0 sm:border-r border-border pb-2 sm:pb-0 pr-2">
-                <span class="text-muted-foreground block text-[10px]">SUPERVISOR:</span>
-                <span class="text-foreground text-sm font-bold">_________________________</span>
-            </div>
-            <div class="border-b sm:border-b-0 sm:border-r border-border pb-2 sm:pb-0 pr-2">
-                <span class="text-muted-foreground block text-[10px]">REALIZADO POR:</span>
-                <span class="text-foreground text-sm font-bold">_________________________</span>
-            </div>
-            <div class="border-b sm:border-b-0 sm:border-r border-border pb-2 sm:pb-0 pr-2">
-                <span class="text-muted-foreground block text-[10px]">MICROPROYECTO:</span>
-                <span class="text-primary text-sm font-extrabold">{{ proyecto.numero_emcali }}</span>
-            </div>
-            <div>
-                <span class="text-muted-foreground block text-[10px]">FECHA DE TRABAJO:</span>
-                <span class="text-foreground text-sm font-bold">{% now "d/m/Y" %}</span>
-            </div>
         </div>
     </div>
 
@@ -205,11 +183,11 @@
                             {% for celda in fila.celdas %}
                             <td class="px-2 py-2 text-center border-r border-border font-bold">
                                 {% if celda.cantidad > 0 %}
-                                    <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat:0 }}</div>
+                                    <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat }}</div>
                                 {% endif %}
                                 {% if celda.cantidad_retirada > 0 %}
                                     <div class="text-[10px] font-extrabold text-amber-700 bg-amber-100/80 px-1 py-0.5 rounded mt-0.5" title="Retirado/Desmonte">
-                                        Ret: {{ celda.cantidad_retirada|floatformat:0 }}
+                                        Ret: {{ celda.cantidad_retirada|floatformat }}
                                     </div>
                                 {% endif %}
                                 {% if celda.cantidad <= 0 and celda.cantidad_retirada <= 0 %}
@@ -260,10 +238,10 @@
                             {% for tot in fila_totales %}
                             <td class="px-2 py-3 text-center border-r border-slate-700">
                                 {% if tot.total > 0 %}
-                                    <div class="text-emerald-400 font-black text-xs">{{ tot.total|floatformat:0 }}</div>
+                                    <div class="text-emerald-400 font-black text-xs">{{ tot.total|floatformat }}</div>
                                 {% endif %}
                                 {% if tot.total_retirado > 0 %}
-                                    <div class="text-amber-400 font-bold text-[10px]">R:{{ tot.total_retirado|floatformat:0 }}</div>
+                                    <div class="text-amber-400 font-bold text-[10px]">R:{{ tot.total_retirado|floatformat }}</div>
                                 {% endif %}
                                 {% if tot.total <= 0 and tot.total_retirado <= 0 %}
                                     <span class="text-slate-500 font-normal">0</span>
@@ -291,7 +269,7 @@
                         <div class="text-[10px] text-gray-500">Item: {{ r.material.item }}</div>
                     </div>
                     <div class="text-sm font-black text-amber-700 bg-amber-100 px-2 py-1 rounded">
-                        {{ r.cantidad_retirada|floatformat:0 }} {{ r.material.unidad|default:"UN" }}
+                        {{ r.cantidad_retirada|floatformat }} {{ r.material.unidad|default:"UN" }}
                     </div>
                 </div>
                 {% endfor %}
@@ -458,9 +436,9 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="tab" value="mano_obra">
                                         <button type="submit"
-                                                class="px-2 py-1 bg-red-100 text-destructive hover:bg-destructive hover:text-white rounded text-xs font-bold transition"
+                                                class="px-2.5 py-1 bg-red-100 text-destructive hover:bg-destructive hover:text-white rounded text-xs font-bold transition flex items-center gap-1"
                                                 title="Eliminar poste completo">
-                                            🗑️
+                                            🗑️ Eliminar
                                         </button>
                                     </form>
                                 </div>
@@ -686,7 +664,7 @@
                 </button>
             </div>
 
-            <form id="formModalApoyo" method="POST" action="{% url 'crear_apoyo' proyecto.id %}" class="flex flex-col flex-1 overflow-hidden bg-card">
+            <form id="formModalApoyo" method="POST" action="{% url 'crear_apoyo' proyecto.id %}" class="flex flex-col flex-1 overflow-hidden bg-card" autocomplete="off" data-lpignore="true" data-form-type="other">
                 {% csrf_token %}
                 <input type="hidden" name="tab" value="{{ tab_activa|default:'materiales' }}">
 
@@ -697,7 +675,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_quien_ejecuta">
                                 Quién Ejecuta (Técnico)
                             </label>
-                            <select id="modalApoyo_quien_ejecuta" name="quien_ejecuta" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                            <select id="modalApoyo_quien_ejecuta" name="quien_ejecuta" autocomplete="off" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                                 <option value="">-- Sin Asignar --</option>
                                 {% for emp in empleados %}
                                     <option value="{{ emp.id }}">{{ emp.nombre_completo }}</option>
@@ -709,7 +687,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_nodo">
                                 Nodo / Poste <span class="text-destructive">*</span>
                             </label>
-                            <input id="modalApoyo_nodo" type="text" name="nodo" required placeholder="Ej: 1, 2, A-1..."
+                            <input id="modalApoyo_nodo" type="text" name="nodo" required placeholder="Ej: 1, 2, A-1..." autocomplete="off" data-lpignore="true"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
@@ -717,7 +695,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_numero_apoyo">
                                 Número de Apoyo
                             </label>
-                            <input id="modalApoyo_numero_apoyo" type="number" name="numero_apoyo" placeholder="Ej: 101"
+                            <input id="modalApoyo_numero_apoyo" type="number" name="numero_apoyo" placeholder="Ej: 101" autocomplete="off"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
@@ -725,7 +703,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_fecha">
                                 Fecha de Trabajo
                             </label>
-                            <input id="modalApoyo_fecha" type="date" name="fecha" value="{% now 'Y-m-d' %}"
+                            <input id="modalApoyo_fecha" type="date" name="fecha" value="{% now 'Y-m-d' %}" autocomplete="off"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
                     </div>
@@ -736,7 +714,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_tipo_instalacion">
                                 Tipo de Instalación
                             </label>
-                            <input id="modalApoyo_tipo_instalacion" type="text" name="tipo_instalacion" placeholder="Ej: Nueva, Cambio..."
+                            <input id="modalApoyo_tipo_instalacion" type="text" name="tipo_instalacion" placeholder="Ej: Nueva, Cambio..." autocomplete="off"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
@@ -744,7 +722,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_direccion">
                                 Dirección / Ubicación
                             </label>
-                            <input id="modalApoyo_direccion" type="text" name="direccion" placeholder="Ej: Calle 5 # 10-20"
+                            <input id="modalApoyo_direccion" type="text" name="direccion" placeholder="Ej: Calle 5 # 10-20" autocomplete="one-time-code" data-lpignore="true" data-form-type="other"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
@@ -752,7 +730,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_tipo_estructura">
                                 Tipo de Estructura
                             </label>
-                            <input id="modalApoyo_tipo_estructura" type="text" name="tipo_estructura" placeholder="Ej: Concreto 12m, Metálico..."
+                            <input id="modalApoyo_tipo_estructura" type="text" name="tipo_estructura" placeholder="Ej: Concreto 12m, Metálico..." autocomplete="off"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
@@ -760,7 +738,7 @@
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_estado">
                                 Estado del Poste
                             </label>
-                            <select id="modalApoyo_estado" name="estado" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                            <select id="modalApoyo_estado" name="estado" autocomplete="off" data-lpignore="true" class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="En ejecución">En ejecución</option>
                                 <option value="Finalizado">Finalizado</option>
@@ -850,7 +828,7 @@
                                         <option value="">-- Seleccionar material a despachar --</option>
                                         {% for mat in materiales_catalogo %}
                                             <option value="{{ mat.id }}">
-                                                [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
+                                                [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                                             </option>
                                         {% endfor %}
                                     </select>
@@ -864,7 +842,8 @@
 
                                 <div class="w-full sm:w-auto flex-shrink-0">
                                     <button type="button" id="btnEjecutarDespachoBodega"
-                                            class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 h-[38px] whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="w-full sm:w-auto px-4 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 h-[38px] whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                            style="background-color: #d97706; color: #ffffff !important;">
                                         <span id="iconoBtnDespacho">⚡</span> <span id="textoBtnDespacho">Despachar al Poste</span>
                                     </button>
                                 </div>
@@ -922,7 +901,7 @@
             <option value="">-- Seleccionar material de bodega --</option>
             {% for mat in materiales_catalogo %}
                 <option value="{{ mat.id }}">
-                    [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat:0 }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
+                    [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                 </option>
             {% endfor %}
         </select>

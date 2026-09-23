@@ -51,12 +51,15 @@ def asignar_equipo(request, id):
 
 @login_required
 def eliminar_equipo(request, id):
-
-    equipo = AsignacionEquipo.objects.get(id=id)
-
+    equipo = get_object_or_404(AsignacionEquipo, id=id)
     empleado_id = equipo.empleado.id
 
+    if equipo.equipo_inventario:
+        equipo.equipo_inventario.estado = 'Disponible'
+        equipo.equipo_inventario.save()
+
     equipo.delete()
+    messages.success(request, "Equipo / Herramienta devuelto al inventario de bodega correctamente.")
 
     return redirect(f'/rrhh/empleados/{empleado_id}/')
 

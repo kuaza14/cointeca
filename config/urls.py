@@ -164,6 +164,7 @@ from core.views.logistica import(
     eliminar_entrada_material,
     materiales_requeridos_proyecto,
     exportar_materiales_proyecto_excel,
+    exportar_materiales_devolucion_excel,
     editar_entrada_material,
     informe_consolidado_proyectos,
     exportar_informe_consolidado_excel,
@@ -396,6 +397,7 @@ urlpatterns = [
     path("logistica/retiros/<int:retiro_id>/eliminar/", eliminar_retiro_material, name="eliminar_retiro_material"),
     path("logistica/proyectos/<int:proyecto_id>/requeridos/", materiales_requeridos_proyecto, name="materiales_requeridos_proyecto"),
     path("logistica/proyectos/<int:proyecto_id>/requeridos/excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel"),
+    path("logistica/proyectos/<int:proyecto_id>/devolucion/excel/", exportar_materiales_devolucion_excel, name="exportar_materiales_devolucion_excel"),
     path("logistica/entradas/<int:entrada_id>/editar/", editar_entrada_material, name="editar_entrada_material"),
 
 

@@ -76,7 +76,7 @@
                 <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
                    title="Descargar libro Excel con Matriz de Balance, Requeridos, Devoluciones y Nodos">
-                    <span>📊</span> Descargar Excel
+                    <span>📊</span> Descargar Excel Balance
                 </a>
 
                 <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'proyectos_logistica' %}{% endif %}"
@@ -130,22 +130,6 @@
 
         <!-- TAB 1: MATRIZ DE BALANCE -->
         <div id="panelDetalleBalance" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden pestana-panel-detalle">
-            <div class="p-4 bg-muted border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h3 class="font-bold text-foreground text-base">
-                        Conciliación de Materiales para el Proyecto {{ proyecto.numero_emcali }}
-                    </h3>
-                    <p class="text-xs text-muted-foreground">Matriz comparativa de requeridos, suministrados, instalados, retirados y devoluciones.</p>
-                </div>
-                <div>
-                    <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
-                       class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
-                       title="Descargar balance completo en Excel">
-                        <span>📊</span> Descargar Balance en Excel
-                    </a>
-                </div>
-            </div>
-
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
                     <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
@@ -237,26 +221,28 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base flex items-center gap-2">
-                        <span>↩️</span> Materiales de Devolución a Bodega
+                        <span>↩️</span> Materiales de Devolución
                     </h3>
                     <p class="text-xs text-muted-foreground">
-                        Materiales suministrados a la obra que sobraron (<span class="font-semibold">Suministrado &gt; Instalado</span>) y/o materiales que fueron retirados/desmontados en terreno que deben ser reintegrados al inventario de bodega.
+                        Materiales suministrados a la obra que sobraron (<span class="font-semibold">Suministrado &gt; Instalado</span>) y/o materiales retirados en terreno que deben ser devueltos a EMCALI / Cliente (se descuentan de Bodega Central al formalizar la devolución).
                     </p>
                 </div>
-                {% if materiales_devolucion %}
                 <div class="flex flex-wrap items-center gap-2">
+                    {% if materiales_devolucion %}
                     <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.remove('hidden'); document.getElementById('modalRegistrarDevolucion').classList.add('flex');"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
-                            title="Reintegrar y sumar estos materiales a la Bodega Central">
-                        <span>↩️</span> Reintegrar / Devolver a Bodega
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+                            style="background-color: #d97706; color: #ffffff !important;"
+                            title="Registrar devolución de materiales y descontar de Bodega Central">
+                        <span>↩️</span> Devolver a Bodega ({{ materiales_devolucion|length }})
                     </button>
-                    <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
-                       title="Descargar este reporte y balance en Excel">
-                        <span>📊</span> Descargar Excel
+                    {% endif %}
+                    <a href="{% url 'exportar_materiales_devolucion_excel' proyecto.id %}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+                       style="background-color: #b45309; color: #ffffff !important;"
+                       title="Descargar relación oficial de Materiales a Devolver en Excel">
+                        <span>📑</span> Descargar Excel a Devolver
                     </a>
                 </div>
-                {% endif %}
             </div>
 
             {% if materiales_devolucion %}
@@ -775,10 +761,10 @@
         <div class="flex items-center justify-between border-b border-amber-950 px-6 py-4 bg-amber-900 text-white">
             <div>
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <span>↩️</span> Reintegrar / Devolver Materiales a Bodega Central
+                    <span>↩️</span> Registrar Devolución de Materiales (Descontar de Bodega)
                 </h2>
                 <p class="text-xs text-amber-100 mt-0.5">
-                    Proyecto {{ proyecto.numero_emcali }} — Al confirmar, estas cantidades se sumarán directamente al inventario de Bodega Central.
+                    Proyecto {{ proyecto.numero_emcali }} — Al confirmar, estas cantidades se descontarán de Bodega Central al formalizarse la devolución a EMCALI / Cliente.
                 </p>
             </div>
             <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
@@ -794,7 +780,7 @@
             <div class="p-6 overflow-y-auto space-y-4 flex-1 bg-slate-50">
                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
                     <p class="font-bold mb-0.5">ℹ️ Información de Devolución:</p>
-                    <p>Los materiales a continuación corresponden al <strong>Sobrante de Compras + Materiales Desmontados en Apoyos</strong>. Al confirmar, estas cantidades se sumarán al inventario de Bodega Central y quedará registrada el acta de devolución.</p>
+                    <p>Los materiales a continuación corresponden al <strong>Sobrante de Obra + Materiales Desmontados en Apoyos</strong>. Al confirmar la devolución, estas cantidades se <strong>descontarán de Bodega Central</strong> y quedará registrada el acta oficial.</p>
                 </div>
 
                 <!-- Datos del Acta / Devolución -->
@@ -802,22 +788,22 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Fecha de Devolución:</label>
                         <input type="date" name="fecha" value="{% now 'Y-m-d' %}" required
-                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                                class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Responsable / Entrega:</label>
                         <input type="text" name="responsable" placeholder="Ej: Cuadrilla Juan Pérez"
-                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                                class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">N° Acta / Planilla:</label>
                         <input type="text" name="numero_acta" placeholder="Ej: DEV-2026-001"
-                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                                class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 font-semibold text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
                     </div>
                     <div class="sm:col-span-3">
                         <label class="block font-bold text-gray-700 mb-1">Observaciones / Motivo (Opcional):</label>
-                        <input type="text" name="observaciones" placeholder="Ej: Reintegro de sobrantes tras finalización de obra"
-                               class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
+                        <input type="text" name="observaciones" placeholder="Ej: Devolución de materiales sobrantes y desmontes a EMCALI"
+                                class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 bg-white focus:border-amber-600 focus:outline-none">
                     </div>
                 </div>
 
@@ -826,7 +812,7 @@
                         <thead class="bg-amber-950 text-xs font-bold text-white uppercase">
                             <tr>
                                 <th class="px-4 py-3 text-left w-16">Ítem</th>
-                                <th class="px-4 py-3 text-left">Material a Reintegrar</th>
+                                <th class="px-4 py-3 text-left">Material a Devolver</th>
                                 <th class="px-3 py-3 text-center w-16">Unidad</th>
                                 <th class="px-4 py-3 text-right w-44">Cantidad a Devolver</th>
                                 <th class="px-3 py-3 text-center w-12">Quitar</th>
@@ -870,15 +856,24 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 bg-gray-100">
-                <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
-                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg border border-gray-300 transition cursor-pointer">
-                    Cancelar
-                </button>
-                <button type="submit" {% if not materiales_devolucion %}disabled{% endif %}
-                        class="px-5 py-2 bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer">
-                    <span>✅</span> Confirmar Reintegro (Sumar a Bodega)
-                </button>
+            <div class="flex items-center justify-between border-t border-gray-200 px-6 py-4 bg-gray-100">
+                <a href="{% url 'exportar_materiales_devolucion_excel' proyecto.id %}"
+                   class="px-3.5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer"
+                   style="background-color: #b45309; color: #ffffff !important;"
+                   title="Descargar relación de Materiales a Devolver en Excel">
+                    <span>📑</span> Descargar Excel a Devolver
+                </a>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg border border-gray-300 transition cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" {% if not materiales_devolucion %}disabled{% endif %}
+                            class="px-5 py-2 disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                            style="background-color: #d97706; color: #ffffff !important;">
+                        <span>✅</span> Confirmar Devolución (Descontar de Bodega)
+                    </button>
+                </div>
             </div>
         </form>
     </div>

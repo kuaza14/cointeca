@@ -380,12 +380,14 @@ def detalle_proyecto(request, id):
     mo_dict = {}
     mo_cant_map = {}
     mo_origen_map = {}
+    mo_obs_map = {}
     mo_id_map = {}
     apoyo_mo_map = defaultdict(list)
 
     for amo in apoyos_mo:
         mo_cant_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.cantidad
         mo_origen_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.origen
+        mo_obs_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.observacion or ""
         mo_id_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.id
         apoyo_mo_map[amo.apoyo_id].append(amo)
         if amo.item_mano_obra_id not in mo_dict:
@@ -401,20 +403,30 @@ def detalle_proyecto(request, id):
         for item in mo_columnas:
             cant_mo = mo_cant_map.get((ap.id, item.id), Decimal("0"))
             orig = mo_origen_map.get((ap.id, item.id), "CALCULADO")
+            obs = mo_obs_map.get((ap.id, item.id), "")
             amo_id = mo_id_map.get((ap.id, item.id))
             celdas_mo.append({
                 "item": item,
                 "cantidad": cant_mo,
                 "origen": orig,
+                "observacion": obs,
                 "amo_id": amo_id,
             })
             mo_totales_columna[item.id] += cant_mo
+
+        # Obtener observaciones de mano de obra manual para este apoyo
+        obs_manuales = [
+            f"[{amo.item_mano_obra.codigo}] {amo.observacion}"
+            for amo in apoyo_mo_map.get(ap.id, [])
+            if amo.origen == ApoyoManoObra.Origen.MANUAL and amo.observacion
+        ]
 
         mo_filas_matriz.append({
             "apoyo": ap,
             "celdas": celdas_mo,
             "manos_obra_list": apoyo_mo_map.get(ap.id, []),
             "materiales_asociados": apoyo_materiales_map.get(ap.id, []),
+            "observaciones_mo_manuales": obs_manuales,
         })
 
     mo_fila_totales = []
@@ -1463,7 +1475,8 @@ def ejecutar_calculo_mano_obra(request, proyecto_id):
 @transaction.atomic
 def guardar_mano_obra_manual(request, apoyo_id):
     """
-    Permite agregar o editar una actividad de mano de obra específica en un apoyo.
+    Permite agregar o editar múltiples actividades de mano de obra manuales en un apoyo.
+    Soporta asignación múltiple (listas de item_mano_obra_id[], cantidad[], observacion[]).
     """
     apoyo = Apoyo.objects.filter(id=apoyo_id).first()
     if not apoyo:
@@ -1471,37 +1484,76 @@ def guardar_mano_obra_manual(request, apoyo_id):
         return redirect("lista_proyectos")
 
     if request.method == "POST":
-        item_id = request.POST.get("item_mano_obra_id")
-        cantidad_str = request.POST.get("cantidad", "0").strip().replace(',', '.')
-        observacion = request.POST.get("observacion", "").strip()
+        # Puede recibir arrays (item_mano_obra_id[], cantidad[], observacion[]) o valores individuales
+        items_ids = request.POST.getlist("item_mano_obra_id[]")
+        if not items_ids:
+            items_ids = request.POST.getlist("item_mano_obra_id")
 
-        if item_id:
-            try:
-                cantidad = Decimal(cantidad_str) if cantidad_str else Decimal("0")
+        cantidades = request.POST.getlist("cantidad[]")
+        if not cantidades:
+            cantidades = request.POST.getlist("cantidad")
+
+        observaciones = request.POST.getlist("observacion[]")
+        if not observaciones:
+            observaciones = request.POST.getlist("observacion")
+
+        # Si viene un solo valor escalar sin listas
+        if not items_ids and request.POST.get("item_mano_obra_id"):
+            items_ids = [request.POST.get("item_mano_obra_id")]
+            cantidades = [request.POST.get("cantidad", "0")]
+            observaciones = [request.POST.get("observacion", "")]
+
+        guardados_count = 0
+        removidos_count = 0
+
+        try:
+            for idx, item_id in enumerate(items_ids):
+                if not item_id:
+                    continue
+
+                cant_str = cantidades[idx].strip().replace(',', '.') if idx < len(cantidades) else "0"
+                obs = observaciones[idx].strip() if idx < len(observaciones) else ""
+
+                try:
+                    cantidad = Decimal(cant_str) if cant_str else Decimal("0")
+                except Exception:
+                    continue
+
                 item = ItemManoObra.objects.filter(id=item_id).first()
                 if not item:
-                    messages.error(request, "La actividad de mano de obra seleccionada no es válida.")
-                    return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab=mano_obra" if apoyo.proyecto else "lista_proyectos")
+                    continue
 
                 if cantidad > 0:
                     amo, _ = ApoyoManoObra.objects.get_or_create(
                         apoyo=apoyo,
                         item_mano_obra=item,
-                        defaults={"cantidad": cantidad, "origen": ApoyoManoObra.Origen.MANUAL, "observacion": observacion}
+                        defaults={"cantidad": cantidad, "origen": ApoyoManoObra.Origen.MANUAL, "observacion": obs}
                     )
                     amo.cantidad = cantidad
                     amo.origen = ApoyoManoObra.Origen.MANUAL
-                    amo.observacion = observacion
+                    amo.observacion = obs
                     amo.save()
-                    messages.success(request, f"Actividad '{item.descripcion}' asignada al apoyo {apoyo.nodo or apoyo.numero_apoyo}.")
+                    guardados_count += 1
                 else:
-                    ApoyoManoObra.objects.filter(apoyo=apoyo, item_mano_obra=item).delete()
-                    messages.info(request, f"Actividad '{item.descripcion}' removida del apoyo.")
+                    deleted, _ = ApoyoManoObra.objects.filter(apoyo=apoyo, item_mano_obra=item).delete()
+                    if deleted:
+                        removidos_count += 1
 
-                if apoyo.proyecto:
-                    actualizar_presupuesto_proyecto(apoyo.proyecto)
-            except Exception as e:
-                messages.error(request, f"Error al guardar actividad: {e}")
+            if guardados_count > 0 or removidos_count > 0:
+                msg_part = f"Se actualizaron {guardados_count} servicio(s) manual(es)"
+                if removidos_count > 0:
+                    msg_part += f" y se removieron {removidos_count}"
+                messages.success(
+                    request,
+                    f"✅ {msg_part} en el poste {apoyo.nodo or apoyo.numero_apoyo}."
+                )
+            else:
+                messages.info(request, "No se registraron cambios en los servicios manuales.")
+
+            if apoyo.proyecto:
+                actualizar_presupuesto_proyecto(apoyo.proyecto)
+        except Exception as e:
+            messages.error(request, f"Error al guardar actividades manuales: {e}")
 
     if apoyo.proyecto:
         return redirect(f"/ingenieria/proyectos/{apoyo.proyecto.id}/?tab=mano_obra")

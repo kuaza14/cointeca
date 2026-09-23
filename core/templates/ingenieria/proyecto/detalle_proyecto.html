@@ -371,13 +371,13 @@
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-primary">●</span>
                                     <span class="text-foreground font-black">{{ fila.apoyo.nodo|default:"Sin Nodo" }}</span>
+                                    {% if fila.apoyo.observacion or fila.observaciones_mo_manuales %}
+                                        <span class="inline-flex items-center text-[11px] text-amber-900 bg-amber-100 border border-amber-300 rounded px-1.5 py-0.2 font-sans font-medium cursor-help"
+                                              title="{% if fila.apoyo.observacion %}Nota Poste: {{ fila.apoyo.observacion }}{% endif %}{% if fila.apoyo.observacion and fila.observaciones_mo_manuales %} | {% endif %}{% for obs in fila.observaciones_mo_manuales %}{{ obs }}{% if not forloop.last %} | {% endif %}{% endfor %}">
+                                            💬
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                {% if fila.apoyo.observacion %}
-                                    <div class="mt-1 flex items-center gap-1 text-[11px] font-sans font-normal text-amber-900 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 max-w-[210px]" title="{{ fila.apoyo.observacion }}">
-                                        <span class="shrink-0 text-xs">💬</span>
-                                        <span class="truncate">{{ fila.apoyo.observacion }}</span>
-                                    </div>
-                                {% endif %}
                                 {% if fila.materiales_asociados %}
                                 <div class="text-[10px] text-muted-foreground font-sans font-medium mt-0.5 truncate max-w-[180px]" title="{% for m in fila.materiales_asociados %}{{ m.cantidad_requerida|floatformat:0 }}x {{ m.material.descripcion }}{% if not forloop.last %}, {% endif %}{% endfor %}">
                                     📦 {{ fila.materiales_asociados|length }} material{{ fila.materiales_asociados|length|pluralize:"es" }}
@@ -398,15 +398,14 @@
                                 {% if celda.cantidad > 0 %}
                                     <div class="text-foreground text-xs font-black">{{ celda.cantidad|floatformat:0 }}</div>
                                     {% if celda.origen == "MANUAL" %}
-                                        <div class="flex items-center justify-center gap-1 mt-0.5">
-                                            <span class="inline-block text-[9px] font-bold text-amber-700 bg-amber-100 px-1 py-0.2 rounded">
+                                        <div class="flex flex-col items-center justify-center gap-0.5 mt-0.5">
+                                            <span class="inline-block text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded" title="Actividad Manual">
                                                 Manual
                                             </span>
-                                            {% if celda.amo_id %}
-                                            <form method="POST" action="{% url 'eliminar_mano_obra_apoyo' celda.amo_id %}" onsubmit="return confirm('¿Deseas eliminar esta actividad manual?');" class="inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="text-red-500 hover:text-red-700 text-[10px] font-black leading-none" title="Eliminar actividad manual">✕</button>
-                                            </form>
+                                            {% if celda.observacion %}
+                                            <div class="text-[9px] font-medium text-amber-900 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.2 max-w-[130px] truncate shadow-2xs mx-auto cursor-help" title="Observación: {{ celda.observacion }}">
+                                                💬 {{ celda.observacion|truncatechars:18 }}
+                                            </div>
                                             {% endif %}
                                         </div>
                                     {% endif %}
@@ -421,11 +420,11 @@
                             <!-- Acciones en cada fila -->
                             <td class="px-3 py-2 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-emerald-50 transition z-10 border-l border-border shadow-xs">
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <!-- Botón editar poste completo en modal -->
+                                    <!-- Botón Editar Servicios de Mano de Obra de este poste -->
                                     <button type="button"
-                                            onclick="abrirModalEditarApoyo('{{ fila.apoyo.id }}')"
-                                            class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs flex items-center gap-1"
-                                            title="Editar datos y materiales del poste">
+                                            onclick="abrirModalAsignarMO('{{ fila.apoyo.id }}')"
+                                            class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded text-xs font-bold transition shadow-xs flex items-center gap-1 cursor-pointer"
+                                            title="Editar actividades y servicios manuales de este poste">
                                         ✏️ Editar
                                     </button>
 
@@ -436,7 +435,7 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="tab" value="mano_obra">
                                         <button type="submit"
-                                                class="px-2.5 py-1 bg-red-100 text-destructive hover:bg-destructive hover:text-white rounded text-xs font-bold transition flex items-center gap-1"
+                                                class="px-2.5 py-1 bg-red-100 text-destructive hover:bg-destructive hover:text-white rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                                                 title="Eliminar poste completo">
                                             🗑️ Eliminar
                                         </button>
@@ -588,20 +587,28 @@
     </div>
 
     <!-- ======================================================================= -->
-    <!-- MODAL 1: ASIGNAR ACTIVIDAD MANUAL A UN APOYO                            -->
+    <!-- MODAL 1: ASIGNAR ACTIVIDAD MANUAL A UN APOYO (MÚLTIPLES ACTIVIDADES)    -->
     <!-- ======================================================================= -->
-    <div id="modalAsignarMO" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-card w-full max-w-lg rounded-2xl shadow-xl border border-border overflow-hidden">
-            <div class="px-6 py-4 bg-muted/40 border-b border-border flex items-center justify-between">
-                <h3 class="font-extrabold text-foreground text-base">➕ Asignar Servicio Manual a un Poste</h3>
-                <button type="button" onclick="cerrarModalAsignarMO()" class="text-muted-foreground hover:text-foreground text-lg">✕</button>
+    <div id="modalAsignarMO" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+        <div class="bg-card w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl border-2 border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="px-6 py-4 bg-neutral border-b border-border flex items-center justify-between text-white flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🛠️</span>
+                    <h3 id="modalAsignarMOTitulo" class="font-extrabold text-base">Asignar Servicios Manuales a un Poste</h3>
+                </div>
+                <button type="button" onclick="cerrarModalAsignarMO()" class="text-gray-300 hover:text-white text-xl font-bold p-1 rounded-lg cursor-pointer">✕</button>
             </div>
-            <form id="formAsignarMO" method="POST" action="" class="p-6 space-y-4">
+
+            <form id="formAsignarMO" method="POST" action="" class="flex flex-col flex-1 overflow-hidden p-6 space-y-4">
                 {% csrf_token %}
+                <input type="hidden" name="tab" value="mano_obra">
+
                 <div>
-                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Seleccionar Poste / Apoyo</label>
-                    <select id="selectApoyoMO" required onchange="actualizarActionMO(this.value)"
-                            class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary font-medium">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="selectApoyoMO">
+                        Seleccionar Poste / Apoyo <span class="text-destructive">*</span>
+                    </label>
+                    <select id="selectApoyoMO" required onchange="onSelectApoyoMOChange(this.value)"
+                            class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary font-bold text-foreground">
                         <option value="">-- Seleccionar Poste --</option>
                         {% for ap in apoyos %}
                             <option value="{{ ap.id }}">Nodo: {{ ap.nodo|default:"Sin Nodo" }} (Apoyo {{ ap.numero_apoyo|default:"—" }})</option>
@@ -609,35 +616,40 @@
                     </select>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Actividad / Servicio de Mano de Obra</label>
-                    <select name="item_mano_obra_id" required
-                            class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary font-medium">
-                        <option value="">-- Seleccionar Actividad --</option>
-                        {% for item in catalogo_mo_todos %}
-                            <option value="{{ item.id }}">
-                                [{{ item.codigo }}] {{ item.descripcion }} (${{ item.valor_unitario|floatformat:0 }} / {{ item.unidad }})
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="border-t border-border pt-3 flex-1 flex flex-col min-h-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
+                                Actividades y Servicios de Mano de Obra
+                            </label>
+                            <p class="text-[11px] text-muted-foreground">Puedes agregar múltiples servicios manuales y justificaciones para este poste en una sola acción.</p>
+                        </div>
+                        <button type="button" id="btnAgregarFilaMO"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition shadow-xs cursor-pointer self-start sm:self-auto">
+                            <span>➕</span> Agregar otra actividad
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-border rounded-lg flex-1 max-h-80 overflow-y-auto">
+                        <table class="min-w-full divide-y border-border text-xs">
+                            <thead class="bg-neutral text-xs font-bold text-white uppercase sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-3 py-2 text-left w-5/12">Actividad / Servicio (Catálogo)</th>
+                                    <th class="px-2 py-2 text-center w-24">Cantidad</th>
+                                    <th class="px-3 py-2 text-left w-6/12">Observación / Justificación Técnica</th>
+                                    <th class="px-2 py-2 text-center w-12">Quitar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="filasMOMultiple" class="divide-y divide-border bg-card">
+                                <!-- Filas inyectadas dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Cantidad</label>
-                        <input type="number" step="any" min="0.01" name="cantidad" required placeholder="1.00"
-                               class="w-full px-3.5 py-2 text-sm font-bold font-mono rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-muted-foreground mb-1">Observación</label>
-                        <input type="text" name="observacion" placeholder="Ej: Zona rocosa, autorización..."
-                               class="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary">
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-3 border-t border-border">
-                    <button type="button" onclick="cerrarModalAsignarMO()" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm">Guardar Servicio</button>
+                <div class="flex justify-end gap-3 pt-3 border-t border-border flex-shrink-0">
+                    <button type="button" onclick="cerrarModalAsignarMO()" class="px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg cursor-pointer">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer" style="background-color: #1e63f0; color: #ffffff !important;">Guardar Servicios</button>
                 </div>
             </form>
         </div>
@@ -907,6 +919,18 @@
         </select>
     </div>
 
+    <!-- Template base oculto para selects de mano de obra -->
+    <div id="templateSelectMO" class="hidden">
+        <select class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+            <option value="">-- Seleccionar Actividad --</option>
+            {% for item in catalogo_mo_todos %}
+                <option value="{{ item.id }}">
+                    [{{ item.codigo }}] {{ item.descripcion }} (${{ item.valor_unitario|floatformat:0 }} / {{ item.unidad }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
 </div>
 
 <script src="{% static 'js/ingenieria.js' %}"></script>
@@ -980,6 +1004,62 @@ const apoyosData = {
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
 };
+
+const apoyosMOData = {
+    {% for fila in mo_filas_matriz %}
+    "{{ fila.apoyo.id }}": [
+        {% for mo in fila.manos_obra_list %}
+        {% if mo.origen == "MANUAL" %}
+        {
+            "id": "{{ mo.id }}",
+            "item_id": "{{ mo.item_mano_obra_id }}",
+            "codigo": "{{ mo.item_mano_obra.codigo|escapejs }}",
+            "descripcion": "{{ mo.item_mano_obra.descripcion|escapejs }}",
+            "cantidad": "{{ mo.cantidad|unlocalize }}",
+            "observacion": "{{ mo.observacion|default:''|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endif %}
+        {% endfor %}
+    ]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+};
+
+function crearFilaMO(itemId = '', cantidad = '1', observacion = '') {
+    const tr = document.createElement('tr');
+    tr.className = 'fila-mo-item';
+
+    const templateSelect = document.querySelector('#templateSelectMO select');
+    let optionsHtml = '';
+    if (templateSelect) {
+        Array.from(templateSelect.options).forEach(opt => {
+            const selected = (itemId && String(opt.value) === String(itemId)) ? 'selected' : '';
+            optionsHtml += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
+        });
+    }
+
+    tr.innerHTML = `
+        <td class="px-3 py-2">
+            <select name="item_mano_obra_id[]" required
+                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+                ${optionsHtml}
+            </select>
+        </td>
+        <td class="px-2 py-2">
+            <input type="number" step="any" min="0.01" name="cantidad[]" value="${cantidad}" required placeholder="1.00"
+                   class="w-full border border-emerald-400 rounded-lg px-2 py-1.5 text-xs font-black text-emerald-950 focus:ring-2 focus:ring-emerald-500 bg-emerald-50/40 text-center">
+        </td>
+        <td class="px-3 py-2">
+            <textarea name="observacion[]" rows="2" placeholder="Escribe aquí la observación o justificación técnica detallada..."
+                      class="w-full border border-border rounded-lg px-3 py-1.5 text-xs font-medium text-foreground bg-background focus:ring-2 focus:ring-primary focus:outline-none resize-y min-h-[42px] leading-relaxed shadow-2xs">${observacion}</textarea>
+        </td>
+        <td class="px-2 py-2 text-center">
+            <button type="button" class="btnEliminarFilaMO text-destructive hover:text-red-800 font-bold text-lg p-1 rounded cursor-pointer">
+                &times;
+            </button>
+        </td>
+    `;
+    return tr;
+}
 
 function crearFilaLuminaria(potencia = '', codigo = '') {
     const tr = document.createElement('tr');
@@ -1176,15 +1256,75 @@ function cerrarModalApoyo() {
     }
 }
 
-function abrirModalAsignarMO() {
-    document.getElementById('modalAsignarMO').classList.remove('hidden');
-}
-function cerrarModalAsignarMO() {
-    document.getElementById('modalAsignarMO').classList.add('hidden');
-}
 function actualizarActionMO(apoyoId) {
-    if (apoyoId) {
-        document.getElementById('formAsignarMO').action = '/ingenieria/apoyos/' + apoyoId + '/mano-obra-manual/';
+    const form = document.getElementById('formAsignarMO');
+    if (apoyoId && form) {
+        form.action = '/ingenieria/apoyos/' + apoyoId + '/mano-obra-manual/';
+    }
+}
+
+function onSelectApoyoMOChange(apoyoId) {
+    actualizarActionMO(apoyoId);
+    const select = document.getElementById('selectApoyoMO');
+    const titulo = document.getElementById('modalAsignarMOTitulo');
+    const tbody = document.getElementById('filasMOMultiple');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (apoyoId && select) {
+        const nodoTexto = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+        if (titulo) titulo.textContent = 'Editar Servicios de Mano de Obra — ' + nodoTexto;
+        if (typeof apoyosMOData !== 'undefined' && apoyosMOData[apoyoId] && apoyosMOData[apoyoId].length > 0) {
+            apoyosMOData[apoyoId].forEach(mo => {
+                tbody.appendChild(crearFilaMO(mo.item_id, mo.cantidad, mo.observacion));
+            });
+        } else {
+            tbody.appendChild(crearFilaMO());
+        }
+    } else {
+        if (titulo) titulo.textContent = 'Asignar Servicios Manuales a un Poste';
+        tbody.appendChild(crearFilaMO());
+    }
+}
+
+function abrirModalAsignarMO(apoyoId = null) {
+    const modal = document.getElementById('modalAsignarMO');
+    const select = document.getElementById('selectApoyoMO');
+    const titulo = document.getElementById('modalAsignarMOTitulo');
+    const tbody = document.getElementById('filasMOMultiple');
+    if (!modal || !tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (apoyoId && select) {
+        select.value = apoyoId;
+        actualizarActionMO(apoyoId);
+        const nodoTexto = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+        if (titulo) titulo.textContent = 'Editar Servicios de Mano de Obra — ' + nodoTexto;
+        if (typeof apoyosMOData !== 'undefined' && apoyosMOData[apoyoId] && apoyosMOData[apoyoId].length > 0) {
+            apoyosMOData[apoyoId].forEach(mo => {
+                tbody.appendChild(crearFilaMO(mo.item_id, mo.cantidad, mo.observacion));
+            });
+        } else {
+            tbody.appendChild(crearFilaMO());
+        }
+    } else {
+        if (select) {
+            select.selectedIndex = 0;
+        }
+        if (titulo) titulo.textContent = 'Asignar Servicios Manuales a un Poste';
+        tbody.appendChild(crearFilaMO());
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function cerrarModalAsignarMO() {
+    const modal = document.getElementById('modalAsignarMO');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 }
 
@@ -1427,12 +1567,44 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Actividades y Servicios de Mano de Obra Múltiple (Botón agregar fila)
+    const btnAgregarFilaMO = document.getElementById("btnAgregarFilaMO");
+    const filasMOMultiple = document.getElementById("filasMOMultiple");
+    if (btnAgregarFilaMO && filasMOMultiple) {
+        btnAgregarFilaMO.addEventListener("click", function () {
+            filasMOMultiple.appendChild(crearFilaMO());
+        });
+
+        filasMOMultiple.addEventListener("click", function (e) {
+            const btnEliminar = e.target.closest(".btnEliminarFilaMO");
+            if (btnEliminar) {
+                const filas = filasMOMultiple.querySelectorAll(".fila-mo-item");
+                if (filas.length > 1) {
+                    btnEliminar.closest(".fila-mo-item").remove();
+                } else {
+                    const fila = btnEliminar.closest(".fila-mo-item");
+                    if (fila) {
+                        const sel = fila.querySelector('select[name="item_mano_obra_id[]"]');
+                        if (sel) sel.selectedIndex = 0;
+                        const inCant = fila.querySelector('input[name="cantidad[]"]');
+                        if (inCant) inCant.value = '1';
+                        const inObs = fila.querySelector('[name="observacion[]"]');
+                        if (inObs) inObs.value = '';
+                    }
+                }
+            }
+        });
+    }
+
     // Inicializar con 1 fila si están vacíos al cargar
     if (filasLuminarias && filasLuminarias.children.length === 0) {
         filasLuminarias.appendChild(crearFilaLuminaria());
     }
     if (filasMaterialesNodo && filasMaterialesNodo.children.length === 0) {
         filasMaterialesNodo.appendChild(crearFilaMaterial());
+    }
+    if (filasMOMultiple && filasMOMultiple.children.length === 0) {
+        filasMOMultiple.appendChild(crearFilaMO());
     }
 });
 </script>

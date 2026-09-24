@@ -131,11 +131,25 @@
         <!-- TAB 1: MATRIZ DE BALANCE -->
         <div id="panelDetalleBalance" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden pestana-panel-detalle">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
-                    <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-sm" id="tablaDetalleBalance">
+                    <thead class="bg-muted text-foreground uppercase text-xs font-semibold select-none">
                         <tr>
-                            <th class="px-4 py-3.5">Ítem</th>
-                            <th class="px-5 py-3.5">Descripción del Material</th>
+                            <th class="px-4 py-2 border-r border-border th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaDetalleBalance')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-5 py-2 border-r border-border th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Descripción del Material</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material', 'tablaDetalleBalance')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3.5 text-right bg-blue-50/50">Materiales Requeridos</th>
                             <th class="px-4 py-3.5 text-right bg-emerald-50/50">Suministrado (Entradas)</th>
                             <th class="px-4 py-3.5 text-right bg-indigo-50/50">Materiales Instalados</th>
@@ -247,12 +261,33 @@
 
             {% if materiales_devolucion %}
             <div class="overflow-x-auto border border-border rounded-lg">
-                <table class="min-w-full text-xs divide-y divide-gray-200 text-left">
-                    <thead class="bg-amber-900 text-white uppercase font-semibold text-[11px]">
+                <table class="min-w-full text-xs divide-y divide-gray-200 text-left" id="tablaDetalleDevoluciones">
+                    <thead class="bg-amber-900 text-white uppercase font-semibold text-[11px] select-none">
                         <tr>
-                            <th class="px-4 py-3">Ítem</th>
-                            <th class="px-5 py-3">Descripción del Material</th>
-                            <th class="px-3 py-3 text-center">Unidad</th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaDetalleDevoluciones')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-amber-800 whitespace-nowrap min-w-[180px] th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Descripción del Material</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material', 'tablaDetalleDevoluciones')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 2, 'Unidad', 'tablaDetalleDevoluciones')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3 text-right bg-emerald-950/80">Suministrado (Entradas)</th>
                             <th class="px-4 py-3 text-right bg-indigo-950/80">Instalado en Obra</th>
                             <th class="px-4 py-3 text-right bg-blue-950/80">Material Sobrante</th>
@@ -404,12 +439,33 @@
 
             {% if requeridos_proyecto %}
             <div class="overflow-x-auto border border-border rounded-lg">
-                <table class="min-w-full text-xs divide-y divide-gray-200">
-                    <thead class="bg-blue-900 text-white uppercase font-semibold">
+                <table class="min-w-full text-xs divide-y divide-gray-200" id="tablaDetalleRequeridos">
+                    <thead class="bg-blue-900 text-white uppercase font-semibold select-none">
                         <tr>
-                            <th class="px-4 py-3 text-left">Ítem</th>
-                            <th class="px-5 py-3 text-left">Descripción del Material</th>
-                            <th class="px-3 py-3 text-center">Unidad</th>
+                            <th class="px-3 py-2 border-r border-blue-800 text-left whitespace-nowrap w-24 th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaDetalleRequeridos')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-blue-800 text-left whitespace-nowrap min-w-[200px] th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Descripción del Material</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material', 'tablaDetalleRequeridos')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-blue-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 2, 'Unidad', 'tablaDetalleRequeridos')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3 text-right bg-blue-950">Cantidad Requerida</th>
                             <th class="px-4 py-3 text-center">Acción</th>
                         </tr>
@@ -468,21 +524,60 @@
             </div>
 
             {% if instalados_apoyo %}
-            <div class="overflow-x-auto border border-border rounded-lg">
-                <table class="min-w-full text-xs divide-y divide-gray-200">
-                    <thead class="bg-indigo-900 text-white uppercase font-semibold">
+            <!-- Barra de estado de filtros activos -->
+            <div id="barraFiltrosInstalados" class="hidden items-center justify-between bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-lg text-xs">
+                <div class="flex items-center gap-2 text-indigo-900 font-medium">
+                    <span>🔍 Filtros activos:</span>
+                    <span id="textoFiltrosInstalados" class="font-bold"></span>
+                </div>
+                <button type="button" onclick="limpiarTodosLosFiltrosExcel('tablaDetalleInstalados')" class="text-xs text-indigo-700 hover:text-indigo-900 font-bold underline cursor-pointer">
+                    Restablecer tabla completa
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-border rounded-lg relative">
+                <table id="tablaDetalleInstalados" class="min-w-full text-xs divide-y divide-gray-200">
+                    <thead class="bg-indigo-900 text-white uppercase font-semibold select-none">
                         <tr>
-                            <th class="px-4 py-3 text-left">Nodo / Apoyo</th>
-                            <th class="px-4 py-3 text-left">Ítem</th>
-                            <th class="px-5 py-3 text-left">Material Instalado</th>
-                            <th class="px-3 py-3 text-center">Unidad</th>
+                            <th class="px-3 py-2 border-r border-indigo-800 text-left whitespace-nowrap th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span>Nodo / Apoyo</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Nodo / Apoyo" onclick="abrirFiltroExcel(event, 0, 'Nodo / Apoyo', 'tablaDetalleInstalados')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-indigo-800 text-left whitespace-nowrap w-24 th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 1, 'Ítem', 'tablaDetalleInstalados')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-indigo-800 text-left whitespace-nowrap min-w-[200px] th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span>Material Instalado</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 2, 'Material Instalado', 'tablaDetalleInstalados')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-indigo-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="3">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 3, 'Unidad', 'tablaDetalleInstalados')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3 text-right bg-indigo-950">Cantidad Instalada</th>
                             <th class="px-4 py-3 text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-card">
                         {% for inst in instalados_apoyo %}
-                        <tr class="hover:bg-indigo-50/40 transition">
+                        <tr class="hover:bg-indigo-50/40 transition fila-datos-excel">
                             <td class="px-4 py-3 font-bold text-foreground">
                                 <span class="text-indigo-600 font-bold">●</span> Nodo: {{ inst.apoyo.nodo|default:inst.apoyo.numero_apoyo }}
                                 {% if inst.apoyo.numero_apoyo %}<span class="text-muted-foreground text-[10px]">(Apoyo #{{ inst.apoyo.numero_apoyo }})</span>{% endif %}
@@ -533,21 +628,60 @@
             </div>
 
             {% if retiros_apoyo %}
-            <div class="overflow-x-auto border border-border rounded-lg">
-                <table class="min-w-full text-xs divide-y divide-gray-200">
-                    <thead class="bg-amber-900 text-white uppercase font-semibold">
+            <!-- Barra de estado de filtros activos -->
+            <div id="barraFiltrosRetiros" class="hidden items-center justify-between bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg text-xs">
+                <div class="flex items-center gap-2 text-amber-900 font-medium">
+                    <span>🔍 Filtros activos:</span>
+                    <span id="textoFiltrosRetiros" class="font-bold"></span>
+                </div>
+                <button type="button" onclick="limpiarTodosLosFiltrosExcel('tablaDetalleRetiros')" class="text-xs text-amber-700 hover:text-amber-900 font-bold underline cursor-pointer">
+                    Restablecer tabla completa
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-border rounded-lg relative">
+                <table id="tablaDetalleRetiros" class="min-w-full text-xs divide-y divide-gray-200">
+                    <thead class="bg-amber-900 text-white uppercase font-semibold select-none">
                         <tr>
-                            <th class="px-4 py-3 text-left">Nodo / Apoyo</th>
-                            <th class="px-4 py-3 text-left">Ítem</th>
-                            <th class="px-5 py-3 text-left">Material Retirado</th>
-                            <th class="px-3 py-3 text-center">Unidad</th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-left whitespace-nowrap th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span>Nodo / Apoyo</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Nodo / Apoyo" onclick="abrirFiltroExcel(event, 0, 'Nodo / Apoyo', 'tablaDetalleRetiros')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-left whitespace-nowrap w-24 th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 1, 'Ítem', 'tablaDetalleRetiros')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-amber-800 text-left whitespace-nowrap min-w-[200px] th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span>Material Retirado</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material Retirado" onclick="abrirFiltroExcel(event, 2, 'Material Retirado', 'tablaDetalleRetiros')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="3">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 3, 'Unidad', 'tablaDetalleRetiros')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3 text-right bg-amber-950">Cantidad Retirada</th>
                             <th class="px-4 py-3 text-center">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-card">
                         {% for ret in retiros_apoyo %}
-                        <tr class="hover:bg-amber-50/40 transition">
+                        <tr class="hover:bg-amber-50/40 transition fila-datos-excel">
                             <td class="px-4 py-3 font-bold text-foreground">
                                 <span class="text-amber-600 font-bold">●</span> Nodo: {{ ret.apoyo.nodo|default:ret.apoyo.numero_apoyo }}
                                 {% if ret.apoyo.numero_apoyo %}<span class="text-muted-foreground text-[10px]">(Apoyo #{{ ret.apoyo.numero_apoyo }})</span>{% endif %}
@@ -879,8 +1013,113 @@
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- MENÚ FLOTANTE INTERACTIVO TIPO EXCEL (POPOVER) -->
+<!-- ========================================================================= -->
+<div id="excelFilterPopover"
+     class="hidden fixed z-50 w-72 max-w-[90vw] bg-card border border-border-strong rounded-xl shadow-2xl p-3 text-xs text-foreground space-y-2.5 animate-in fade-in duration-150"
+     style="top: 0; left: 0;">
+    
+    <!-- Encabezado del Popover -->
+    <div class="flex items-center justify-between border-b border-border pb-2">
+        <div class="flex items-center gap-1.5 font-bold text-foreground truncate">
+            <span>🔍</span> <span id="popoverColName">Filtrar Columna</span>
+        </div>
+        <button type="button" onclick="cerrarFiltroExcel()" class="text-muted-foreground hover:text-foreground text-sm font-bold px-1.5 py-0.5 rounded hover:bg-muted transition">
+            ✕
+        </button>
+    </div>
+
+    <!-- Acciones de Ordenamiento -->
+    <div class="grid grid-cols-2 gap-1.5 border-b border-border pb-2">
+        <button type="button" id="btnSortAsc" onclick="ejecutarSortExcel(true)"
+                class="flex items-center justify-center gap-1 px-2 py-1.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg transition text-[11px]">
+            <span>🔼</span> Ordenar A-Z
+        </button>
+        <button type="button" id="btnSortDesc" onclick="ejecutarSortExcel(false)"
+                class="flex items-center justify-center gap-1 px-2 py-1.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg transition text-[11px]">
+            <span>🔽</span> Ordenar Z-A
+        </button>
+    </div>
+
+    <!-- Botón Borrar Filtro de esta Columna -->
+    <button type="button" id="btnClearThisCol" onclick="borrarFiltroColumnaActual()"
+            class="w-full flex items-center justify-center gap-1 px-2 py-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-bold rounded-lg transition text-[11px]">
+        <span>🗑️</span> Borrar filtro de esta columna
+    </button>
+
+    <!-- Buscador en Tiempo Real dentro del Dropdown -->
+    <div class="relative">
+        <input type="text" id="popoverSearchInput" placeholder="Buscar en opciones..."
+               autocomplete="off"
+               class="w-full border border-border-strong rounded-lg pl-7 pr-2.5 py-1.5 text-xs bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-2 text-muted-foreground pointer-events-none">
+            🔍
+        </span>
+    </div>
+
+    <!-- Lista Desplazable de Casillas de Selección Múltiple -->
+    <div class="space-y-1">
+        <!-- Casilla Seleccionar Todo -->
+        <label class="flex items-center gap-2 p-1 rounded hover:bg-muted font-bold text-foreground cursor-pointer border-b border-border pb-1">
+            <input type="checkbox" id="chkSelectAll" class="size-3.5 rounded text-primary focus:ring-0 cursor-pointer" onchange="toggleSelectAllExcel(this.checked)">
+            <span>(Seleccionar todo)</span>
+        </label>
+
+        <!-- Contenedor dinámico de checkboxes -->
+        <div id="popoverCheckboxList" class="max-h-44 overflow-y-auto space-y-0.5 p-1 bg-muted/20 rounded-lg border border-border">
+            <!-- Rellenado dinámicamente con JS -->
+        </div>
+    </div>
+
+    <!-- Botones de Confirmación y Cancelación -->
+    <div class="flex items-center justify-end gap-2 pt-2 border-t border-border">
+        <button type="button" onclick="cerrarFiltroExcel()"
+                class="px-3 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition">
+            Cancelar
+        </button>
+        <button type="button" onclick="aplicarFiltroColumnaActual()"
+                class="px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
+            Aceptar
+        </button>
+    </div>
+</div>
+
+<style>
+/* Estilos para el botón de filtro en los encabezados tipo Excel */
+.btn-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.btn-filter-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}
+.btn-filter-trigger.filter-active {
+    background-color: #f59e0b !important;
+    color: #78350f !important;
+    border-color: #d97706 !important;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.7);
+}
+.th-excel-col.has-active-filter {
+    background-color: #1e3a8a !important;
+}
+</style>
+
 <script>
+// ---------- CONTROL DE PESTAÑAS ----------
 function cambiarPestanaDetalle(tabName) {
+    cerrarFiltroExcel();
+
     const paneles = {
         'balance': document.getElementById('panelDetalleBalance'),
         'devoluciones': document.getElementById('panelDetalleDevoluciones'),
@@ -931,6 +1170,7 @@ function cambiarPestanaDetalle(tabName) {
     }
 }
 
+// ---------- GESTIÓN DE MODALES REQUERIDOS Y ESCAPE ----------
 document.addEventListener("DOMContentLoaded", function () {
     const tbody = document.getElementById("filasModalRequeridos");
     const btnAgregar = document.getElementById("btnAgregarFilaRequerido");
@@ -964,20 +1204,385 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            const mReq = document.getElementById("modalPedirRequerido");
-            if (mReq && !mReq.classList.contains("hidden")) {
-                mReq.classList.add("hidden");
-                mReq.classList.remove("flex");
+    // Buscador en vivo dentro del popover Excel
+    const searchInput = document.getElementById("popoverSearchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const q = searchInput.value.toLowerCase().trim();
+            const optionItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item");
+            
+            optionItems.forEach(item => {
+                const text = item.getAttribute("data-val-normalized") || "";
+                if (text.includes(q)) {
+                    item.classList.remove("hidden");
+                } else {
+                    item.classList.add("hidden");
+                }
+            });
+        });
+    }
+});
+
+document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+        cerrarFiltroExcel();
+        const mReq = document.getElementById("modalPedirRequerido");
+        if (mReq && !mReq.classList.contains("hidden")) {
+            mReq.classList.add("hidden");
+            mReq.classList.remove("flex");
+        }
+        const mDev = document.getElementById("modalRegistrarDevolucion");
+        if (mDev && !mDev.classList.contains("hidden")) {
+            mDev.classList.add("hidden");
+            mDev.classList.remove("flex");
+        }
+    }
+});
+
+// =========================================================================
+// MOTOR UNIVERSAL DE FILTROS TIPO EXCEL MULTI-TABLA
+// =========================================================================
+let colActualFiltro = null;
+let tablaActualFiltro = null;
+let nombreColActualFiltro = "";
+let activeFiltersByTable = {
+    'tablaDetalleBalance': {},
+    'tablaDetalleDevoluciones': {},
+    'tablaDetalleRequeridos': {},
+    'tablaDetalleInstalados': {},
+    'tablaDetalleRetiros': {}
+};
+
+function getActiveFilters(tablaId) {
+    if (!activeFiltersByTable[tablaId]) {
+        activeFiltersByTable[tablaId] = {};
+    }
+    return activeFiltersByTable[tablaId];
+}
+
+// Abrir Popover de Filtro Excel
+function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const th = btn.closest("th");
+    const tabla = tablaId ? document.getElementById(tablaId) : btn.closest("table");
+    if (!tabla) return;
+
+    const idTabla = tabla.id;
+    tablaActualFiltro = idTabla;
+
+    if (colIdx === undefined || colIdx === null) {
+        colIdx = th ? (th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex) : 0;
+    }
+    colActualFiltro = colIdx;
+    nombreColActualFiltro = colName || (th ? th.querySelector("span")?.innerText?.trim() : "Columna");
+
+    const activeFilters = getActiveFilters(idTabla);
+
+    // Obtener todas las filas de datos de esta tabla
+    const tbody = tabla.querySelector("tbody");
+    if (!tbody) return;
+    const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
+
+    // Contar valores distintos
+    const counts = {};
+    filas.forEach(f => {
+        let val = "";
+        if (f.hasAttribute(`data-col-${colIdx}`)) {
+            val = (f.getAttribute(`data-col-${colIdx}`) || "").trim();
+        } else if (f.children[colIdx]) {
+            val = f.children[colIdx].innerText.replace(/\s+/g, " ").trim();
+        }
+        if (val === "") val = "(Vacío)";
+        counts[val] = (counts[val] || 0) + 1;
+    });
+
+    const items = Object.keys(counts).map(v => ({ val: v, count: counts[v] }));
+    items.sort((a, b) => a.val.localeCompare(b.val, undefined, { numeric: true, sensitivity: 'base' }));
+
+    const popover = document.getElementById("excelFilterPopover");
+    if (!popover) return;
+
+    const popoverTitle = document.getElementById("popoverColName");
+    const searchInput = document.getElementById("popoverSearchInput");
+    const chkListContainer = document.getElementById("popoverCheckboxList");
+    const chkSelectAll = document.getElementById("chkSelectAll");
+    const btnClearThisCol = document.getElementById("btnClearThisCol");
+
+    if (popoverTitle) popoverTitle.textContent = `Filtrar: ${nombreColActualFiltro}`;
+    if (searchInput) searchInput.value = "";
+
+    // Estado del botón borrar
+    if (btnClearThisCol) {
+        btnClearThisCol.style.display = activeFilters[colIdx] ? "flex" : "none";
+    }
+
+    const currentSelectedSet = activeFilters[colIdx] || null;
+
+    if (chkListContainer) {
+        chkListContainer.innerHTML = "";
+        let todosMarcados = true;
+
+        if (items.length === 0) {
+            chkListContainer.innerHTML = '<div class="py-3 text-center text-muted-foreground text-xs italic">No hay registros disponibles en esta columna</div>';
+            if (chkSelectAll) chkSelectAll.checked = false;
+        } else {
+            items.forEach((item) => {
+                const isChecked = currentSelectedSet === null || currentSelectedSet.has(item.val);
+                if (!isChecked) todosMarcados = false;
+
+                const rowDiv = document.createElement("label");
+                rowDiv.className = "flex items-center justify-between gap-2 px-1.5 py-1 rounded hover:bg-muted text-xs cursor-pointer chk-option-item";
+                rowDiv.setAttribute("data-val-normalized", item.val.toLowerCase());
+
+                rowDiv.innerHTML = `
+                    <div class="flex items-center gap-2 truncate">
+                        <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked ? "checked" : ""}>
+                        <span class="truncate font-medium text-foreground">${item.val}</span>
+                    </div>
+                    <span class="text-[10px] px-1.5 py-0.2 bg-muted text-muted-foreground font-mono rounded-full shrink-0">${item.count}</span>
+                `;
+                chkListContainer.appendChild(rowDiv);
+            });
+
+            if (chkSelectAll) chkSelectAll.checked = todosMarcados;
+        }
+    }
+
+    // Posicionar popover debajo del botón
+    const rect = btn.getBoundingClientRect();
+    const popoverWidth = 288;
+
+    let leftPos = rect.left;
+    if (leftPos + popoverWidth > window.innerWidth - 10) {
+        leftPos = window.innerWidth - popoverWidth - 15;
+    }
+    if (leftPos < 10) leftPos = 10;
+
+    let topPos = rect.bottom + 6;
+    if (topPos + 360 > window.innerHeight) {
+        topPos = Math.max(10, rect.top - 370);
+    }
+
+    popover.style.left = `${leftPos}px`;
+    popover.style.top = `${topPos}px`;
+    popover.classList.remove("hidden");
+
+    setTimeout(() => {
+        if (searchInput) searchInput.focus();
+    }, 50);
+}
+
+// Cerrar Popover
+function cerrarFiltroExcel() {
+    const popover = document.getElementById("excelFilterPopover");
+    if (popover) {
+        popover.classList.add("hidden");
+    }
+    colActualFiltro = null;
+}
+function cerrarPopupFiltroExcel() {
+    cerrarFiltroExcel();
+}
+
+// Seleccionar todo / Deseleccionar todo
+function toggleSelectAllExcel(checked) {
+    const visibleChkItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item:not(.hidden) .chk-item-filter");
+    visibleChkItems.forEach(chk => {
+        chk.checked = checked;
+    });
+}
+
+// Aplicar Filtro de Columna Actual
+function aplicarFiltroColumnaActual() {
+    if (colActualFiltro === null || !tablaActualFiltro) return;
+
+    const activeFilters = getActiveFilters(tablaActualFiltro);
+    const allChk = document.querySelectorAll("#popoverCheckboxList .chk-item-filter");
+    const allTotal = allChk.length;
+    let checkedCount = 0;
+    const selectedSet = new Set();
+
+    allChk.forEach(chk => {
+        if (chk.checked) {
+            checkedCount++;
+            selectedSet.add(decodeURIComponent(chk.value));
+        }
+    });
+
+    if (checkedCount === allTotal) {
+        delete activeFilters[colActualFiltro];
+    } else {
+        activeFilters[colActualFiltro] = selectedSet;
+    }
+
+    cerrarFiltroExcel();
+    ejecutarFiltradoTabla(tablaActualFiltro);
+}
+
+// Borrar Filtro de Columna Actual
+function borrarFiltroColumnaActual() {
+    if (colActualFiltro !== null && tablaActualFiltro) {
+        const activeFilters = getActiveFilters(tablaActualFiltro);
+        delete activeFilters[colActualFiltro];
+        cerrarFiltroExcel();
+        ejecutarFiltradoTabla(tablaActualFiltro);
+    }
+}
+
+// Limpiar todos los filtros de una tabla o de todas
+function limpiarTodosLosFiltrosExcel(tablaId = null) {
+    if (tablaId && activeFiltersByTable[tablaId]) {
+        activeFiltersByTable[tablaId] = {};
+        ejecutarFiltradoTabla(tablaId);
+    } else if (tablaId) {
+        activeFiltersByTable[tablaId] = {};
+        ejecutarFiltradoTabla(tablaId);
+    } else {
+        for (const t in activeFiltersByTable) {
+            activeFiltersByTable[t] = {};
+            ejecutarFiltradoTabla(t);
+        }
+    }
+}
+window.limpiarTodosLosFiltrosExcel = limpiarTodosLosFiltrosExcel;
+window.limpiarTodosFiltrosTabla = limpiarTodosLosFiltrosExcel;
+
+// Ordenar filas A-Z / Z-A
+function ejecutarSortExcel(ascendente) {
+    if (colActualFiltro === null || !tablaActualFiltro) return;
+    const colIdx = colActualFiltro;
+    const tabla = document.getElementById(tablaActualFiltro);
+    if (!tabla) return;
+    const tbody = tabla.querySelector("tbody");
+    if (!tbody) return;
+    const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
+
+    filas.sort((a, b) => {
+        let valA = a.hasAttribute(`data-col-${colIdx}`) ? a.getAttribute(`data-col-${colIdx}`) : (a.children[colIdx] ? a.children[colIdx].innerText : "");
+        let valB = b.hasAttribute(`data-col-${colIdx}`) ? b.getAttribute(`data-col-${colIdx}`) : (b.children[colIdx] ? b.children[colIdx].innerText : "");
+        valA = (valA || "").trim();
+        valB = (valB || "").trim();
+
+        const dateA = parseFecha(valA);
+        const dateB = parseFecha(valB);
+        if (dateA && dateB) {
+            return ascendente ? dateA - dateB : dateB - dateA;
+        }
+
+        const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
+        const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
+        if (!isNaN(numA) && !isNaN(numB) && !valA.includes("/") && !valB.includes("/")) {
+            return ascendente ? numA - numB : numB - numA;
+        }
+
+        return ascendente ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
+    });
+
+    filas.forEach(f => tbody.appendChild(f));
+    cerrarFiltroExcel();
+}
+
+function parseFecha(str) {
+    if (!str || !str.includes("/")) return null;
+    const parts = str.split("/");
+    if (parts.length === 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parseInt(parts[2], 10);
+        return new Date(y, m, d);
+    }
+    return null;
+}
+
+// Motor de filtrado por tabla
+function ejecutarFiltradoTabla(tablaId) {
+    const tabla = document.getElementById(tablaId);
+    if (!tabla) return;
+    const tbody = tabla.querySelector("tbody");
+    if (!tbody) return;
+
+    const activeFilters = getActiveFilters(tablaId);
+    const activeCols = Object.keys(activeFilters).map(k => parseInt(k, 10));
+    const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
+    let visiblesCount = 0;
+
+    filas.forEach(f => {
+        let cumple = true;
+
+        if (activeCols.length > 0) {
+            for (const col of activeCols) {
+                const setValores = activeFilters[col];
+                let val = "";
+                if (f.hasAttribute(`data-col-${col}`)) {
+                    val = (f.getAttribute(`data-col-${col}`) || "").trim();
+                } else if (f.children[col]) {
+                    val = f.children[col].innerText.replace(/\s+/g, " ").trim();
+                }
+                if (val === "") val = "(Vacío)";
+                if (!setValores.has(val)) {
+                    cumple = false;
+                    break;
+                }
             }
-            const mDev = document.getElementById("modalRegistrarDevolucion");
-            if (mDev && !mDev.classList.contains("hidden")) {
-                mDev.classList.add("hidden");
-                mDev.classList.remove("flex");
+        }
+
+        if (cumple) {
+            f.style.display = "";
+            visiblesCount++;
+        } else {
+            f.style.display = "none";
+        }
+    });
+
+    // Actualizar botones de encabezado para esta tabla
+    const ths = tabla.querySelectorAll("th.th-excel-col");
+    ths.forEach(th => {
+        const cIdx = th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex;
+        const btn = th.querySelector(".btn-filter-trigger");
+        if (btn) {
+            if (activeFilters[cIdx]) {
+                th.classList.add("has-active-filter");
+                btn.classList.add("filter-active");
+                btn.innerHTML = '<span class="text-amber-950 font-black text-[10px]">▼✓</span>';
+            } else {
+                th.classList.remove("has-active-filter");
+                btn.classList.remove("filter-active");
+                btn.innerHTML = '<span class="icon-arrow text-[10px]">▼</span>';
             }
         }
     });
+
+    // Actualizar barra de estado de filtros si existe
+    const barraMap = {
+        'tablaDetalleInstalados': { barra: 'barraFiltrosInstalados', texto: 'textoFiltrosInstalados' },
+        'tablaDetalleRetiros': { barra: 'barraFiltrosRetiros', texto: 'textoFiltrosRetiros' }
+    };
+
+    if (barraMap[tablaId]) {
+        const barra = document.getElementById(barraMap[tablaId].barra);
+        const texto = document.getElementById(barraMap[tablaId].texto);
+        if (barra && texto) {
+            if (activeCols.length > 0) {
+                barra.classList.remove('hidden');
+                barra.classList.add('flex');
+                texto.textContent = `${visiblesCount} de ${filas.length} registros visibles (${activeCols.length} columna(s) filtrada(s))`;
+            } else {
+                barra.classList.add('hidden');
+                barra.classList.remove('flex');
+            }
+        }
+    }
+}
+
+// Clic fuera del popover para cerrarlo
+document.addEventListener("click", function (e) {
+    const popover = document.getElementById("excelFilterPopover");
+    if (popover && !popover.classList.contains("hidden")) {
+        if (!popover.contains(e.target) && !e.target.closest(".btn-filter-trigger")) {
+            cerrarFiltroExcel();
+        }
+    }
 });
 </script>
 {% endblock %}

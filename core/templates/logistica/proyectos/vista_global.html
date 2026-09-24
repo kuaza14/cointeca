@@ -640,18 +640,46 @@
             {% if materiales_devolucion %}
             <div class="overflow-x-auto">
                 <table class="min-w-full text-xs divide-y divide-gray-200 text-left" id="tablaDevolucionesGlobal">
-                    <thead class="bg-amber-900 text-white uppercase font-semibold text-[11px]">
+                    <thead class="bg-amber-900 text-white uppercase font-semibold text-[11px] select-none">
                         <tr>
-                            <th class="px-4 py-3 text-center w-20">Ítem</th>
-                            <th class="px-5 py-3">Descripción del Material</th>
-                            <th class="px-3 py-3 text-center w-20">Unidad</th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaDevolucionesGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-amber-800 whitespace-nowrap min-w-[180px] th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Descripción del Material</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material', 'tablaDevolucionesGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 2, 'Unidad', 'tablaDevolucionesGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3 text-right bg-emerald-950/80">Suministrado (Entradas)</th>
                             <th class="px-4 py-3 text-right bg-indigo-950/80">Instalado en Obra</th>
                             <th class="px-4 py-3 text-right bg-blue-950/80">Material Sobrante</th>
                             <th class="px-4 py-3 text-right bg-amber-950/90 font-bold text-amber-200">Material Desinstalado</th>
                             <th class="px-4 py-3 text-right bg-amber-950 font-black text-amber-200">Total a Devolver</th>
                             <th class="px-4 py-3 text-right bg-slate-900">Stock Actual en Bodega</th>
-                            <th class="px-4 py-3 text-center w-36">Estado</th>
+                            <th class="px-4 py-2 border-l border-amber-800 text-center whitespace-nowrap w-36 th-excel-col" data-col-idx="9">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Estado</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Estado" onclick="abrirFiltroExcel(event, 9, 'Estado', 'tablaDevolucionesGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-card">
@@ -748,11 +776,32 @@
 
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-left text-xs" id="tablaBalanceGlobal">
-                    <thead class="bg-neutral text-white uppercase text-xs font-semibold">
+                    <thead class="bg-neutral text-white uppercase text-xs font-semibold select-none">
                         <tr>
-                            <th class="px-4 py-3 text-center w-20">Ítem</th>
-                            <th class="px-5 py-3">Descripción del Material</th>
-                            <th class="px-3 py-3 text-center w-16">Unidad</th>
+                            <th class="px-3 py-2 border-r border-gray-700 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaBalanceGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-gray-700 whitespace-nowrap min-w-[200px] th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Descripción del Material</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material', 'tablaBalanceGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-gray-700 text-center whitespace-nowrap w-16 th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 2, 'Unidad', 'tablaBalanceGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-4 py-3 text-right bg-emerald-800/80">Suministrado (Entradas)</th>
                             <th class="px-4 py-3 text-right bg-indigo-800/80">Instalado en Postes</th>
                             <th class="px-4 py-3 text-right bg-amber-800/80">Retirado / Desmonte</th>
@@ -860,12 +909,33 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
-                    <thead class="bg-amber-900 text-white uppercase text-xs font-semibold">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs" id="tablaRetirosGlobal">
+                    <thead class="bg-amber-900 text-white uppercase text-xs font-semibold select-none">
                         <tr>
-                            <th class="px-4 py-3 text-center w-20">Ítem</th>
-                            <th class="px-5 py-3">Descripción del Material Retirado</th>
-                            <th class="px-3 py-3 text-center w-24">Unidad</th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Ítem</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaRetirosGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-2 border-r border-amber-800 whitespace-nowrap min-w-[200px] th-excel-col" data-col-idx="1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span>Descripción del Material Retirado</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material Retirado', 'tablaRetirosGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2 border-r border-amber-800 text-center whitespace-nowrap w-24 th-excel-col" data-col-idx="2">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>Unidad</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 2, 'Unidad', 'tablaRetirosGlobal')">
+                                        <span class="icon-arrow">▼</span>
+                                    </button>
+                                </div>
+                            </th>
                             <th class="px-6 py-3 text-right bg-amber-950 w-44">Total Desmontado</th>
                         </tr>
                     </thead>
@@ -977,12 +1047,33 @@
                 </div>
 
                 <div class="border border-border rounded-xl overflow-hidden shadow-sm">
-                    <table class="min-w-full text-xs divide-y divide-border">
-                        <thead class="bg-emerald-900 text-white font-bold uppercase text-[11px]">
+                    <table class="min-w-full text-xs divide-y divide-border" id="tablaResumenEntradasGlobal">
+                        <thead class="bg-emerald-900 text-white font-bold uppercase text-[11px] select-none">
                             <tr>
-                                <th class="px-4 py-3 text-center w-20">Ítem</th>
-                                <th class="px-5 py-3 text-left">Descripción del Material</th>
-                                <th class="px-4 py-3 text-center w-24">Unidad</th>
+                                <th class="px-3 py-2 border-r border-emerald-800 text-center whitespace-nowrap w-20 th-excel-col" data-col-idx="0">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <span>Ítem</span>
+                                        <button type="button" class="btn-filter-trigger" title="Filtrar por Ítem" onclick="abrirFiltroExcel(event, 0, 'Ítem', 'tablaResumenEntradasGlobal')">
+                                            <span class="icon-arrow">▼</span>
+                                        </button>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 border-r border-emerald-800 text-left whitespace-nowrap min-w-[200px] th-excel-col" data-col-idx="1">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <span>Descripción del Material</span>
+                                        <button type="button" class="btn-filter-trigger" title="Filtrar por Material" onclick="abrirFiltroExcel(event, 1, 'Material', 'tablaResumenEntradasGlobal')">
+                                            <span class="icon-arrow">▼</span>
+                                        </button>
+                                    </div>
+                                </th>
+                                <th class="px-3 py-2 border-r border-emerald-800 text-center whitespace-nowrap w-24 th-excel-col" data-col-idx="2">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <span>Unidad</span>
+                                        <button type="button" class="btn-filter-trigger" title="Filtrar por Unidad" onclick="abrirFiltroExcel(event, 2, 'Unidad', 'tablaResumenEntradasGlobal')">
+                                            <span class="icon-arrow">▼</span>
+                                        </button>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-3 text-right bg-emerald-950 w-52">Total Cantidad de Entrada</th>
                             </tr>
                         </thead>
@@ -1212,12 +1303,24 @@
 </style>
 
 <script>
-// ---------- ESTADO GLOBAL DE FILTROS TIPO EXCEL ----------
+// ---------- ESTADO GLOBAL DE FILTROS TIPO EXCEL POR TABLA ----------
 let colActualFiltro = null;
+let tablaActualFiltro = "tablaNodosGlobal";
 let nombreColActualFiltro = "";
-// activeFilters: { colIdx: Set of selected string values }
-let activeFilters = {};
-let allDistinctValuesMap = {}; // colIdx -> Array of { val: string, count: number }
+let activeFiltersByTable = {
+    'tablaNodosGlobal': {},
+    'tablaDevolucionesGlobal': {},
+    'tablaBalanceGlobal': {},
+    'tablaRetirosGlobal': {},
+    'tablaResumenEntradasGlobal': {}
+};
+
+function getActiveFilters(tablaId) {
+    if (!activeFiltersByTable[tablaId]) {
+        activeFiltersByTable[tablaId] = {};
+    }
+    return activeFiltersByTable[tablaId];
+}
 
 // ---------- PESTAÑAS PRINCIPALES ----------
 function cambiarPestanaGlobal(tabName) {
@@ -1260,89 +1363,98 @@ function cambiarPestanaGlobal(tabName) {
     }
 }
 
-// ---------- INICIALIZACIÓN DE VALORES DISTINTOS POR COLUMNA ----------
-function indexarValoresColumnas() {
-    const filas = document.querySelectorAll(".fila-nodo-global");
-    allDistinctValuesMap = {};
-
-    // Columnas técnicas de 0 a 12
-    for (let c = 0; c <= 12; c++) {
-        const counts = {};
-        filas.forEach(f => {
-            const rawVal = (f.getAttribute(`data-col-${c}`) || "").trim();
-            const val = rawVal === "" ? "(Vacío)" : rawVal;
-            counts[val] = (counts[val] || 0) + 1;
-        });
-
-        const list = Object.keys(counts).map(v => ({ val: v, count: counts[v] }));
-        // Orden alfabético
-        list.sort((a, b) => a.val.localeCompare(b.val, undefined, { numeric: true, sensitivity: 'base' }));
-        allDistinctValuesMap[c] = list;
-    }
-}
-
-// ---------- ABRIR POPUP DE FILTRO EXCEL ----------
-function abrirFiltroExcel(event, colIdx, colName) {
+// ---------- ABRIR POPUP DE FILTRO EXCEL (UNIVERSAL MULTI-TABLA) ----------
+function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
     event.stopPropagation();
-    colActualFiltro = colIdx;
-    nombreColActualFiltro = colName;
+    const btn = event.currentTarget;
+    const th = btn.closest("th");
+    const tabla = tablaId ? document.getElementById(tablaId) : (btn.closest("table") || document.getElementById("tablaNodosGlobal"));
+    if (!tabla) return;
 
-    // Re-indexar valores en tiempo real
-    indexarValoresColumnas();
+    const idTabla = tabla.id || "tablaNodosGlobal";
+    tablaActualFiltro = idTabla;
+
+    if (colIdx === undefined || colIdx === null) {
+        colIdx = th ? (th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex) : 0;
+    }
+    colActualFiltro = colIdx;
+    nombreColActualFiltro = colName || (th ? th.querySelector("span")?.innerText?.trim() : "Columna");
+
+    const activeFilters = getActiveFilters(idTabla);
+
+    // Obtener todas las filas de datos de esta tabla
+    const tbody = tabla.querySelector("tbody");
+    if (!tbody) return;
+    const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
+
+    // Contar valores distintos
+    const counts = {};
+    filas.forEach(f => {
+        let val = "";
+        if (f.hasAttribute(`data-col-${colIdx}`)) {
+            val = (f.getAttribute(`data-col-${colIdx}`) || "").trim();
+        } else if (f.children[colIdx]) {
+            val = f.children[colIdx].innerText.replace(/\s+/g, " ").trim();
+        }
+        if (val === "") val = "(Vacío)";
+        counts[val] = (counts[val] || 0) + 1;
+    });
+
+    const items = Object.keys(counts).map(v => ({ val: v, count: counts[v] }));
+    items.sort((a, b) => a.val.localeCompare(b.val, undefined, { numeric: true, sensitivity: 'base' }));
 
     const popover = document.getElementById("excelFilterPopover");
+    if (!popover) return;
+
     const popoverTitle = document.getElementById("popoverColName");
     const searchInput = document.getElementById("popoverSearchInput");
     const chkListContainer = document.getElementById("popoverCheckboxList");
     const chkSelectAll = document.getElementById("chkSelectAll");
     const btnClearThisCol = document.getElementById("btnClearThisCol");
 
-    popoverTitle.textContent = `Filtrar: ${colName}`;
-    searchInput.value = "";
+    if (popoverTitle) popoverTitle.textContent = `Filtrar: ${nombreColActualFiltro}`;
+    if (searchInput) searchInput.value = "";
 
     // Estado del botón borrar
-    if (activeFilters[colIdx]) {
-        btnClearThisCol.style.display = "flex";
-    } else {
-        btnClearThisCol.style.display = "none";
+    if (btnClearThisCol) {
+        btnClearThisCol.style.display = activeFilters[colIdx] ? "flex" : "none";
     }
 
-    // Valores para esta columna
-    const items = allDistinctValuesMap[colIdx] || [];
-    const currentSelectedSet = activeFilters[colIdx] || null; // null significa todo seleccionado
+    const currentSelectedSet = activeFilters[colIdx] || null;
 
-    chkListContainer.innerHTML = "";
-    let todosMarcados = true;
+    if (chkListContainer) {
+        chkListContainer.innerHTML = "";
+        let todosMarcados = true;
 
-    if (items.length === 0) {
-        chkListContainer.innerHTML = '<div class="py-3 text-center text-muted-foreground text-xs italic">No hay registros disponibles en esta columna</div>';
-        chkSelectAll.checked = false;
-    } else {
-        items.forEach((item, index) => {
-            const isChecked = currentSelectedSet === null || currentSelectedSet.has(item.val);
-            if (!isChecked) todosMarcados = false;
+        if (items.length === 0) {
+            chkListContainer.innerHTML = '<div class="py-3 text-center text-muted-foreground text-xs italic">No hay registros disponibles en esta columna</div>';
+            if (chkSelectAll) chkSelectAll.checked = false;
+        } else {
+            items.forEach((item) => {
+                const isChecked = currentSelectedSet === null || currentSelectedSet.has(item.val);
+                if (!isChecked) todosMarcados = false;
 
-            const rowDiv = document.createElement("label");
-            rowDiv.className = "flex items-center justify-between gap-2 px-1.5 py-1 rounded hover:bg-muted text-xs cursor-pointer chk-option-item";
-            rowDiv.setAttribute("data-val-normalized", item.val.toLowerCase());
+                const rowDiv = document.createElement("label");
+                rowDiv.className = "flex items-center justify-between gap-2 px-1.5 py-1 rounded hover:bg-muted text-xs cursor-pointer chk-option-item";
+                rowDiv.setAttribute("data-val-normalized", item.val.toLowerCase());
 
-            rowDiv.innerHTML = `
-                <div class="flex items-center gap-2 truncate">
-                    <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked ? "checked" : ""}>
-                    <span class="truncate font-medium text-foreground">${item.val}</span>
-                </div>
-                <span class="text-[10px] px-1.5 py-0.2 bg-muted text-muted-foreground font-mono rounded-full shrink-0">${item.count}</span>
-            `;
-            chkListContainer.appendChild(rowDiv);
-        });
+                rowDiv.innerHTML = `
+                    <div class="flex items-center gap-2 truncate">
+                        <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked ? "checked" : ""}>
+                        <span class="truncate font-medium text-foreground">${item.val}</span>
+                    </div>
+                    <span class="text-[10px] px-1.5 py-0.2 bg-muted text-muted-foreground font-mono rounded-full shrink-0">${item.count}</span>
+                `;
+                chkListContainer.appendChild(rowDiv);
+            });
 
-        chkSelectAll.checked = todosMarcados;
+            if (chkSelectAll) chkSelectAll.checked = todosMarcados;
+        }
     }
 
-    // Posicionar popover debajo del botón relativo a la ventana (fixed)
-    const btn = event.currentTarget;
+    // Posicionar popover debajo del botón
     const rect = btn.getBoundingClientRect();
-    const popoverWidth = 288; // 72 * 4
+    const popoverWidth = 288;
 
     let leftPos = rect.left;
     if (leftPos + popoverWidth > window.innerWidth - 10) {
@@ -1360,7 +1472,7 @@ function abrirFiltroExcel(event, colIdx, colName) {
     popover.classList.remove("hidden");
 
     setTimeout(() => {
-        searchInput.focus();
+        if (searchInput) searchInput.focus();
     }, 50);
 }
 
@@ -1399,15 +1511,13 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-
-    // Indexar valores al cargar
-    indexarValoresColumnas();
 });
 
 // ---------- APLICAR FILTRO DE LA COLUMNA ACTUAL ----------
 function aplicarFiltroColumnaActual() {
-    if (colActualFiltro === null) return;
+    if (colActualFiltro === null || !tablaActualFiltro) return;
 
+    const activeFilters = getActiveFilters(tablaActualFiltro);
     const allChk = document.querySelectorAll("#popoverCheckboxList .chk-item-filter");
     const allTotal = allChk.length;
     let checkedCount = 0;
@@ -1421,59 +1531,67 @@ function aplicarFiltroColumnaActual() {
     });
 
     if (checkedCount === allTotal) {
-        // Si todos están marcados, no hay restricción
         delete activeFilters[colActualFiltro];
     } else {
         activeFilters[colActualFiltro] = selectedSet;
     }
 
     cerrarFiltroExcel();
-    ejecutarFiltradoGeneral();
+    ejecutarFiltradoTabla(tablaActualFiltro);
 }
 
 // ---------- BORRAR FILTRO DE COLUMNA ACTUAL ----------
 function borrarFiltroColumnaActual() {
-    if (colActualFiltro !== null) {
+    if (colActualFiltro !== null && tablaActualFiltro) {
+        const activeFilters = getActiveFilters(tablaActualFiltro);
         delete activeFilters[colActualFiltro];
         cerrarFiltroExcel();
-        ejecutarFiltradoGeneral();
+        ejecutarFiltradoTabla(tablaActualFiltro);
     }
 }
 
-// ---------- LIMPIAR TODOS LOS FILTROS ----------
+// ---------- LIMPIAR TODOS LOS FILTROS DE UNA TABLA ----------
+function limpiarTodosFiltrosTabla(tablaId = "tablaNodosGlobal") {
+    activeFiltersByTable[tablaId] = {};
+    if (tablaId === "tablaNodosGlobal") {
+        const inputGlobal = document.getElementById("inputBuscadorGlobal");
+        if (inputGlobal) inputGlobal.value = "";
+    }
+    ejecutarFiltradoTabla(tablaId);
+}
+
 function limpiarTodosFiltrosExcel() {
-    activeFilters = {};
-    const inputGlobal = document.getElementById("inputBuscadorGlobal");
-    if (inputGlobal) inputGlobal.value = "";
-    ejecutarFiltradoGeneral();
+    limpiarTodosFiltrosTabla("tablaNodosGlobal");
 }
 
 // ---------- ORDENAR FILAS A-Z / Z-A ----------
 function ejecutarSortExcel(ascendente) {
-    if (colActualFiltro === null) return;
+    if (colActualFiltro === null || !tablaActualFiltro) return;
     const colIdx = colActualFiltro;
-    const tbody = document.querySelector("#tablaNodosGlobal tbody");
-    const filas = Array.from(document.querySelectorAll(".fila-nodo-global"));
+    const tabla = document.getElementById(tablaActualFiltro);
+    if (!tabla) return;
+    const tbody = tabla.querySelector("tbody");
+    if (!tbody) return;
+    const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
 
     filas.sort((a, b) => {
-        const valA = (a.getAttribute(`data-col-${colIdx}`) || "").trim();
-        const valB = (b.getAttribute(`data-col-${colIdx}`) || "").trim();
+        let valA = a.hasAttribute(`data-col-${colIdx}`) ? a.getAttribute(`data-col-${colIdx}`) : (a.children[colIdx] ? a.children[colIdx].innerText : "");
+        let valB = b.hasAttribute(`data-col-${colIdx}`) ? b.getAttribute(`data-col-${colIdx}`) : (b.children[colIdx] ? b.children[colIdx].innerText : "");
+        valA = (valA || "").trim();
+        valB = (valB || "").trim();
 
-        // Comprobación de fechas DD/MM/YYYY
         const dateA = parseFecha(valA);
         const dateB = parseFecha(valB);
         if (dateA && dateB) {
             return ascendente ? dateA - dateB : dateB - dateA;
         }
 
-        // Comprobación numérica
-        const numA = parseFloat(valA.replace(/[^0-9.-]+/g,""));
-        const numB = parseFloat(valB.replace(/[^0-9.-]+/g,""));
+        const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
+        const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
         if (!isNaN(numA) && !isNaN(numB) && !valA.includes("/") && !valB.includes("/")) {
             return ascendente ? numA - numB : numB - numA;
         }
 
-        // Comparación alfabética estándar
         return ascendente ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
     });
 
@@ -1493,35 +1611,44 @@ function parseFecha(str) {
     return null;
 }
 
-// ---------- MOTOR DE FILTRADO Y RECÁLCULO EN VIVO ----------
-function ejecutarFiltradoGeneral() {
-    const inputGlobal = document.getElementById("inputBuscadorGlobal");
-    const qGlobal = inputGlobal ? inputGlobal.value.toLowerCase().trim() : "";
-    const filas = document.querySelectorAll(".fila-nodo-global");
+// ---------- MOTOR DE FILTRADO Y RECÁLCULO MULTI-TABLA ----------
+function ejecutarFiltradoTabla(tablaId) {
+    const tabla = document.getElementById(tablaId);
+    if (!tabla) return;
+    const tbody = tabla.querySelector("tbody");
+    if (!tbody) return;
 
+    const activeFilters = getActiveFilters(tablaId);
+    const activeCols = Object.keys(activeFilters).map(k => parseInt(k, 10));
+
+    let qGlobal = "";
+    if (tablaId === "tablaNodosGlobal") {
+        const inputGlobal = document.getElementById("inputBuscadorGlobal");
+        qGlobal = inputGlobal ? inputGlobal.value.toLowerCase().trim() : "";
+    }
+
+    const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
     let visiblesCount = 0;
-    const activeCols = Object.keys(activeFilters);
-
-    // Sumatorias para el footer
-    const colMatTotals = {}; // matIdx -> { inst: 0, ret: 0 }
+    const colMatTotals = {};
 
     filas.forEach(f => {
         let cumple = true;
 
-        // 1. Filtro global de texto
         if (qGlobal !== "") {
             const txt = f.textContent.toLowerCase();
-            if (!txt.includes(qGlobal)) {
-                cumple = false;
-            }
+            if (!txt.includes(qGlobal)) cumple = false;
         }
 
-        // 2. Filtros de columnas activas
         if (cumple && activeCols.length > 0) {
             for (const col of activeCols) {
                 const setValores = activeFilters[col];
-                const rawVal = (f.getAttribute(`data-col-${col}`) || "").trim();
-                const val = rawVal === "" ? "(Vacío)" : rawVal;
+                let val = "";
+                if (f.hasAttribute(`data-col-${col}`)) {
+                    val = (f.getAttribute(`data-col-${col}`) || "").trim();
+                } else if (f.children[col]) {
+                    val = f.children[col].innerText.replace(/\s+/g, " ").trim();
+                }
+                if (val === "") val = "(Vacío)";
                 if (!setValores.has(val)) {
                     cumple = false;
                     break;
@@ -1533,84 +1660,80 @@ function ejecutarFiltradoGeneral() {
             f.style.display = "";
             visiblesCount++;
 
-            // Sumar celdas de materiales de esta fila visible
             const celdasMat = f.querySelectorAll(".celda-material");
             celdasMat.forEach(c => {
                 const mIdx = c.getAttribute("data-mat-idx");
-                if (!colMatTotals[mIdx]) {
-                    colMatTotals[mIdx] = { inst: 0, ret: 0 };
-                }
-                const cInst = parseFloat(c.getAttribute("data-cant-inst")) || 0;
-                const cRet = parseFloat(c.getAttribute("data-cant-ret")) || 0;
-                colMatTotals[mIdx].inst += cInst;
-                colMatTotals[mIdx].ret += cRet;
+                if (!colMatTotals[mIdx]) colMatTotals[mIdx] = { inst: 0, ret: 0 };
+                colMatTotals[mIdx].inst += parseFloat(c.getAttribute("data-cant-inst")) || 0;
+                colMatTotals[mIdx].ret += parseFloat(c.getAttribute("data-cant-ret")) || 0;
             });
         } else {
             f.style.display = "none";
         }
     });
 
-    // Actualizar contadores
-    const countSpan = document.getElementById("nodosVisiblesCount");
-    if (countSpan) countSpan.textContent = visiblesCount;
-
-    const tfootNodeSpan = document.getElementById("tfootContadorNodos");
-    if (tfootNodeSpan) tfootNodeSpan.textContent = visiblesCount;
-
-    // Actualizar estados visuales en encabezados de columna
-    for (let c = 0; c <= 12; c++) {
-        const th = document.querySelector(`.th-excel-col[data-col-idx="${c}"]`);
-        if (th) {
-            const btn = th.querySelector(".btn-filter-trigger");
-            if (activeFilters[c]) {
+    // Actualizar botones de encabezado para esta tabla
+    const ths = tabla.querySelectorAll("th.th-excel-col");
+    ths.forEach(th => {
+        const cIdx = th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex;
+        const btn = th.querySelector(".btn-filter-trigger");
+        if (btn) {
+            if (activeFilters[cIdx]) {
                 th.classList.add("has-active-filter");
-                if (btn) {
-                    btn.classList.add("filter-active");
-                    btn.innerHTML = '<span>🔻</span>';
-                }
+                btn.classList.add("filter-active");
+                btn.innerHTML = '<span class="text-amber-950 font-black text-[10px]">▼✓</span>';
             } else {
                 th.classList.remove("has-active-filter");
-                if (btn) {
-                    btn.classList.remove("filter-active");
-                    btn.innerHTML = '<span class="icon-arrow">▼</span>';
-                }
-            }
-        }
-    }
-
-    // Botón global de limpiar filtros
-    const btnLimpiar = document.getElementById("btnLimpiarTodosFiltros");
-    const spanNumFiltros = document.getElementById("filtrosActivosNum");
-    if (btnLimpiar && spanNumFiltros) {
-        const numActivos = activeCols.length + (qGlobal ? 1 : 0);
-        spanNumFiltros.textContent = numActivos;
-        if (numActivos > 0) {
-            btnLimpiar.classList.remove("hidden");
-        } else {
-            btnLimpiar.classList.add("hidden");
-        }
-    }
-
-    // Actualizar celdas del tfoot con los totales dinámicos
-    const tfootCeldas = document.querySelectorAll(".tfoot-col-mat");
-    tfootCeldas.forEach(tc => {
-        const mIdx = tc.getAttribute("data-mat-idx");
-        const tot = colMatTotals[mIdx] || { inst: 0, ret: 0 };
-        const valInstDiv = tc.querySelector(".tfoot-val-inst");
-        const valRetDiv = tc.querySelector(".tfoot-val-ret");
-
-        if (valInstDiv) {
-            valInstDiv.textContent = Number.isInteger(tot.inst) ? tot.inst : tot.inst.toFixed(1);
-        }
-        if (valRetDiv) {
-            if (tot.ret > 0) {
-                valRetDiv.classList.remove("hidden");
-                valRetDiv.textContent = `Ret: ${Number.isInteger(tot.ret) ? tot.ret : tot.ret.toFixed(1)}`;
-            } else {
-                valRetDiv.classList.add("hidden");
+                btn.classList.remove("filter-active");
+                btn.innerHTML = '<span class="icon-arrow text-[10px]">▼</span>';
             }
         }
     });
+
+    // Si es tablaNodosGlobal, actualizar contadores específicos y tfoot
+    if (tablaId === "tablaNodosGlobal") {
+        const countSpan = document.getElementById("nodosVisiblesCount");
+        if (countSpan) countSpan.textContent = visiblesCount;
+
+        const tfootNodeSpan = document.getElementById("tfootContadorNodos");
+        if (tfootNodeSpan) tfootNodeSpan.textContent = visiblesCount;
+
+        const btnLimpiar = document.getElementById("btnLimpiarTodosFiltros");
+        const spanNumFiltros = document.getElementById("filtrosActivosNum");
+        if (btnLimpiar && spanNumFiltros) {
+            const numActivos = activeCols.length + (qGlobal ? 1 : 0);
+            spanNumFiltros.textContent = numActivos;
+            if (numActivos > 0) {
+                btnLimpiar.classList.remove("hidden");
+            } else {
+                btnLimpiar.classList.add("hidden");
+            }
+        }
+
+        const tfootCeldas = document.querySelectorAll(".tfoot-col-mat");
+        tfootCeldas.forEach(tc => {
+            const mIdx = tc.getAttribute("data-mat-idx");
+            const tot = colMatTotals[mIdx] || { inst: 0, ret: 0 };
+            const valInstDiv = tc.querySelector(".tfoot-val-inst");
+            const valRetDiv = tc.querySelector(".tfoot-val-ret");
+
+            if (valInstDiv) {
+                valInstDiv.textContent = Number.isInteger(tot.inst) ? tot.inst : tot.inst.toFixed(1);
+            }
+            if (valRetDiv) {
+                if (tot.ret > 0) {
+                    valRetDiv.classList.remove("hidden");
+                    valRetDiv.textContent = `Ret: ${Number.isInteger(tot.ret) ? tot.ret : tot.ret.toFixed(1)}`;
+                } else {
+                    valRetDiv.classList.add("hidden");
+                }
+            }
+        });
+    }
+}
+
+function ejecutarFiltradoGeneral() {
+    ejecutarFiltradoTabla("tablaNodosGlobal");
 }
 
 // ---------- EVENTOS DE CLIC FUERA Y TECLADO ----------

@@ -1,8 +1,10 @@
 from collections import defaultdict
 from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo, calcular_mano_obra_para_apoyo, actualizar_presupuesto_proyecto
 import io
+import os
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
@@ -579,6 +581,9 @@ def crear_apoyo(request, proyecto_id):
         estado_val = request.POST.get("estado", "Pendiente").strip()
         estado = estado_val if estado_val else "Pendiente"
 
+        brazo_val = request.POST.get("brazo", "2").strip()
+        brazo = brazo_val if brazo_val else "2"
+
         apoyo = Apoyo.objects.create(
             proyecto=proyecto,
             quien_ejecuta_id=quien_ejecuta_id,
@@ -590,6 +595,7 @@ def crear_apoyo(request, proyecto_id):
             tipo_estructura=tipo_estructura,
             cantidad_retenida=cantidad_retenida,
             metros_retenido=metros_retenido,
+            brazo=brazo,
             observacion=observacion,
             estado=estado
         )
@@ -702,6 +708,7 @@ def editar_apoyo(request, apoyo_id):
         apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
 
         apoyo.nodo = request.POST.get("nodo", "").strip()
+        apoyo.brazo = request.POST.get("brazo", "2").strip() or "2"
         apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
         apoyo.direccion = request.POST.get("direccion", "").strip()
         apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
@@ -955,431 +962,18 @@ def despachar_bodega_apoyo(request, apoyo_id):
 
 
 @login_required
-@transaction.atomic
 def detalle_apoyo(request, apoyo_id):
-    apoyo = Apoyo.objects.filter(id=apoyo_id).first()
-    if not apoyo:
-        messages.warning(request, "El poste o apoyo seleccionado no existe o fue removido previamente.")
-        return redirect("lista_proyectos")
-
-    materiales_asociados = ApoyoMaterial.objects.filter(
-        apoyo=apoyo
-    ).select_related("material", "material__inventario").order_by("material__descripcion")
-
-    materiales_catalogo = Material.objects.select_related("inventario").order_by("descripcion")
-
-    empleados = Empleado.objects.filter(
-        estado="activo"
-    ).order_by("nombre_completo")
-
-    if request.method == "POST":
-        accion = request.POST.get("accion")
-
-        # 1. DESPACHAR DIRECTO DESDE BODEGA CENTRAL
-        if accion == "despachar_bodega":
-            material_id = request.POST.get("material_id")
-            cantidad_str = request.POST.get("cantidad", "0")
-
-            if material_id:
-                try:
-                    cant = Decimal(cantidad_str.strip())
-                    if cant > 0:
-                        material = get_object_or_404(Material, id=material_id)
-                        inventario, _ = Inventario.objects.get_or_create(material=material)
-                        stock_previo = inventario.cantidad
-                        unidad_str = material.unidad or "UN"
-
-                        # Descontar del inventario general de bodega
-                        if stock_previo <= 0:
-                            messages.warning(
-                                request,
-                                f"⚠️ Advertencia: '{material.descripcion}' no tiene existencias en bodega central (Stock: 0 {unidad_str}). Se despacharon/asignaron {cant} {unidad_str} al poste como requerimiento pendiente de compra/entrada."
-                            )
-                        elif stock_previo < cant:
-                            inventario.cantidad = Decimal("0")
-                            inventario.save()
-                            messages.warning(
-                                request,
-                                f"⚠️ Advertencia: Stock insuficiente en bodega para '{material.descripcion}'. Había {stock_previo} {unidad_str} y se solicitaron {cant} {unidad_str}. Se agotó el stock disponible y el resto queda pendiente."
-                            )
-                        else:
-                            inventario.cantidad -= cant
-                            inventario.save()
-                            messages.success(
-                                request,
-                                f"Se despacharon {cant} {unidad_str} de '{material.descripcion}' al poste. Stock disponible restante: {inventario.cantidad} {unidad_str}."
-                            )
-
-                        # Asignar / sumar el material a este apoyo en la obra
-                        apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
-                            apoyo=apoyo,
-                            material=material,
-                            defaults={"cantidad_requerida": cant}
-                        )
-                        if not created:
-                            apoyo_mat.cantidad_requerida += cant
-                            apoyo_mat.save()
-
-                        calcular_mano_obra_para_apoyo(apoyo)
-                        actualizar_presupuesto_proyecto(apoyo.proyecto)
-
-                except (ValueError, TypeError):
-                    pass
-
-            return redirect("detalle_apoyo", apoyo_id=apoyo.id)
-
-        # 2. EDITAR MATERIAL ASIGNADO (INSTALADO Y RETIRADO)
-        if accion == "editar_material":
-            item_id = request.POST.get("item_id")
-            cantidad_inst_str = request.POST.get("cantidad_instalada", "0")
-            cantidad_ret_str = request.POST.get("cantidad_retirada", "0")
-
-            try:
-                cant_inst = Decimal(cantidad_inst_str.strip()) if cantidad_inst_str else Decimal("0")
-                cant_ret = Decimal(cantidad_ret_str.strip()) if cantidad_ret_str else Decimal("0")
-
-                if item_id:
-                    apoyo_mat = ApoyoMaterial.objects.filter(
-                        id=item_id,
-                        apoyo=apoyo
-                    ).first()
-
-                    if apoyo_mat:
-                        diferencia = cant_inst - apoyo_mat.cantidad_requerida
-                        unidad_str = apoyo_mat.material.unidad or "UN"
-                        inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
-
-                        if diferencia > 0:
-                            if inventario.cantidad <= 0:
-                                messages.warning(
-                                    request,
-                                    f"⚠️ Advertencia: '{apoyo_mat.material.descripcion}' no tiene existencias en bodega (Stock: 0 {unidad_str}). Se aumentó la cantidad instalada en el poste a {cant_inst} {unidad_str} como proyección técnica."
-                                )
-                            elif inventario.cantidad < diferencia:
-                                messages.warning(
-                                    request,
-                                    f"⚠️ Advertencia: Stock insuficiente en bodega para '{apoyo_mat.material.descripcion}'. Se consumió el remanente de {inventario.cantidad} {unidad_str}."
-                                )
-                                inventario.cantidad = Decimal("0")
-                            else:
-                                inventario.cantidad -= diferencia
-                        elif diferencia < 0:
-                            inventario.cantidad += abs(diferencia)
-
-                        diferencia_ret = cant_ret - apoyo_mat.cantidad_retirada
-                        if diferencia_ret != 0:
-                            inventario.cantidad += diferencia_ret
-                            inventario.cantidad = max(Decimal("0"), inventario.cantidad)
-
-                        inventario.save()
-                        messages.success(request, f"Cantidades actualizadas para '{apoyo_mat.material.descripcion}'.")
-
-                        apoyo_mat.cantidad_requerida = max(Decimal("0"), cant_inst)
-                        apoyo_mat.cantidad_retirada = max(Decimal("0"), cant_ret)
-                        apoyo_mat.save()
-
-                        calcular_mano_obra_para_apoyo(apoyo)
-                        actualizar_presupuesto_proyecto(apoyo.proyecto)
-
-            except (ValueError, TypeError, ArithmeticError):
-                pass
-
-            return redirect("detalle_apoyo", apoyo_id=apoyo.id)
-
-        # 3. ELIMINAR MATERIAL DEL APOYO (DEVUELVE LO INSTALADO A BODEGA)
-        if accion == "eliminar_material":
-            item_id = request.POST.get("item_id")
-
-            if item_id:
-                apoyo_mat = ApoyoMaterial.objects.filter(
-                    id=item_id,
-                    apoyo=apoyo
-                ).first()
-
-                if apoyo_mat:
-                    nombre_mat = apoyo_mat.material.descripcion
-                    inv_del, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
-                    if apoyo_mat.cantidad_requerida > 0:
-                        inv_del.cantidad += apoyo_mat.cantidad_requerida
-                    if apoyo_mat.cantidad_retirada > 0:
-                        inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - apoyo_mat.cantidad_retirada)
-                    inv_del.save()
-
-                    mat_cable_obj = Material.objects.filter(item="43").first() or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-                    if mat_cable_obj and apoyo_mat.material_id == mat_cable_obj.id:
-                        apoyo.metros_retenido = Decimal("0")
-                        apoyo.cantidad_retenida = Decimal("0")
-                        apoyo.save()
-
-                    apoyo_mat.delete()
-                    calcular_mano_obra_para_apoyo(apoyo)
-                    actualizar_presupuesto_proyecto(apoyo.proyecto)
-                    messages.success(request, f"Material '{nombre_mat}' eliminado de este apoyo.")
-
-            return redirect("detalle_apoyo", apoyo_id=apoyo.id)
-
-        # 4. GUARDAR DATOS PRINCIPALES DEL APOYO
-        apoyo.nodo = request.POST.get("nodo", "").strip()
-
-        numero_apoyo = request.POST.get("numero_apoyo")
-        apoyo.numero_apoyo = (
-            int(numero_apoyo)
-            if numero_apoyo and numero_apoyo.isdigit()
-            else None
-        )
-
-        fecha_val = request.POST.get("fecha")
-        apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
-
-        apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
-        apoyo.direccion = request.POST.get("direccion", "").strip()
-        apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
-
-        cant_ret_val = request.POST.get("cantidad_retenida")
-        try:
-            apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
-        except (ValueError, TypeError, ArithmeticError):
-            apoyo.cantidad_retenida = Decimal("0")
-
-        m_ret_val = request.POST.get("metros_retenido")
-        try:
-            apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
-        except (ValueError, TypeError, ArithmeticError):
-            apoyo.metros_retenido = Decimal("0")
-
-        apoyo.estado = request.POST.get(
-            "estado",
-            apoyo.estado
-        )
-
-        empleado_id = request.POST.get("quien_ejecuta")
-
-        if empleado_id and str(empleado_id).strip().isdigit():
-            apoyo.quien_ejecuta_id = int(str(empleado_id).strip())
-        else:
-            apoyo.quien_ejecuta = None
-
-        apoyo.observacion = request.POST.get(
-            "observacion",
-            ""
-        ).strip()
-        apoyo.save()
-
-        # Material cable retenida para no duplicarlo si se ingresa manualmente
-        mat_cable_obj = (
-            Material.objects.filter(item="43").first()
-            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-        )
-        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
-
-        materiales_sin_stock = []
-        cambios_realizados = False
-
-        # 5. ACTUALIZAR / EDITAR MATERIALES EXISTENTES EN EL APOYO
-        asociados_ids = request.POST.getlist("asociado_id[]")
-        asociados_mat_ids = request.POST.getlist("asociado_material_id[]")
-        asociados_c_inst = request.POST.getlist("asociado_cant_instalada[]")
-        asociados_c_ret = request.POST.getlist("asociado_cant_retirada[]")
-
-        for i, a_id in enumerate(asociados_ids):
-            if not a_id:
-                continue
-            apoyo_mat = ApoyoMaterial.objects.filter(id=a_id, apoyo=apoyo).first()
-            if not apoyo_mat:
-                continue
-
-            # El cable de retenida se gestiona automáticamente por los metros_retenido
-            if mat_cable_id and apoyo_mat.material_id == mat_cable_id:
-                continue
-
-            try:
-                c_inst_raw = asociados_c_inst[i] if i < len(asociados_c_inst) else None
-                c_ret_raw = asociados_c_ret[i] if i < len(asociados_c_ret) else None
-
-                c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
-                c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
-
-                if c_inst_str != "":
-                    c_inst = Decimal(c_inst_str)
-                else:
-                    c_inst = apoyo_mat.cantidad_requerida
-
-                if c_ret_str != "":
-                    c_ret = Decimal(c_ret_str)
-                else:
-                    c_ret = apoyo_mat.cantidad_retirada
-
-                # Cambio de material si el usuario seleccionó uno diferente
-                mat_id_nuevo = asociados_mat_ids[i] if i < len(asociados_mat_ids) and asociados_mat_ids[i] else str(apoyo_mat.material_id)
-
-                if str(mat_id_nuevo) != str(apoyo_mat.material_id):
-                    # Devolver stock anterior
-                    inv_ant, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
-                    if apoyo_mat.cantidad_requerida > 0:
-                        inv_ant.cantidad += apoyo_mat.cantidad_requerida
-                    if apoyo_mat.cantidad_retirada > 0:
-                        inv_ant.cantidad = max(Decimal("0"), inv_ant.cantidad - apoyo_mat.cantidad_retirada)
-                    inv_ant.save()
-
-                    nuevo_mat = Material.objects.filter(id=mat_id_nuevo).first()
-                    if nuevo_mat:
-                        apoyo_mat.material = nuevo_mat
-                        apoyo_mat.cantidad_requerida = Decimal("0")
-                        apoyo_mat.cantidad_retirada = Decimal("0")
-
-                inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
-                mat_obj = inventario.material
-                unidad_str = mat_obj.unidad or "UN"
-
-                diferencia = c_inst - apoyo_mat.cantidad_requerida
-                if diferencia > 0:
-                    if inventario.cantidad <= 0:
-                        materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: 0, Solicitado: {c_inst} {unidad_str})")
-                    elif inventario.cantidad < diferencia:
-                        materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: {inventario.cantidad}, Solicitado: {c_inst} {unidad_str})")
-                        inventario.cantidad = Decimal("0")
-                        inventario.save()
-                    else:
-                        inventario.cantidad -= diferencia
-                        inventario.save()
-                elif diferencia < 0:
-                    inventario.cantidad += abs(diferencia)
-                    inventario.save()
-
-                diferencia_ret = c_ret - apoyo_mat.cantidad_retirada
-                if diferencia_ret != 0:
-                    inventario.cantidad += diferencia_ret
-                    inventario.cantidad = max(Decimal("0"), inventario.cantidad)
-                    inventario.save()
-
-                apoyo_mat.cantidad_requerida = max(Decimal("0"), c_inst)
-                apoyo_mat.cantidad_retirada = max(Decimal("0"), c_ret)
-                apoyo_mat.save()
-                cambios_realizados = True
-
-            except (ValueError, TypeError, ArithmeticError):
-                continue
-
-        # 6. GUARDAR NUEVOS MATERIALES ASIGNADOS AL APOYO
-        materiales_ids = request.POST.getlist("material_id[]")
-        cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
-        cantidades_ret = request.POST.getlist("cantidad_retirada[]")
-
-        for i, mat_id in enumerate(materiales_ids):
-            if not mat_id:
-                continue
-
-            # El cable de retenida se gestiona automáticamente por los metros_retenido
-            if mat_cable_id and str(mat_id) == str(mat_cable_id):
-                continue
-
-            try:
-                c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
-                c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
-
-                c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
-                c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
-
-                c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
-                c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
-
-                if c_inst <= 0 and c_ret <= 0:
-                    continue
-
-                inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
-                mat_obj = inventario.material
-                unidad_str = mat_obj.unidad or "UN"
-
-                apoyo_mat = ApoyoMaterial.objects.filter(
-                    apoyo=apoyo,
-                    material_id=mat_id
-                ).first()
-
-                if apoyo_mat:
-                    diferencia = c_inst
-                    if diferencia > 0:
-                        if inventario.cantidad <= 0:
-                            materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: 0, Solicitado: {c_inst} {unidad_str})")
-                        elif inventario.cantidad < diferencia:
-                            materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: {inventario.cantidad}, Solicitado: {c_inst} {unidad_str})")
-                            inventario.cantidad = Decimal("0")
-                        else:
-                            inventario.cantidad -= diferencia
-
-                    if c_ret > 0:
-                        inventario.cantidad += c_ret
-
-                    inventario.save()
-
-                    apoyo_mat.cantidad_requerida += c_inst
-                    apoyo_mat.cantidad_retirada += c_ret
-                    apoyo_mat.save()
-                else:
-                    if c_inst > 0:
-                        if inventario.cantidad <= 0:
-                            materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: 0, Asignado: {c_inst} {unidad_str})")
-                        elif inventario.cantidad < c_inst:
-                            materiales_sin_stock.append(f"{mat_obj.descripcion} (Stock: {inventario.cantidad}, Asignado: {c_inst} {unidad_str})")
-                            inventario.cantidad = Decimal("0")
-                        else:
-                            inventario.cantidad -= c_inst
-
-                    if c_ret > 0:
-                        inventario.cantidad += c_ret
-
-                    inventario.save()
-
-                    ApoyoMaterial.objects.create(
-                        apoyo=apoyo,
-                        material_id=mat_id,
-                        cantidad_requerida=c_inst,
-                        cantidad_retirada=c_ret
-                    )
-
-                cambios_realizados = True
-
-            except (ValueError, TypeError, ArithmeticError):
-                continue
-
-        # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
-        sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
-
-        if materiales_sin_stock:
-            lista_str = "; ".join(materiales_sin_stock)
-            messages.warning(
-                request,
-                f"⚠️ Aviso de Stock en Bodega: Los siguientes materiales no cuentan con suficiente stock disponible: [{lista_str}]. Han quedado guardados en este poste como proyección técnica de la obra y se conciliarán en la matriz de balance de logística."
-            )
-        else:
-            messages.success(request, "Los datos y materiales del apoyo se han guardado exitosamente.")
-
-        # Recalcular Mano de Obra y Presupuesto
-        calcular_mano_obra_para_apoyo(apoyo)
-        actualizar_presupuesto_proyecto(apoyo.proyecto)
-
-        # DECIDIR A DÓNDE VOLVER
-        if "guardar_y_volver" in request.POST:
-            return redirect("detalle_proyecto", id=apoyo.proyecto.id)
-
-        return redirect("detalle_apoyo", apoyo_id=apoyo.id)
-
-    mat_cable_obj = (
-        Material.objects.filter(item="43").first()
-        or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+    """
+    Redirecciona de forma unificada a la vista principal de ingeniería del proyecto
+    abriendo directamente el modal de edición del poste seleccionado.
+    Esto unifica la interfaz y evita duplicidad o interferencia entre dos editores.
+    """
+    apoyo = get_object_or_404(
+        Apoyo.objects.select_related("proyecto"),
+        id=apoyo_id
     )
-    mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
-
-    return render(
-        request,
-        "ingenieria/apoyos/detalle_apoyo.html",
-        {
-            "apoyo": apoyo,
-            "materiales_asociados": materiales_asociados,
-            "materiales_catalogo": materiales_catalogo,
-            "empleados": empleados,
-            "mat_cable_id": mat_cable_id,
-        }
-    )
+    url = reverse("detalle_proyecto", kwargs={"id": apoyo.proyecto.id})
+    return redirect(f"{url}?tab=materiales&editar_apoyo={apoyo.id}")
 
 @login_required
 @transaction.atomic
@@ -1564,6 +1158,116 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     """
     from core.views.logistica.proyectos_materiales import exportar_materiales_proyecto_excel as exportar_full
     return exportar_full(request, proyecto_id)
+
+
+@login_required
+def imprimir_formato_poste_a_poste(request, proyecto_id):
+    """
+    Genera y descarga el archivo oficial de terreno Poste a Poste (AP o MT)
+    detectando automáticamente el tipo de proyecto.
+    Llena únicamente los datos iniciales de trabajo (NODO, POTENCIA, BRAZO)
+    y deja las demás columnas en blanco para que el personal en terreno anote a mano.
+    """
+    proyecto = get_object_or_404(
+        Proyecto.objects.select_related("macroproyecto"),
+        id=proyecto_id
+    )
+    apoyos = Apoyo.objects.filter(proyecto=proyecto).prefetch_related("luminarias").order_by("numero_apoyo", "id")
+
+    es_mt = (proyecto.tipo == Proyecto.Tipos.MT)
+    plantillas_dir = os.path.join(settings.BASE_DIR, "plantillas_excel")
+
+    primer_apoyo_dir = apoyos.filter(direccion__gt="").values_list("direccion", flat=True).first() or ""
+    direccion_texto = primer_apoyo_dir or (proyecto.macroproyecto.descripcion if proyecto.macroproyecto and proyecto.macroproyecto.descripcion else "")
+
+    if es_mt:
+        # ==========================================
+        # FORMATO MEDIA TENSIÓN (MT)
+        # ==========================================
+        plantilla_path = os.path.join(plantillas_dir, "PLANTILLA_POSTE_A_POSTE_MT.xlsx")
+        if not os.path.exists(plantilla_path):
+            plantilla_path = os.path.join(plantillas_dir, "POSTE_A_POSTE_MT.xlsx")
+
+        wb = openpyxl.load_workbook(plantilla_path)
+        sheet = wb.active
+
+        # Encabezado MT
+        if direccion_texto:
+            sheet.cell(7, 1).value = f"DIRECCION: {direccion_texto}"
+        sheet.cell(8, 1).value = f"FECHA: {timezone.now().strftime('%d-%m-%Y')}"
+        sheet.cell(8, 9).value = f"CIRCUITO: {proyecto.numero_emcali or ''}"
+
+        # Postes en fila 10 (Cols 8 a 25)
+        for idx, apoyo in enumerate(apoyos):
+            col = 8 + idx
+            if col > 25:
+                break
+            sheet.cell(10, col).value = apoyo.nodo or apoyo.numero_apoyo or f"P-{idx+1}"
+
+        filename = f"POSTE_A_POSTE_MT_{proyecto.numero_emcali}.xlsx"
+    else:
+        # ==========================================
+        # FORMATO ALUMBRADO PÚBLICO (AP / BARRIO / PARQUE)
+        # ==========================================
+        plantilla_path = os.path.join(plantillas_dir, "PLANTILLA_POSTE_A_POSTE_AP.xlsx")
+        if not os.path.exists(plantilla_path):
+            plantilla_path = os.path.join(plantillas_dir, "POSTE_A_POSTE_AP.xlsx")
+
+        wb = openpyxl.load_workbook(plantilla_path)
+        sheet = wb.active
+
+        # Encabezado AP (Fila 7)
+        # T7: Microproyecto
+        sheet.cell(7, 20).value = proyecto.numero_emcali
+        # Y7: Fecha
+        sheet.cell(7, 25).value = f"FECHA: {timezone.now().strftime('%d-%m-%Y')}"
+        # AC7: Dirección
+        if direccion_texto:
+            sheet.cell(7, 29).value = f"DIRECCIÓN: {direccion_texto}"
+
+        thin_border = Border(
+            left=Side(style='thin', color='A0A0A0'),
+            right=Side(style='thin', color='A0A0A0'),
+            top=Side(style='thin', color='A0A0A0'),
+            bottom=Side(style='thin', color='A0A0A0')
+        )
+        data_font = Font(name="Calibri", size=9)
+        align_center = Alignment(horizontal="center", vertical="center")
+
+        # Llenar nodos desde la fila 12
+        for idx, apoyo in enumerate(apoyos):
+            r = 12 + idx
+            sheet.row_dimensions[r].height = 18
+
+            for c in range(1, 52):
+                cell = sheet.cell(r, c)
+                cell.border = thin_border
+                cell.font = data_font
+                cell.alignment = align_center
+
+            # Col 1: Consecutivo
+            sheet.cell(r, 1).value = idx + 1
+            # Col 3: NODO
+            sheet.cell(r, 3).value = apoyo.nodo or apoyo.numero_apoyo or ""
+            # Col 4: POT.INST
+            lum = apoyo.luminarias.first()
+            sheet.cell(r, 4).value = lum.potencia if lum else ""
+            # Col 5: BRAZO INSTA
+            sheet.cell(r, 5).value = apoyo.brazo or "2"
+            # Cols 6..51: quedan vacías para llenado en terreno
+
+        filename = f"POSTE_A_POSTE_AP_{proyecto.numero_emcali}.xlsx"
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 

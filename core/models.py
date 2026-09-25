@@ -988,6 +988,7 @@ class Apoyo(models.Model):
     tipo_estructura = models.CharField(max_length=100, blank=True, default="", verbose_name="Tipo de Estructura")
     cantidad_retenida = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=0, verbose_name="Cantidad Retenida")
     metros_retenido = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0, verbose_name="Metros Retenido")
+    brazo = models.CharField(max_length=50, blank=True, default="2", verbose_name="Brazo Instalado")
     observacion = models.TextField(blank=True, default="")
     estado = models.CharField(max_length=20, choices=Estados.choices, default=Estados.PENDIENTE)
 

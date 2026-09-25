@@ -8,6 +8,127 @@
 {% block content %}
 <div class="max-w-[95rem] mx-auto p-4 sm:p-6 space-y-6">
 
+    <style>
+        /* ==========================================================================
+           COLUMNAS FIJAS / STICKY EN MATRICES DE INGENIERÍA (NODO Y APOYO)
+           ========================================================================== */
+        /* Configuración de tabla con columnas fijas limpias */
+        .tabla-fija {
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+
+        .tabla-fija th,
+        .tabla-fija td {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* Encabezados Sticky (Thead) */
+        .sticky-col-nodo-header {
+            position: sticky !important;
+            left: 0 !important;
+            width: 120px !important;
+            min-width: 120px !important;
+            max-width: 120px !important;
+            z-index: 40 !important;
+            background-color: #262626 !important;
+            color: #ffffff !important;
+        }
+
+        .sticky-col-apoyo-header {
+            position: sticky !important;
+            left: 120px !important;
+            width: 70px !important;
+            min-width: 70px !important;
+            max-width: 70px !important;
+            z-index: 40 !important;
+            background-color: #262626 !important;
+            color: #ffffff !important;
+            border-right: 2px solid #404040 !important;
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        /* Celdas del Body Sticky */
+        .sticky-col-nodo {
+            position: sticky !important;
+            left: 0 !important;
+            width: 120px !important;
+            min-width: 120px !important;
+            max-width: 120px !important;
+            z-index: 20 !important;
+        }
+
+        .sticky-col-apoyo {
+            position: sticky !important;
+            left: 120px !important;
+            width: 70px !important;
+            min-width: 70px !important;
+            max-width: 70px !important;
+            z-index: 20 !important;
+            border-right: 2px solid #cbd5e1 !important;
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.18) !important;
+        }
+
+        /* Fondos 100% opacos sólidos (evita transparencias y superposiciones al mover el scroll) */
+        /* Matriz Materiales */
+        #panel-tab-materiales tr.fila-par .sticky-col-nodo,
+        #panel-tab-materiales tr.fila-par .sticky-col-apoyo {
+            background-color: #f1f5f9 !important;
+        }
+        #panel-tab-materiales tr.fila-impar .sticky-col-nodo,
+        #panel-tab-materiales tr.fila-impar .sticky-col-apoyo {
+            background-color: #ffffff !important;
+        }
+        #panel-tab-materiales tr:hover .sticky-col-nodo,
+        #panel-tab-materiales tr:hover .sticky-col-apoyo {
+            background-color: #e2e8f0 !important;
+        }
+
+        /* Matriz Mano de Obra */
+        #panel-tab-mano_obra tr.fila-mo-par .sticky-col-nodo,
+        #panel-tab-mano_obra tr.fila-mo-par .sticky-col-apoyo {
+            background-color: #f1f5f9 !important;
+        }
+        #panel-tab-mano_obra tr.fila-mo-impar .sticky-col-nodo,
+        #panel-tab-mano_obra tr.fila-mo-impar .sticky-col-apoyo {
+            background-color: #ffffff !important;
+        }
+        #panel-tab-mano_obra tr:hover .sticky-col-nodo,
+        #panel-tab-mano_obra tr:hover .sticky-col-apoyo {
+            background-color: #e2e8f0 !important;
+        }
+
+        /* Resaltado de fila seleccionada */
+        tr.bg-amber-100 .sticky-col-nodo,
+        tr.bg-amber-100 .sticky-col-apoyo {
+            background-color: #fef3c7 !important;
+        }
+
+        /* Totales (Footer) */
+        .sticky-col-nodo-footer {
+            position: sticky !important;
+            left: 0 !important;
+            width: 120px !important;
+            min-width: 120px !important;
+            max-width: 120px !important;
+            z-index: 35 !important;
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+        }
+        .sticky-col-apoyo-footer {
+            position: sticky !important;
+            left: 120px !important;
+            width: 70px !important;
+            min-width: 70px !important;
+            max-width: 70px !important;
+            z-index: 35 !important;
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            border-right: 2px solid #334155 !important;
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.35) !important;
+        }
+    </style>
+
     <!-- Encabezado de Navegación -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
         <div>
@@ -32,6 +153,11 @@
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
                 <span>+</span> Nuevo Nodo / Poste
             </button>
+            <a href="{% url 'imprimir_formato_poste_a_poste' proyecto.id %}" target="_blank"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg shadow-sm transition"
+               title="Descargar formato oficial Poste a Poste listo para imprimir (con Nodo, Potencia y Brazo pre-llenados)">
+                <span>🖨️</span> Imprimir Formato Poste a Poste
+            </a>
             <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
                class="inline-flex items-center px-4 py-2.5 text-sm font-bold rounded-lg transition border shadow-xs"
                style="background-color: #15803d; color: #ffffff !important; border-color: #166534;">
@@ -77,24 +203,12 @@
     <div id="panel-tab-materiales" class="tab-panel space-y-6 {% if tab_activa != 'materiales' %}hidden{% endif %}">
         <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
             <div class="overflow-x-auto max-h-[70vh]">
-                <table class="min-w-full border-collapse text-left text-xs">
-                    <thead class="sticky top-0 z-20">
-                        <tr class="bg-sky-100 text-sky-900 font-extrabold text-center border-b border-sky-300 text-xs tracking-wider">
-                            <th colspan="6" class="px-4 py-2 border-r border-sky-300 bg-sky-200/90 text-left">
-                                IDENTIFICACIÓN DEL APOYO (POSTE)
-                            </th>
-                            <th colspan="{{ materiales_columnas|length|default:1 }}" class="px-4 py-2 border-r border-sky-300 bg-sky-100">
-                                MATERIALES E INSTALACIONES TÉCNICAS REQUERIDAS
-                            </th>
-                            <th class="px-4 py-2 bg-sky-200/90">
-                                ACCIONES
-                            </th>
-                        </tr>
-
+                <table class="min-w-full tabla-fija text-left text-xs">
+                    <thead class="sticky top-0 z-30">
                         <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
+                            <th class="sticky-col-nodo-header px-2.5 py-3 border-r border-gray-700 whitespace-nowrap">NODO / POSTE</th>
+                            <th class="sticky-col-apoyo-header px-1 py-3 border-r border-gray-700 text-center whitespace-nowrap">N° APOYO</th>
                             <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap min-w-[170px]">QUIÉN EJECUTA</th>
-                            <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap">NODO / POSTE</th>
-                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-20">N° APOYO</th>
                             <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-28">ESTADO</th>
                             <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px]">POT. INST.</th>
                             <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[150px]">CÓDIGO LUM. INST.</th>
@@ -118,7 +232,23 @@
 
                     <tbody class="divide-y divide-gray-200">
                         {% for fila in filas_matriz %}
-                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-blue-50/50{% else %}bg-card{% endif %} hover:bg-sky-50/40 transition">
+                        <tr id="fila-apoyo-{{ fila.apoyo.id }}" class="{% if forloop.counter|divisibleby:2 %}fila-par bg-blue-50/50{% else %}fila-impar bg-card{% endif %} hover:bg-sky-50/40 transition">
+                            <td class="sticky-col-nodo px-2.5 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
+                                <div class="flex items-center gap-1 font-bold font-mono">
+                                    <span class="text-primary text-[10px]">●</span>
+                                    <span class="text-xs truncate max-w-[90px]">{{ fila.apoyo.nodo|default:"Sin Nodo" }}</span>
+                                </div>
+                                {% if fila.apoyo.observacion %}
+                                    <div class="text-[10px] font-sans font-normal text-muted-foreground truncate max-w-[95px] mt-0.5 leading-tight" title="{{ fila.apoyo.observacion }}">
+                                        {{ fila.apoyo.observacion }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td class="sticky-col-apoyo px-1 py-2.5 text-center font-bold text-foreground border-r border-border text-xs">
+                                {{ fila.apoyo.numero_apoyo|default:"—" }}
+                            </td>
+
                             <td class="px-4 py-2.5 border-r border-border whitespace-nowrap font-medium text-foreground">
                                 {% if fila.apoyo.quien_ejecuta %}
                                     <div class="flex items-center gap-1.5 font-semibold text-foreground">
@@ -128,22 +258,6 @@
                                 {% else %}
                                     <span class="text-gray-400 italic text-xs">Sin asignar</span>
                                 {% endif %}
-                            </td>
-
-                            <td class="px-4 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
-                                <div class="flex items-center gap-1.5 font-bold font-mono">
-                                    <span class="text-primary">●</span> {{ fila.apoyo.nodo|default:"Sin Nodo" }}
-                                </div>
-                                {% if fila.apoyo.observacion %}
-                                    <div class="mt-1 flex items-center gap-1 text-[11px] font-sans font-normal text-amber-900 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 max-w-[210px]" title="{{ fila.apoyo.observacion }}">
-                                        <span class="shrink-0 text-xs">💬</span>
-                                        <span class="truncate">{{ fila.apoyo.observacion }}</span>
-                                    </div>
-                                {% endif %}
-                            </td>
-
-                            <td class="px-3 py-2.5 text-center font-semibold text-foreground border-r border-border">
-                                {{ fila.apoyo.numero_apoyo|default:"—" }}
                             </td>
 
                             <td class="px-3 py-2.5 text-center border-r border-border">
@@ -232,7 +346,13 @@
                     {% if fila_totales %}
                     <tfoot class="sticky bottom-0 z-10 bg-slate-900 text-white font-extrabold border-t-2 border-slate-700 shadow-lg">
                         <tr>
-                            <td colspan="6" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
+                            <td class="sticky-col-nodo-footer px-2 py-3 text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700 truncate" title="TOTAL MATERIALES:">
+                                TOTALES:
+                            </td>
+                            <td class="sticky-col-apoyo-footer px-1 py-3 text-center text-xs text-slate-400 font-bold border-r border-slate-700">
+                                —
+                            </td>
+                            <td colspan="4" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
                                 TOTAL MATERIALES PROYECTO:
                             </td>
                             {% for tot in fila_totales %}
@@ -327,13 +447,13 @@
         <!-- TABLA MATRIZ POSTE A POSTE DE MANO DE OBRA -->
         <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
             <div class="overflow-x-auto max-h-[70vh]">
-                <table class="min-w-full border-collapse text-left text-xs">
-                    <thead class="sticky top-0 z-20">
+                <table class="min-w-full tabla-fija text-left text-xs">
+                    <thead class="sticky top-0 z-30">
                         <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
-                            <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap min-w-[160px] bg-neutral">
+                            <th class="sticky-col-nodo-header px-2.5 py-3 border-r border-gray-700 whitespace-nowrap">
                                 NODO / POSTE
                             </th>
-                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-20 bg-neutral">
+                            <th class="sticky-col-apoyo-header px-1 py-3 border-r border-gray-700 text-center whitespace-nowrap">
                                 N° APOYO
                             </th>
 
@@ -358,7 +478,7 @@
                             {% endfor %}
 
                             <!-- Columna Acciones -->
-                            <th class="px-4 py-3 text-center whitespace-nowrap min-w-[190px] bg-neutral sticky right-0 z-30 shadow-l">
+                            <th class="px-4 py-3 text-center whitespace-nowrap min-w-[190px] bg-neutral">
                                 ACCIONES
                             </th>
                         </tr>
@@ -366,30 +486,29 @@
 
                     <tbody class="divide-y divide-gray-200">
                         {% for fila in mo_filas_matriz %}
-                        <tr class="{% if forloop.counter|divisibleby:2 %}bg-emerald-50/30{% else %}bg-card{% endif %} hover:bg-emerald-50/60 transition group">
-                            <td class="px-4 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-primary">●</span>
-                                    <span class="text-foreground font-black">{{ fila.apoyo.nodo|default:"Sin Nodo" }}</span>
-                                    {% if fila.apoyo.observacion or fila.observaciones_mo_manuales %}
-                                        <span class="inline-flex items-center text-[11px] text-amber-900 bg-amber-100 border border-amber-300 rounded px-1.5 py-0.2 font-sans font-medium cursor-help"
-                                              title="{% if fila.apoyo.observacion %}Nota Poste: {{ fila.apoyo.observacion }}{% endif %}{% if fila.apoyo.observacion and fila.observaciones_mo_manuales %} | {% endif %}{% for obs in fila.observaciones_mo_manuales %}{{ obs }}{% if not forloop.last %} | {% endif %}{% endfor %}">
-                                            💬
-                                        </span>
-                                    {% endif %}
+                        <tr class="{% if forloop.counter|divisibleby:2 %}fila-mo-par bg-emerald-50/30{% else %}fila-mo-impar bg-card{% endif %} hover:bg-emerald-50/60 transition group">
+                            <td class="sticky-col-nodo px-2.5 py-2.5 font-bold text-foreground border-r border-border whitespace-nowrap font-mono">
+                                <div class="flex items-center gap-1">
+                                    <span class="text-primary text-[10px]">●</span>
+                                    <span class="text-foreground font-black text-xs truncate max-w-[90px]">{{ fila.apoyo.nodo|default:"Sin Nodo" }}</span>
                                 </div>
+                                {% if fila.apoyo.observacion %}
+                                    <div class="text-[10px] font-sans font-normal text-muted-foreground truncate max-w-[95px] mt-0.5 leading-tight" title="{{ fila.apoyo.observacion }}">
+                                        {{ fila.apoyo.observacion }}
+                                    </div>
+                                {% endif %}
                                 {% if fila.materiales_asociados %}
-                                <div class="text-[10px] text-muted-foreground font-sans font-medium mt-0.5 truncate max-w-[180px]" title="{% for m in fila.materiales_asociados %}{{ m.cantidad_requerida|floatformat:0 }}x {{ m.material.descripcion }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                                <div class="text-[9px] text-muted-foreground font-sans font-medium mt-0.5 truncate max-w-[95px]" title="{% for m in fila.materiales_asociados %}{{ m.cantidad_requerida|floatformat:0 }}x {{ m.material.descripcion }}{% if not forloop.last %}, {% endif %}{% endfor %}">
                                     📦 {{ fila.materiales_asociados|length }} material{{ fila.materiales_asociados|length|pluralize:"es" }}
                                 </div>
                                 {% else %}
-                                <div class="text-[10px] text-amber-600 font-sans font-medium mt-0.5">
+                                <div class="text-[9px] text-amber-600 font-sans font-medium mt-0.5">
                                     ⚠️ Sin materiales
                                 </div>
                                 {% endif %}
                             </td>
 
-                            <td class="px-3 py-2.5 text-center font-semibold text-foreground border-r border-border">
+                            <td class="sticky-col-apoyo px-1 py-2.5 text-center font-bold text-foreground border-r border-border text-xs">
                                 {{ fila.apoyo.numero_apoyo|default:"—" }}
                             </td>
 
@@ -418,7 +537,7 @@
                             {% endfor %}
 
                             <!-- Acciones en cada fila -->
-                            <td class="px-3 py-2 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-emerald-50 transition z-10 border-l border-border shadow-xs">
+                            <td class="px-3 py-2 text-center whitespace-nowrap border-l border-border">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <!-- Botón Editar Servicios de Mano de Obra de este poste -->
                                     <button type="button"
@@ -455,8 +574,11 @@
                     {% if mo_fila_totales %}
                     <tfoot class="sticky bottom-0 z-10 bg-slate-900 text-white font-extrabold border-t-2 border-slate-700 shadow-lg">
                         <tr>
-                            <td colspan="2" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-emerald-400 font-black border-r border-slate-700">
-                                TOTAL CANTIDADES ACTIVIDAD:
+                            <td class="sticky-col-nodo-footer px-2 py-3 text-xs uppercase tracking-wider text-emerald-400 font-black border-r border-slate-700 truncate" title="TOTAL CANTIDADES ACTIVIDAD:">
+                                TOTALES:
+                            </td>
+                            <td class="sticky-col-apoyo-footer px-1 py-3 text-center text-xs text-slate-400 font-bold border-r border-slate-700">
+                                —
                             </td>
                             {% for tot in mo_fila_totales %}
                             <td class="px-2 py-3 text-center border-r border-slate-700">
@@ -468,7 +590,7 @@
                                 {% endif %}
                             </td>
                             {% endfor %}
-                            <td class="px-4 py-3 text-center text-slate-400 text-xs sticky right-0 bg-slate-900 z-20">ACCIONES</td>
+                            <td class="px-4 py-3 text-center text-slate-400 text-xs">ACCIONES</td>
                         </tr>
                     </tfoot>
                     {% endif %}
@@ -721,7 +843,15 @@
                     </div>
 
                     <!-- FILA 2: ESPECIFICACIONES & ESTADO -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_brazo">
+                                Brazo Instalado (m)
+                            </label>
+                            <input id="modalApoyo_brazo" type="text" name="brazo" value="2" placeholder="Ej: 2, 1.5..." autocomplete="off"
+                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                        </div>
+
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_tipo_instalacion">
                                 Tipo de Instalación
@@ -1001,6 +1131,7 @@ const apoyosData = {
         "tipo_instalacion": "{{ fila.apoyo.tipo_instalacion|default:''|escapejs }}",
         "direccion": "{{ fila.apoyo.direccion|default:''|escapejs }}",
         "tipo_estructura": "{{ fila.apoyo.tipo_estructura|default:''|escapejs }}",
+        "brazo": "{{ fila.apoyo.brazo|default:'2'|escapejs }}",
         "cantidad_retenida": "{{ fila.apoyo.cantidad_retenida|unlocalize|default:'' }}",
         "metros_retenido": "{{ fila.apoyo.metros_retenido|unlocalize|default:'' }}",
         "estado": "{{ fila.apoyo.estado|default:'Pendiente'|escapejs }}",
@@ -1191,6 +1322,7 @@ function abrirModalNuevoApoyo() {
     document.getElementById('modalApoyo_tipo_instalacion').value = '';
     document.getElementById('modalApoyo_direccion').value = '';
     document.getElementById('modalApoyo_tipo_estructura').value = '';
+    document.getElementById('modalApoyo_brazo').value = '2';
     document.getElementById('modalApoyo_estado').value = 'Pendiente';
     document.getElementById('modalApoyo_cantidad_retenida').value = '';
     document.getElementById('modalApoyo_altura_retenida').value = '';
@@ -1286,6 +1418,7 @@ function abrirModalEditarApoyo(apoyoId) {
     document.getElementById('modalApoyo_tipo_instalacion').value = data.tipo_instalacion || '';
     document.getElementById('modalApoyo_direccion').value = data.direccion || '';
     document.getElementById('modalApoyo_tipo_estructura').value = data.tipo_estructura || '';
+    document.getElementById('modalApoyo_brazo').value = data.brazo || '2';
     document.getElementById('modalApoyo_estado').value = data.estado || 'Pendiente';
     document.getElementById('modalApoyo_cantidad_retenida').value = data.cantidad_retenida || '';
     document.getElementById('modalApoyo_metros_retenido').value = data.metros_retenido || '';
@@ -1703,6 +1836,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (filasMOMultiple && filasMOMultiple.children.length === 0) {
         filasMOMultiple.appendChild(crearFilaMO());
+    }
+
+    // Auto-abrir modal si la URL contiene ?editar_apoyo=ID o ?apoyo_id=ID
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const editarApoyoId = urlParams.get('editar_apoyo') || urlParams.get('apoyo_id');
+        if (editarApoyoId && typeof apoyosData !== 'undefined' && apoyosData[editarApoyoId]) {
+            cambiarPestana('materiales');
+            abrirModalEditarApoyo(editarApoyoId);
+            const elFila = document.getElementById('fila-apoyo-' + editarApoyoId);
+            if (elFila) {
+                elFila.classList.add('ring-2', 'ring-primary', 'bg-amber-100');
+                setTimeout(() => elFila.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+            }
+        }
+    } catch (e) {
+        console.error('Error al auto-abrir modal de apoyo:', e);
     }
 });
 </script>

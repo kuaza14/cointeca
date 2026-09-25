@@ -175,7 +175,7 @@
                                 </a>
                             </td>
                             <td class="px-4 py-2.5 text-center font-mono font-bold text-foreground">
-                                <a href="{% url 'detalle_apoyo' am.apoyo.id %}" class="hover:underline px-2 py-0.5 rounded bg-muted">
+                                <a href="{% url 'detalle_proyecto' am.apoyo.proyecto.id %}?tab=materiales&editar_apoyo={{ am.apoyo.id }}" class="hover:underline px-2 py-0.5 rounded bg-muted" title="Ver y editar poste en Ingeniería">
                                     {{ am.apoyo.nodo|default:am.apoyo.numero_apoyo }}
                                 </a>
                             </td>
@@ -192,8 +192,9 @@
                                 +{{ am.cantidad_retirada|floatformat }}
                             </td>
                             <td class="px-4 py-2.5 text-center">
-                                <a href="{% url 'detalle_apoyo' am.apoyo.id %}"
-                                   class="px-2.5 py-1 bg-primary text-white text-[11px] font-bold rounded hover:bg-primary-hover transition inline-block">
+                                <a href="{% url 'detalle_proyecto' am.apoyo.proyecto.id %}?tab=materiales&editar_apoyo={{ am.apoyo.id }}"
+                                   class="px-2.5 py-1 bg-primary text-white text-[11px] font-bold rounded hover:bg-primary-hover transition inline-block"
+                                   title="Abrir y editar poste en Ingeniería">
                                     Ver Poste
                                 </a>
                             </td>

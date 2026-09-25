@@ -567,8 +567,9 @@
 
                             <!-- Acciones -->
                             <td class="px-2 py-2 text-center whitespace-nowrap">
-                                <a href="{% url 'detalle_apoyo' fila.apoyo.id %}"
-                                   class="inline-flex items-center px-2 py-1 bg-primary hover:bg-primary-hover text-white text-[11px] font-semibold rounded shadow-sm transition">
+                                <a href="{% url 'detalle_proyecto' fila.apoyo.proyecto.id %}?tab=materiales&editar_apoyo={{ fila.apoyo.id }}"
+                                   class="inline-flex items-center px-2 py-1 bg-primary hover:bg-primary-hover text-white text-[11px] font-semibold rounded shadow-sm transition"
+                                   title="Abrir y editar en Ingeniería">
                                     Abrir Apoyo
                                 </a>
                             </td>

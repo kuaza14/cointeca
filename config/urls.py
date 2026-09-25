@@ -206,6 +206,7 @@ from core.views.ingenieria import(
     catalogo_mano_obra,
     editar_tarifa_mano_obra,
     exportar_liquidacion_proyecto_excel,
+    imprimir_formato_poste_a_poste,
     agregar_material_apoyo_rapido,
     editar_material_apoyo_rapido,
     eliminar_material_apoyo_rapido,
@@ -439,6 +440,7 @@ urlpatterns = [
     path("ingenieria/apoyos/<int:apoyo_id>/agregar-material-rapido/", agregar_material_apoyo_rapido, name="agregar_material_apoyo_rapido"),
     path("ingenieria/apoyos/<int:apoyo_id>/editar-material-rapido/", editar_material_apoyo_rapido, name="editar_material_apoyo_rapido"),
     path("ingenieria/apoyos-material/<int:apoyo_material_id>/eliminar/", eliminar_material_apoyo_rapido, name="eliminar_material_apoyo_rapido"),
+    path("ingenieria/proyectos/<int:proyecto_id>/imprimir-formato-poste-a-poste/", imprimir_formato_poste_a_poste, name="imprimir_formato_poste_a_poste"),
 
     
 

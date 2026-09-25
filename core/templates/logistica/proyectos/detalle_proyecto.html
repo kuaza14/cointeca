@@ -589,8 +589,9 @@
                                 {{ inst.cantidad_requerida|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <a href="{% url 'detalle_apoyo' inst.apoyo.id %}"
-                                   class="inline-flex items-center px-2.5 py-1 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded shadow-sm transition">
+                                <a href="{% url 'detalle_proyecto' inst.apoyo.proyecto.id %}?tab=materiales&editar_apoyo={{ inst.apoyo.id }}"
+                                   class="inline-flex items-center px-2.5 py-1 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded shadow-sm transition"
+                                   title="Abrir y editar en Ingeniería">
                                     Abrir Apoyo
                                 </a>
                             </td>
@@ -693,8 +694,9 @@
                                 {{ ret.cantidad_retirada|floatformat }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <a href="{% url 'detalle_apoyo' ret.apoyo.id %}"
-                                   class="inline-flex items-center px-2.5 py-1 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded shadow-sm transition">
+                                <a href="{% url 'detalle_proyecto' ret.apoyo.proyecto.id %}?tab=materiales&editar_apoyo={{ ret.apoyo.id }}"
+                                   class="inline-flex items-center px-2.5 py-1 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded shadow-sm transition"
+                                   title="Abrir y editar en Ingeniería">
                                     Abrir Apoyo
                                 </a>
                             </td>

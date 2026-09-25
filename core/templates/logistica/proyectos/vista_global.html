@@ -317,20 +317,20 @@
                             </th>
 
                             <!-- Col 8: Cant. Retenida -->
-                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[85px] th-excel-col" data-col-idx="8">
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px] th-excel-col" data-col-idx="8" title="Cantidad de Retenidas mecánicas (tirantes/riostras del poste)">
                                 <div class="flex items-center justify-center gap-1">
-                                    <span>CANT. RET</span>
-                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Cant. Retenida" onclick="abrirFiltroExcel(event, 8, 'CANT. RETENIDA')">
+                                    <span>CANT. RETENIDAS</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Cantidad de Retenidas" onclick="abrirFiltroExcel(event, 8, 'CANT. RETENIDAS')">
                                         <span class="icon-arrow">▼</span>
                                     </button>
                                 </div>
                             </th>
 
                             <!-- Col 9: Metros Retenido -->
-                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[85px] th-excel-col" data-col-idx="9">
+                            <th class="px-2 py-2 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px] th-excel-col" data-col-idx="9" title="Metros de cable de retenida/riostra instalados en el poste">
                                 <div class="flex items-center justify-center gap-1">
-                                    <span>MET. RET</span>
-                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Metros Retenido" onclick="abrirFiltroExcel(event, 9, 'METROS RETENIDO')">
+                                    <span>METROS RETENIDA</span>
+                                    <button type="button" class="btn-filter-trigger" title="Filtrar por Metros de Retenida" onclick="abrirFiltroExcel(event, 9, 'METROS RETENIDA')">
                                         <span class="icon-arrow">▼</span>
                                     </button>
                                 </div>
@@ -516,25 +516,29 @@
                             </td>
 
                             <!-- Col 11: Potencias Luminarias -->
-                            <td class="px-2 py-2 text-center border-r border-border align-top text-xs">
-                                {% for lum in fila.apoyo.luminarias.all %}
-                                    <span class="inline-block px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-bold text-[11px] mb-0.5">
-                                        {{ lum.potencia|default:"—" }}
-                                    </span>
-                                {% empty %}
-                                    <span class="text-gray-400">—</span>
-                                {% endfor %}
+                            <td class="px-2 py-2 text-center border-r border-border align-middle text-xs">
+                                <div class="flex flex-col items-center gap-1.5 justify-center">
+                                    {% for lum in fila.apoyo.luminarias.all %}
+                                        <span class="inline-flex items-center justify-center min-w-[55px] px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/70 font-bold text-[11px] whitespace-nowrap shadow-2xs">
+                                            {{ lum.potencia|default:"—" }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endfor %}
+                                </div>
                             </td>
 
                             <!-- Col 12: Códigos Luminarias -->
-                            <td class="px-2 py-2 text-center border-r border-border align-top text-xs">
-                                {% for lum in fila.apoyo.luminarias.all %}
-                                    <span class="inline-block px-1.5 py-0.5 rounded bg-primary-soft text-primary font-mono font-bold text-[11px] mb-0.5">
-                                        {{ lum.codigo|default:"—" }}
-                                    </span>
-                                {% empty %}
-                                    <span class="text-gray-400">—</span>
-                                {% endfor %}
+                            <td class="px-2 py-2 text-center border-r border-border align-middle text-xs">
+                                <div class="flex flex-col items-center gap-1.5 justify-center">
+                                    {% for lum in fila.apoyo.luminarias.all %}
+                                        <span class="inline-flex items-center justify-center min-w-[70px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/70 font-mono font-bold text-[11px] whitespace-nowrap shadow-2xs">
+                                            {{ lum.codigo|default:"—" }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endfor %}
+                                </div>
                             </td>
 
                             <!-- Celdas Numéricas de Materiales -->

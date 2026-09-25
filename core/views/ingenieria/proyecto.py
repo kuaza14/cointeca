@@ -459,6 +459,12 @@ def detalle_proyecto(request, id):
     catalogo_mo_todos = list(ItemManoObra.objects.all().order_by("codigo"))
     empleados = list(Empleado.objects.filter(estado="activo").order_by("nombre_completo"))
 
+    mat_cable_obj = (
+        Material.objects.filter(item="43").first()
+        or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+    )
+    mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
     return render(
         request,
         "ingenieria/proyecto/detalle_proyecto.html",
@@ -472,6 +478,7 @@ def detalle_proyecto(request, id):
             "tabla_resumen_retiros": tabla_resumen_retiros,
             "materiales_catalogo": materiales_catalogo,
             "empleados": empleados,
+            "mat_cable_id": mat_cable_id,
             # Mano de Obra
             "mo_columnas": mo_columnas,
             "mo_filas_matriz": mo_filas_matriz,
@@ -482,6 +489,58 @@ def detalle_proyecto(request, id):
             "presupuesto": presupuesto,
         }
     )
+
+
+def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
+    """
+    Sincroniza los metros de retenida con el material Ítem 43 (Cable para retenida EAR 3/8")
+    y descuenta o ajusta automáticamente el stock de bodega en Inventario.
+    """
+    mat_cable = (
+        Material.objects.filter(item="43").first()
+        or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+    )
+    if not mat_cable:
+        return
+
+    try:
+        metros = Decimal(str(metros_nuevos).strip().replace(',', '.')) if metros_nuevos and str(metros_nuevos).strip() else Decimal("0")
+    except (ValueError, TypeError, ArithmeticError):
+        metros = Decimal("0")
+
+    metros = max(Decimal("0"), metros)
+    ap_mat = ApoyoMaterial.objects.filter(apoyo=apoyo, material=mat_cable).first()
+    inventario, _ = Inventario.objects.get_or_create(material=mat_cable)
+
+    if ap_mat:
+        diferencia = metros - ap_mat.cantidad_requerida
+        if diferencia > 0:
+            if inventario.cantidad >= diferencia:
+                inventario.cantidad -= diferencia
+            else:
+                inventario.cantidad = Decimal("0")
+        elif diferencia < 0:
+            inventario.cantidad += abs(diferencia)
+        inventario.save()
+
+        if metros > 0:
+            ap_mat.cantidad_requerida = metros
+            ap_mat.save()
+        else:
+            ap_mat.delete()
+    elif metros > 0:
+        if inventario.cantidad >= metros:
+            inventario.cantidad -= metros
+        else:
+            inventario.cantidad = Decimal("0")
+        inventario.save()
+
+        ApoyoMaterial.objects.create(
+            apoyo=apoyo,
+            material=mat_cable,
+            cantidad_requerida=metros,
+            cantidad_retirada=Decimal("0"),
+        )
 
 @login_required
 @transaction.atomic
@@ -546,6 +605,13 @@ def crear_apoyo(request, proyecto_id):
                     codigo=codigo.strip()
                 )
 
+        # Material cable retenida para no duplicarlo si se ingresa manualmente
+        mat_cable_obj = (
+            Material.objects.filter(item="43").first()
+            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+        )
+        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
         # Guardar materiales asignados (múltiples)
         materiales_ids = request.POST.getlist("material_id[]")
         cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
@@ -554,6 +620,10 @@ def crear_apoyo(request, proyecto_id):
         materiales_creados = 0
         for i, mat_id in enumerate(materiales_ids):
             if not mat_id:
+                continue
+
+            # El cable de retenida se gestiona automáticamente por los metros_retenido
+            if mat_cable_id and str(mat_id) == str(mat_cable_id):
                 continue
 
             try:
@@ -590,6 +660,9 @@ def crear_apoyo(request, proyecto_id):
                 materiales_creados += 1
             except (ValueError, TypeError, ArithmeticError):
                 continue
+
+        # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+        sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
 
         # Recalcular Mano de Obra y Presupuesto
         calcular_mano_obra_para_apoyo(apoyo)
@@ -666,6 +739,13 @@ def editar_apoyo(request, apoyo_id):
                     codigo=codigo.strip()
                 )
 
+        # Material cable retenida para no duplicarlo si se ingresa manualmente
+        mat_cable_obj = (
+            Material.objects.filter(item="43").first()
+            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+        )
+        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
         # Sincronizar Materiales
         materiales_ids = request.POST.getlist("material_id[]")
         cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
@@ -678,6 +758,10 @@ def editar_apoyo(request, apoyo_id):
             if not mat_id or not str(mat_id).isdigit():
                 continue
             mat_id_int = int(mat_id)
+
+            # El cable de retenida se gestiona automáticamente por los metros_retenido
+            if mat_cable_id and mat_id_int == mat_cable_id:
+                continue
 
             try:
                 c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
@@ -738,8 +822,10 @@ def editar_apoyo(request, apoyo_id):
             except (ValueError, TypeError, ArithmeticError):
                 continue
 
-        # Eliminar materiales que se hayan removido
+        # Eliminar materiales que se hayan removido (excepto el cable de retenida que se sincroniza aparte)
         for mat_id_antiguo, am in materiales_actuales.items():
+            if mat_cable_id and mat_id_antiguo == mat_cable_id:
+                continue
             if mat_id_antiguo not in materiales_nuevos_procesados:
                 inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
                 if am.cantidad_requerida > 0:
@@ -748,6 +834,9 @@ def editar_apoyo(request, apoyo_id):
                     inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - am.cantidad_retirada)
                 inv_del.save()
                 am.delete()
+
+        # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+        sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
 
         # Recalcular Mano de Obra y Presupuesto
         calcular_mano_obra_para_apoyo(apoyo)
@@ -1016,6 +1105,12 @@ def detalle_apoyo(request, apoyo_id):
                         inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - apoyo_mat.cantidad_retirada)
                     inv_del.save()
 
+                    mat_cable_obj = Material.objects.filter(item="43").first() or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+                    if mat_cable_obj and apoyo_mat.material_id == mat_cable_obj.id:
+                        apoyo.metros_retenido = Decimal("0")
+                        apoyo.cantidad_retenida = Decimal("0")
+                        apoyo.save()
+
                     apoyo_mat.delete()
                     calcular_mano_obra_para_apoyo(apoyo)
                     actualizar_presupuesto_proyecto(apoyo.proyecto)
@@ -1070,6 +1165,13 @@ def detalle_apoyo(request, apoyo_id):
         ).strip()
         apoyo.save()
 
+        # Material cable retenida para no duplicarlo si se ingresa manualmente
+        mat_cable_obj = (
+            Material.objects.filter(item="43").first()
+            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+        )
+        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
         materiales_sin_stock = []
         cambios_realizados = False
 
@@ -1084,6 +1186,10 @@ def detalle_apoyo(request, apoyo_id):
                 continue
             apoyo_mat = ApoyoMaterial.objects.filter(id=a_id, apoyo=apoyo).first()
             if not apoyo_mat:
+                continue
+
+            # El cable de retenida se gestiona automáticamente por los metros_retenido
+            if mat_cable_id and apoyo_mat.material_id == mat_cable_id:
                 continue
 
             try:
@@ -1163,6 +1269,10 @@ def detalle_apoyo(request, apoyo_id):
             if not mat_id:
                 continue
 
+            # El cable de retenida se gestiona automáticamente por los metros_retenido
+            if mat_cable_id and str(mat_id) == str(mat_cable_id):
+                continue
+
             try:
                 c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
                 c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
@@ -1231,6 +1341,9 @@ def detalle_apoyo(request, apoyo_id):
             except (ValueError, TypeError, ArithmeticError):
                 continue
 
+        # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+        sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
+
         if materiales_sin_stock:
             lista_str = "; ".join(materiales_sin_stock)
             messages.warning(
@@ -1250,6 +1363,12 @@ def detalle_apoyo(request, apoyo_id):
 
         return redirect("detalle_apoyo", apoyo_id=apoyo.id)
 
+    mat_cable_obj = (
+        Material.objects.filter(item="43").first()
+        or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+    )
+    mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
     return render(
         request,
         "ingenieria/apoyos/detalle_apoyo.html",
@@ -1258,6 +1377,7 @@ def detalle_apoyo(request, apoyo_id):
             "materiales_asociados": materiales_asociados,
             "materiales_catalogo": materiales_catalogo,
             "empleados": empleados,
+            "mat_cable_id": mat_cable_id,
         }
     )
 

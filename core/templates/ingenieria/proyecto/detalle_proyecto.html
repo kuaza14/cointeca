@@ -758,29 +758,49 @@
                         </div>
                     </div>
 
-                    <!-- FILA 3: RETENIDOS & OBSERVACIONES -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- FILA 3: RETENIDAS & OBSERVACIONES -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_cantidad_retenida">
-                                Cantidad Retenida
+                                Cantidad Retenidas
                             </label>
-                            <input id="modalApoyo_cantidad_retenida" type="number" step="any" min="0" name="cantidad_retenida" placeholder="0"
+                            <input id="modalApoyo_cantidad_retenida" type="number" step="any" min="0" name="cantidad_retenida" placeholder="Ej: 1, 2..."
+                                   oninput="recalcularMetrosRetenidaModal()"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                            <span class="text-[10px] text-muted-foreground mt-0.5 block">Tirantes o riostras</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_altura_retenida">
+                                Altura Poste (Retenida)
+                            </label>
+                            <select id="modalApoyo_altura_retenida" onchange="recalcularMetrosRetenidaModal()"
+                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                                <option value="">-- Escoger 12 o 14 --</option>
+                                <option value="12">Poste de 12 (14 mts c/u)</option>
+                                <option value="14">Poste de 14 (16 mts c/u)</option>
+                                <option value="manual">Manual / Otro valor</option>
+                            </select>
+                            <span class="text-[10px] text-muted-foreground mt-0.5 block">12 &rarr; 14m | 14 &rarr; 16m</span>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_metros_retenido">
-                                Metros Retenido (m)
+                                Metros Retenida (m)
                             </label>
-                            <input id="modalApoyo_metros_retenido" type="number" step="0.01" min="0" name="metros_retenido" placeholder="0.00 m"
-                                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
+                            <input id="modalApoyo_metros_retenido" type="number" step="0.01" min="0" name="metros_retenido" placeholder="0.00"
+                                   oninput="verificarMetrosManualModal()"
+                                   class="w-full border border-blue-300 rounded-lg px-3 py-2 text-xs font-bold font-mono text-blue-700 bg-blue-50/40 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <span id="modalApoyo_retenida_info" class="text-[10px] text-blue-600 font-semibold mt-0.5 block">
+                                Cable EAR 3/8" (Ítem 43)
+                            </span>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_observacion">
                                 Observaciones / Notas Técnicas
                             </label>
-                            <textarea id="modalApoyo_observacion" name="observacion" rows="2" placeholder="Ej: Zona rocosa, requiere autorización..."
+                            <textarea id="modalApoyo_observacion" name="observacion" rows="2" placeholder="Ej: Zona rocosa, autorización..."
                                       class="w-full border border-border rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground"></textarea>
                         </div>
                     </div>
@@ -968,6 +988,8 @@ function cambiarPestana(tabName) {
         window.history.replaceState(null, '', url);
     } catch (e) {}
 }
+
+const MAT_CABLE_ID = "{{ mat_cable_id|default:'' }}";
 
 const apoyosData = {
     {% for fila in filas_matriz %}
@@ -1171,8 +1193,11 @@ function abrirModalNuevoApoyo() {
     document.getElementById('modalApoyo_tipo_estructura').value = '';
     document.getElementById('modalApoyo_estado').value = 'Pendiente';
     document.getElementById('modalApoyo_cantidad_retenida').value = '';
+    document.getElementById('modalApoyo_altura_retenida').value = '';
     document.getElementById('modalApoyo_metros_retenido').value = '';
     document.getElementById('modalApoyo_observacion').value = '';
+    const infoRetNew = document.getElementById('modalApoyo_retenida_info');
+    if (infoRetNew) infoRetNew.innerHTML = 'Cable EAR 3/8" (Ítem 43)';
 
     const tbodyLum = document.getElementById('filasLuminarias');
     tbodyLum.innerHTML = '';
@@ -1183,6 +1208,50 @@ function abrirModalNuevoApoyo() {
     tbodyMat.appendChild(crearFilaMaterial());
 
     modal.classList.remove('hidden');
+}
+
+function recalcularMetrosRetenidaModal() {
+    const inputCant = document.getElementById('modalApoyo_cantidad_retenida');
+    const selectAlt = document.getElementById('modalApoyo_altura_retenida');
+    const inputMet = document.getElementById('modalApoyo_metros_retenido');
+    const info = document.getElementById('modalApoyo_retenida_info');
+    if (!inputCant || !selectAlt || !inputMet) return;
+
+    const cant = parseFloat(inputCant.value) || 0;
+    const tipo = selectAlt.value;
+
+    if (tipo === '12') {
+        const total = cant > 0 ? (cant * 14) : 0;
+        inputMet.value = total > 0 ? parseFloat(total.toFixed(2)) : (cant === 0 ? '0' : '');
+        if (info) {
+            info.innerHTML = cant > 0
+                ? `<span class="text-blue-600 font-bold">⚡ ${cant} × 14m = ${parseFloat(total.toFixed(2))}m Cable EAR 3/8" a descontar</span>`
+                : `<span class="text-blue-600 font-semibold">Poste 12: 14 mts por retenida (Cable EAR 3/8")</span>`;
+        }
+    } else if (tipo === '14') {
+        const total = cant > 0 ? (cant * 16) : 0;
+        inputMet.value = total > 0 ? parseFloat(total.toFixed(2)) : (cant === 0 ? '0' : '');
+        if (info) {
+            info.innerHTML = cant > 0
+                ? `<span class="text-blue-600 font-bold">⚡ ${cant} × 16m = ${parseFloat(total.toFixed(2))}m Cable EAR 3/8" a descontar</span>`
+                : `<span class="text-blue-600 font-semibold">Poste 14: 16 mts por retenida (Cable EAR 3/8")</span>`;
+        }
+    } else if (tipo === 'manual') {
+        if (info) {
+            info.innerHTML = `<span class="text-amber-600 font-semibold">Ingreso manual (Cable EAR 3/8" Ítem 43)</span>`;
+        }
+    } else {
+        if (info) {
+            info.innerHTML = 'Cable EAR 3/8" (Ítem 43)';
+        }
+    }
+}
+
+function verificarMetrosManualModal() {
+    const selectAlt = document.getElementById('modalApoyo_altura_retenida');
+    if (selectAlt && selectAlt.value !== '12' && selectAlt.value !== '14') {
+        selectAlt.value = 'manual';
+    }
 }
 
 function abrirModalEditarApoyo(apoyoId) {
@@ -1222,6 +1291,26 @@ function abrirModalEditarApoyo(apoyoId) {
     document.getElementById('modalApoyo_metros_retenido').value = data.metros_retenido || '';
     document.getElementById('modalApoyo_observacion').value = data.observacion || '';
 
+    // Auto-detectar altura de retenida según cantidad y metros
+    const cantRet = parseFloat(data.cantidad_retenida) || 0;
+    const metRet = parseFloat(data.metros_retenido) || 0;
+    const selectAlt = document.getElementById('modalApoyo_altura_retenida');
+    if (selectAlt) {
+        if (cantRet > 0 && metRet > 0) {
+            const porRet = metRet / cantRet;
+            if (Math.abs(porRet - 14) < 0.05) {
+                selectAlt.value = '12';
+            } else if (Math.abs(porRet - 16) < 0.05) {
+                selectAlt.value = '14';
+            } else {
+                selectAlt.value = 'manual';
+            }
+        } else {
+            selectAlt.value = '';
+        }
+    }
+    recalcularMetrosRetenidaModal();
+
     const tbodyLum = document.getElementById('filasLuminarias');
     tbodyLum.innerHTML = '';
     if (data.luminarias && data.luminarias.length > 0) {
@@ -1235,9 +1324,18 @@ function abrirModalEditarApoyo(apoyoId) {
     const tbodyMat = document.getElementById('filasMaterialesNodo');
     tbodyMat.innerHTML = '';
     if (data.materiales && data.materiales.length > 0) {
+        let matsAgregados = 0;
         data.materiales.forEach(m => {
+            // El cable de retenida se gestiona automáticamente por la sección de Retenidas
+            if (MAT_CABLE_ID && String(m.material_id) === String(MAT_CABLE_ID)) {
+                return;
+            }
             tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret));
+            matsAgregados++;
         });
+        if (matsAgregados === 0) {
+            tbodyMat.appendChild(crearFilaMaterial());
+        }
     } else {
         tbodyMat.appendChild(crearFilaMaterial());
     }

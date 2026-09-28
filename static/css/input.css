@@ -229,6 +229,42 @@
         background-color: var(--color-destructive-hover);
     }
 
+    .btn-indigo {
+        background-color: #4338ca !important;
+        color: #ffffff !important;
+        border: 1px solid #3730a3 !important;
+        box-shadow: 0 1px 2px 0 rgba(67, 56, 202, 0.25);
+    }
+
+    .btn-indigo:hover {
+        background-color: #3730a3 !important;
+        color: #ffffff !important;
+    }
+
+    .btn-slate {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        border: 1px solid #1e293b !important;
+        box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.25);
+    }
+
+    .btn-slate:hover {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+    }
+
+    .btn-emerald {
+        background-color: #059669 !important;
+        color: #ffffff !important;
+        border: 1px solid #047857 !important;
+        box-shadow: 0 1px 2px 0 rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-emerald:hover {
+        background-color: #047857 !important;
+        color: #ffffff !important;
+    }
+
     /* ---------- Tablas Modernas ---------- */
     .tabla-caja {
         overflow-x: auto;

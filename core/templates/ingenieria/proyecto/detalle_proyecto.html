@@ -154,9 +154,10 @@
                 <span>+</span> Nuevo Nodo / Poste
             </button>
             <a href="{% url 'imprimir_formato_poste_a_poste' proyecto.id %}" target="_blank"
-               class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg shadow-sm transition"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 text-white text-sm font-bold rounded-lg shadow-sm transition"
+               style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b !important;"
                title="Descargar formato oficial Poste a Poste listo para imprimir (con Nodo, Potencia y Brazo pre-llenados)">
-                <span>🖨️</span> Imprimir Formato Poste a Poste
+                <span>🖨️</span> <span style="color: #ffffff !important;">Imprimir Formato Poste a Poste</span>
             </a>
             <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
                class="inline-flex items-center px-4 py-2.5 text-sm font-bold rounded-lg transition border shadow-xs"

@@ -22,15 +22,28 @@
     </div>
 
     <div class="flex flex-wrap gap-3">
-        <a href="{% url 'catalogo_mano_obra' %}" class="btn bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-            🛠️ Tarifario Mano de Obra
+        <a href="{% url 'catalogo_mano_obra' %}" 
+           class="btn btn-emerald font-bold inline-flex items-center gap-2 shadow-sm"
+           style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;">
+            <span>🛠️</span> <span>Tarifario Mano de Obra</span>
         </a>
 
-        <button type="button" id="btnNuevoMacro" class="btn btn-primario font-bold">
-            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <button type="button" id="btnAbrirModalImprimir" 
+                class="btn btn-slate font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
+                style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b !important;">
+            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="color: #ffffff !important;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.656h10.5Z"/>
+            </svg>
+            <span style="color: #ffffff !important;">Imprimir Formato Poste a Poste</span>
+        </button>
+
+        <button type="button" id="btnNuevoMacro" 
+                class="btn btn-primario font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
+                style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color: #ffffff !important;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
-            Nuevo Macroproyecto
+            <span style="color: #ffffff !important;">Nuevo Macroproyecto</span>
         </button>
 
         <a href="{% url 'ingenieria_inicio' %}" class="btn btn-secundario">
@@ -171,6 +184,14 @@
                                class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg shadow-sm transition"
                                title="Ver proyectos de este macroproyecto">
                                 <span>Ver Proyectos ({{ item.num_proyectos }})</span>
+                            </a>
+
+                            <a href="{% url 'exportar_liquidacion_macroproyecto_excel' item.macro.id %}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition border shadow-xs"
+                               style="background-color: #4338ca !important; color: #ffffff !important; border: 1px solid #3730a3 !important;"
+                               title="Descargar consolidado ejecutivo de liquidación y mano de obra del macroproyecto en Excel">
+                                <span>📊</span>
+                                <span style="color: #ffffff !important;">Liquidación</span>
                             </a>
 
                             <button type="button"
@@ -448,6 +469,148 @@
     </div>
 </div>
 
+<!-- ======================================================================
+     MODAL: BUSCAR E IMPRIMIR FORMATO POSTE A POSTE
+     ====================================================================== -->
+<div id="modalImprimirFormato"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
+     style="background-color: rgba(2, 6, 23, 0.75) !important;"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="tituloModalImprimir">
+
+    <div class="w-full max-w-2xl rounded-2xl border border-gray-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+         style="background-color: #ffffff !important; color: #0f172a !important;">
+        <!-- Cabecera -->
+        <div class="flex items-center justify-between border-b border-slate-700 px-6 py-4 bg-slate-900 text-white">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shrink-0">
+                    🖨️
+                </div>
+                <div>
+                    <h2 id="tituloModalImprimir" class="text-base sm:text-lg font-bold text-white leading-tight">
+                        Imprimir Formato Poste a Poste
+                    </h2>
+                    <p class="text-xs text-slate-300">
+                        Busca cualquier proyecto registrado para descargar su formato oficial pre-llenado listo para imprimir
+                    </p>
+                </div>
+            </div>
+
+            <button type="button" id="cerrarModalImprimir"
+                    class="flex size-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-slate-800 hover:text-white cursor-pointer"
+                    title="Cerrar modal">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span class="sr-only">Cerrar</span>
+            </button>
+        </div>
+
+        <!-- Barra de búsqueda en el modal -->
+        <div class="p-4 border-b border-gray-200 bg-slate-50">
+            <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </span>
+                <input type="text"
+                       id="buscadorModalImprimir"
+                       placeholder="Escribe el número de proyecto (ej: 9901, 9902), tipo o macroproyecto..."
+                       autocomplete="off"
+                       class="w-full border-2 border-slate-300 rounded-xl pl-11 pr-10 py-2.5 text-sm font-semibold text-slate-900 focus:border-slate-800 focus:ring-0 focus:outline-none transition">
+                <button type="button"
+                        id="btnLimpiarBuscadorModal"
+                        class="absolute inset-y-0 right-0 items-center pr-3 text-slate-400 hover:text-slate-700 hidden cursor-pointer"
+                        title="Limpiar búsqueda">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2 px-1">
+                <span>Resultados: <strong id="contadorModalImprimir" class="text-slate-800 font-bold">{{ proyectos_imprimir|length }}</strong> proyectos</span>
+                <span class="text-[11px] text-slate-400 hidden sm:inline italic">Presiona «Enter» para imprimir la primera coincidencia</span>
+            </div>
+        </div>
+
+        <!-- Lista scrollable de proyectos -->
+        <div class="overflow-y-auto p-4 space-y-2.5 flex-1 divide-y divide-gray-100" id="listaProyectosModal">
+            {% for proy in proyectos_imprimir %}
+                <div class="item-proyecto-imprimir flex items-center justify-between gap-4 p-3 rounded-xl border border-gray-200 hover:border-slate-400 hover:bg-slate-50/80 transition"
+                     data-numero="{{ proy.numero_emcali|lower }}"
+                     data-tipo="{{ proy.get_tipo_display|default:proy.tipo|lower }}"
+                     data-macro="{% if proy.macroproyecto %}{{ proy.macroproyecto.nombre|lower }}{% endif %}">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="size-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-extrabold text-sm shrink-0">
+                            {% if proy.tipo == 'MT' %}⚡{% elif 'AP' in proy.tipo %}💡{% else %}🔌{% endif %}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-extrabold text-base text-slate-900 tracking-tight font-mono">{{ proy.numero_emcali }}</span>
+                                {% if proy.tipo == "AP_BARRIO" %}
+                                    <span class="px-2 py-0.5 text-[11px] font-bold rounded-md bg-amber-100 text-amber-900 border border-amber-300">AP Barrio</span>
+                                {% elif proy.tipo == "AP_PARQUE" %}
+                                    <span class="px-2 py-0.5 text-[11px] font-bold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">AP Parque</span>
+                                {% elif proy.tipo == "MT" %}
+                                    <span class="px-2 py-0.5 text-[11px] font-bold rounded-md bg-purple-100 text-purple-900 border border-purple-300">Media Tensión (MT)</span>
+                                {% elif proy.tipo == "BT" %}
+                                    <span class="px-2 py-0.5 text-[11px] font-bold rounded-md bg-blue-100 text-blue-900 border border-blue-300">Baja Tensión (BT)</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 text-[11px] font-bold rounded-md bg-gray-100 text-gray-800 border border-gray-300">{{ proy.get_tipo_display|default:proy.tipo }}</span>
+                                {% endif %}
+
+                                <span class="px-2 py-0.5 text-[11px] font-semibold rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    {{ proy.apoyos.count }} poste{{ proy.apoyos.count|pluralize }}
+                                </span>
+                            </div>
+                            {% if proy.macroproyecto %}
+                                <p class="text-xs text-slate-500 mt-0.5 truncate">
+                                    Macroproyecto: <strong class="text-slate-700">{{ proy.macroproyecto.nombre }}</strong>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{% url 'detalle_proyecto' proy.id %}"
+                           class="hidden sm:inline-flex items-center px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg transition"
+                           title="Ver detalle del proyecto">
+                            Ver Postes
+                        </a>
+                        <a href="{% url 'imprimir_formato_poste_a_poste' proy.id %}" target="_blank"
+                           class="btn-imprimir-accion inline-flex items-center gap-1.5 px-4 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                           style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b !important;"
+                           title="Descargar formato oficial Poste a Poste listo para imprimir">
+                            <span>🖨️</span>
+                            <span style="color: #ffffff !important;">Imprimir Formato</span>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-8 text-slate-500">
+                    <p class="font-semibold text-slate-700">No hay proyectos disponibles para imprimir.</p>
+                </div>
+            {% endfor %}
+
+            <div id="sinResultadosModalImprimir" class="hidden text-center py-10 text-slate-500">
+                <span class="text-3xl block mb-2">🔍</span>
+                <p class="font-semibold text-slate-700">No se encontraron proyectos con ese criterio.</p>
+                <p class="text-xs text-slate-400 mt-1">Verifica el número de proyecto o limpia el buscador.</p>
+            </div>
+        </div>
+
+        <!-- Pie del modal -->
+        <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-3 bg-slate-50">
+            <button type="button" id="btnCerrarModalImprimirFooter"
+                    class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-sm font-semibold rounded-lg transition cursor-pointer">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
     // ==========================================
@@ -637,12 +800,123 @@
         });
     }
 
+    // ==========================================
+    // MODAL IMPRIMIR FORMATO POSTE A POSTE
+    // ==========================================
+    const modalImprimir = document.getElementById("modalImprimirFormato");
+    const btnAbrirModalImprimir = document.getElementById("btnAbrirModalImprimir");
+    const btnCerrarModalImprimir = document.getElementById("cerrarModalImprimir");
+    const btnCerrarModalImprimirFooter = document.getElementById("btnCerrarModalImprimirFooter");
+    const buscadorModal = document.getElementById("buscadorModalImprimir");
+    const btnLimpiarModal = document.getElementById("btnLimpiarBuscadorModal");
+    const itemsProyectos = document.querySelectorAll(".item-proyecto-imprimir");
+    const contadorModal = document.getElementById("contadorModalImprimir");
+    const sinResultadosModal = document.getElementById("sinResultadosModalImprimir");
+
+    function abrirModalImprimir() {
+        if (!modalImprimir) return;
+        modalImprimir.classList.remove("hidden");
+        modalImprimir.classList.add("flex");
+        if (buscadorModal) {
+            buscadorModal.value = "";
+            filtrarModalImprimir();
+            setTimeout(function() { buscadorModal.focus(); }, 50);
+        }
+    }
+
+    function cerrarModalImprimir() {
+        if (!modalImprimir) return;
+        modalImprimir.classList.remove("flex");
+        modalImprimir.classList.add("hidden");
+        if (btnAbrirModalImprimir) btnAbrirModalImprimir.focus();
+    }
+
+    function filtrarModalImprimir() {
+        if (!buscadorModal) return;
+        const q = buscadorModal.value.toLowerCase().trim();
+        let visibles = 0;
+
+        if (btnLimpiarModal) {
+            if (q.length > 0) {
+                btnLimpiarModal.classList.remove("hidden");
+                btnLimpiarModal.classList.add("flex");
+            } else {
+                btnLimpiarModal.classList.add("hidden");
+                btnLimpiarModal.classList.remove("flex");
+            }
+        }
+
+        itemsProyectos.forEach(function (item) {
+            const numero = item.dataset.numero || "";
+            const tipo = item.dataset.tipo || "";
+            const macro = item.dataset.macro || "";
+
+            if (numero.includes(q) || tipo.includes(q) || macro.includes(q)) {
+                item.style.display = "";
+                visibles++;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        if (contadorModal) {
+            contadorModal.textContent = visibles;
+        }
+
+        if (sinResultadosModal) {
+            if (visibles === 0 && itemsProyectos.length > 0) {
+                sinResultadosModal.classList.remove("hidden");
+            } else {
+                sinResultadosModal.classList.add("hidden");
+            }
+        }
+    }
+
+    if (btnAbrirModalImprimir) btnAbrirModalImprimir.addEventListener("click", abrirModalImprimir);
+    if (btnCerrarModalImprimir) btnCerrarModalImprimir.addEventListener("click", cerrarModalImprimir);
+    if (btnCerrarModalImprimirFooter) btnCerrarModalImprimirFooter.addEventListener("click", cerrarModalImprimir);
+
+    if (buscadorModal) {
+        buscadorModal.addEventListener("input", filtrarModalImprimir);
+        buscadorModal.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                // Abrir la primera coincidencia visible
+                for (let i = 0; i < itemsProyectos.length; i++) {
+                    const item = itemsProyectos[i];
+                    if (item.style.display !== "none") {
+                        const link = item.querySelector(".btn-imprimir-accion");
+                        if (link) {
+                            window.open(link.href, "_blank");
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (btnLimpiarModal) {
+        btnLimpiarModal.addEventListener("click", function () {
+            buscadorModal.value = "";
+            filtrarModalImprimir();
+            buscadorModal.focus();
+        });
+    }
+
+    if (modalImprimir) {
+        modalImprimir.addEventListener("click", function (e) {
+            if (e.target === modalImprimir) cerrarModalImprimir();
+        });
+    }
+
     // Cerrar con Escape cualquier modal
     document.addEventListener("keydown", function (evento) {
         if (evento.key === "Escape") {
             if (modalMacro && !modalMacro.classList.contains("hidden")) cerrarMacro();
             if (modalEditar && !modalEditar.classList.contains("hidden")) cerrarEditar();
             if (modalEliminar && !modalEliminar.classList.contains("hidden")) cerrarEliminar();
+            if (modalImprimir && !modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
         }
     });
 })();

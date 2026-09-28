@@ -65,11 +65,14 @@ def lista_macroproyectos(request):
             "num_apoyos": num_apoyos,
         })
 
+    proyectos_imprimir = Proyecto.objects.all().select_related("macroproyecto").prefetch_related("apoyos").order_by("numero_emcali")
+
     return render(
         request,
         "ingenieria/macroproyectos/lista.html",
         {
             "macroproyectos": resumen_macros,
+            "proyectos_imprimir": proyectos_imprimir,
             "query": query,
             "total_macros": Macroproyecto.objects.count(),
             "total_filtrados": len(resumen_macros),
@@ -169,6 +172,11 @@ def lista_proyectos(request, macroproyecto_id=None):
         else:
             proyectos = Proyecto.objects.all()
 
+    if macroproyecto:
+        proyectos_imprimir = Proyecto.objects.filter(macroproyecto=macroproyecto).select_related("macroproyecto").prefetch_related("apoyos").order_by("numero_emcali")
+    else:
+        proyectos_imprimir = Proyecto.objects.all().select_related("macroproyecto").prefetch_related("apoyos").order_by("numero_emcali")
+
     if query:
         proyectos = proyectos.filter(
             Q(numero_emcali__icontains=query) |
@@ -187,6 +195,7 @@ def lista_proyectos(request, macroproyecto_id=None):
         {
             "macroproyecto": macroproyecto,
             "proyectos": proyectos,
+            "proyectos_imprimir": proyectos_imprimir,
             "macroproyectos": todos_macroproyectos,
             "query": query,
             "total_proyectos": total_proy,
@@ -1177,9 +1186,6 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
     es_mt = (proyecto.tipo == Proyecto.Tipos.MT)
     plantillas_dir = os.path.join(settings.BASE_DIR, "plantillas_excel")
 
-    primer_apoyo_dir = apoyos.filter(direccion__gt="").values_list("direccion", flat=True).first() or ""
-    direccion_texto = primer_apoyo_dir or (proyecto.macroproyecto.descripcion if proyecto.macroproyecto and proyecto.macroproyecto.descripcion else "")
-
     if es_mt:
         # ==========================================
         # FORMATO MEDIA TENSIÓN (MT)
@@ -1191,18 +1197,18 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
         wb = openpyxl.load_workbook(plantilla_path)
         sheet = wb.active
 
-        # Encabezado MT
-        if direccion_texto:
-            sheet.cell(7, 1).value = f"DIRECCION: {direccion_texto}"
+        # Encabezado MT (Fecha y Circuito; la Dirección se deja en blanco para diligenciamiento en terreno)
         sheet.cell(8, 1).value = f"FECHA: {timezone.now().strftime('%d-%m-%Y')}"
         sheet.cell(8, 9).value = f"CIRCUITO: {proyecto.numero_emcali or ''}"
 
-        # Postes en fila 10 (Cols 8 a 25)
-        for idx, apoyo in enumerate(apoyos):
-            col = 8 + idx
-            if col > 25:
-                break
-            sheet.cell(10, col).value = apoyo.nodo or apoyo.numero_apoyo or f"P-{idx+1}"
+        # En MT, los números 1, 2, 3, 4... de la fila 10 bajo 'POSTE' son los identificadores de la plantilla y no se modifican
+
+        # Ajuste de impresión MT: encajar en 1 sola hoja
+        sheet.page_setup.orientation = sheet.ORIENTATION_PORTRAIT
+        sheet.sheet_properties.pageSetUpPr.fitToPage = True
+        sheet.page_setup.fitToWidth = 1
+        sheet.page_setup.fitToHeight = 1
+        sheet.print_area = f"'{sheet.title}'!$A$1:$Z$77"
 
         filename = f"POSTE_A_POSTE_MT_{proyecto.numero_emcali}.xlsx"
     else:
@@ -1216,14 +1222,11 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
         wb = openpyxl.load_workbook(plantilla_path)
         sheet = wb.active
 
-        # Encabezado AP (Fila 7)
+        # Encabezado AP (Fila 7: Microproyecto y Fecha; Dirección se conserva en blanco para cada nodo)
         # T7: Microproyecto
         sheet.cell(7, 20).value = proyecto.numero_emcali
         # Y7: Fecha
         sheet.cell(7, 25).value = f"FECHA: {timezone.now().strftime('%d-%m-%Y')}"
-        # AC7: Dirección
-        if direccion_texto:
-            sheet.cell(7, 29).value = f"DIRECCIÓN: {direccion_texto}"
 
         thin_border = Border(
             left=Side(style='thin', color='A0A0A0'),
@@ -1231,30 +1234,67 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
             top=Side(style='thin', color='A0A0A0'),
             bottom=Side(style='thin', color='A0A0A0')
         )
-        data_font = Font(name="Calibri", size=9)
+        font_consecutivo = Font(name="Arial", size=11, bold=False)
+        font_nodo = Font(name="Arial", size=14, bold=True)
+        font_potencia = Font(name="Arial", size=11, bold=True)
+        font_brazo = Font(name="Arial", size=11, bold=True)
+        font_celda = Font(name="Arial", size=10, bold=False)
         align_center = Alignment(horizontal="center", vertical="center")
 
         # Llenar nodos desde la fila 12
         for idx, apoyo in enumerate(apoyos):
             r = 12 + idx
-            sheet.row_dimensions[r].height = 18
+
+            # Respetar y asegurar las medidas exactas de fila de la plantilla original para que quepan en 1 hoja
+            if sheet.row_dimensions[r].height is None or sheet.row_dimensions[r].height < 20:
+                sheet.row_dimensions[r].height = 58.5 if r <= 21 else (49.5 if r <= 28 else 51.0)
 
             for c in range(1, 52):
                 cell = sheet.cell(r, c)
                 cell.border = thin_border
-                cell.font = data_font
+                cell.font = font_celda
                 cell.alignment = align_center
 
             # Col 1: Consecutivo
-            sheet.cell(r, 1).value = idx + 1
-            # Col 3: NODO
-            sheet.cell(r, 3).value = apoyo.nodo or apoyo.numero_apoyo or ""
-            # Col 4: POT.INST
+            c1 = sheet.cell(r, 1)
+            c1.value = idx + 1
+            c1.font = font_consecutivo
+
+            # Col 3: NODO (Arial 14 Bold, grande y legible para los trabajadores en terreno)
+            c3 = sheet.cell(r, 3)
+            c3.value = apoyo.nodo or apoyo.numero_apoyo or ""
+            c3.font = font_nodo
+
+            # Col 4: POT.INST (Arial 11 Bold)
             lum = apoyo.luminarias.first()
-            sheet.cell(r, 4).value = lum.potencia if lum else ""
-            # Col 5: BRAZO INSTA
-            sheet.cell(r, 5).value = apoyo.brazo or "2"
+            c4 = sheet.cell(r, 4)
+            c4.value = lum.potencia if lum else ""
+            c4.font = font_potencia
+
+            # Col 5: BRAZO INSTA (Arial 11 Bold)
+            c5 = sheet.cell(r, 5)
+            c5.value = apoyo.brazo or "2"
+            c5.font = font_brazo
+
             # Cols 6..51: quedan vacías para llenado en terreno
+
+        # Ajuste de impresión para que encaje exactamente en 1 sola hoja de oficio (Legal) apaisada
+        sheet.page_setup.orientation = sheet.ORIENTATION_LANDSCAPE
+        sheet.page_setup.paperSize = 5  # Oficio / Legal (8.5 x 14 pulg)
+        sheet.sheet_properties.pageSetUpPr.fitToPage = True
+        sheet.page_setup.fitToWidth = 1
+        sheet.page_setup.fitToHeight = 1
+        sheet.page_setup.scale = None
+
+        sheet.page_margins.left = 0.0
+        sheet.page_margins.right = 0.0
+        sheet.page_margins.top = 0.0
+        sheet.page_margins.bottom = 0.0
+        sheet.page_margins.header = 0.0
+        sheet.page_margins.footer = 0.0
+
+        max_row_impresion = max(41, 11 + len(apoyos))
+        sheet.print_area = f"'{sheet.title}'!$A$2:$AZ${max_row_impresion}"
 
         filename = f"POSTE_A_POSTE_AP_{proyecto.numero_emcali}.xlsx"
 
@@ -1586,4 +1626,307 @@ def exportar_liquidacion_proyecto_excel(request, proyecto_id):
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+@login_required
+def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
+    macro = get_object_or_404(Macroproyecto, id=macroproyecto_id)
+    proyectos = macro.proyectos.all().order_by("numero_emcali", "id")
+
+    wb = openpyxl.Workbook()
+    ws_macro = wb.active
+    ws_macro.title = "CONSOLIDADO_EJECUTIVO"
+
+    # Fuentes y estilos
+    font_titulo = Font(name="Calibri", size=14, bold=True, color="FFFFFF")
+    font_subtitulo = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
+    font_bold = Font(name="Calibri", size=11, bold=True)
+    font_normal = Font(name="Calibri", size=11)
+    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+
+    fill_navy = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    fill_blue = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    fill_gold = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+
+    border_thin = Border(
+        left=Side(style='thin', color='D1D5DB'),
+        right=Side(style='thin', color='D1D5DB'),
+        top=Side(style='thin', color='D1D5DB'),
+        bottom=Side(style='thin', color='D1D5DB')
+    )
+    border_double = Border(
+        left=Side(style='thin', color='D1D5DB'),
+        right=Side(style='thin', color='D1D5DB'),
+        top=Side(style='thin', color='D1D5DB'),
+        bottom=Side(style='double', color='1E3A8A')
+    )
+
+    # 1. BANNER PRINCIPAL
+    ws_macro.merge_cells("A1:G1")
+    cell_t = ws_macro["A1"]
+    cell_t.value = "COINTECA S.A.S. — LIQUIDACIÓN CONSOLIDADA DE MACROPROYECTO"
+    cell_t.font = font_titulo
+    cell_t.fill = fill_navy
+    cell_t.alignment = Alignment(horizontal="center", vertical="center")
+    ws_macro.row_dimensions[1].height = 32
+
+    # Metadatos del macroproyecto
+    datos_meta = [
+        ("MACROPROYECTO:", macro.nombre.upper(), "ESTADO:", macro.estado),
+        ("MANIOBRA EMCALI:", macro.numero_maniobra_emcali or "N/A", "FECHA EMISIÓN:", timezone.now().strftime("%d/%m/%Y")),
+        ("MANIOBRA COINTECA:", macro.numero_maniobra_cointeca or "N/A", "TOTAL PROYECTOS:", f"{proyectos.count()} proyectos")
+    ]
+
+    r_m = 3
+    for fila_m in datos_meta:
+        ws_macro.cell(row=r_m, column=1, value=fila_m[0]).font = font_bold
+        ws_macro.cell(row=r_m, column=2, value=fila_m[1]).font = font_normal
+        ws_macro.cell(row=r_m, column=4, value=fila_m[2]).font = font_bold
+        ws_macro.cell(row=r_m, column=5, value=fila_m[3]).font = font_normal
+        r_m += 1
+
+    # TABLA 1: RESUMEN POR PROYECTO
+    r_m += 1
+    ws_macro.cell(row=r_m, column=1, value="1. CONSOLIDADO POR PROYECTO / CIRCUITO").font = font_subtitulo
+    r_m += 1
+
+    headers_proy = ["ITEM", "PROYECTO EMCALI", "TIPO DE RED", "ESTADO", "POSTES", "LUMINARIAS INST.", "TOTAL MANO DE OBRA ($)"]
+    ws_macro.append(headers_proy)
+    r_header_proy = ws_macro.max_row
+    ws_macro.row_dimensions[r_header_proy].height = 24
+    for c_i in range(1, 8):
+        c = ws_macro.cell(row=r_header_proy, column=c_i)
+        c.font = font_header
+        c.fill = fill_navy
+        c.alignment = Alignment(horizontal="center", vertical="center")
+
+    tot_postes_macro = 0
+    tot_lums_macro = 0
+    tot_dinero_macro = Decimal("0")
+    totales_globales_actividades = defaultdict(lambda: {"item": None, "cantidad": Decimal("0")})
+
+    proyectos_data = []
+
+    for idx, proy in enumerate(proyectos, 1):
+        apoyos_proy = Apoyo.objects.filter(proyecto=proy).order_by("numero_apoyo", "id")
+        num_postes = apoyos_proy.count()
+        tot_postes_macro += num_postes
+
+        num_lums = ApoyoLuminaria.objects.filter(apoyo__proyecto=proy).count()
+        tot_lums_macro += num_lums
+
+        apoyos_ids = apoyos_proy.values_list("id", flat=True)
+        amos = ApoyoManoObra.objects.filter(apoyo_id__in=apoyos_ids).select_related("item_mano_obra")
+        dinero_proy = Decimal("0")
+        totales_item_proy = defaultdict(Decimal)
+
+        for amo in amos:
+            totales_item_proy[amo.item_mano_obra] += amo.cantidad
+            totales_globales_actividades[amo.item_mano_obra.id]["item"] = amo.item_mano_obra
+            totales_globales_actividades[amo.item_mano_obra.id]["cantidad"] += amo.cantidad
+
+        for it, cant in totales_item_proy.items():
+            dinero_proy += cant * it.valor_unitario
+
+        tot_dinero_macro += dinero_proy
+
+        proyectos_data.append({
+            "proyecto": proy,
+            "apoyos": apoyos_proy,
+            "totales_item": totales_item_proy,
+            "dinero_total": dinero_proy
+        })
+
+        ws_macro.append([
+            idx,
+            proy.numero_emcali,
+            proy.get_tipo_display() if hasattr(proy, 'get_tipo_display') else proy.tipo,
+            proy.estado,
+            num_postes,
+            num_lums,
+            float(dinero_proy)
+        ])
+        r_actual = ws_macro.max_row
+        for c_i in range(1, 8):
+            cell = ws_macro.cell(row=r_actual, column=c_i)
+            cell.border = border_thin
+            if c_i in [1, 5, 6]:
+                cell.alignment = Alignment(horizontal="center")
+            elif c_i == 7:
+                cell.alignment = Alignment(horizontal="right")
+                cell.number_format = '"$"#,##0'
+
+    # Fila de totales de proyectos
+    ws_macro.append(["", "TOTAL MACROPROYECTO", "", "", tot_postes_macro, tot_lums_macro, float(tot_dinero_macro)])
+    r_tot_p = ws_macro.max_row
+    ws_macro.row_dimensions[r_tot_p].height = 22
+    for c_i in range(1, 8):
+        cell = ws_macro.cell(row=r_tot_p, column=c_i)
+        cell.font = font_bold
+        cell.fill = fill_gold
+        cell.border = border_double
+        if c_i in [5, 6]:
+            cell.alignment = Alignment(horizontal="center")
+        elif c_i == 7:
+            cell.alignment = Alignment(horizontal="right")
+            cell.number_format = '"$"#,##0'
+
+    # TABLA 2: CONSOLIDADO MAESTRO DE ACTIVIDADES (TODO EL MACROPROYECTO)
+    ws_macro.append([])
+    ws_macro.append([])
+    ws_macro.cell(row=ws_macro.max_row, column=1, value="2. CONSOLIDADO GLOBAL DE ACTIVIDADES DE MANO DE OBRA (TODA LA OBRA)").font = font_subtitulo
+
+    headers_mo = ["ITEM", "CÓDIGO", "DESCRIPCIÓN DE LA ACTIVIDAD / SERVICIO", "UND", "CANTIDAD TOTAL", "VALOR UNITARIO ($)", "VALOR TOTAL ($)"]
+    ws_macro.append(headers_mo)
+    r_header_mo = ws_macro.max_row
+    ws_macro.row_dimensions[r_header_mo].height = 24
+    for c_i in range(1, 8):
+        c = ws_macro.cell(row=r_header_mo, column=c_i)
+        c.font = font_header
+        c.fill = fill_blue
+        c.alignment = Alignment(horizontal="center", vertical="center")
+
+    actividades_ordenadas = sorted(
+        [v for v in totales_globales_actividades.values() if v["cantidad"] > 0],
+        key=lambda x: x["item"].codigo
+    )
+
+    tot_acum_mo = Decimal("0")
+    for a_idx, act in enumerate(actividades_ordenadas, 1):
+        item_obj = act["item"]
+        cant_tot = act["cantidad"]
+        subt = cant_tot * item_obj.valor_unitario
+        tot_acum_mo += subt
+
+        ws_macro.append([
+            a_idx,
+            item_obj.codigo,
+            item_obj.descripcion,
+            item_obj.unidad,
+            float(cant_tot),
+            float(item_obj.valor_unitario),
+            float(subt)
+        ])
+        r_actual_mo = ws_macro.max_row
+        for c_i in range(1, 8):
+            cell = ws_macro.cell(row=r_actual_mo, column=c_i)
+            cell.border = border_thin
+            if c_i in [1, 2, 4]:
+                cell.alignment = Alignment(horizontal="center")
+            elif c_i == 5:
+                cell.alignment = Alignment(horizontal="right")
+                cell.number_format = '#,##0.00'
+            elif c_i in [6, 7]:
+                cell.alignment = Alignment(horizontal="right")
+                cell.number_format = '"$"#,##0'
+
+    # Fila total de actividades
+    ws_macro.append(["", "TOTAL MANO DE OBRA CONSOLIDADA", "", "", "", "", float(tot_acum_mo)])
+    r_tot_mo = ws_macro.max_row
+    ws_macro.row_dimensions[r_tot_mo].height = 22
+    for c_i in range(1, 8):
+        cell = ws_macro.cell(row=r_tot_mo, column=c_i)
+        cell.font = font_bold
+        cell.fill = fill_gold
+        cell.border = border_double
+        if c_i == 7:
+            cell.alignment = Alignment(horizontal="right")
+            cell.number_format = '"$"#,##0'
+
+    # Ajustar anchos en hoja de resumen
+    ws_macro.column_dimensions['A'].width = 8
+    ws_macro.column_dimensions['B'].width = 24
+    ws_macro.column_dimensions['C'].width = 52
+    ws_macro.column_dimensions['D'].width = 16
+    ws_macro.column_dimensions['E'].width = 18
+    ws_macro.column_dimensions['F'].width = 20
+    ws_macro.column_dimensions['G'].width = 24
+
+    # PESTAÑAS INDIVIDUALES POR CADA PROYECTO (Desglose poste a poste)
+    for pdata in proyectos_data:
+        proy = pdata["proyecto"]
+        apoyos_proy = pdata["apoyos"]
+        totales_item_proy = pdata["totales_item"]
+        safe_title = f"PROY_{proy.numero_emcali}"[:31]
+        ws_det = wb.create_sheet(title=safe_title)
+
+        ws_det.append(["PROYECTO:", proy.numero_emcali, "TIPO:", proy.get_tipo_display() if hasattr(proy, 'get_tipo_display') else proy.tipo, "MACROPROYECTO:", macro.nombre])
+        ws_det.append([])
+
+        encabezado_postes = ["CÓDIGO", "DESCRIPCIÓN ACTIVIDAD", "UND", "CANT. TOTAL", "VR. UNITARIO ($)", "SUBTOTAL ($)"]
+        for ap in apoyos_proy:
+            encabezado_postes.append(ap.nodo or f"P{ap.numero_apoyo}")
+
+        ws_det.append(encabezado_postes)
+        r_head = ws_det.max_row
+        ws_det.row_dimensions[r_head].height = 24
+        for c_i in range(1, len(encabezado_postes) + 1):
+            c = ws_det.cell(row=r_head, column=c_i)
+            c.font = font_header
+            c.fill = fill_navy
+            c.alignment = Alignment(horizontal="center", vertical="center")
+
+        items_proy_ordenados = sorted(
+            [it for it in totales_item_proy.keys() if totales_item_proy[it] > 0],
+            key=lambda x: x.codigo
+        )
+
+        for item in items_proy_ordenados:
+            tot = totales_item_proy.get(item, Decimal("0"))
+            v_unit = item.valor_unitario
+            sub_val = tot * v_unit
+            row_vals = [item.codigo, item.descripcion, item.unidad, float(tot), float(v_unit), float(sub_val)]
+            for ap in apoyos_proy:
+                amo = ApoyoManoObra.objects.filter(apoyo=ap, item_mano_obra=item).first()
+                row_vals.append(float(amo.cantidad) if amo and amo.cantidad > 0 else 0)
+            ws_det.append(row_vals)
+            r_det = ws_det.max_row
+            for c_i in range(1, len(row_vals) + 1):
+                cell = ws_det.cell(row=r_det, column=c_i)
+                cell.border = border_thin
+                if c_i in [1, 3]:
+                    cell.alignment = Alignment(horizontal="center")
+                elif c_i == 4:
+                    cell.alignment = Alignment(horizontal="right")
+                    cell.number_format = '#,##0.00'
+                elif c_i in [5, 6]:
+                    cell.alignment = Alignment(horizontal="right")
+                    cell.number_format = '"$"#,##0'
+                elif c_i > 6:
+                    cell.alignment = Alignment(horizontal="center")
+
+        # Fila total del proyecto
+        fila_tot_proy = ["", "TOTAL PROYECTO", "", "", "", float(pdata["dinero_total"])]
+        for _ in apoyos_proy:
+            fila_tot_proy.append("")
+        ws_det.append(fila_tot_proy)
+        r_f_tot = ws_det.max_row
+        ws_det.row_dimensions[r_f_tot].height = 22
+        for c_i in range(1, len(fila_tot_proy) + 1):
+            cell = ws_det.cell(row=r_f_tot, column=c_i)
+            cell.font = font_bold
+            cell.fill = fill_gold
+            cell.border = border_double
+            if c_i == 6:
+                cell.alignment = Alignment(horizontal="right")
+                cell.number_format = '"$"#,##0'
+
+        ws_det.column_dimensions['A'].width = 12
+        ws_det.column_dimensions['B'].width = 45
+        ws_det.column_dimensions['C'].width = 8
+        ws_det.column_dimensions['D'].width = 14
+        ws_det.column_dimensions['E'].width = 16
+        ws_det.column_dimensions['F'].width = 18
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    nombre_archivo = f"Liquidacion_Macroproyecto_{macro.nombre.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d')}.xlsx"
+    response = HttpResponse(
+        output.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
     return response

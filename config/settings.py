@@ -65,6 +65,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.alertas',
             ],
+            'builtins': [
+                'core.templatetags.filtros',
+            ],
         },
     },
 ]
@@ -107,6 +110,13 @@ TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 
 USE_TZ = True
+
+FORMAT_MODULE_PATH = [
+    'config.formats',
+]
+DECIMAL_SEPARATOR = '.'
+THOUSAND_SEPARATOR = ','
+NUMBER_GROUPING = 3
 
 STATIC_URL = 'static/'
 

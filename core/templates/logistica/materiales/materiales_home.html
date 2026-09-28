@@ -47,6 +47,14 @@
             <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ total_materiales }}</span>
         </button>
 
+        <button type="button" onclick="cambiarPestanaBodega('historial')" id="tabBtnHistorialBodega"
+                class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-bodega">
+            📋 Historial de Movimientos
+            <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 font-bold border border-blue-300">
+                {{ total_movimientos }}
+            </span>
+        </button>
+
         <button type="button" onclick="cambiarPestanaBodega('devoluciones')" id="tabBtnDevolucionesBodega"
                 class="py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-bodega">
             ↩️ Retiros de Postes y Devoluciones
@@ -108,13 +116,19 @@
                                 </span>
                             </td>
 
-                            <td class="px-6 py-3 text-right font-black text-base {% if material.inventario.cantidad > 0 %}text-emerald-700{% else %}text-gray-400{% endif %}">
-                                {{ material.inventario.cantidad|floatformat:1 }}
+                            <td class="px-6 py-3 text-right font-black text-base {% if material.inventario.cantidad > 0 %}text-emerald-700{% elif material.inventario.cantidad < 0 %}text-red-600 font-extrabold{% else %}text-gray-400{% endif %}">
+                                {% if material.inventario.cantidad < 0 %}
+                                    <span class="inline-flex items-center gap-1 text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded text-sm font-black">
+                                        ⚠️ {{ material.inventario.cantidad|floatformat }}
+                                    </span>
+                                {% else %}
+                                    {{ material.inventario.cantidad|floatformat }}
+                                {% endif %}
                             </td>
 
                             <td class="px-6 py-3 text-center">
                                 <button type="button"
-                                        onclick="abrirModalAjuste('{{ material.id }}', '{{ material.descripcion|escapejs }}', '{{ material.inventario.cantidad|floatformat:1 }}', '{{ material.unidad|default:'UN'|escapejs }}')"
+                                        onclick="abrirModalAjuste('{{ material.id }}', '{{ material.descripcion|escapejs }}', '{{ material.inventario.cantidad|floatformat }}', '{{ material.unidad|default:'UN'|escapejs }}')"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-soft hover:bg-blue-100 text-primary text-xs font-bold rounded-lg border border-blue-200 transition">
                                     Cargar Stock
                                 </button>
@@ -133,7 +147,147 @@
         </div>
     </div>
 
-    <!-- PANEL 2: HISTORIAL DE RETIROS DE APOYOS Y DEVOLUCIONES A BODEGA -->
+    <!-- PANEL 2: HISTORIAL DE MOVIMIENTOS Y AUDITORÍA DE BODEGA -->
+    <div id="panelHistorialBodega" class="space-y-4 pestana-panel-bodega hidden">
+        <!-- Buscador y Métricas del Historial -->
+        <div class="bg-card rounded-xl shadow-sm border border-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="w-full sm:w-96 relative">
+                <input type="text" id="buscadorHistorial" placeholder="Buscar por material, usuario, proyecto, tipo..."
+                       class="w-full border border-border-strong rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <span class="px-3 py-1.5 rounded-lg bg-muted border">
+                    Total Movimientos: <strong class="text-foreground text-sm">{{ total_movimientos }}</strong>
+                </span>
+                <span class="px-2.5 py-1 rounded bg-red-50 text-red-700 border border-red-200">
+                    🔴 Despachos / Salidas
+                </span>
+                <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    🟢 Ingresos / Entradas
+                </span>
+                <span class="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                    🟡 Ajustes Físicos
+                </span>
+            </div>
+        </div>
+
+        <!-- Tabla de Historial -->
+        <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+            <div class="overflow-x-auto max-h-[75vh]">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-sm" id="tablaHistorial">
+                    <thead class="bg-slate-900 text-white uppercase text-xs font-semibold sticky top-0 z-10">
+                        <tr>
+                            <th class="px-4 py-3.5 w-36">Fecha / Hora</th>
+                            <th class="px-5 py-3.5">Material</th>
+                            <th class="px-4 py-3.5 text-center w-36">Operación</th>
+                            <th class="px-4 py-3.5 text-right w-36">Cantidad</th>
+                            <th class="px-4 py-3.5 text-center w-44">Saldo en Bodega</th>
+                            <th class="px-5 py-3.5">Destino / Detalle</th>
+                            <th class="px-4 py-3.5 w-40">¿Quién lo hizo?</th>
+                            <th class="px-5 py-3.5">Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-card" id="filasHistorial">
+                        {% for mov in movimientos %}
+                        <tr class="hover:bg-slate-50/80 transition fila-historial">
+                            <td class="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                                📅 {{ mov.fecha|date:"d/m/Y" }}<br>
+                                <span class="text-[11px] text-gray-500 font-semibold">⏰ {{ mov.fecha|date:"h:i A" }}</span>
+                            </td>
+
+                            <td class="px-5 py-3">
+                                <div class="font-bold text-foreground text-sm">{{ mov.material.descripcion }}</div>
+                                <span class="text-xs font-mono text-muted-foreground">Ítem #{{ mov.material.item }}</span>
+                            </td>
+
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
+                                {% if mov.tipo_movimiento == 'DESPACHO' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-red-100 text-red-800 border border-red-200">
+                                        🔴 Despacho
+                                    </span>
+                                {% elif mov.tipo_movimiento == 'ENTRADA' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        🟢 Ingreso
+                                    </span>
+                                {% elif mov.tipo_movimiento == 'DEVOLUCION' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-200">
+                                        ↩️ Retorno / Retiro
+                                    </span>
+                                {% elif mov.tipo_movimiento == 'AJUSTE' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-200">
+                                        🟡 Ajuste Físico
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-800 border border-gray-200">
+                                        {{ mov.tipo_movimiento }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-4 py-3 text-right font-black text-sm whitespace-nowrap">
+                                {% if mov.cantidad < 0 %}
+                                    <span class="text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200 font-black">
+                                        {{ mov.cantidad|floatformat }} {{ mov.material.unidad|default:'UN' }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-black">
+                                        +{{ mov.cantidad|floatformat }} {{ mov.material.unidad|default:'UN' }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-4 py-3 text-center whitespace-nowrap text-xs font-semibold">
+                                <span class="text-gray-500">{{ mov.stock_anterior|floatformat }}</span>
+                                <span class="mx-1 text-gray-400 font-bold">➔</span>
+                                {% if mov.stock_resultante < 0 %}
+                                    <span class="text-red-600 font-black bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
+                                        ⚠️ {{ mov.stock_resultante|floatformat }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-foreground font-black bg-slate-100 px-1.5 py-0.5 rounded">
+                                        {{ mov.stock_resultante|floatformat }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-5 py-3 text-xs">
+                                {% if mov.proyecto %}
+                                    <div class="font-bold text-primary flex items-center gap-1">
+                                        🏢 {{ mov.proyecto.numero_emcali }}
+                                        {% if mov.apoyo %}
+                                            <span class="text-foreground font-semibold">· Poste {{ mov.apoyo.nodo|default:mov.apoyo.numero_apoyo }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                <div class="text-muted-foreground">{{ mov.detalle_origen_destino|default:"-" }}</div>
+                            </td>
+
+                            <td class="px-4 py-3 text-xs whitespace-nowrap">
+                                <div class="font-bold text-foreground flex items-center gap-1">
+                                    <span>👤</span>
+                                    <span>{{ mov.usuario.get_full_name|default:mov.usuario.username|default:mov.usuario_nombre|default:"Sistema" }}</span>
+                                </div>
+                            </td>
+
+                            <td class="px-5 py-3 text-xs text-muted-foreground max-w-xs truncate" title="{{ mov.observacion }}">
+                                {{ mov.observacion|default:"-" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-10 text-muted-foreground text-sm">
+                                📦 Aún no se registran movimientos en el historial de bodega. A medida que se despache material a postes o se ajuste stock, aparecerán aquí automáticamente.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 3: HISTORIAL DE RETIROS DE APOYOS Y DEVOLUCIONES A BODEGA -->
     <div id="panelDevolucionesBodega" class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-6 pestana-panel-bodega hidden">
         
         <!-- SECCIÓN A: RETIROS DIRECTOS DE APOYOS / POSTES -->
@@ -302,7 +456,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="modalMaterialCantidad">Nueva Existencia *</label>
-                    <input type="number" step="0.01" min="0" name="cantidad" id="modalMaterialCantidad" required
+                    <input type="number" step="any" name="cantidad" id="modalMaterialCantidad" required
                            class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-black text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
                 </div>
 
@@ -317,6 +471,12 @@
                         <option value="JGO">JGO (Juego)</option>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1" for="modalMaterialObservacion">Motivo / Observación del Ajuste</label>
+                <input type="text" name="observacion" id="modalMaterialObservacion" placeholder="Ej: Conteo físico, compra local, corrección de inventario..."
+                       class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
             </div>
 
             <p class="text-xs text-slate-500 italic bg-blue-50/50 p-2.5 rounded-lg border border-blue-100">
@@ -390,18 +550,42 @@
 </div>
 
 <script>
-    // Buscador en tiempo real de materiales
+    // Buscadores en tiempo real
     document.addEventListener('DOMContentLoaded', function () {
+        // Buscador de existencias
         const inputBuscador = document.getElementById('buscadorMateriales');
         const filas = document.querySelectorAll('.fila-inventario');
 
-        inputBuscador.addEventListener('input', function () {
-            const query = this.value.toLowerCase().trim();
-            filas.forEach(function (fila) {
-                const texto = fila.textContent.toLowerCase();
-                fila.style.display = texto.includes(query) ? '' : 'none';
+        if (inputBuscador) {
+            inputBuscador.addEventListener('input', function () {
+                const query = this.value.toLowerCase().trim();
+                filas.forEach(function (fila) {
+                    const texto = fila.textContent.toLowerCase();
+                    fila.style.display = texto.includes(query) ? '' : 'none';
+                });
             });
-        });
+        }
+
+        // Buscador de historial
+        const inputHistorial = document.getElementById('buscadorHistorial');
+        const filasHistorial = document.querySelectorAll('.fila-historial');
+
+        if (inputHistorial) {
+            inputHistorial.addEventListener('input', function () {
+                const query = this.value.toLowerCase().trim();
+                filasHistorial.forEach(function (fila) {
+                    const texto = fila.textContent.toLowerCase();
+                    fila.style.display = texto.includes(query) ? '' : 'none';
+                });
+            });
+        }
+
+        // Detectar si la URL viene con ?tab=historial o ?tab=devoluciones
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam && ['stock', 'historial', 'devoluciones'].includes(tabParam)) {
+            cambiarPestanaBodega(tabParam);
+        }
     });
 
     // Modales
@@ -409,6 +593,8 @@
         document.getElementById('modalMaterialId').value = id;
         document.getElementById('modalMaterialNombre').value = nombre;
         document.getElementById('modalMaterialCantidad').value = cantidad;
+        const obsEl = document.getElementById('modalMaterialObservacion');
+        if (obsEl) obsEl.value = '';
         let uVal = (unidad || '').toUpperCase();
         if (uVal === 'U') uVal = 'UN';
         document.getElementById('modalMaterialUnidad').value = (['M', 'MT', 'UN', 'KG', 'JGO'].includes(uVal)) ? uVal : 'UN';
@@ -432,19 +618,32 @@
 
     function cambiarPestanaBodega(tabName) {
         const panelStock = document.getElementById('panelStockBodega');
+        const panelHistorial = document.getElementById('panelHistorialBodega');
         const panelDev = document.getElementById('panelDevolucionesBodega');
+
         const btnStock = document.getElementById('tabBtnStockBodega');
+        const btnHistorial = document.getElementById('tabBtnHistorialBodega');
         const btnDev = document.getElementById('tabBtnDevolucionesBodega');
+
+        // Ocultar todos los paneles
+        if (panelStock) panelStock.classList.add('hidden');
+        if (panelHistorial) panelHistorial.classList.add('hidden');
+        if (panelDev) panelDev.classList.add('hidden');
+
+        // Clases inactivas
+        const inactivoCls = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-bodega';
+        if (btnStock) btnStock.className = inactivoCls;
+        if (btnHistorial) btnHistorial.className = inactivoCls;
+        if (btnDev) btnDev.className = inactivoCls;
 
         if (tabName === 'stock') {
             if (panelStock) panelStock.classList.remove('hidden');
-            if (panelDev) panelDev.classList.add('hidden');
             if (btnStock) btnStock.className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-primary text-primary font-bold tab-btn-bodega';
-            if (btnDev) btnDev.className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-bodega';
+        } else if (tabName === 'historial') {
+            if (panelHistorial) panelHistorial.classList.remove('hidden');
+            if (btnHistorial) btnHistorial.className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-blue-600 text-blue-900 font-bold tab-btn-bodega';
         } else if (tabName === 'devoluciones') {
-            if (panelStock) panelStock.classList.add('hidden');
             if (panelDev) panelDev.classList.remove('hidden');
-            if (btnStock) btnStock.className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap text-muted-foreground hover:text-gray-700 tab-btn-bodega';
             if (btnDev) btnDev.className = 'py-3 px-5 text-sm transition flex items-center gap-2 whitespace-nowrap border-b-2 border-amber-600 text-amber-900 font-bold tab-btn-bodega';
         }
     }

@@ -991,7 +991,7 @@
                                         <option value="">-- Seleccionar material a despachar --</option>
                                         {% for mat in materiales_catalogo %}
                                             <option value="{{ mat.id }}">
-                                                [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
+                                                [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% elif mat.inventario.cantidad < 0 %}[⚠️ Déficit: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                                             </option>
                                         {% endfor %}
                                     </select>
@@ -1064,7 +1064,7 @@
             <option value="">-- Seleccionar material de bodega --</option>
             {% for mat in materiales_catalogo %}
                 <option value="{{ mat.id }}">
-                    [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
+                    [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% elif mat.inventario.cantidad < 0 %}[⚠️ Déficit: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                 </option>
             {% endfor %}
         </select>
@@ -1275,9 +1275,16 @@ let currentEditingApoyoId = null;
 let huboDespachoEnModal = false;
 
 function actualizarStockEnTodosLosSelects(materialId, stockRestante, item, descripcion, unidad) {
-    const stockLabel = stockRestante > 0
-        ? `[Stock: ${stockRestante} ${unidad}]`
-        : `[⚠️ Sin stock: 0 ${unidad}]`;
+    let stockLabel = '';
+    const numStock = parseFloat(stockRestante);
+    const stockLimpio = Number.isInteger(numStock) ? numStock : parseFloat(numStock.toFixed(2));
+    if (numStock > 0) {
+        stockLabel = `[Stock: ${stockLimpio} ${unidad}]`;
+    } else if (numStock < 0) {
+        stockLabel = `[⚠️ Déficit: ${stockLimpio} ${unidad}]`;
+    } else {
+        stockLabel = `[⚠️ Sin stock: 0 ${unidad}]`;
+    }
     const nuevoTexto = `[${item}] ${descripcion} ${stockLabel}`;
 
     // 1. Actualizar en el selector de despacho de bodega
@@ -1697,7 +1704,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         textoAlerta.innerHTML = data.warning;
                     } else {
                         alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-emerald-100 text-emerald-900 border border-emerald-300 transition-all';
-                        textoAlerta.innerHTML = `✅ <strong>¡Despacho Exitoso!</strong> Se despacharon <strong>${data.cantidad_despachada} ${data.unidad}</strong> de <em>${data.material_descripcion}</em> al poste. (Stock restante en bodega: <strong>${data.stock_restante} ${data.unidad}</strong>). ¡Puedes despachar otro material!`;
+                        const cantDespFmt = Number.isInteger(data.cantidad_despachada) ? data.cantidad_despachada : parseFloat(data.cantidad_despachada.toFixed(2));
+                        const stockRestFmt = Number.isInteger(data.stock_restante) ? data.stock_restante : parseFloat(data.stock_restante.toFixed(2));
+                        textoAlerta.innerHTML = `✅ <strong>¡Despacho Exitoso!</strong> Se despacharon <strong>${cantDespFmt} ${data.unidad}</strong> de <em>${data.material_descripcion}</em> al poste. (Stock restante en bodega: <strong>${stockRestFmt} ${data.unidad}</strong>). ¡Puedes despachar otro material!`;
                     }
                     alertaDespacho.classList.remove('hidden');
                 }

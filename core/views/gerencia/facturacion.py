@@ -1,3 +1,7 @@
+import os
+import openpyxl
+from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -7,6 +11,20 @@ from core.models import (
     SeguimientoFacturacion,
 )
 
+MESES_ORDEN = [
+    ('enero', 'Enero'),
+    ('febrero', 'Febrero'),
+    ('marzo', 'Marzo'),
+    ('abril', 'Abril'),
+    ('mayo', 'Mayo'),
+    ('junio', 'Junio'),
+    ('julio', 'Julio'),
+    ('agosto', 'Agosto'),
+    ('septiembre', 'Septiembre'),
+    ('octubre', 'Octubre'),
+    ('noviembre', 'Noviembre'),
+    ('diciembre', 'Diciembre'),
+]
 
 # Vistas de Facturación dentro de Gerencia
 @login_required
@@ -18,9 +36,26 @@ def facturacion(request):
     total_real = sum([s.facturacion_real for s in seguimientos]) if seguimientos else 0
     porcentaje_global = round((total_real / total_meta * 100), 1) if total_meta > 0 else 0
 
+    # Consolidado mensual para la matriz anual (Enero a Diciembre)
+    matriz_mensual = []
+    for mes_cod, mes_nom in MESES_ORDEN:
+        segs_mes = [s for s in seguimientos if s.mes.lower() == mes_cod]
+        meta_mes = sum([s.meta_facturacion for s in segs_mes])
+        real_mes = sum([s.facturacion_real for s in segs_mes])
+        pct_mes = round((real_mes / meta_mes * 100), 1) if meta_mes > 0 else 0
+        matriz_mensual.append({
+            'codigo': mes_cod,
+            'nombre': mes_nom,
+            'meta': meta_mes,
+            'real': real_mes,
+            'porcentaje': pct_mes,
+            'num_registros': len(segs_mes),
+        })
+
     return render(request, 'gerencia/facturacion/facturacion.html', {
         'proyectos': proyectos,
         'seguimientos': seguimientos,
+        'matriz_mensual': matriz_mensual,
         'total_meta': total_meta,
         'total_real': total_real,
         'porcentaje_global': porcentaje_global,
@@ -71,4 +106,46 @@ def editar_facturacion(request, id):
         'seguimiento': seguimiento,
         'proyectos': proyectos
     })
+
+@login_required
+def exportar_facturacion_excel(request):
+    """
+    Exporta el libro de seguimiento de facturación (hoja SEGUIMIENTO FACTURACION de GER-FR-02).
+    """
+    ruta_plantilla = os.path.join(settings.BASE_DIR, 'plantillas_excel', 'formato_tablero_indicadores.xlsx')
+    if os.path.exists(ruta_plantilla):
+        wb = openpyxl.load_workbook(ruta_plantilla)
+    else:
+        wb = openpyxl.Workbook()
+        wb.active.title = "SEGUIMIENTO FACTURACION"
+
+    ws = wb['SEGUIMIENTO FACTURACION'] if 'SEGUIMIENTO FACTURACION' in wb.sheetnames else wb.active
+
+    seguimientos = SeguimientoFacturacion.objects.select_related('proyecto').all()
+
+    # Mapear cada mes de Enero a Diciembre
+    fila_base = 4
+    for i, (mes_cod, mes_nom) in enumerate(MESES_ORDEN):
+        fila = fila_base + i
+        segs_mes = [s for s in seguimientos if s.mes.lower() == mes_cod]
+        meta_mes = sum([float(s.meta_facturacion) for s in segs_mes])
+        real_mes = sum([float(s.facturacion_real) for s in segs_mes])
+        pct_mes = round((real_mes / meta_mes * 100), 1) if meta_mes > 0 else 0
+
+        ws.cell(row=fila, column=2, value=mes_nom)
+        if meta_mes > 0:
+            ws.cell(row=fila, column=3, value=meta_mes)
+            ws.cell(row=fila, column=3).number_format = '$#,##0'
+        if real_mes > 0:
+            ws.cell(row=fila, column=4, value=real_mes)
+            ws.cell(row=fila, column=4).number_format = '$#,##0'
+            ws.cell(row=fila, column=5, value=f"{pct_mes}%")
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="GER-FR-02_Seguimiento_Facturacion.xlsx"'
+    wb.save(response)
+    return response
+
 

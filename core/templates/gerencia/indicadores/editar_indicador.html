@@ -11,26 +11,26 @@
 
         <div>
             <label class="block text-sm font-semibold mb-1" for="campo-perspectiva">Perspectiva</label>
-            <select id="campo-perspectiva" name="perspectiva" class="w-full border rounded px-3 py-2">
+            <select id="campo-perspectiva" name="perspectiva" class="w-full border rounded px-3 py-2 bg-background">
                 <option value="financiera" {% if indicador.perspectiva == 'financiera' %}selected{% endif %}>Financiera</option>
                 <option value="comercial" {% if indicador.perspectiva == 'comercial' %}selected{% endif %}>Comercial</option>
                 <option value="operativa" {% if indicador.perspectiva == 'operativa' %}selected{% endif %}>Operativa</option>
                 <option value="cliente" {% if indicador.perspectiva == 'cliente' %}selected{% endif %}>Cliente</option>
                 <option value="aprendizaje" {% if indicador.perspectiva == 'aprendizaje' %}selected{% endif %}>Aprendizaje</option>
             </select>
-            </select>
         </div>
 
         <div>
-            <label class="block text-sm font-semibold mb-1" for="campo-nombre">Nombre del indicadoricador (KPI)</label>
+            <label class="block text-sm font-semibold mb-1" for="campo-nombre">Nombre del Indicador (KPI)</label>
             <input id="campo-nombre" type="text" name="nombre" required
                 value="{{ indicador.nombre }}"
-                class="w-full border rounded px-3 py-2">
+                class="w-full border rounded px-3 py-2 bg-background">
         </div>
 
         <div>
-            <textarea name="definicion" required rows="3"
-                class="w-full border rounded px-3 py-2">{{ indicador.definicion }}</textarea>
+            <label class="block text-sm font-semibold mb-1" for="campo-definicion">Definición Técnica / Fórmula</label>
+            <textarea id="campo-definicion" name="definicion" required rows="3"
+                class="w-full border rounded px-3 py-2 bg-background">{{ indicador.definicion }}</textarea>
         </div>
 
         <div>

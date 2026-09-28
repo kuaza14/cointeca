@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Sum
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 class CajaMenor(models.Model):
     fecha_tramite = models.DateField()
@@ -1459,4 +1460,97 @@ class DetalleDevolucionMaterial(models.Model):
 
     def __str__(self):
         return f"{self.material.descripcion}: {self.cantidad}"
+
+
+class MovimientoInventario(models.Model):
+    class Tipos(models.TextChoices):
+        DESPACHO = "DESPACHO", "Despacho a Poste / Obra"
+        SALIDA_MANUAL = "SALIDA_MANUAL", "Salida Manual"
+        ENTRADA = "ENTRADA", "Entrada / Ingreso a Bodega"
+        DEVOLUCION = "DEVOLUCION", "Devolución / Desmonte"
+        AJUSTE = "AJUSTE", "Ajuste de Inventario"
+
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.CASCADE,
+        related_name="movimientos_inventario",
+        verbose_name="Material"
+    )
+    tipo_movimiento = models.CharField(
+        max_length=25,
+        choices=Tipos.choices,
+        default=Tipos.DESPACHO,
+        verbose_name="Tipo de Movimiento"
+    )
+    cantidad = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Cantidad Movida"
+    )
+    stock_anterior = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name="Stock Antes"
+    )
+    stock_resultante = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name="Stock Resultante"
+    )
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_inventario",
+        verbose_name="Usuario Responsable"
+    )
+    usuario_nombre = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+        verbose_name="Nombre del Responsable"
+    )
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_inventario",
+        verbose_name="Proyecto Relacionado"
+    )
+    apoyo = models.ForeignKey(
+        Apoyo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_inventario",
+        verbose_name="Apoyo / Poste Relacionado"
+    )
+    detalle_origen_destino = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Detalle Origen / Destino"
+    )
+    observacion = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observación"
+    )
+    fecha = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Fecha y Hora"
+    )
+
+    class Meta:
+        verbose_name = "Movimiento de Inventario"
+        verbose_name_plural = "Movimientos de Inventario"
+        ordering = ["-fecha", "-id"]
+
+    def __str__(self):
+        return f"{self.fecha.strftime('%d/%m/%Y %H:%M')} - {self.material.descripcion} ({self.get_tipo_movimiento_display()}): {self.cantidad}"
+
 

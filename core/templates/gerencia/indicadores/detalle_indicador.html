@@ -1,74 +1,122 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
 
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">{{ indicador.nombre }}</h1>
-    <div class="flex gap-3">
-        <a href="/indicadores/{{ indicador.id }}/seguimiento/"
-           class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover">
-            + Registrar Seguimiento
-        </a>
-        <a href="/indicadores/"
-           class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-            Volver
-        </a>
+    <!-- Encabezado con Botones de Acción -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase
+                    {% if indicador.perspectiva == 'financiera' %}bg-blue-100 text-blue-800
+                    {% elif indicador.perspectiva == 'comercial' %}bg-emerald-100 text-emerald-800
+                    {% elif indicador.perspectiva == 'operativa' %}bg-amber-100 text-amber-800
+                    {% elif indicador.perspectiva == 'cliente' %}bg-purple-100 text-purple-800
+                    {% else %}bg-indigo-100 text-indigo-800{% endif %}">
+                    Perspectiva {{ indicador.get_perspectiva_display }}
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700">
+                    Frecuencia: {{ indicador.get_frecuencia_display }}
+                </span>
+            </div>
+            <h1 class="text-2xl font-black text-foreground tracking-tight">{{ indicador.nombre }}</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{% url 'agregar_seguimiento' indicador.id %}"
+               class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>+ Registrar Seguimiento</span>
+            </a>
+            <a href="{% url 'editar_indicador' indicador.id %}"
+               class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>Editar</span>
+            </a>
+            <a href="{% url 'indicadores' %}"
+               class="inline-flex items-center gap-1 bg-secondary hover:bg-secondary/80 text-foreground px-3.5 py-2 rounded-xl font-bold text-xs border border-border shadow-xs transition-all">
+                <span>← Volver</span>
+            </a>
+        </div>
     </div>
-</div>
 
-<!-- Info del indicador -->
-<div class="grid grid-cols-3 gap-4 mb-6">
-    <div class="bg-card rounded shadow p-4">
-        <p class="text-sm text-muted-foreground">Perspectiva</p>
-        <p class="font-bold text-lg capitalize">{{ indicador.perspectiva }}</p>
+    <!-- Tarjetas de Información Clave -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-card border border-border rounded-xl p-4 shadow-xs">
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Perspectiva</p>
+            <p class="font-black text-lg text-foreground mt-1 capitalize">{{ indicador.perspectiva }}</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-4 shadow-xs border-l-4 border-l-emerald-600">
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Meta Anual</p>
+            <p class="font-black text-xl text-emerald-700 font-mono mt-1">{{ indicador.meta_anual }}</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-4 shadow-xs">
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Frecuencia de Medición</p>
+            <p class="font-black text-lg text-foreground mt-1">{{ indicador.get_frecuencia_display }}</p>
+        </div>
     </div>
-    <div class="bg-card rounded shadow p-4">
-        <p class="text-sm text-muted-foreground">Meta Anual</p>
-        <p class="font-bold text-lg text-success">{{ indicador.meta_anual }}</p>
-    </div>
-    <div class="bg-card rounded shadow p-4">
-        <p class="text-sm text-muted-foreground">Frecuencia</p>
-        <p class="font-bold text-lg">{{ indicador.get_frecuencia_display }}</p>
-    </div>
-</div>
 
-<!-- Definicion -->
-<div class="bg-card rounded shadow p-4 mb-6">
-    <p class="text-sm text-muted-foreground mb-1">Definición Técnica</p>
-    <p class="text-foreground">{{ indicador.definicion }}</p>
-</div>
-
-<!-- Tabla de seguimientos -->
-<div class="bg-card shadow rounded-lg overflow-hidden">
-    <div class="px-4 py-3 bg-neutral text-white font-semibold">
-        Historial de Seguimiento
+    <!-- Definición Técnica -->
+    <div class="bg-card border border-border rounded-xl p-5 shadow-xs">
+        <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Definición Técnica / Fórmula de Cálculo</h3>
+        <p class="text-sm font-medium text-foreground leading-relaxed">{{ indicador.definicion }}</p>
     </div>
-    <div class="overflow-x-auto">
-<table class="min-w-full text-sm text-left">
-        <thead class="bg-muted text-foreground">
-            <tr>
-                <th class="px-4 py-3">Fecha</th>
-                <th class="px-4 py-3">Valor Obtenido</th>
-                <th class="px-4 py-3">Observaciones</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y">
-            {% for s in seguimientos %}
-            <tr class="hover:bg-muted transition">
-                <td class="px-4 py-3">{{ s.fecha }}</td>
-                <td class="px-4 py-3 font-semibold text-primary">{{ s.valor_obtenido }}</td>
-                <td class="px-4 py-3 text-muted-foreground">{{ s.observaciones|default:"-" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="px-4 py-6 text-center text-gray-400">
-                    No hay seguimientos registrados aún.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-</div>
 
+    <!-- Tabla de Seguimientos Históricos -->
+    <div class="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
+        <div class="px-5 py-3.5 bg-muted/60 border-b border-border flex items-center justify-between">
+            <h3 class="font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-2">
+                <span>📈</span>
+                <span>Historial de Mediciones & Seguimiento</span>
+            </h3>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">
+                {{ seguimientos|length }} registros
+            </span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs text-left">
+                <thead class="bg-muted/30 text-muted-foreground uppercase text-[10px] font-bold tracking-wider border-b border-border">
+                    <tr>
+                        <th class="px-4 py-3 min-w-[120px]">Fecha</th>
+                        <th class="px-4 py-3 min-w-[140px]">Valor Obtenido</th>
+                        <th class="px-4 py-3">Observaciones</th>
+                        <th class="px-4 py-3 text-center min-w-[100px] w-28">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border/60">
+                    {% for s in seguimientos %}
+                    <tr class="hover:bg-muted/40 transition-colors">
+                        <td class="px-4 py-3 font-semibold text-foreground">{{ s.fecha }}</td>
+                        <td class="px-4 py-3 font-black text-emerald-700 font-mono text-sm">{{ s.valor_obtenido }}</td>
+                        <td class="px-4 py-3 text-muted-foreground">{{ s.observaciones|default:"-" }}</td>
+                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                            <div class="inline-flex items-center justify-center gap-1.5">
+                                <a href="{% url 'editar_seguimiento' s.id %}" 
+                                   title="Editar Medición"
+                                   class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 transition-colors shadow-2xs">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    <span class="sr-only">Editar</span>
+                                </a>
+                                <a href="{% url 'eliminar_seguimiento' s.id %}" 
+                                   title="Eliminar Medición"
+                                   onclick="return confirm('¿Está seguro de eliminar esta medición?')"
+                                   class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white border border-rose-200 transition-colors shadow-2xs">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    <span class="sr-only">Eliminar</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-muted-foreground">
+                            No hay seguimientos registrados aún para este indicador.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 {% endblock %}

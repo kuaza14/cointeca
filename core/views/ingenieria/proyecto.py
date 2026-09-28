@@ -1,5 +1,6 @@
 from collections import defaultdict
 from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo, calcular_mano_obra_para_apoyo, actualizar_presupuesto_proyecto
+from core.helpers.inventario_historial import registrar_movimiento_inventario
 import io
 import os
 import openpyxl
@@ -25,6 +26,7 @@ from core.models import (
     ItemManoObra,
     ApoyoManoObra,
     Presupuesto,
+    MovimientoInventario,
 )
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
@@ -525,13 +527,8 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
 
     if ap_mat:
         diferencia = metros - ap_mat.cantidad_requerida
-        if diferencia > 0:
-            if inventario.cantidad >= diferencia:
-                inventario.cantidad -= diferencia
-            else:
-                inventario.cantidad = Decimal("0")
-        elif diferencia < 0:
-            inventario.cantidad += abs(diferencia)
+        if diferencia != 0:
+            inventario.cantidad -= diferencia
         inventario.save()
 
         if metros > 0:
@@ -540,10 +537,7 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
         else:
             ap_mat.delete()
     elif metros > 0:
-        if inventario.cantidad >= metros:
-            inventario.cantidad -= metros
-        else:
-            inventario.cantidad = Decimal("0")
+        inventario.cantidad -= metros
         inventario.save()
 
         ApoyoMaterial.objects.create(
@@ -656,10 +650,7 @@ def crear_apoyo(request, proyecto_id):
 
                 inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
                 if c_inst > 0:
-                    if inventario.cantidad >= c_inst:
-                        inventario.cantidad -= c_inst
-                    else:
-                        inventario.cantidad = Decimal("0")
+                    inventario.cantidad -= c_inst
 
                 if c_ret > 0:
                     inventario.cantidad += c_ret
@@ -797,18 +788,12 @@ def editar_apoyo(request, apoyo_id):
                 if mat_id_int in materiales_actuales:
                     am = materiales_actuales[mat_id_int]
                     diferencia = c_inst - am.cantidad_requerida
-                    if diferencia > 0:
-                        if inventario.cantidad >= diferencia:
-                            inventario.cantidad -= diferencia
-                        else:
-                            inventario.cantidad = Decimal("0")
-                    elif diferencia < 0:
-                        inventario.cantidad += abs(diferencia)
+                    if diferencia != 0:
+                        inventario.cantidad -= diferencia
 
                     diferencia_ret = c_ret - am.cantidad_retirada
                     if diferencia_ret != 0:
                         inventario.cantidad += diferencia_ret
-                        inventario.cantidad = max(Decimal("0"), inventario.cantidad)
 
                     inventario.save()
 
@@ -817,10 +802,7 @@ def editar_apoyo(request, apoyo_id):
                     am.save()
                 else:
                     if c_inst > 0:
-                        if inventario.cantidad >= c_inst:
-                            inventario.cantidad -= c_inst
-                        else:
-                            inventario.cantidad = Decimal("0")
+                        inventario.cantidad -= c_inst
 
                     if c_ret > 0:
                         inventario.cantidad += c_ret
@@ -847,7 +829,7 @@ def editar_apoyo(request, apoyo_id):
                 if am.cantidad_requerida > 0:
                     inv_del.cantidad += am.cantidad_requerida
                 if am.cantidad_retirada > 0:
-                    inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - am.cantidad_retirada)
+                    inv_del.cantidad -= am.cantidad_retirada
                 inv_del.save()
                 am.delete()
 
@@ -912,26 +894,37 @@ def despachar_bodega_apoyo(request, apoyo_id):
         stock_previo = inventario.cantidad or Decimal("0")
         unidad_str = material.unidad or "UN"
 
+        # Descontar del inventario general de bodega (permite negativos para reflejar déficit en bodega)
+        inventario.cantidad -= cant
+        inventario.save()
+
         warning_msg = None
-        # Descontar del inventario general de bodega
-        if stock_previo <= 0:
-            warning_msg = f"⚠️ Advertencia: '{material.descripcion}' no tiene existencias en bodega central (Stock: 0 {unidad_str}). Se despacharon {cant} {unidad_str} al poste como requerimiento pendiente de compra."
-            if not is_ajax:
-                messages.warning(request, warning_msg)
-        elif stock_previo < cant:
-            inventario.cantidad = Decimal("0")
-            inventario.save()
-            warning_msg = f"⚠️ Advertencia: Stock insuficiente en bodega para '{material.descripcion}'. Había {stock_previo} {unidad_str} y se solicitaron {cant} {unidad_str}. Se agotó el stock disponible en bodega."
+        if inventario.cantidad < 0:
+            warning_msg = f"⚠️ Advertencia: Stock en déficit en Bodega Central para '{material.descripcion}'. Quedó en {float(inventario.cantidad):g} {unidad_str} (se despacharon {float(cant):g} {unidad_str} al poste)."
             if not is_ajax:
                 messages.warning(request, warning_msg)
         else:
-            inventario.cantidad -= cant
-            inventario.save()
             if not is_ajax:
                 messages.success(
                     request,
-                    f"Se despacharon exitosamente {cant} {unidad_str} de '{material.descripcion}' desde Bodega Central al poste (Stock restante en bodega: {inventario.cantidad} {unidad_str})."
+                    f"Se despacharon exitosamente {float(cant):g} {unidad_str} de '{material.descripcion}' desde Bodega Central al poste (Stock restante en bodega: {float(inventario.cantidad):g} {unidad_str})."
                 )
+
+        # Registrar en Historial / Kardex de Bodega Central
+        nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
+        obs_user = request.POST.get("observacion", "").strip()
+        registrar_movimiento_inventario(
+            material=material,
+            tipo_movimiento=MovimientoInventario.Tipos.DESPACHO,
+            cantidad=-cant,
+            stock_anterior=stock_previo,
+            stock_resultante=inventario.cantidad,
+            usuario=request.user,
+            proyecto=proyecto,
+            apoyo=apoyo,
+            detalle_origen_destino=f"Proyecto {proyecto.numero_emcali} • Poste/Nodo {nodo_str}",
+            observacion=obs_user or f"Despacho directo desde Bodega al poste/nodo {nodo_str}"
+        )
 
         # Asignar / sumar el material a este apoyo en la obra
         apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
@@ -949,7 +942,7 @@ def despachar_bodega_apoyo(request, apoyo_id):
         if is_ajax:
             return JsonResponse({
                 "success": True,
-                "message": f"Se despacharon {cant} {unidad_str} de '{material.descripcion}' al poste.",
+                "message": f"Se despacharon {float(cant):g} {unidad_str} de '{material.descripcion}' al poste.",
                 "warning": warning_msg,
                 "material_id": material.id,
                 "material_item": material.item,
@@ -1036,19 +1029,45 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
             if material_id and (cant_inst > 0 or cant_ret > 0):
                 material = get_object_or_404(Material, id=material_id)
                 inventario, _ = Inventario.objects.get_or_create(material=material)
+                stock_previo = inventario.cantidad or Decimal("0")
+                nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
+                proy_emcali = apoyo.proyecto.numero_emcali if apoyo.proyecto else ""
 
                 if cant_inst > 0:
-                    if inventario.cantidad < cant_inst:
+                    inventario.cantidad -= cant_inst
+                    if inventario.cantidad < 0:
                         messages.warning(
                             request,
-                            f"⚠️ Stock insuficiente en bodega para '{material.descripcion}' (Stock disponible: {inventario.cantidad}). Se asignaron {cant_inst} como requerimiento proyectado."
+                            f"⚠️ Advertencia: Stock en déficit en bodega para '{material.descripcion}' (Stock actual: {float(inventario.cantidad):g} {material.unidad or 'UN'}). Se asignaron {float(cant_inst):g} al poste."
                         )
-                        inventario.cantidad = Decimal("0")
-                    else:
-                        inventario.cantidad -= cant_inst
+                    registrar_movimiento_inventario(
+                        material=material,
+                        tipo_movimiento=MovimientoInventario.Tipos.DESPACHO,
+                        cantidad=-cant_inst,
+                        stock_anterior=stock_previo,
+                        stock_resultante=inventario.cantidad,
+                        usuario=request.user,
+                        proyecto=apoyo.proyecto,
+                        apoyo=apoyo,
+                        detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
+                        observacion=f"Asignación rápida al poste {nodo_str}"
+                    )
 
                 if cant_ret > 0:
+                    stock_antes_ret = inventario.cantidad
                     inventario.cantidad += cant_ret
+                    registrar_movimiento_inventario(
+                        material=material,
+                        tipo_movimiento=MovimientoInventario.Tipos.DEVOLUCION,
+                        cantidad=cant_ret,
+                        stock_anterior=stock_antes_ret,
+                        stock_resultante=inventario.cantidad,
+                        usuario=request.user,
+                        proyecto=apoyo.proyecto,
+                        apoyo=apoyo,
+                        detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
+                        observacion=f"Material retirado/desmontado en poste {nodo_str}"
+                    )
 
                 inventario.save()
 
@@ -1092,20 +1111,42 @@ def editar_material_apoyo_rapido(request, apoyo_id):
 
             apoyo_mat = get_object_or_404(ApoyoMaterial, id=am_id, apoyo=apoyo)
             inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+            stock_ant = inventario.cantidad or Decimal("0")
+            nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
+            proy_emcali = apoyo.proyecto.numero_emcali if apoyo.proyecto else ""
 
             diferencia = cant_inst - apoyo_mat.cantidad_requerida
-            if diferencia > 0:
-                if inventario.cantidad < diferencia:
-                    inventario.cantidad = Decimal("0")
-                else:
-                    inventario.cantidad -= diferencia
-            elif diferencia < 0:
-                inventario.cantidad += abs(diferencia)
+            if diferencia != 0:
+                inventario.cantidad -= diferencia
+                registrar_movimiento_inventario(
+                    material=apoyo_mat.material,
+                    tipo_movimiento=MovimientoInventario.Tipos.DESPACHO if diferencia > 0 else MovimientoInventario.Tipos.DEVOLUCION,
+                    cantidad=-diferencia,
+                    stock_anterior=stock_ant,
+                    stock_resultante=inventario.cantidad,
+                    usuario=request.user,
+                    proyecto=apoyo.proyecto,
+                    apoyo=apoyo,
+                    detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
+                    observacion=f"Ajuste en poste {nodo_str}: variación de {'instalado' if diferencia > 0 else 'reintegrado'} {abs(float(diferencia)):g} {apoyo_mat.material.unidad or 'UN'}"
+                )
+                stock_ant = inventario.cantidad
 
             diferencia_ret = cant_ret - apoyo_mat.cantidad_retirada
             if diferencia_ret != 0:
                 inventario.cantidad += diferencia_ret
-                inventario.cantidad = max(Decimal("0"), inventario.cantidad)
+                registrar_movimiento_inventario(
+                    material=apoyo_mat.material,
+                    tipo_movimiento=MovimientoInventario.Tipos.DEVOLUCION if diferencia_ret > 0 else MovimientoInventario.Tipos.DESPACHO,
+                    cantidad=diferencia_ret,
+                    stock_anterior=stock_ant,
+                    stock_resultante=inventario.cantidad,
+                    usuario=request.user,
+                    proyecto=apoyo.proyecto,
+                    apoyo=apoyo,
+                    detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
+                    observacion=f"Ajuste de retiro en poste {nodo_str}: {abs(float(diferencia_ret)):g} {apoyo_mat.material.unidad or 'UN'}"
+                )
 
             inventario.save()
 
@@ -1141,11 +1182,28 @@ def eliminar_material_apoyo_rapido(request, apoyo_material_id):
         nombre_mat = apoyo_mat.material.descripcion if apoyo_mat.material else "Material"
         if apoyo_mat.material:
             inv_del, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+            stock_ant = inv_del.cantidad or Decimal("0")
             if apoyo_mat.cantidad_requerida > 0:
                 inv_del.cantidad += apoyo_mat.cantidad_requerida
             if apoyo_mat.cantidad_retirada > 0:
-                inv_del.cantidad = max(Decimal("0"), inv_del.cantidad - apoyo_mat.cantidad_retirada)
+                inv_del.cantidad -= apoyo_mat.cantidad_retirada
             inv_del.save()
+
+            if apoyo_mat.cantidad_requerida > 0:
+                nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste") if apoyo else ""
+                proy_str = apoyo.proyecto.numero_emcali if (apoyo and apoyo.proyecto) else ""
+                registrar_movimiento_inventario(
+                    material=apoyo_mat.material,
+                    tipo_movimiento=MovimientoInventario.Tipos.DEVOLUCION,
+                    cantidad=apoyo_mat.cantidad_requerida,
+                    stock_anterior=stock_ant,
+                    stock_resultante=inv_del.cantidad,
+                    usuario=request.user,
+                    proyecto=apoyo.proyecto if apoyo else None,
+                    apoyo=apoyo,
+                    detalle_origen_destino=f"Proyecto {proy_str} • Poste {nodo_str}",
+                    observacion=f"Material removido del poste {nodo_str}: se devolvió a bodega"
+                )
 
         apoyo_mat.delete()
         if apoyo:
@@ -1203,11 +1261,13 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
 
         # En MT, los números 1, 2, 3, 4... de la fila 10 bajo 'POSTE' son los identificadores de la plantilla y no se modifican
 
-        # Ajuste de impresión MT: encajar en 1 sola hoja
+        # Ajuste de impresión MT: encajar en 1 sola hoja Oficio / Legal
         sheet.page_setup.orientation = sheet.ORIENTATION_PORTRAIT
+        sheet.page_setup.paperSize = 5  # Papel Oficio / Legal
         sheet.sheet_properties.pageSetUpPr.fitToPage = True
         sheet.page_setup.fitToWidth = 1
         sheet.page_setup.fitToHeight = 1
+        sheet.page_setup.scale = None
         sheet.print_area = f"'{sheet.title}'!$A$1:$Z$77"
 
         filename = f"POSTE_A_POSTE_MT_{proyecto.numero_emcali}.xlsx"

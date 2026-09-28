@@ -25,8 +25,13 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{% url 'exportar_facturacion_excel' %}" 
+               class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Exportar Excel (GER-FR-02)</span>
+            </a>
             <a href="{% url 'registrar_facturacion' %}" 
-               class="btn btn-primario bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition">
+               class="btn btn-primario bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 <span>Registrar Facturación</span>
             </a>
@@ -82,6 +87,67 @@
                 <div class="h-1.5 rounded-full {% if porcentaje_global >= 100 %}bg-emerald-600{% elif porcentaje_global >= 70 %}bg-amber-500{% else %}bg-red-500{% endif %}" 
                      style="width: {% if porcentaje_global > 100 %}100{% else %}{{ porcentaje_global }}{% endif %}%;"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- MATRIZ ANUAL CONSOLIDADA (ENERO A DICIEMBRE - GER-FR-02) -->
+    <div class="tarjeta overflow-hidden border border-slate-200">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2 bg-slate-50/50">
+            <div>
+                <h2 class="text-sm font-bold text-[#1F2937] flex items-center gap-2">
+                    <span>📅</span>
+                    <span>Consolidado Anual de Facturación (GER-FR-02)</span>
+                </h2>
+                <p class="text-[11px] text-[#64748B]">Metas proyectadas vs facturación real acumulada mes a mes</p>
+            </div>
+            <a href="{% url 'exportar_facturacion_excel' %}" 
+               class="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1">
+                <span>Descargar formato oficial en Excel →</span>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="tabla w-full text-xs text-left">
+                <thead class="bg-slate-50 text-slate-600 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-2.5">Mes</th>
+                        <th class="px-4 py-2.5 text-right">Meta (COP)</th>
+                        <th class="px-4 py-2.5 text-right">Facturación Real</th>
+                        <th class="px-4 py-2.5 text-center">% Cumplimiento</th>
+                        <th class="px-4 py-2.5 text-center">Registros</th>
+                        <th class="px-4 py-2.5">Progreso</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for m in matriz_mensual %}
+                    <tr class="hover:bg-slate-50/70 transition {% if m.real > 0 %}bg-emerald-50/10{% endif %}">
+                        <td class="px-4 py-2.5 font-bold text-[#1F2937]">{{ m.nombre }}</td>
+                        <td class="px-4 py-2.5 text-right font-mono text-slate-600">${{ m.meta|floatformat:0 }}</td>
+                        <td class="px-4 py-2.5 text-right font-mono font-bold {% if m.real > 0 %}text-emerald-700{% else %}text-slate-400{% endif %}">
+                            ${{ m.real|floatformat:0 }}
+                        </td>
+                        <td class="px-4 py-2.5 text-center">
+                            {% if m.meta > 0 %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {% if m.porcentaje >= 100 %}bg-emerald-100 text-emerald-800{% elif m.porcentaje >= 70 %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700{% endif %}">
+                                    {{ m.porcentaje }}%
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400 text-[10px]">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5 text-center text-slate-500 font-mono text-[11px]">
+                            {{ m.num_registros }}
+                        </td>
+                        <td class="px-4 py-2.5 min-w-[120px]">
+                            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                <div class="h-2 rounded-full {% if m.porcentaje >= 100 %}bg-emerald-600{% elif m.porcentaje >= 70 %}bg-amber-500{% else %}bg-blue-500{% endif %}" 
+                                     style="width: {% if m.porcentaje > 100 %}100{% else %}{{ m.porcentaje }}{% endif %}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from core.models import ActaJuntaDirectiva
+from core.helpers.word import generar_word, limpiar_nombre_archivo
 
 @login_required
 def actas(request):
@@ -58,10 +59,29 @@ def editar_acta(request, id):
 
 @login_required
 def eliminar_acta(request, id):
-    acta = ActaJuntaDirectiva.objects.get(id=id)
+    acta = get_object_or_404(ActaJuntaDirectiva, id=id)
 
     if request.method == 'POST':
         acta.delete()
         return redirect('/actas/')
 
     return render(request, 'gerencia/actas/eliminar_acta.html', {'acta': acta})
+
+@login_required
+def exportar_acta_word(request, id):
+    acta = get_object_or_404(ActaJuntaDirectiva, id=id)
+    nombre_limpio = limpiar_nombre_archivo(f"Acta_Junta_Directiva_{acta.numero_acta}.docx")
+    contexto = {
+        'numero_acta': acta.numero_acta,
+        'nombre_entidad': acta.nombre_entidad or "COINTECA S.A.S.",
+        'nit': acta.nit or "",
+        'fecha': acta.fecha.strftime("%d/%m/%Y") if acta.fecha else "",
+        'hora_inicio': acta.hora_inicio.strftime("%I:%M %p") if acta.hora_inicio else "",
+        'lugar': acta.lugar or "",
+        'presidente': acta.presidente or "",
+        'secretario': acta.secretario or "",
+        'orden_del_dia': acta.orden_del_dia or "",
+        'desarrollo': acta.desarrollo or "",
+        'proposiciones': acta.proposiciones or "Sin proposiciones adicionales.",
+    }
+    return generar_word("acta_junta_directiva.docx", nombre_limpio, contexto)

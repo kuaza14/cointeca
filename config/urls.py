@@ -26,6 +26,7 @@ from core.views import (
     detalle_acta,
     editar_acta,
     eliminar_acta,
+    exportar_acta_word,
     indicadores,
     crear_indicador,
     detalle_indicador,
@@ -34,12 +35,17 @@ from core.views import (
     editar_indicador,
     editar_seguimiento,
     eliminar_seguimiento,
+    exportar_indicadores_excel,
+    sembrar_indicadores_view,
     facturacion,
     crear_proyecto_facturacion,
     registrar_facturacion,
     eliminar_facturacion,
     editar_facturacion,
+    exportar_facturacion_excel,
     gerencia_home,
+    plan_estrategico,
+    descargar_plan_estrategico,
 )
 
 # 🟢 RRHH - EMPLEADOS
@@ -237,6 +243,8 @@ urlpatterns = [
 
     # GERENCIA & GOBERNANZA
     path('gerencia/', gerencia_home, name='gerencia_home'),
+    path('gerencia/plan-estrategico/', plan_estrategico, name='plan_estrategico'),
+    path('gerencia/plan-estrategico/descargar/', descargar_plan_estrategico, name='descargar_plan_estrategico'),
 
     # ACTAS
     path('actas/', actas, name='actas'),
@@ -244,10 +252,13 @@ urlpatterns = [
     path('actas/<int:id>/', detalle_acta, name='detalle_acta'),
     path('actas/<int:id>/editar/', editar_acta, name='editar_acta'),
     path('actas/<int:id>/eliminar/', eliminar_acta, name='eliminar_acta'),
+    path('actas/<int:id>/exportar-word/', exportar_acta_word, name='exportar_acta_word'),
 
     # INDICADORES
     path('indicadores/', indicadores, name='indicadores'),
     path('indicadores/crear/', crear_indicador, name='crear_indicador'),
+    path('indicadores/exportar-excel/', exportar_indicadores_excel, name='exportar_indicadores_excel'),
+    path('indicadores/sembrar-oficiales/', sembrar_indicadores_view, name='sembrar_indicadores'),
     path('indicadores/<int:id>/', detalle_indicador, name='detalle_indicador'),
     path('indicadores/<int:id>/agregar-seguimiento/', agregar_seguimiento, name='agregar_seguimiento'),
     path('indicadores/<int:id>/editar/', editar_indicador, name='editar_indicador'),
@@ -259,6 +270,7 @@ urlpatterns = [
     path('facturacion/', facturacion, name='facturacion'),
     path('facturacion/crear-proyecto/', crear_proyecto_facturacion, name='crear_proyecto_facturacion'),
     path('facturacion/registrar/', registrar_facturacion, name='registrar_facturacion'),
+    path('facturacion/exportar-excel/', exportar_facturacion_excel, name='exportar_facturacion_excel'),
     path('facturacion/<int:id>/editar/', editar_facturacion, name='editar_facturacion'),
     path('facturacion/<int:id>/eliminar/', eliminar_facturacion, name='eliminar_facturacion'),
 

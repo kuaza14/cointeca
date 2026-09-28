@@ -1,0 +1,140 @@
+﻿{% extends 'base.html' %}
+
+{% block titulo %}Plan Estratégico Corporativo 2026–2030 | COINTECA S.A.S.{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-6xl mx-auto">
+
+    <!-- Encabezado Institucional -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">
+                    Código: {{ codigo_documento }}
+                </span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                    Horizonte: {{ horizonte }}
+                </span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">
+                    Aprobado por Junta
+                </span>
+            </div>
+            <h1 class="text-3xl font-black text-foreground tracking-tight">
+                Plan Estratégico Corporativo
+            </h1>
+            <p class="text-sm text-muted-foreground mt-1">
+                Direccionamiento estratégico, marco ético y objetivos para el liderazgo de {{ empresa }}.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{% url 'descargar_plan_estrategico' %}" 
+               class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Descargar Word Oficial (.docx)</span>
+            </a>
+            <a href="{% url 'gerencia_home' %}" 
+               class="inline-flex items-center gap-1.5 bg-secondary hover:bg-secondary/80 text-foreground px-4 py-2.5 rounded-xl font-bold text-xs border border-border shadow-xs transition-all">
+                <span>← Volver a Gerencia</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Misión y Visión -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Misión -->
+        <div class="relative bg-gradient-to-br from-blue-500/10 via-card to-card border-2 border-blue-500/30 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-2xl shadow-sm">
+                    🧭
+                </div>
+                <div>
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">Razón de Ser</span>
+                    <h2 class="text-2xl font-black text-foreground">Nuestra Misión</h2>
+                </div>
+            </div>
+            <p class="text-sm leading-relaxed text-foreground/90 font-medium">
+                {{ mision }}
+            </p>
+        </div>
+
+        <!-- Visión -->
+        <div class="relative bg-gradient-to-br from-indigo-500/10 via-card to-card border-2 border-indigo-500/30 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-sm">
+                    🔭
+                </div>
+                <div>
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Hacia dónde vamos</span>
+                    <h2 class="text-2xl font-black text-foreground">Nuestra Visión (2026–2030)</h2>
+                </div>
+            </div>
+            <p class="text-sm leading-relaxed text-foreground/90 font-medium">
+                {{ vision }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Valores Corporativos -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-xl font-black text-foreground tracking-tight">Valores Corporativos</h3>
+                <p class="text-xs text-muted-foreground mt-0.5">Los principios innegociables que guían el actuar diario de nuestro equipo técnico y administrativo.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for v in valores %}
+            <div class="bg-card border border-border rounded-xl p-5 shadow-xs hover:shadow-md transition-shadow">
+                <div class="text-3xl mb-3">{{ v.icono }}</div>
+                <h4 class="text-base font-bold text-foreground mb-2">{{ v.titulo }}</h4>
+                <p class="text-xs leading-relaxed text-muted-foreground">
+                    {{ v.descripcion }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pilares Estratégicos & Metas (Alineados a los KPIs) -->
+    <div class="space-y-4">
+        <div>
+            <h3 class="text-xl font-black text-foreground tracking-tight">Pilares Estratégicos & Metas Corporativas</h3>
+            <p class="text-xs text-muted-foreground mt-0.5">Metas cuantitativas alineadas directamente con el Tablero de Indicadores GER-FR-02.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for p in pilares %}
+            <div class="bg-card border border-border rounded-xl p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="font-black text-sm text-foreground">{{ p.pilar }}</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
+                            {{ p.meta }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-muted-foreground leading-relaxed">
+                        {{ p.foco }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Banner Informativo -->
+    <div class="bg-muted/50 border border-border rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h4 class="text-sm font-bold text-foreground">¿Deseas revisar los detalles completos de proyección?</h4>
+            <p class="text-xs text-muted-foreground mt-0.5">El documento oficial incluye el perfil corporativo, análisis sectorial y presupuesto plurianual.</p>
+        </div>
+        <a href="{% url 'descargar_plan_estrategico' %}" 
+           class="inline-flex items-center justify-center gap-2 bg-foreground text-background px-4 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 transition-opacity">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <span>Descargar GR-PL-01</span>
+        </a>
+    </div>
+
+</div>
+{% endblock %}

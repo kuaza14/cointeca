@@ -221,7 +221,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
                         cantidad=cant_dec
                     )
                     inventario, _ = Inventario.objects.get_or_create(material=mat)
-                    inventario.cantidad = max(Decimal("0"), inventario.cantidad - cant_dec)
+                    inventario.cantidad = inventario.cantidad - cant_dec
                     inventario.save()
                     total_unidades += cant_dec
 
@@ -713,10 +713,6 @@ def eliminar_entrada_material(request, entrada_id):
 
             if inventario:
                 inventario.cantidad -= detalle.cantidad
-
-                if inventario.cantidad < 0:
-                    inventario.cantidad = Decimal("0")
-
                 inventario.save(
                     update_fields=["cantidad"]
                 )
@@ -878,10 +874,6 @@ def editar_entrada_material(request, entrada_id):
             )
 
             inventario.cantidad += diferencia
-
-            if inventario.cantidad < 0:
-                inventario.cantidad = Decimal("0")
-
             inventario.save(
                 update_fields=["cantidad"]
             )

@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
-from core.models import Material, Inventario, DevolucionMaterialProyecto, ApoyoMaterial
+from core.models import Material, Inventario, DevolucionMaterialProyecto, ApoyoMaterial, MovimientoInventario
+from core.helpers.inventario_historial import registrar_movimiento_inventario
 
 
 @login_required
 def materiales_home(request):
     """
     Catálogo e Inventario General de Bodega Central.
-    Permite consultar existencias, ajustar stock de bodega y agregar nuevos materiales.
+    Permite consultar existencias, auditar historial de movimientos, ajustar stock y crear nuevos materiales.
     """
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -18,6 +19,7 @@ def materiales_home(request):
             material_id = request.POST.get("material_id")
             nueva_cantidad_str = request.POST.get("cantidad", "0")
             nueva_unidad = request.POST.get("unidad", "").strip()
+            observacion = request.POST.get("observacion", "").strip()
 
             if material_id:
                 try:
@@ -31,8 +33,21 @@ def materiales_home(request):
                         material.save()
 
                     inventario, _ = Inventario.objects.get_or_create(material=material)
-                    inventario.cantidad = max(Decimal("0"), nueva_cantidad)
+                    stock_anterior = inventario.cantidad or Decimal("0")
+                    inventario.cantidad = nueva_cantidad
                     inventario.save()
+
+                    diferencia = nueva_cantidad - stock_anterior
+                    registrar_movimiento_inventario(
+                        material=material,
+                        tipo_movimiento=MovimientoInventario.Tipos.AJUSTE,
+                        cantidad=diferencia,
+                        stock_anterior=stock_anterior,
+                        stock_resultante=nueva_cantidad,
+                        usuario=request.user,
+                        detalle_origen_destino="Bodega Central (Ajuste Físico)",
+                        observacion=observacion or "Ajuste manual de existencias físicas en Bodega"
+                    )
                 except (ValueError, TypeError):
                     pass
 
@@ -58,8 +73,19 @@ def materiales_home(request):
                     cant_inicial = Decimal(cantidad_str.strip() or "0")
                     Inventario.objects.create(
                         material=material,
-                        cantidad=max(Decimal("0"), cant_inicial)
+                        cantidad=cant_inicial
                     )
+                    if cant_inicial != 0:
+                        registrar_movimiento_inventario(
+                            material=material,
+                            tipo_movimiento=MovimientoInventario.Tipos.ENTRADA,
+                            cantidad=cant_inicial,
+                            stock_anterior=Decimal("0"),
+                            stock_resultante=cant_inicial,
+                            usuario=request.user,
+                            detalle_origen_destino="Bodega Central (Creación de Material)",
+                            observacion="Carga de saldo inicial de material nuevo"
+                        )
                 except Exception:
                     pass
 
@@ -80,6 +106,14 @@ def materiales_home(request):
         .order_by("-apoyo__id", "material__descripcion")
     )
 
+    movimientos = (
+        MovimientoInventario.objects.select_related(
+            "material", "usuario", "proyecto", "apoyo"
+        ).order_by("-fecha", "-id")[:200]
+    )
+
+    total_movimientos = MovimientoInventario.objects.count()
+
     return render(
         request,
         "logistica/materiales/materiales_home.html",
@@ -88,5 +122,7 @@ def materiales_home(request):
             "total_materiales": materiales.count(),
             "devoluciones_recientes": devoluciones_recientes,
             "retiros_apoyos": retiros_apoyos,
+            "movimientos": movimientos,
+            "total_movimientos": total_movimientos,
         }
     )

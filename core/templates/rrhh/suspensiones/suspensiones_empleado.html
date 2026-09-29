@@ -2,22 +2,25 @@
 
 {% block empleado_content %}
 
-<div class="flex justify-between items-center mb-6">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h2 class="text-2xl font-extrabold text-foreground tracking-tight">
+            Suspensiones del Contrato · {{ empleado.nombre_completo }}
+        </h2>
+    </div>
 
-    <h2 class="text-3xl font-bold text-foreground">
-        Suspensiones del Contrato
-    </h2>
+    <div class="flex items-center gap-2.5 shrink-0 sm:justify-end">
+        <a href="{% url 'crear_suspension' empleado.id %}"
+           class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            <span>Nueva Suspensión</span>
+        </a>
 
-    <a href="{% url 'crear_suspension' empleado.id %}"
-       class="bg-success hover:bg-success-hover text-white px-4 py-2 rounded-lg shadow">
-        + Nueva Suspensión
-    </a>
-
-    <a href="{% url 'detalle_empleado' empleado.id %}"
-       class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow">
-        Volver
-    </a>
-
+        <a href="{% url 'detalle_empleado' empleado.id %}"
+           class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+            <span>← Volver al Empleado</span>
+        </a>
+    </div>
 </div>
 
 <div class="bg-card rounded-xl shadow overflow-hidden">

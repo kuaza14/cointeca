@@ -2,120 +2,98 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">
-    Suspensiones disciplinarias
-</h1>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+                <span>/</span>
+                <a href="{% url 'empleados' %}" class="hover:text-primary transition">Empleados</a>
+                <span>/</span>
+                <a href="{% url 'detalle_empleado' empleado.id %}" class="hover:text-primary transition">{{ empleado.nombre_completo }}</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Suspensiones Disciplinarias</span>
+            </nav>
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                Suspensiones Disciplinarias · {{ empleado.nombre_completo }}
+            </h1>
+        </div>
 
-<div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2.5 shrink-0 sm:justify-end">
+            <a href="{% url 'crear_suspension_disciplinaria' empleado.id %}"
+               class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>Nueva Suspensión</span>
+            </a>
+            <a href="{% url 'detalle_empleado' empleado.id %}"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+                <span>← Volver al Empleado</span>
+            </a>
+        </div>
+    </div>
 
-    <p>
-        <strong>Empleado:</strong>
-        {{ empleado.nombre_completo }}
-    </p>
-
-    <a
-        href="{% url 'crear_suspension_disciplinaria' empleado.id %}"
-        class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded"
-    >
-        Nueva suspensión
-    </a>
-
-</div>
-
-<div class="overflow-x-auto">
-<table class="w-full border shadow">
-
-    <thead class="bg-neutral text-white">
-
-        <tr>
-
-            <th class="p-2 text-center">
-                Fecha falta
-            </th>
-
-            <th class="p-2 text-center">
-                Inicio suspensión
-            </th>
-
-            <th class="p-2 text-center">
-                Fin suspensión
-            </th>
-
-            <th class="p-2 text-center">
-                Motivo
-            </th>
-
-            <th class="p-2 text-center">
-                Acciones
-            </th>
-
-        </tr>
-
-    </thead>
-
-    <tbody>
-
-        {% for suspension in suspensiones %}
-
-        <tr class="border-b hover:bg-muted">
-
-            <td class="p-2 text-center">
-                {{ suspension.fecha_falta }}
-            </td>
-
-            <td class="p-2 text-center">
-                {{ suspension.fecha_inicio_suspension }}
-            </td>
-
-            <td class="p-2 text-center">
-                {{ suspension.fecha_fin_suspension }}
-            </td>
-
-            <td class="p-2">
-                {{ suspension.motivo_suspension|truncatechars:60 }}
-            </td>
-
-            <td class="p-2 text-center">
-
-                <a
-                    href="{% url 'detalle_suspension_disciplinaria' suspension.id %}"
-                    class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded"
-                >
-                    Ver
-                </a>
-
-            </td>
-
-        </tr>
-
-        {% empty %}
-
-        <tr>
-
-            <td colspan="5" class="text-center p-5 text-muted-foreground">
-
-                No hay suspensiones disciplinarias registradas.
-
-            </td>
-
-        </tr>
-
-        {% endfor %}
-
-    </tbody>
-
-</table>
-</div>
-
-<div class="mt-6">
-
-    <a
-        href="{% url 'detalle_empleado' empleado.id %}"
-        class="bg-neutral hover:bg-neutral-hover text-white px-5 py-2 rounded"
-    >
-        Volver al empleado
-    </a>
-
-</div>
+    <div class="bg-card rounded-xl shadow overflow-hidden border border-border">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-primary text-white text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="p-3 text-center">Fecha Falta</th>
+                        <th class="p-3 text-center">Inicio Suspensión</th>
+                        <th class="p-3 text-center">Fin Suspensión</th>
+                        <th class="p-3 text-left">Motivo</th>
+                        <th class="p-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for suspension in suspensiones %}
+                    <tr class="hover:bg-muted transition">
+                        <td class="p-3 text-center font-mono text-xs">
+                            {{ suspension.fecha_falta|date:'d/m/Y' }}
+                        </td>
+                        <td class="p-3 text-center font-mono text-xs">
+                            {{ suspension.fecha_inicio_suspension|date:'d/m/Y' }}
+                        </td>
+                        <td class="p-3 text-center font-mono text-xs">
+                            {{ suspension.fecha_fin_suspension|date:'d/m/Y' }}
+                        </td>
+                        <td class="p-3">
+                            <span class="text-xs text-foreground">{{ suspension.motivo_suspension|truncatechars:60 }}</span>
+                        </td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{% url 'detalle_suspension_disciplinaria' suspension.id %}"
+                                   class="bg-[#1E63F0] hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs transition">
+                                    Ver
+                                </a>
+                                <a href="{% url 'generar_suspension_disciplinaria' suspension.id %}"
+                                   class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs transition"
+                                   title="Descargar documento Word">
+                                    Word
+                                </a>
+                                <form method="POST"
+                                      action="{% url 'eliminar_suspension_disciplinaria' suspension.id %}"
+                                      onsubmit="return confirm('¿Está seguro de que desea eliminar esta suspensión disciplinaria?');"
+                                      class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs transition">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center p-8 text-muted-foreground">
+                            No hay suspensiones disciplinarias registradas para este empleado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 {% endblock %}

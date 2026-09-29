@@ -4,73 +4,89 @@
 {% block titulo %}Dashboard Principal | COINTECA S.A.S. INGENIERIA{% endblock %}
 
 {% block content %}
-<div class="space-y-4">
+<div class="space-y-6">
 
     <!-- ==================================================================
-         ENCABEZADO DE BIENVENIDA Y FECHA
+         ENCABEZADO DE BIENVENIDA Y PERFIL
          ================================================================== -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
             <h1 class="text-xl sm:text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2">
-                Hola, Bienvenido <span class="inline-block animate-bounce">👋</span>
+                Hola, {{ request.user.get_full_name|default:request.user.username|capfirst }} <span class="inline-block animate-bounce">👋</span>
             </h1>
+            <p class="text-xs text-[#64748B] mt-0.5">
+                Panel de control asignado para tu rol: <strong class="text-[#1E63F0]">{{ rol_principal|default:"Colaborador" }}</strong> · {{ fecha_hoy }}
+            </p>
         </div>
-
-        <!-- Widget de fecha actual -->
-        <div class="inline-flex items-center gap-2.5 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs self-start sm:self-auto">
-            <div class="size-8 rounded-lg bg-[#E6F1FF] flex items-center justify-center text-[#1E63F0]">
-                <svg class="size-4.5" width="18" height="18" style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-            </div>
+        <div class="shrink-0 flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                <span class="size-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span>{{ rol_principal|default:"Usuario Activo" }}</span>
+            </span>
         </div>
     </div>
 
     <!-- ==================================================================
-         ACCESO DIRECTO A TODOS LOS MÓDULOS DE COINTECA (AL PRINCIPIO)
+         ACCESO DIRECTO A LOS MÓDULOS PERMITIDOS
          ================================================================== -->
     <div>
         <h2 class="text-sm font-bold text-[#1F2937] mb-2 flex items-center gap-2">
-            <span>Acceso a Módulos del Sistema</span>
-            <span class="text-[11px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-md">5 Módulos Corporativos</span>
+            <span>Tus Módulos Disponibles</span>
         </h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <a href="{% url 'ingenieria_inicio' %}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-xl block mb-1">🏗️</span>
+            {% if puede_ver_ingenieria %}
+            <a href="{% url 'ingenieria_inicio' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
+                <span class="text-2xl block mb-1">🏗️</span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Ingeniería</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Proyectos y Obra</span>
             </a>
-            <a href="{% url 'logistica_home' %}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-xl block mb-1">📦</span>
+            {% endif %}
+
+            {% if puede_ver_logistica %}
+            <a href="{% url 'logistica_home' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
+                <span class="text-2xl block mb-1">📦</span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Logística</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Stock e Inventario</span>
             </a>
-            <a href="{% url 'rrhh' %}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-xl block mb-1">👥</span>
+            {% endif %}
+
+            {% if puede_ver_rrhh %}
+            <a href="{% url 'rrhh' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
+                <span class="text-2xl block mb-1">👥</span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">RRHH</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Talento y Contratos</span>
             </a>
-            <a href="{% url 'gerencia_home' %}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-xl block mb-1">🏛️</span>
+            {% endif %}
+
+            {% if puede_ver_gerencia %}
+            <a href="{% url 'gerencia_home' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
+                <span class="text-2xl block mb-1">🏛️</span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Gerencia</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Gobernanza y Actas</span>
             </a>
-            <a href="{% url 'caja_menor' %}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-xl block mb-1">💵</span>
+            {% endif %}
+
+            {% if puede_ver_contabilidad %}
+            <a href="{% url 'caja_menor' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
+                <span class="text-2xl block mb-1">💵</span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Contabilidad</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Caja Menor y Arqueos</span>
             </a>
+            {% endif %}
         </div>
     </div>
 
     <!-- ==================================================================
-         MÉTRICAS REALES DE LA PLATAFORMA (DATOS REALES DE BD)
+         MÉTRICAS SEGÚN PERMISOS DEL USUARIO
          ================================================================== -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
 
+        {% if puede_ver_ingenieria %}
         <!-- 1. Proyectos activos -->
         <a href="{% url 'lista_proyectos' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E63F0]/50 transition-all flex flex-col justify-between group">
             <div class="flex items-start justify-between">
                 <div class="size-9 rounded-lg bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center">
-                    <svg class="size-5" width="20" height="20" style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="12 2 2 7 12 12 22 7 12 2"/>
                         <polyline points="2 17 12 22 22 17"/>
                         <polyline points="2 12 12 17 22 12"/>
@@ -86,12 +102,14 @@
                 </div>
             </div>
         </a>
+        {% endif %}
 
+        {% if puede_ver_rrhh %}
         <!-- 2. Personal / RRHH -->
         <a href="{% url 'empleados' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#8B5CF6]/50 transition-all flex flex-col justify-between group">
             <div class="flex items-start justify-between">
                 <div class="size-9 rounded-lg bg-[#F3E8FF] text-[#8B5CF6] flex items-center justify-center">
-                    <svg class="size-5" width="20" height="20" style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                         <circle cx="9" cy="7" r="4"/>
                         <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
@@ -108,12 +126,14 @@
                 </div>
             </div>
         </a>
+        {% endif %}
 
+        {% if puede_ver_logistica %}
         <!-- 3. Catálogo de Materiales -->
         <a href="{% url 'materiales_home' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#F59E0B]/50 transition-all flex flex-col justify-between group">
             <div class="flex items-start justify-between">
                 <div class="size-9 rounded-lg bg-[#FEF3C7] text-[#F59E0B] flex items-center justify-center">
-                    <svg class="size-5" width="20" height="20" style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                         <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
                         <line x1="12" y1="22.08" x2="12" y2="12"/>
@@ -134,7 +154,7 @@
         <a href="{% url 'logistica_home' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#14B8A6]/50 transition-all flex flex-col justify-between group">
             <div class="flex items-start justify-between">
                 <div class="size-9 rounded-lg bg-[#CCFBF1] text-[#14B8A6] flex items-center justify-center">
-                    <svg class="size-5" width="20" height="20" style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                     </svg>
                 </div>
@@ -148,90 +168,166 @@
                 </div>
             </div>
         </a>
+        {% endif %}
+
+        {% if puede_ver_contabilidad and not puede_ver_ingenieria and not puede_ver_logistica %}
+        <!-- Tarjeta especial Contabilidad cuando es rol exclusivo -->
+        <a href="{% url 'caja_menor' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-emerald-500/50 transition-all flex flex-col justify-between group">
+            <div class="flex items-start justify-between">
+                <div class="size-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    💵
+                </div>
+                <span class="text-[11px] font-bold text-emerald-600 group-hover:translate-x-0.5 transition-transform">Ir a Caja →</span>
+            </div>
+            <div class="mt-3">
+                <p class="text-[11px] font-semibold text-[#64748B]">Caja Menor</p>
+                <div class="flex items-baseline gap-1.5 mt-0.5">
+                    <span class="text-sm font-extrabold text-[#1F2937] tracking-tight">Gestión Activa</span>
+                </div>
+            </div>
+        </a>
+        {% endif %}
 
     </div>
 
     <!-- ==================================================================
-         SECCIÓN PRINCIPAL: PROYECTOS RECIENTES Y CALLOUT CORPORATIVO
+         SECCIÓN PRINCIPAL SEGÚN ROL
          ================================================================== -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-        <!-- Columna Izquierda: Proyectos recientes de la base de datos (Col 1-8) -->
-        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col justify-between">
-            <div class="p-4 sm:px-5 flex items-center justify-between border-b border-slate-100">
-                <div class="flex items-center gap-2">
-                    <svg class="size-4.5 text-[#1E63F0]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                        <polyline points="2 17 12 22 22 17"/>
-                        <polyline points="2 12 12 17 22 12"/>
-                    </svg>
-                    <h2 class="font-bold text-sm text-[#1F2937]">Proyectos recientes</h2>
-                </div>
-                <a href="{% url 'lista_proyectos' %}" class="text-[11px] font-semibold text-[#1E63F0] hover:underline flex items-center gap-0.5">
-                    Ver todos <span>→</span>
-                </a>
+    {% if puede_ver_ingenieria or puede_ver_logistica %}
+    <!-- Proyectos recientes para Ingeniería, Logística y Gerencia -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 sm:px-5 flex items-center justify-between border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <svg class="size-4.5 text-[#1E63F0]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                    <polyline points="2 17 12 22 22 17"/>
+                    <polyline points="2 12 12 17 22 12"/>
+                </svg>
+                <h2 class="font-bold text-sm text-[#1F2937]">Proyectos recientes</h2>
             </div>
+            <a href="{% url 'lista_proyectos' %}" class="text-[11px] font-semibold text-[#1E63F0] hover:underline flex items-center gap-0.5">
+                Ver todos <span>→</span>
+            </a>
+        </div>
 
-            {% if proyectos_recientes %}
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-slate-100">
-                            <tr>
-                                <th class="py-2.5 px-4">N° Proyecto</th>
-                                <th class="py-2.5 px-4">Macroproyecto</th>
-                                <th class="py-2.5 px-4">Tipo</th>
-                                <th class="py-2.5 px-4">Estado</th>
-                                <th class="py-2.5 px-3 text-right"></th>
+        {% if proyectos_recientes %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-slate-100">
+                        <tr>
+                            <th class="py-2.5 px-4">N° Proyecto</th>
+                            <th class="py-2.5 px-4">Macroproyecto</th>
+                            <th class="py-2.5 px-4">Tipo</th>
+                            <th class="py-2.5 px-4">Estado</th>
+                            <th class="py-2.5 px-3 text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for p in proyectos_recientes %}
+                            <tr onclick="window.location.href='{% url 'detalle_proyecto' p.id %}';" class="hover:bg-[#E6F1FF]/40 transition-colors group cursor-pointer">
+                                <td class="py-3 px-4 font-bold text-[#1F2937]">{{ p.numero_emcali }}</td>
+                                <td class="py-3 px-4 text-[#64748B]">{{ p.macroproyecto.nombre|default:"-" }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700">
+                                        {{ p.get_tipo_display|default:p.tipo }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                        {{ p.estado|default:"Planeación" }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-right">
+                                    <a href="{% url 'detalle_proyecto' p.id %}" class="text-slate-400 group-hover:text-[#1E63F0] transition-colors">
+                                        <svg class="size-4 inline-block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            {% for p in proyectos_recientes %}
-                                <tr onclick="window.location.href='{% url 'detalle_proyecto' p.id %}';" class="hover:bg-[#E6F1FF]/40 transition-colors group cursor-pointer">
-                                    <td class="py-3 px-4 font-bold text-[#1F2937]">{{ p.numero_emcali }}</td>
-                                    <td class="py-3 px-4 text-[#64748B]">{{ p.macroproyecto.nombre|default:"-" }}</td>
-                                    <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700">
-                                            {{ p.get_tipo_display|default:p.tipo }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
-                                            {{ p.estado|default:"Planeación" }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-3 text-right">
-                                        <a href="{% url 'detalle_proyecto' p.id %}" class="text-slate-400 group-hover:text-[#1E63F0] transition-colors">
-                                            <svg class="size-4 inline-block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="9 18 15 12 9 6"></polyline>
-                                            </svg>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-6 sm:p-7 text-center flex flex-col items-center justify-center my-auto">
+                <div class="size-11 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center text-xl mb-2.5 shadow-xs">
+                    🏗️
                 </div>
-            {% else %}
-                <!-- Estado limpio sin datos inventados -->
-                <div class="p-6 sm:p-7 text-center flex flex-col items-center justify-center my-auto">
-                    <div class="size-11 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center text-xl mb-2.5 shadow-xs">
-                        🏗️
-                    </div>
-                    <h3 class="text-sm font-bold text-[#1F2937]">No hay proyectos registrados aún</h3>
-                    <p class="text-xs text-[#64748B] max-w-sm mt-1 leading-relaxed">
-                        Los proyectos que comiences a gestionar en el módulo de Ingeniería aparecerán resumidos aquí en tiempo real con su avance y estado.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2.5">
-                        <a href="{% url 'crear_proyecto' %}" class="px-3.5 py-2 rounded-xl bg-[#1E63F0] hover:bg-[#1651C7] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
-                            <span>+ Crear nuevo proyecto</span>
-                        </a>
-                        <a href="{% url 'ingenieria_inicio' %}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all">
-                            Ir a Ingeniería
-                        </a>
-                    </div>
+                <h3 class="text-sm font-bold text-[#1F2937]">No hay proyectos registrados aún</h3>
+                <p class="text-xs text-[#64748B] max-w-sm mt-1 leading-relaxed">
+                    Los proyectos que comiences a gestionar en el módulo de Ingeniería aparecerán resumidos aquí en tiempo real con su avance y estado.
+                </p>
+                <div class="mt-4 flex items-center gap-2.5">
+                    <a href="{% url 'crear_proyecto' %}" class="px-3.5 py-2 rounded-xl bg-[#1E63F0] hover:bg-[#1651C7] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
+                        <span>+ Crear nuevo proyecto</span>
+                    </a>
+                    <a href="{% url 'ingenieria_inicio' %}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all">
+                        Ir a Ingeniería
+                    </a>
                 </div>
-            {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {% elif puede_ver_rrhh and not puede_ver_ingenieria %}
+    <!-- Panel específico de Recursos Humanos -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-2xl">👥</span>
+            <div>
+                <h2 class="text-base font-extrabold text-[#1F2937]">Gestión Integral de Talento Humano</h2>
+                <p class="text-xs text-muted-foreground">Accesos directos principales del departamento de Recursos Humanos</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+            <a href="{% url 'empleados' %}" class="p-4 rounded-xl border border-slate-200 hover:border-[#1E63F0] hover:bg-blue-50/30 transition group">
+                <span class="text-xl block mb-2">📋</span>
+                <p class="font-bold text-sm text-[#1F2937] group-hover:text-[#1E63F0]">Fichas de Empleados</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Consultar historial y fichas técnicas</p>
+            </a>
+            <a href="{% url 'crear_empleado' %}" class="p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 transition group">
+                <span class="text-xl block mb-2">➕</span>
+                <p class="font-bold text-sm text-[#1F2937] group-hover:text-emerald-600">Registrar Colaborador</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Ingresar nuevo empleado al sistema</p>
+            </a>
+            <a href="{% url 'vacaciones' %}" class="p-4 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/30 transition group">
+                <span class="text-xl block mb-2">🌴</span>
+                <p class="font-bold text-sm text-[#1F2937] group-hover:text-amber-600">Control de Vacaciones</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Programación y seguimiento</p>
+            </a>
+            <a href="{% url 'documentos_rrhh' %}" class="p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/30 transition group">
+                <span class="text-xl block mb-2">📄</span>
+                <p class="font-bold text-sm text-[#1F2937] group-hover:text-purple-600">Documentos y Actas</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Generación de formatos y certificaciones</p>
+            </a>
         </div>
     </div>
+
+    {% elif puede_ver_contabilidad and not puede_ver_ingenieria and not puede_ver_rrhh %}
+    <!-- Panel específico de Contabilidad -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-2xl">💵</span>
+            <div>
+                <h2 class="text-base font-extrabold text-[#1F2937]">Módulo Financiero y Caja Menor</h2>
+                <p class="text-xs text-muted-foreground">Accesos directos para control de egresos y movimientos de caja</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <a href="{% url 'caja_menor' %}" class="p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 transition group">
+                <span class="text-xl block mb-2">📊</span>
+                <p class="font-bold text-sm text-[#1F2937] group-hover:text-emerald-600">Libro de Caja Menor</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Ver saldos, ingresos y egresos registrados</p>
+            </a>
+            <a href="{% url 'crear_caja' %}" class="p-4 rounded-xl border border-slate-200 hover:border-[#1E63F0] hover:bg-blue-50/30 transition group">
+                <span class="text-xl block mb-2">➕</span>
+                <p class="font-bold text-sm text-[#1F2937] group-hover:text-[#1E63F0]">Aperturar Nueva Caja</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Configurar un nuevo periodo de caja menor</p>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

@@ -152,6 +152,7 @@ from core.views.rrhh.no_superacion_periodo_prueba import generar_no_superacion_p
 from core.views.rrhh.suspension_disciplinaria import (
     crear_suspension_disciplinaria,
     detalle_suspension_disciplinaria,
+    eliminar_suspension_disciplinaria,
     generar_suspension_disciplinaria,
     suspensiones_disciplinarias_empleado
 )
@@ -383,6 +384,7 @@ urlpatterns = [
     path("rrhh/empleados/<int:id>/suspension_disciplinaria/", suspensiones_disciplinarias_empleado, name="suspensiones_disciplinarias_empleado"),
     path("rrhh/suspensiones_disciplinarias/<int:id>/crear/", crear_suspension_disciplinaria, name="crear_suspension_disciplinaria"),
     path("rrhh/suspensiones_disciplinarias/<int:id>/generar/", generar_suspension_disciplinaria, name="generar_suspension_disciplinaria"),
+    path("rrhh/suspensiones_disciplinarias/<int:id>/eliminar/", eliminar_suspension_disciplinaria, name="eliminar_suspension_disciplinaria"),
     path("rrhh/suspensiones_disciplinarias/<int:id>/", detalle_suspension_disciplinaria, name="detalle_suspension_disciplinaria"),
 
     #historia clinica laboral

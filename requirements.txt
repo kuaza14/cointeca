@@ -7,3 +7,6 @@ holidays==0.103
 num2words==0.5.14
 pillow==12.3.0
 python-dotenv==1.2.1
+gunicorn>=23.0.0
+whitenoise>=6.8.0
+dj-database-url>=2.3.0

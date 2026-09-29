@@ -5,18 +5,23 @@
 {% block content %}
 <div class="max-w-3xl mx-auto space-y-5">
 
-    <!-- BREADCRUMB -->
-    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
-        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
-        <span>/</span>
-        <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
-        <span>/</span>
-        <a href="{% url 'actas' %}" class="hover:text-primary transition">Actas de Junta</a>
-        <span>/</span>
-        <a href="{% url 'detalle_acta' acta.id %}" class="hover:text-primary transition">Acta #{{ acta.numero_acta }}</a>
-        <span>/</span>
-        <span class="text-[#1F2937] font-semibold">Editar</span>
-    </nav>
+    <!-- BREADCRUMB & VOLVER (ALINEADO A LA DERECHA) -->
+    <div class="flex items-center justify-between gap-3">
+        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+            <span>/</span>
+            <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+            <span>/</span>
+            <a href="{% url 'actas' %}" class="hover:text-primary transition">Actas de Junta</a>
+            <span>/</span>
+            <a href="{% url 'detalle_acta' acta.id %}" class="hover:text-primary transition">Acta #{{ acta.numero_acta }}</a>
+            <span>/</span>
+            <span class="text-[#1F2937] font-semibold">Editar</span>
+        </nav>
+        <a href="{% url 'detalle_acta' acta.id %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 text-slate-600 shadow-2xs">
+            ← Volver al Acta
+        </a>
+    </div>
 
     <!-- FORMULARIO -->
     <div class="tarjeta p-6 sm:p-8">

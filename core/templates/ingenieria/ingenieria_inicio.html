@@ -22,10 +22,12 @@
             </p>
         </div>
 
-        <a href="{% url 'dashboard' %}" 
-           class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-border hover:bg-muted transition self-start sm:self-auto flex items-center gap-1.5 shadow-2xs">
-            <span>← Volver al Dashboard</span>
-        </a>
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a href="{% url 'dashboard' %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-border hover:bg-muted transition flex items-center gap-1.5 shadow-2xs">
+                <span>← Volver al Dashboard</span>
+            </a>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">

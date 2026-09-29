@@ -5,16 +5,21 @@
 {% block content %}
 <div class="max-w-2xl mx-auto space-y-5">
 
-    <!-- BREADCRUMB -->
-    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
-        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
-        <span>/</span>
-        <a href="{% url 'caja_menor' %}" class="hover:text-primary transition">Caja Menor</a>
-        <span>/</span>
-        <a href="{% url 'detalle_caja' m.caja.id %}" class="hover:text-primary transition">Caja #{{ m.caja.id }}</a>
-        <span>/</span>
-        <span class="text-[#1F2937] font-semibold">Editar Gasto</span>
-    </nav>
+    <!-- BREADCRUMB & VOLVER (ALINEADO A LA DERECHA) -->
+    <div class="flex items-center justify-between gap-3">
+        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+            <span>/</span>
+            <a href="{% url 'caja_menor' %}" class="hover:text-primary transition">Caja Menor</a>
+            <span>/</span>
+            <a href="{% url 'detalle_caja' m.caja.id %}" class="hover:text-primary transition">Caja #{{ m.caja.id }}</a>
+            <span>/</span>
+            <span class="text-[#1F2937] font-semibold">Editar Gasto</span>
+        </nav>
+        <a href="{% url 'detalle_caja' m.caja.id %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 text-slate-600 shadow-2xs">
+            ← Volver a Caja #{{ m.caja.id }}
+        </a>
+    </div>
 
     <!-- FORMULARIO -->
     <div class="tarjeta p-6 sm:p-8">

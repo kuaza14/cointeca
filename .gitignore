@@ -14,3 +14,7 @@ skills-lock.json
 # Volcados de base de datos generados al migrar
 respaldo-*.sql
 *.dump
+
+# Archivos estáticos generados por collectstatic
+staticfiles/
+

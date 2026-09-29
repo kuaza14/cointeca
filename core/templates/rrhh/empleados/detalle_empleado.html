@@ -20,7 +20,7 @@
             {% endif %}
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 shrink-0 sm:justify-end">
             {% if not editando %}
                 {% if empleado.estado == 'retirado' %}
                     <button type="button" 
@@ -436,8 +436,13 @@
             </div>
 
         {% if editando %}
-            <div class="pt-2">
-                <button type="submit" class="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded shadow font-semibold transition">
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
+                <a href="/rrhh/empleados/{{ empleado.id }}/" 
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600">
+                    Cancelar Edición
+                </a>
+                <button type="submit" 
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xs transition">
                     Guardar Cambios
                 </button>
             </div>

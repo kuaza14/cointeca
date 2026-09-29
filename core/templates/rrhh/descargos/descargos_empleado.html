@@ -2,33 +2,45 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">
-    Descargos disciplinarios - {{ empleado.nombre_completo }}
-</h1>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+                <span>/</span>
+                <a href="{% url 'empleados' %}" class="hover:text-primary transition">Empleados</a>
+                <span>/</span>
+                <a href="{% url 'detalle_empleado' empleado.id %}" class="hover:text-primary transition">{{ empleado.nombre_completo }}</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Descargos</span>
+            </nav>
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                Descargos Disciplinarios · {{ empleado.nombre_completo }}
+            </h1>
+        </div>
 
-<div class="flex gap-3 mb-6">
-
-    <a href="{% url 'crear_descargo' empleado.id %}"
-       class="bg-destructive text-white px-4 py-2 rounded hover:bg-destructive-hover">
-       Crear diligencia
-    </a>
-
-    <a href="{% url 'crear_citacion_descargo' empleado.id %}"
-       class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
-       Crear citación
-    </a>
-
-    <a href="{% url 'empleado_descargo' empleado.id %}"
-       class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover">
-       Descargar diligencia
-    </a>
-
-    <a href="{% url 'detalle_empleado' empleado.id %}"
-       class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-       Volver al empleado
-    </a>
-
-</div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0 sm:justify-end">
+            <a href="{% url 'crear_descargo' empleado.id %}"
+               class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>Crear Diligencia</span>
+            </a>
+            <a href="{% url 'crear_citacion_descargo' empleado.id %}"
+               class="btn btn-secundario bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-2xs">
+                <span>+ Citación</span>
+            </a>
+            <a href="{% url 'empleado_descargo' empleado.id %}"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Descargar Diligencia</span>
+            </a>
+            <a href="{% url 'detalle_empleado' empleado.id %}"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+                <span>← Volver al Empleado</span>
+            </a>
+        </div>
+    </div>
 
 <hr class="my-4">
 

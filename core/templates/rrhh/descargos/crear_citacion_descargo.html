@@ -2,11 +2,32 @@
 
 {% block content %}
 
-<div class="max-w-4xl mx-auto bg-card shadow rounded-lg p-6">
+<div class="max-w-4xl mx-auto space-y-4">
 
-    <h1 class="text-2xl font-bold mb-6">
-        Citación a Descargos
-    </h1>
+    <!-- BREADCRUMB & VOLVER (ALINEADO A LA DERECHA) -->
+    <div class="flex items-center justify-between gap-3 mb-4">
+        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+            <span>/</span>
+            <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+            <span>/</span>
+            <a href="{% url 'empleados' %}" class="hover:text-primary transition">Empleados</a>
+            <span>/</span>
+            <a href="{% url 'detalle_empleado' empleado.id %}" class="hover:text-primary transition">{{ empleado.nombre_completo }}</a>
+            <span>/</span>
+            <a href="{% url 'descargos_empleado' empleado.id %}" class="hover:text-primary transition">Descargos</a>
+            <span>/</span>
+            <span class="text-[#1F2937] font-semibold">Nueva Citación</span>
+        </nav>
+        <a href="{% url 'descargos_empleado' empleado.id %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 shadow-2xs">
+            ← Volver a Descargos
+        </a>
+    </div>
+
+    <div class="bg-card shadow rounded-2xl border border-border p-6">
+        <h1 class="text-2xl font-bold mb-6 text-[#1F2937] flex items-center gap-2">
+            <span>📋</span> <span>Citación a Descargos · {{ empleado.nombre_completo }}</span>
+        </h1>
 
     <form method="POST">
 
@@ -114,26 +135,24 @@
 
         </div>
 
-        <div class="mt-6 flex gap-3">
-
-            <button
-                type="submit"
-                class="bg-primary text-white px-6 py-2 rounded hover:bg-primary-hover"
-            >
-                Guardar citación
-            </button>
-
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
             <a
                 href="{% url 'descargos_empleado' empleado.id %}"
-                class="bg-neutral text-white px-6 py-2 rounded hover:bg-neutral-hover"
+                class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600"
             >
                 Cancelar
             </a>
-
+            <button
+                type="submit"
+                class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xs transition"
+            >
+                Guardar Citación
+            </button>
         </div>
 
     </form>
 
+    </div>
 </div>
 
 {% endblock %}

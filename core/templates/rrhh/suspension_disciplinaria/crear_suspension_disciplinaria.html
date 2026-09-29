@@ -2,130 +2,162 @@
 
 {% block content %}
 
-<div class="max-w-5xl mx-auto bg-card p-6 rounded shadow">
-
-    <h1 class="text-2xl font-bold mb-6">
-        Nueva suspensión disciplinaria
-    </h1>
-
-    <p class="mb-6">
-        Empleado:
-        <strong>{{ empleado.nombre_completo }}</strong>
-    </p>
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            <div class="md:col-span-2">
-                <label class="font-semibold" for="campo-motivo_suspension">Motivo de la suspensión</label>
-                <textarea id="campo-motivo_suspension"
-                    name="motivo_suspension"
-                    rows="4"
-                    required
-                    class="w-full border p-2 rounded"
-                ></textarea>
-            </div>
-
-            <div>
-                <label class="font-semibold" for="campo-fecha_falta">Fecha de la falta</label>
-                <input id="campo-fecha_falta"
-                    type="date"
-                    name="fecha_falta"
-                    required
-                    class="w-full border p-2 rounded"
-                >
-            </div>
-
-            <div class="md:col-span-2">
-                <label class="font-semibold" for="campo-articulos_infringidos">
-                    Artículos infringidos
-                </label>
-
-                <textarea id="campo-articulos_infringidos"
-                    name="articulos_infringidos"
-                    rows="6"
-                    required
-                    placeholder="Ejemplo: Artículo 38, numeral 4: ..."
-                    class="w-full border p-2 rounded"
-                ></textarea>
-            </div>
-
-            <div>
-                <label class="font-semibold" for="campo-fecha_inicio_suspension">Inicio de suspensión</label>
-                <input id="campo-fecha_inicio_suspension"
-                    type="date"
-                    name="fecha_inicio_suspension"
-                    required
-                    class="w-full border p-2 rounded"
-                >
-            </div>
-
-            <div>
-                <label class="font-semibold" for="campo-fecha_fin_suspension">Fin de suspensión</label>
-                <input id="campo-fecha_fin_suspension"
-                    type="date"
-                    name="fecha_fin_suspension"
-                    required
-                    class="w-full border p-2 rounded"
-                >
-            </div>
-
-            <div>
-                <label class="font-semibold" for="campo-fecha_reincorporacion">Fecha de reincorporación</label>
-                <input id="campo-fecha_reincorporacion"
-                    type="date"
-                    name="fecha_reincorporacion"
-                    required
-                    class="w-full border p-2 rounded"
-                >
-            </div>
-
-            <div class="md:col-span-2">
-                <label class="font-semibold" for="campo-responsabilidad_pecuniaria">
-                    Responsabilidad pecuniaria
-                </label>
-
-                <textarea id="campo-responsabilidad_pecuniaria"
-                    name="responsabilidad_pecuniaria"
-                    rows="4"
-                    class="w-full border p-2 rounded"
-                ></textarea>
-            </div>
-
-            <div class="md:col-span-2">
-                <label class="font-semibold" for="campo-consecuencia_reincidencia">
-                    Consecuencia por reincidencia
-                </label>
-
-                <textarea id="campo-consecuencia_reincidencia"
-                    name="consecuencia_reincidencia"
-                    rows="4"
-                    class="w-full border p-2 rounded"
-                ></textarea>
-            </div>
-
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+                <span>/</span>
+                <a href="{% url 'empleados' %}" class="hover:text-primary transition">Empleados</a>
+                <span>/</span>
+                <a href="{% url 'detalle_empleado' empleado.id %}" class="hover:text-primary transition">{{ empleado.nombre_completo }}</a>
+                <span>/</span>
+                <a href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}" class="hover:text-primary transition">Suspensiones Disciplinarias</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Nueva</span>
+            </nav>
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                Nueva Suspensión Disciplinaria · {{ empleado.nombre_completo }}
+            </h1>
         </div>
 
-        <div class="flex gap-3 mt-6">
-            <button
-                type="submit"
-                class="bg-primary text-white px-5 py-2 rounded"
-            >
-                Guardar suspensión
-            </button>
-
-            <a
-                href="{% url 'detalle_empleado' empleado.id %}"
-                class="bg-neutral text-white px-5 py-2 rounded"
-            >
-                Cancelar
+        <div class="flex items-center gap-2.5 shrink-0 sm:justify-end">
+            <a href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+                <span>← Volver a Suspensiones</span>
+            </a>
+            <a href="{% url 'detalle_empleado' empleado.id %}"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+                <span>← Volver al Empleado</span>
             </a>
         </div>
+    </div>
 
-    </form>
+    <div class="bg-card shadow rounded-xl p-6 border border-border">
 
-</div>
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-motivo_suspension">
+                        Motivo de la suspensión <span class="text-destructive">*</span>
+                    </label>
+                    <textarea id="campo-motivo_suspension"
+                        name="motivo_suspension"
+                        rows="3"
+                        required
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                        placeholder="Descripción detallada de la falta cometida..."
+                    ></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-fecha_falta">
+                        Fecha de la falta <span class="text-destructive">*</span>
+                    </label>
+                    <input id="campo-fecha_falta"
+                        type="date"
+                        name="fecha_falta"
+                        required
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-fecha_reincorporacion">
+                        Fecha de reincorporación <span class="text-destructive">*</span>
+                    </label>
+                    <input id="campo-fecha_reincorporacion"
+                        type="date"
+                        name="fecha_reincorporacion"
+                        required
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-fecha_inicio_suspension">
+                        Inicio de suspensión <span class="text-destructive">*</span>
+                    </label>
+                    <input id="campo-fecha_inicio_suspension"
+                        type="date"
+                        name="fecha_inicio_suspension"
+                        required
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-fecha_fin_suspension">
+                        Fin de suspensión <span class="text-destructive">*</span>
+                    </label>
+                    <input id="campo-fecha_fin_suspension"
+                        type="date"
+                        name="fecha_fin_suspension"
+                        required
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    >
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-articulos_infringidos">
+                        Artículos infringidos <span class="text-destructive">*</span>
+                    </label>
+                    <textarea id="campo-articulos_infringidos"
+                        name="articulos_infringidos"
+                        rows="4"
+                        required
+                        placeholder="Ejemplo: Reglamento Interno de Trabajo, Artículo 38, numeral 4: ..."
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    ></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-responsabilidad_pecuniaria">
+                        Responsabilidad pecuniaria (opcional)
+                    </label>
+                    <textarea id="campo-responsabilidad_pecuniaria"
+                        name="responsabilidad_pecuniaria"
+                        rows="2"
+                        placeholder="En caso de daños económicos o reposición requerida..."
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    ></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold uppercase text-muted-foreground mb-1" for="campo-consecuencia_reincidencia">
+                        Consecuencia por reincidencia (opcional)
+                    </label>
+                    <textarea id="campo-consecuencia_reincidencia"
+                        name="consecuencia_reincidencia"
+                        rows="2"
+                        placeholder="Medidas a tomar en caso de incurrir nuevamente en la misma falta..."
+                        class="w-full border border-border-strong rounded-lg p-2.5 bg-background text-foreground text-sm focus:ring-2 focus:ring-primary outline-none"
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-200 mt-6">
+                <a
+                    href="{% url 'suspensiones_disciplinarias_empleado' empleado.id %}"
+                    class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs"
+                >
+                    Cancelar
+                </a>
+                <button
+                    type="submit"
+                    class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xs transition"
+                >
+                    Guardar Suspensión
+                </button>
+            </div>
+
+        </form>
+
+    </div>
 
 {% endblock %}

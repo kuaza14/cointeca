@@ -1,87 +1,110 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Editar Indicador Estratégico | Gerencia Cointeca S.A.S.{% endblock %}
+
 {% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
 
-<div class="max-w-2xl mx-auto space-y-4">
-
-    <!-- BREADCRUMB & VOLVER -->
-    <div class="flex items-center justify-between gap-3">
-        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
-            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
-            <span>/</span>
-            <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
-            <span>/</span>
-            <a href="{% url 'indicadores' %}" class="hover:text-primary transition">Indicadores</a>
-            <span>/</span>
-            <span class="text-[#1F2937] font-semibold">Editar</span>
-        </nav>
-        <a href="{% url 'indicadores' %}" class="btn btn-secundario text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
-            ← Volver a Indicadores
-        </a>
-    </div>
-
-    <div class="bg-card p-6 rounded-2xl border border-border shadow-xs">
-        <h1 class="text-xl font-bold mb-4 text-[#1F2937] flex items-center gap-2">
-            <span>✏️</span> <span>Editar Indicador Estratégico</span>
-        </h1>
-
-    <form method="POST" class="space-y-4">
-        {% csrf_token %}
-
+    <!-- ENCABEZADO Y VOLVER (ALINEADO A LA DERECHA) -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <label class="block text-sm font-semibold mb-1" for="campo-perspectiva">Perspectiva</label>
-            <select id="campo-perspectiva" name="perspectiva" class="w-full border rounded px-3 py-2 bg-background">
-                <option value="financiera" {% if indicador.perspectiva == 'financiera' %}selected{% endif %}>Financiera</option>
-                <option value="comercial" {% if indicador.perspectiva == 'comercial' %}selected{% endif %}>Comercial</option>
-                <option value="operativa" {% if indicador.perspectiva == 'operativa' %}selected{% endif %}>Operativa</option>
-                <option value="cliente" {% if indicador.perspectiva == 'cliente' %}selected{% endif %}>Cliente</option>
-                <option value="aprendizaje" {% if indicador.perspectiva == 'aprendizaje' %}selected{% endif %}>Aprendizaje</option>
-            </select>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+                <span>/</span>
+                <a href="{% url 'indicadores' %}" class="hover:text-primary transition">Indicadores</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Editar</span>
+            </nav>
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2">
+                <span>✏️</span> <span>Editar Indicador Estratégico</span>
+            </h1>
         </div>
 
-        <div>
-            <label class="block text-sm font-semibold mb-1" for="campo-nombre">Nombre del Indicador (KPI)</label>
-            <input id="campo-nombre" type="text" name="nombre" required
-                value="{{ indicador.nombre }}"
-                class="w-full border rounded px-3 py-2 bg-background">
-        </div>
-
-        <div>
-            <label class="block text-sm font-semibold mb-1" for="campo-definicion">Definición Técnica / Fórmula</label>
-            <textarea id="campo-definicion" name="definicion" required rows="3"
-                class="w-full border rounded px-3 py-2 bg-background">{{ indicador.definicion }}</textarea>
-        </div>
-
-        <div>
-            <label class="block text-sm font-semibold mb-1" for="campo-meta_anual">Meta Anual</label>
-            <input id="campo-meta_anual" type="text" name="meta_anual" required
-                value="{{ indicador.meta_anual }}"
-                class="w-full border rounded px-3 py-2">
-        </div>
-
-        <div>
-            <label class="block text-sm font-semibold mb-1" for="campo-frecuencia">Frecuencia de Medición</label>
-            <select id="campo-frecuencia" name="frecuencia" class="w-full border rounded px-3 py-2">
-                <option value="mensual" {% if indicador.frecuencia == 'mensual' %}selected{% endif %}>Mensual</option>
-                <option value="trimestral" {% if indicador.frecuencia == 'trimestral' %}selected{% endif %}>Trimestral</option>
-                <option value="semestral" {% if indicador.frecuencia == 'semestral' %}selected{% endif %}>Semestral</option>
-                <option value="anual" {% if indicador.frecuencia == 'anual' %}selected{% endif %}>Anual</option>
-                <option value="por_proyecto" {% if indicador.frecuencia == 'por_proyecto' %}selected{% endif %}>Por Proyecto</option>
-            </select>
-        </div>
-
-        <div class="flex gap-3 pt-2">
-            <button type="submit"
-                class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover">
-                Guardar
-            </button>
-            <a href="/indicadores/"
-                class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-                Cancelar
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a href="{% url 'indicadores' %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs">
+                <span>← Volver a Indicadores</span>
             </a>
         </div>
+    </div>
 
-    </form>
+    <!-- TARJETA DEL FORMULARIO -->
+    <div class="tarjeta p-6 bg-card border border-border rounded-2xl shadow-xs">
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="campo-perspectiva">
+                    Perspectiva <span class="text-rose-500">*</span>
+                </label>
+                <select id="campo-perspectiva" name="perspectiva" 
+                        class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                    <option value="financiera" {% if indicador.perspectiva == 'financiera' %}selected{% endif %}>Financiera</option>
+                    <option value="comercial" {% if indicador.perspectiva == 'comercial' %}selected{% endif %}>Comercial</option>
+                    <option value="operativa" {% if indicador.perspectiva == 'operativa' %}selected{% endif %}>Operativa</option>
+                    <option value="cliente" {% if indicador.perspectiva == 'cliente' %}selected{% endif %}>Cliente</option>
+                    <option value="aprendizaje" {% if indicador.perspectiva == 'aprendizaje' %}selected{% endif %}>Aprendizaje</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="campo-nombre">
+                    Nombre del Indicador (KPI) <span class="text-rose-500">*</span>
+                </label>
+                <input id="campo-nombre" type="text" name="nombre" required
+                       value="{{ indicador.nombre }}"
+                       placeholder="Ej: Margen por Proyecto"
+                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="campo-definicion">
+                    Definición Técnica / Fórmula <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="campo-definicion" name="definicion" required rows="3"
+                          placeholder="Ej: (Utilidad Bruta / Valor Contrato) * 100"
+                          class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">{{ indicador.definicion }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="campo-meta_anual">
+                    Meta Anual <span class="text-rose-500">*</span>
+                </label>
+                <input id="campo-meta_anual" type="text" name="meta_anual" required
+                       value="{{ indicador.meta_anual }}"
+                       placeholder="Ej: > 25%"
+                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition font-mono">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="campo-frecuencia">
+                    Frecuencia de Medición <span class="text-rose-500">*</span>
+                </label>
+                <select id="campo-frecuencia" name="frecuencia" 
+                        class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                    <option value="mensual" {% if indicador.frecuencia == 'mensual' %}selected{% endif %}>Mensual</option>
+                    <option value="trimestral" {% if indicador.frecuencia == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                    <option value="semestral" {% if indicador.frecuencia == 'semestral' %}selected{% endif %}>Semestral</option>
+                    <option value="anual" {% if indicador.frecuencia == 'anual' %}selected{% endif %}>Anual</option>
+                    <option value="por_proyecto" {% if indicador.frecuencia == 'por_proyecto' %}selected{% endif %}>Por Proyecto</option>
+                </select>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN ALINEADOS A LA DERECHA -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <a href="{% url 'indicadores' %}"
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-xl shadow-xs transition">
+                    Guardar Cambios
+                </button>
+            </div>
+
+        </form>
+    </div>
 </div>
-
 {% endblock %}

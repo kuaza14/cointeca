@@ -1,13 +1,24 @@
 #!/bin/sh
 set -e
 
-echo "Esperando a PostgreSQL en ${POSTGRES_HOST:-db}:${POSTGRES_PORT:-5432} ..."
 python <<'PY'
 import os, socket, sys, time
+from urllib.parse import urlparse
 
-host = os.environ.get("POSTGRES_HOST", "db")
-port = int(os.environ.get("POSTGRES_PORT", "5432"))
+db_url = os.environ.get("DATABASE_URL")
+if db_url:
+    try:
+        parsed = urlparse(db_url)
+        host = parsed.hostname or "localhost"
+        port = parsed.port or 5432
+    except Exception:
+        host = os.environ.get("POSTGRES_HOST", "db")
+        port = int(os.environ.get("POSTGRES_PORT", "5432"))
+else:
+    host = os.environ.get("POSTGRES_HOST", "db")
+    port = int(os.environ.get("POSTGRES_PORT", "5432"))
 
+print(f"Esperando a PostgreSQL en {host}:{port} ...")
 for _ in range(60):
     try:
         with socket.create_connection((host, port), timeout=2):
@@ -22,6 +33,9 @@ PY
 
 echo "Aplicando migraciones ..."
 python manage.py migrate --noinput
+
+echo "Recopilando archivos estáticos ..."
+python manage.py collectstatic --noinput
 
 # Sincronizar archivos multimedia iniciales al volumen de media si no existen
 if [ -d "/app/documentos_rrhh" ]; then

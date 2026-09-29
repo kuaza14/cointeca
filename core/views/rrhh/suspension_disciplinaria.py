@@ -1,11 +1,10 @@
 from datetime import date
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
 from core.models import Empleado, SuspensionDisciplinaria
-
-from core.models import SuspensionDisciplinaria
 from core.helpers.word import generar_word, limpiar_nombre_archivo
 
 
@@ -42,6 +41,25 @@ def detalle_suspension_disciplinaria(request, id):
             'suspension': suspension
         }
     )
+
+
+@login_required
+def eliminar_suspension_disciplinaria(request, id):
+    suspension = get_object_or_404(
+        SuspensionDisciplinaria,
+        id=id
+    )
+    empleado_id = suspension.empleado.id
+    suspension.delete()
+    messages.success(
+        request,
+        '✅ Suspensión disciplinaria eliminada correctamente.'
+    )
+    return redirect(
+        'suspensiones_disciplinarias_empleado',
+        id=empleado_id
+    )
+
 
 @login_required
 def crear_suspension_disciplinaria(request, id):

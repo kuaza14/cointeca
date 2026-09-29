@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <form method="POST" class="space-y-4">
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -67,6 +67,29 @@
                     <input id="campo-pagado_a" type="text" name="pagado_a" required
                            placeholder="Ej: COMBUSCOL S.A.S."
                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-categoria">
+                        Categoría / Centro de Costos <span class="text-red-500">*</span>
+                    </label>
+                    <select id="campo-categoria" name="categoria" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                        {% for cod, nom in categorias %}
+                        <option value="{{ cod }}" {% if cod == 'otros' %}selected{% endif %}>{{ nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-soporte">
+                        Soporte Digital (Foto o PDF)
+                    </label>
+                    <input id="campo-soporte" type="file" name="soporte" accept="image/*,.pdf"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    <p class="text-[10px] text-slate-400 mt-1">Opcional: Adjunta foto del recibo o factura física para auditoría.</p>
                 </div>
             </div>
 

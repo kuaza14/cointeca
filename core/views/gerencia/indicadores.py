@@ -10,13 +10,24 @@ from core.models import (
     SeguimientoIndicador,
 )
 from core.helpers.gerencia_seeder import sembrar_indicadores_oficiales
+from core.helpers.semaforo_indicadores import evaluar_semaforo, resumen_salud_indicadores
 
 @login_required
 def indicadores(request):
     if not IndicadorEstrategico.objects.exists():
         sembrar_indicadores_oficiales()
     items = IndicadorEstrategico.objects.all().order_by('perspectiva')
-    return render(request, 'gerencia/indicadores/indicadores.html', {'indicadores': items})
+    
+    # Anexar evaluación semafórica a cada indicador
+    for item in items:
+        item.semaforo = evaluar_semaforo(item)
+
+    resumen_salud = resumen_salud_indicadores(items)
+
+    return render(request, 'gerencia/indicadores/indicadores.html', {
+        'indicadores': items,
+        'resumen_salud': resumen_salud,
+    })
 
 @login_required
 def crear_indicador(request):
@@ -35,9 +46,11 @@ def crear_indicador(request):
 def detalle_indicador(request, id):
     indicador = get_object_or_404(IndicadorEstrategico, id=id)
     seguimientos = indicador.seguimientoindicador_set.all().order_by('-fecha')
+    semaforo = evaluar_semaforo(indicador)
     return render(request, 'gerencia/indicadores/detalle_indicador.html', {
         'indicador': indicador,
-        'seguimientos': seguimientos
+        'seguimientos': seguimientos,
+        'semaforo': semaforo,
     })
 
 @login_required

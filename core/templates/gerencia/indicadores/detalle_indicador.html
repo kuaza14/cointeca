@@ -40,17 +40,33 @@
     </div>
 
     <!-- Tarjetas de Información Clave -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div class="bg-card border border-border rounded-xl p-4 shadow-xs">
             <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Perspectiva</p>
             <p class="font-black text-lg text-foreground mt-1 capitalize">{{ indicador.perspectiva }}</p>
         </div>
-        <div class="bg-card border border-border rounded-xl p-4 shadow-xs border-l-4 border-l-emerald-600">
+        <div class="bg-card border border-border rounded-xl p-4 shadow-xs border-l-4 border-l-blue-600">
             <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Meta Anual</p>
-            <p class="font-black text-xl text-emerald-700 font-mono mt-1">{{ indicador.meta_anual }}</p>
+            <p class="font-black text-xl text-blue-700 font-mono mt-1">{{ indicador.meta_anual }}</p>
+        </div>
+        <div class="bg-card border rounded-xl p-4 shadow-xs border-l-4 
+            {% if semaforo.color == 'verde' %}border-l-emerald-600 bg-emerald-50/20
+            {% elif semaforo.color == 'amarillo' %}border-l-amber-500 bg-amber-50/20
+            {% elif semaforo.color == 'rojo' %}border-l-rose-600 bg-rose-50/20
+            {% else %}border-l-slate-400 bg-slate-50/40{% endif %}">
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Estado Semáforo</p>
+            <div class="flex items-center gap-1.5 mt-1">
+                <span class="text-base">{{ semaforo.icono }}</span>
+                <span class="font-black text-base {% if semaforo.color == 'verde' %}text-emerald-700{% elif semaforo.color == 'amarillo' %}text-amber-700{% elif semaforo.color == 'rojo' %}text-rose-700{% else %}text-slate-600{% endif %}">
+                    {{ semaforo.texto }}
+                </span>
+            </div>
+            {% if semaforo.porcentaje_cumplimiento %}
+            <p class="text-[11px] text-muted-foreground mt-0.5 font-mono">Cumplimiento: <span class="font-bold">{{ semaforo.porcentaje_str }}</span></p>
+            {% endif %}
         </div>
         <div class="bg-card border border-border rounded-xl p-4 shadow-xs">
-            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Frecuencia de Medición</p>
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Frecuencia</p>
             <p class="font-black text-lg text-foreground mt-1">{{ indicador.get_frecuencia_display }}</p>
         </div>
     </div>

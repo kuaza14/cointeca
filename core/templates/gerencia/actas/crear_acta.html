@@ -1,31 +1,160 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Crear Acta de Junta Directiva | Gerencia Cointeca S.A.S.{% endblock %}
+
 {% block content %}
+<div class="max-w-3xl mx-auto space-y-5">
 
-<h1 class="text-2xl font-bold mb-6">Crear Acta</h1>
+    <!-- BREADCRUMB -->
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+        <span>/</span>
+        <a href="{% url 'actas' %}" class="hover:text-primary transition">Actas de Junta</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Nueva Acta</span>
+    </nav>
 
-<form method="POST" class="bg-card p-6 rounded shadow space-y-4">
-    {% csrf_token %}
+    <!-- FORMULARIO -->
+    <div class="tarjeta p-6 sm:p-8">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div class="size-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
+                📋
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-[#1F2937]">Registrar Nueva Acta de Junta Directiva</h1>
+                <p class="text-xs text-[#64748B]">Formato institucional GR-FR-01 para reuniones y decisiones corporativas</p>
+            </div>
+        </div>
 
-    <input type="text" name="numero_acta" placeholder="Número de acta" class="w-full border p-2 rounded" required>
-    <input type="text" name="nombre_entidad" placeholder="Entidad" class="w-full border p-2 rounded" required>
-    <input type="text" name="nit" placeholder="NIT" class="w-full border p-2 rounded" required>
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
 
-    <input type="date" name="fecha" class="w-full border p-2 rounded" required>
-    <input type="time" name="hora_inicio" class="w-full border p-2 rounded" required>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-numero_acta">
+                        Nº de Acta <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-numero_acta" type="text" name="numero_acta" required
+                           placeholder="Ej: 001-2026"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                </div>
 
-    <input type="text" name="lugar" placeholder="Lugar" class="w-full border p-2 rounded">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-nombre_entidad">
+                        Razón Social / Entidad <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-nombre_entidad" type="text" name="nombre_entidad" value="COINTECA S.A.S." required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
 
-    <input type="text" name="presidente" placeholder="Presidente" class="w-full border p-2 rounded">
-    <input type="text" name="secretario" placeholder="Secretario" class="w-full border p-2 rounded">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-nit">
+                        NIT <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-nit" type="text" name="nit" value="900.512.431-8" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                </div>
+            </div>
 
-    <textarea name="orden_del_dia" placeholder="Orden del día" class="w-full border p-2 rounded"></textarea>
-    <textarea name="desarrollo" placeholder="Desarrollo" class="w-full border p-2 rounded"></textarea>
-    <textarea name="proposiciones" placeholder="Proposiciones" class="w-full border p-2 rounded"></textarea>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha">
+                        Fecha de la Reunión <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-fecha" type="date" name="fecha" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
 
-    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-primary-hover">
-        Guardar
-    </button>
-</form>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-hora_inicio">
+                        Hora de Inicio <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-hora_inicio" type="time" name="hora_inicio" value="09:00" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+            </div>
 
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-lugar">
+                    Lugar de Reunión
+                </label>
+                <input id="campo-lugar" type="text" name="lugar" placeholder="Ej: Sala de Juntas Principal - Sede Cointeca, Bogotá D.C."
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-presidente">
+                        Presidente de la Junta <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-presidente" type="text" name="presidente" required
+                           placeholder="Nombre completo del Presidente"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-secretario">
+                        Secretario de la Junta <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-secretario" type="text" name="secretario" required
+                           placeholder="Nombre completo del Secretario"
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+            </div>
+
+            <!-- CUSTODIA DIGITAL -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="campo-archivo_firmado">
+                    Custodia Digital: Adjuntar Escaneo Firmado (Opcional)
+                </label>
+                <input id="campo-archivo_firmado" type="file" name="archivo_firmado" accept=".pdf,image/*"
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <p class="text-[10px] text-slate-500">Puedes adjuntarlo ahora o más adelante cuando se recopilen las firmas manuscritas.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-orden_del_dia">
+                    Orden del Día <span class="text-red-500">*</span>
+                </label>
+                <textarea id="campo-orden_del_dia" name="orden_del_dia" required rows="3"
+                          placeholder="1. Verificación del quórum.&#10;2. Aprobación del orden del día.&#10;3. Presentación de estados financieros."
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-desarrollo">
+                    Desarrollo de la Sesión y Deliberaciones <span class="text-red-500">*</span>
+                </label>
+                <textarea id="campo-desarrollo" name="desarrollo" required rows="5"
+                          placeholder="Detalle de los puntos tratados, deliberaciones y acuerdos alcanzados por los miembros..."
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-proposiciones">
+                    Proposiciones y Acuerdos Varios
+                </label>
+                <textarea id="campo-proposiciones" name="proposiciones" rows="3"
+                          placeholder="Proposiciones sometidas a votación o tareas acordadas..."
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <a href="{% url 'actas' %}"
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Guardar Acta</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
 {% endblock %}

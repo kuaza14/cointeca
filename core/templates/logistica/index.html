@@ -6,13 +6,25 @@
 <div class="space-y-6">
 
     <!-- Encabezado -->
-    <div>
-        <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
-            Módulo de Logística & Almacén
-        </h1>
-        <p class="text-xs text-[#64748B] mt-1">
-            Control de inventarios, despachos por macroproyectos, entregas de dotación y vista global de materiales.
-        </p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Logística</span>
+            </nav>
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                Módulo de Logística & Almacén
+            </h1>
+            <p class="text-xs text-[#64748B] mt-1">
+                Control de inventarios, despachos por macroproyectos, entregas de dotación y vista global de materiales.
+            </p>
+        </div>
+
+        <a href="{% url 'dashboard' %}" 
+           class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition self-start sm:self-auto flex items-center gap-1.5 shadow-2xs">
+            <span>← Volver al Dashboard</span>
+        </a>
     </div>
 
     <!-- Grid de Tarjetas Modernas -->

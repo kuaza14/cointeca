@@ -85,13 +85,24 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-facturacion_real">
-                    Facturación Real ($ COP) <span class="text-red-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="campo-facturacion_real">
+                        Facturación Real ($ COP) <span class="text-red-500">*</span>
+                    </label>
+                    <button type="button" id="btn-importar-ingenieria"
+                            title="Consulta el valor liquidado en los postes/apoyos de ingeniería y lo ingresa automáticamente"
+                            class="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-lg transition cursor-pointer shadow-2xs">
+                        <span>⚡ Importar Liquidación Mano de Obra</span>
+                    </button>
+                </div>
                 <input id="campo-facturacion_real" type="text" name="facturacion_real" required
                        placeholder="Ej: 95000000"
                        class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
-                <p class="text-[10px] text-slate-400 mt-1">Valor efectivamente facturado y radicado</p>
+                <div id="info-importacion" class="hidden mt-1.5 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-[11px] text-emerald-800 flex items-center justify-between">
+                    <span id="texto-importacion"></span>
+                    <button type="button" onclick="document.getElementById('info-importacion').classList.add('hidden')" class="text-emerald-700 font-bold ml-2">✕</button>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Valor efectivamente facturado y radicado o importado de liquidaciones de ingeniería</p>
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -110,4 +121,37 @@
     </div>
 
 </div>
+
+<script>
+document.getElementById('btn-importar-ingenieria').addEventListener('click', function() {
+    const proyectoSelect = document.getElementById('campo-proyecto');
+    const proyectoId = proyectoSelect ? proyectoSelect.value : '';
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳ Consultando...</span>';
+    btn.disabled = true;
+
+    fetch(`{% url 'api_liquidacion_ingenieria' %}?proyecto_id=${proyectoId}`)
+        .then(response => response.json())
+        .then(data => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            if (data.total > 0) {
+                document.getElementById('campo-facturacion_real').value = Math.round(data.total);
+                const infoDiv = document.getElementById('info-importacion');
+                const textoSpan = document.getElementById('texto-importacion');
+                textoSpan.innerHTML = `✓ Se importó <strong>$${data.total_formateado} COP</strong> desde las liquidaciones de <em>${data.proyecto_referencia}</em>.`;
+                infoDiv.classList.remove('hidden');
+            } else {
+                alert(`No se encontraron liquidaciones de mano de obra en ingeniería para este proyecto.`);
+            }
+        })
+        .catch(err => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            console.error(err);
+            alert('Error al consultar las liquidaciones de ingeniería.');
+        });
+});
+</script>
 {% endblock %}

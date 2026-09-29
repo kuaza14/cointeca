@@ -1,31 +1,54 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Eliminar Acta #{{ acta.numero_acta }} | Gerencia Cointeca S.A.S.{% endblock %}
+
 {% block content %}
+<div class="max-w-xl mx-auto space-y-6">
 
-<div class="max-w-xl mx-auto mt-10 bg-card p-6 rounded shadow text-center">
-
-    <h2 class="text-2xl font-bold text-destructive mb-4">
-        Eliminar Acta
-    </h2>
-
-    <p class="mb-6 text-foreground">
-        ¿Seguro que quieres eliminar el acta 
-        <strong>{{ acta.numero_acta }}</strong>?
-    </p>
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <button class="bg-destructive text-white px-4 py-2 rounded hover:bg-destructive-hover">
-            Sí, eliminar
-        </button>
-
-        <a href="/actas/{{ acta.id }}/" 
-           class="ml-3 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
-           Cancelar
+    <!-- BREADCRUMB -->
+    <div class="flex items-center justify-between gap-3">
+        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+            <span>/</span>
+            <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+            <span>/</span>
+            <a href="{% url 'actas' %}" class="hover:text-primary transition">Actas</a>
+            <span>/</span>
+            <a href="{% url 'detalle_acta' acta.id %}" class="hover:text-primary transition">Acta #{{ acta.numero_acta }}</a>
+            <span>/</span>
+            <span class="text-[#1F2937] font-semibold">Eliminar</span>
+        </nav>
+        <a href="{% url 'detalle_acta' acta.id %}" class="btn btn-secundario text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600">
+            ← Volver al Acta
         </a>
-    </form>
+    </div>
+
+    <!-- TARJETA DE CONFIRMACIÓN -->
+    <div class="bg-card p-8 rounded-2xl border border-rose-200 shadow-xs text-center space-y-4">
+        <div class="size-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl mx-auto">
+            🗑️
+        </div>
+
+        <h2 class="text-xl font-bold text-rose-700">
+            ¿Eliminar Acta de Junta Directiva?
+        </h2>
+
+        <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+            Estás a punto de eliminar de manera permanente el <strong>Acta Nº {{ acta.numero_acta }}</strong> del <strong>{{ acta.fecha|date:"d/m/Y" }}</strong>. Esta acción no se puede deshacer.
+        </p>
+
+        <form method="POST" class="pt-4 flex items-center justify-center gap-3">
+            {% csrf_token %}
+            <button type="submit" 
+                    class="btn btn-peligro text-xs font-bold px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition">
+                Sí, eliminar definitivamente
+            </button>
+            <a href="{% url 'detalle_acta' acta.id %}" 
+               class="btn btn-secundario text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600">
+               Cancelar
+            </a>
+        </form>
+    </div>
 
 </div>
-
 {% endblock %}

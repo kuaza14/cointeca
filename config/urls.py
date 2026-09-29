@@ -27,6 +27,7 @@ from core.views import (
     editar_acta,
     eliminar_acta,
     exportar_acta_word,
+    imprimir_acta,
     indicadores,
     crear_indicador,
     detalle_indicador,
@@ -43,6 +44,7 @@ from core.views import (
     eliminar_facturacion,
     editar_facturacion,
     exportar_facturacion_excel,
+    api_liquidacion_ingenieria,
     gerencia_home,
     plan_estrategico,
     descargar_plan_estrategico,
@@ -63,6 +65,7 @@ from core.views.rrhh.empleados import (
     editar_dotacion_empleado,
     subir_documento,
     eliminar_documento,
+    ver_documento,
 )
 
 from core.views.rrhh.retiro import acuerdo_terminacion
@@ -250,6 +253,7 @@ urlpatterns = [
     path('actas/', actas, name='actas'),
     path('actas/crear/', crear_acta, name='crear_acta'),
     path('actas/<int:id>/', detalle_acta, name='detalle_acta'),
+    path('actas/<int:id>/imprimir/', imprimir_acta, name='imprimir_acta'),
     path('actas/<int:id>/editar/', editar_acta, name='editar_acta'),
     path('actas/<int:id>/eliminar/', eliminar_acta, name='eliminar_acta'),
     path('actas/<int:id>/exportar-word/', exportar_acta_word, name='exportar_acta_word'),
@@ -271,6 +275,7 @@ urlpatterns = [
     path('facturacion/crear-proyecto/', crear_proyecto_facturacion, name='crear_proyecto_facturacion'),
     path('facturacion/registrar/', registrar_facturacion, name='registrar_facturacion'),
     path('facturacion/exportar-excel/', exportar_facturacion_excel, name='exportar_facturacion_excel'),
+    path('facturacion/api-liquidacion-ingenieria/', api_liquidacion_ingenieria, name='api_liquidacion_ingenieria'),
     path('facturacion/<int:id>/editar/', editar_facturacion, name='editar_facturacion'),
     path('facturacion/<int:id>/eliminar/', eliminar_facturacion, name='eliminar_facturacion'),
 
@@ -302,6 +307,7 @@ urlpatterns = [
     # DOCUMENTOS
     path('rrhh/empleados/<int:id>/subir-documento/', subir_documento, name='subir_documento'),
     path('rrhh/documentos/<int:id>/eliminar/', eliminar_documento, name='eliminar_documento'),
+    path('rrhh/documentos/<int:id>/ver/', ver_documento, name='ver_documento'),
 
     # DOCUMENTOS PDF/WORD
     path('rrhh/empleados/<int:id>/contrato/', generar_contrato, name='generar_contrato'),

@@ -6,13 +6,29 @@ from core.helpers.word import generar_word, limpiar_nombre_archivo
 
 @login_required
 def actas(request):
-    actas = ActaJuntaDirectiva.objects.all()
-    return render(request, 'gerencia/actas/actas.html', {'actas': actas})
+    actas = ActaJuntaDirectiva.objects.all().order_by('-fecha', '-id')
+    total_actas = actas.count()
+    actas_custodiadas = actas.filter(archivo_firmado__isnull=False).exclude(archivo_firmado='').count()
+    actas_aprobadas = actas.filter(estado='aprobada').count()
+    actas_borrador = actas.filter(estado='borrador').count()
+    ultima_sesion = actas.first()
+    porcentaje_custodia = round((actas_custodiadas / total_actas * 100), 1) if total_actas > 0 else 0
+    
+    return render(request, 'gerencia/actas/actas.html', {
+        'actas': actas,
+        'total_actas': total_actas,
+        'actas_custodiadas': actas_custodiadas,
+        'actas_aprobadas': actas_aprobadas,
+        'actas_borrador': actas_borrador,
+        'porcentaje_custodia': porcentaje_custodia,
+        'ultima_sesion': ultima_sesion,
+    })
 
 @login_required
 def crear_acta(request):
     if request.method == 'POST':
-        ActaJuntaDirectiva.objects.create(
+        archivo_firmado = request.FILES.get('archivo_firmado')
+        acta = ActaJuntaDirectiva.objects.create(
             numero_acta=request.POST['numero_acta'],
             nombre_entidad=request.POST['nombre_entidad'],
             nit=request.POST['nit'],
@@ -23,20 +39,21 @@ def crear_acta(request):
             secretario=request.POST['secretario'],
             orden_del_dia=request.POST['orden_del_dia'],
             desarrollo=request.POST['desarrollo'],
-            proposiciones=request.POST.get('proposiciones', '')
+            proposiciones=request.POST.get('proposiciones', ''),
+            archivo_firmado=archivo_firmado,
         )
-        return redirect('/actas/')
+        return redirect('detalle_acta', id=acta.id)
 
     return render(request, 'gerencia/actas/crear_acta.html')
 
 @login_required
 def detalle_acta(request, id):
-    acta = ActaJuntaDirectiva.objects.get(id=id)
+    acta = get_object_or_404(ActaJuntaDirectiva, id=id)
     return render(request, 'gerencia/actas/detalle_acta.html', {'acta': acta})
 
 @login_required
 def editar_acta(request, id):
-    acta = ActaJuntaDirectiva.objects.get(id=id)
+    acta = get_object_or_404(ActaJuntaDirectiva, id=id)
 
     if request.method == 'POST':
         acta.numero_acta = request.POST['numero_acta']
@@ -50,10 +67,17 @@ def editar_acta(request, id):
         acta.orden_del_dia = request.POST['orden_del_dia']
         acta.desarrollo = request.POST['desarrollo']
         acta.proposiciones = request.POST.get('proposiciones', '')
-        acta.estado = request.POST['estado']
+        acta.estado = request.POST.get('estado', acta.estado)
+
+        if request.FILES.get('archivo_firmado'):
+            acta.archivo_firmado = request.FILES.get('archivo_firmado')
+        elif request.POST.get('eliminar_archivo_firmado'):
+            if acta.archivo_firmado:
+                acta.archivo_firmado.delete(save=False)
+            acta.archivo_firmado = None
 
         acta.save()
-        return redirect(f'/actas/{acta.id}/')
+        return redirect('detalle_acta', id=acta.id)
 
     return render(request, 'gerencia/actas/editar_acta.html', {'acta': acta})
 
@@ -66,6 +90,17 @@ def eliminar_acta(request, id):
         return redirect('/actas/')
 
     return render(request, 'gerencia/actas/eliminar_acta.html', {'acta': acta})
+
+@login_required
+def imprimir_acta(request, id):
+    """
+    Vista oficial para impresión directa y generación de PDF en el navegador
+    con formato institucional idéntico a GR-FR-01.
+    """
+    acta = get_object_or_404(ActaJuntaDirectiva, id=id)
+    return render(request, 'gerencia/actas/imprimir_acta.html', {
+        'acta': acta,
+    })
 
 @login_required
 def exportar_acta_word(request, id):

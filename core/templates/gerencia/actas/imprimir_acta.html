@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acta Nº {{ acta.numero_acta }} - Cointeca S.A.S. (GR-FR-01)</title>
+    <!-- Tailwind CSS CDN for printable styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page {
+            size: letter;
+            margin: 18mm 15mm 18mm 15mm;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                font-size: 11pt;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .avoid-break {
+                page-break-inside: avoid;
+            }
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .borde-oficial {
+            border: 1px solid #cbd5e1;
+        }
+    </style>
+</head>
+<body class="py-8">
+
+    <!-- BARRA FLOTANTE DE ACCIONES (NO IMPRIMIBLE) -->
+    <div class="no-print max-w-4xl mx-auto mb-6 px-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'detalle_acta' acta.id %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition">
+                    <span>← Volver al Acta</span>
+                </a>
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800">Vista de Impresión Oficial (GR-FR-01)</h2>
+                    <p class="text-[11px] text-slate-500">Genera el PDF oficial listo para archivar o firmar físicamente</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{% url 'exportar_acta_word' acta.id %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3.5 py-2 rounded-xl transition">
+                    <span>📄 Descargar Word (.docx)</span>
+                </a>
+                <button onclick="window.print()" class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl shadow-xs transition cursor-pointer">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.667-2.03-1.282-2.859M17.28 13.829c.24-1.076.667-2.03 1.282-2.859M6 18h12m-6-10V4m-4 4h8M4 14h16v6H4v-6z"/></svg>
+                    <span>🖨️ Imprimir / Guardar como PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENTO OFICIAL FORMATO GR-FR-01 -->
+    <main class="max-w-4xl mx-auto bg-white p-10 sm:p-12 shadow-md sm:rounded-xl border border-slate-200 text-slate-800 text-sm leading-relaxed">
+        
+        <!-- ENCABEZADO INSTITUCIONAL -->
+        <table class="w-full border-collapse borde-oficial mb-6">
+            <tr>
+                <td class="w-1/4 p-3 border border-slate-300 text-center align-middle bg-slate-50/50">
+                    <div class="font-extrabold text-blue-900 tracking-wider text-base">COINTECA</div>
+                    <div class="text-[9px] font-bold text-slate-500 tracking-widest uppercase">S.A.S. - INGENIERÍA</div>
+                </td>
+                <td class="w-2/4 p-3 border border-slate-300 text-center align-middle">
+                    <div class="font-extrabold text-xs text-slate-900 uppercase tracking-wide">SISTEMA INTEGRADO DE GESTIÓN Y GOBERNANZA</div>
+                    <div class="font-bold text-sm text-blue-800 mt-0.5">ACTA DE JUNTA DIRECTIVA</div>
+                    <div class="text-xs font-mono font-semibold text-slate-600">ACTA Nº {{ acta.numero_acta }}</div>
+                </td>
+                <td class="w-1/4 p-3 border border-slate-300 text-[10px] text-slate-600 space-y-0.5 align-middle bg-slate-50/50">
+                    <div><span class="font-bold text-slate-700">CÓDIGO:</span> GR-FR-01</div>
+                    <div><span class="font-bold text-slate-700">VERSIÓN:</span> 01</div>
+                    <div><span class="font-bold text-slate-700">FECHA:</span> {{ acta.fecha|date:"d/m/Y" }}</div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- DATOS GENERALES DE LA REUNIÓN -->
+        <div class="mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-2">
+                1. INFORMACIÓN GENERAL DE LA REUNIÓN
+            </h3>
+            <table class="w-full border-collapse borde-oficial text-xs">
+                <tr class="border-b border-slate-300">
+                    <td class="p-2.5 font-bold bg-slate-50 w-1/4 text-slate-700">Razón Social:</td>
+                    <td class="p-2.5 w-1/4 text-slate-900 font-semibold">{{ acta.nombre_entidad }}</td>
+                    <td class="p-2.5 font-bold bg-slate-50 w-1/4 text-slate-700">NIT:</td>
+                    <td class="p-2.5 w-1/4 text-slate-900 font-mono">{{ acta.nit }}</td>
+                </tr>
+                <tr class="border-b border-slate-300">
+                    <td class="p-2.5 font-bold bg-slate-50 text-slate-700">Fecha de Realización:</td>
+                    <td class="p-2.5 text-slate-900">{{ acta.fecha|date:"d \d\e F \d\e Y" }}</td>
+                    <td class="p-2.5 font-bold bg-slate-50 text-slate-700">Hora de Inicio:</td>
+                    <td class="p-2.5 text-slate-900 font-mono">{{ acta.hora_inicio|time:"h:i A" }}</td>
+                </tr>
+                <tr>
+                    <td class="p-2.5 font-bold bg-slate-50 text-slate-700">Lugar de Convocatoria:</td>
+                    <td colspan="3" class="p-2.5 text-slate-900 font-medium">{{ acta.lugar }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- DIGNATARIOS Y QUÓRUM -->
+        <div class="mb-6 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-2">
+                2. DIGNATARIOS DE LA ASAMBLEA / JUNTA
+            </h3>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+                <div class="border border-slate-300 rounded-lg p-3 bg-slate-50/50">
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Presidente de la Reunión</span>
+                    <span class="font-bold text-slate-900 text-sm mt-0.5 block">{{ acta.presidente }}</span>
+                    <span class="text-[10px] text-slate-500">Preside la sesión y modera el orden del día</span>
+                </div>
+                <div class="border border-slate-300 rounded-lg p-3 bg-slate-50/50">
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Secretario de la Reunión</span>
+                    <span class="font-bold text-slate-900 text-sm mt-0.5 block">{{ acta.secretario }}</span>
+                    <span class="text-[10px] text-slate-500">Da fe de los acuerdos y levanta la presente acta</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ORDEN DEL DÍA -->
+        <div class="mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-2">
+                3. ORDEN DEL DÍA PROPUESTO Y APROBADO
+            </h3>
+            <div class="p-3.5 bg-slate-50/80 border border-slate-300 rounded-lg text-slate-800 text-xs leading-relaxed whitespace-pre-line font-medium">
+                {{ acta.orden_del_dia }}
+            </div>
+        </div>
+
+        <!-- DESARROLLO DE LA REUNIÓN -->
+        <div class="mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-2">
+                4. DESARROLLO DE LA REUNIÓN Y DELIBERACIONES
+            </h3>
+            <div class="p-4 border border-slate-300 rounded-lg text-slate-800 text-xs leading-relaxed whitespace-pre-line text-justify font-normal">
+                {{ acta.desarrollo }}
+            </div>
+        </div>
+
+        <!-- PROPOSICIONES Y VARIOS -->
+        {% if acta.proposiciones %}
+        <div class="mb-6 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-2">
+                5. PROPOSICIONES, ACUERDOS Y VARIOS
+            </h3>
+            <div class="p-3.5 bg-slate-50/80 border border-slate-300 rounded-lg text-slate-800 text-xs leading-relaxed whitespace-pre-line">
+                {{ acta.proposiciones }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- CONSTANCIA Y FIRMAS DE DIGNATARIOS -->
+        <div class="mt-10 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-6">
+                {% if acta.proposiciones %}6.{% else %}5.{% endif %} CONSTANCIA DE APROBACIÓN Y FIRMAS
+            </h3>
+            <p class="text-xs text-slate-600 mb-12 text-justify">
+                Habiéndose agotado el orden del día y leída la presente acta, es aprobada por unanimidad de los miembros asistentes en constancia de lo cual firman el Presidente y el Secretario de la sesión.
+            </p>
+
+            <div class="grid grid-cols-2 gap-12 text-center text-xs">
+                <!-- Firma Presidente -->
+                <div>
+                    <div class="border-t border-slate-800 pt-2 w-3/4 mx-auto font-bold text-slate-900">
+                        {{ acta.presidente }}
+                    </div>
+                    <div class="text-[11px] text-slate-600 font-semibold uppercase tracking-wider">
+                        Presidente de la Junta
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">
+                        {{ acta.nombre_entidad }}
+                    </div>
+                </div>
+
+                <!-- Firma Secretario -->
+                <div>
+                    <div class="border-t border-slate-800 pt-2 w-3/4 mx-auto font-bold text-slate-900">
+                        {{ acta.secretario }}
+                    </div>
+                    <div class="text-[11px] text-slate-600 font-semibold uppercase tracking-wider">
+                        Secretario de la Junta
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">
+                        {{ acta.nombre_entidad }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PIE DE PÁGINA INSTITUCIONAL -->
+        <footer class="mt-12 pt-4 border-t border-slate-200 text-[10px] text-slate-400 flex items-center justify-between">
+            <span>COINTECA S.A.S. — Sistema Integrado de Gestión (SIG)</span>
+            <span>Documento Oficial: Formato GR-FR-01</span>
+        </footer>
+
+    </main>
+
+</body>
+</html>

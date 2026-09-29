@@ -1,37 +1,32 @@
 {% extends 'base.html' %}
 
-{% block titulo %}Registrar Seguimiento | Gerencia Cointeca S.A.S.{% endblock %}
+{% block titulo %}Editar Seguimiento | Gerencia Cointeca S.A.S.{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto space-y-6">
 
     <!-- BREADCRUMB -->
-    <div class="flex items-center justify-between gap-3">
-        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
-            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
-            <span>/</span>
-            <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
-            <span>/</span>
-            <a href="{% url 'indicadores' %}" class="hover:text-primary transition">Indicadores</a>
-            <span>/</span>
-            <a href="/indicadores/{{ indicador.id }}/" class="hover:text-primary transition">{{ indicador.nombre }}</a>
-            <span>/</span>
-            <span class="text-[#1F2937] font-semibold">Nueva Medición</span>
-        </nav>
-        <a href="/indicadores/{{ indicador.id }}/" class="btn btn-secundario text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600">
-            ← Volver al Indicador
-        </a>
-    </div>
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+        <span>/</span>
+        <a href="{% url 'indicadores' %}" class="hover:text-primary transition">Indicadores</a>
+        <span>/</span>
+        <a href="/indicadores/{{ seguimiento.indicador.id }}/" class="hover:text-primary transition">{{ seguimiento.indicador.nombre }}</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Editar Medición</span>
+    </nav>
 
     <!-- TARJETA DEL FORMULARIO -->
     <div class="tarjeta p-6 bg-card border border-border rounded-2xl shadow-xs">
         <div class="border-b border-border pb-4 mb-5">
             <h1 class="text-xl font-extrabold text-[#1F2937] flex items-center gap-2">
-                <span>➕</span>
-                <span>Registrar Nueva Medición de Seguimiento</span>
+                <span>✏️</span>
+                <span>Editar Medición de Seguimiento</span>
             </h1>
             <p class="text-xs text-muted-foreground mt-1">
-                Indicador: <strong class="text-foreground">{{ indicador.nombre }}</strong> · Meta Anual: <strong class="text-foreground">{{ indicador.meta_anual }}</strong>
+                Indicador: <strong class="text-foreground">{{ seguimiento.indicador.nombre }}</strong> · Meta Anual: <strong class="text-foreground">{{ seguimiento.indicador.meta_anual }}</strong>
             </p>
         </div>
 
@@ -43,6 +38,7 @@
                     Fecha de Medición <span class="text-rose-500">*</span>
                 </label>
                 <input id="campo-fecha" type="date" name="fecha" required
+                       value="{{ seguimiento.fecha|date:'Y-m-d' }}"
                        class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
             </div>
 
@@ -51,10 +47,11 @@
                     Valor Obtenido <span class="text-rose-500">*</span>
                 </label>
                 <input id="campo-valor_obtenido" type="text" name="valor_obtenido" required
+                       value="{{ seguimiento.valor_obtenido }}"
                        placeholder="Ej: 28%, 95, 1.2"
                        class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition font-mono">
                 <p class="text-[11px] text-slate-400 mt-1">
-                    Meta de referencia: <span class="font-bold text-slate-600">{{ indicador.meta_anual }}</span>
+                    Meta de referencia: <span class="font-bold text-slate-600">{{ seguimiento.indicador.meta_anual }}</span>
                 </p>
             </div>
 
@@ -64,15 +61,15 @@
                 </label>
                 <textarea id="campo-observaciones" name="observaciones" rows="3"
                           placeholder="Notas sobre el resultado obtenido, factores que influyeron..."
-                          class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"></textarea>
+                          class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">{{ seguimiento.observaciones|default:'' }}</textarea>
             </div>
 
             <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
                 <button type="submit"
                         class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition">
-                    Guardar Medición
+                    Guardar Cambios
                 </button>
-                <a href="/indicadores/{{ indicador.id }}/"
+                <a href="/indicadores/{{ seguimiento.indicador.id }}/"
                    class="btn btn-secundario text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-slate-600">
                     Cancelar
                 </a>

@@ -1,40 +1,179 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Editar Acta #{{ acta.numero_acta }} | Gerencia Cointeca S.A.S.{% endblock %}
+
 {% block content %}
+<div class="max-w-3xl mx-auto space-y-5">
 
-<h1 class="text-2xl font-bold mb-6">Editar Acta</h1>
+    <!-- BREADCRUMB -->
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+        <span>/</span>
+        <a href="{% url 'actas' %}" class="hover:text-primary transition">Actas de Junta</a>
+        <span>/</span>
+        <a href="{% url 'detalle_acta' acta.id %}" class="hover:text-primary transition">Acta #{{ acta.numero_acta }}</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Editar</span>
+    </nav>
 
-<form method="POST" class="bg-card p-6 rounded shadow space-y-4">
-    {% csrf_token %}
+    <!-- FORMULARIO -->
+    <div class="tarjeta p-6 sm:p-8">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
+                ✏️
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-[#1F2937]">Editar Acta de Junta Directiva #{{ acta.numero_acta }}</h1>
+                <p class="text-xs text-[#64748B]">Modifica los datos del acta oficial y gestiona el documento firmado</p>
+            </div>
+        </div>
 
-    <input type="text" name="numero_acta" value="{{ acta.numero_acta }}" class="w-full border p-2 rounded" required>
-    <input type="text" name="nombre_entidad" value="{{ acta.nombre_entidad }}" class="w-full border p-2 rounded" required>
-    <input type="text" name="nit" value="{{ acta.nit }}" class="w-full border p-2 rounded" required>
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
 
-    <input type="date" name="fecha" value="{{ acta.fecha|date:'Y-m-d' }}" class="w-full border p-2 rounded">
-    <input type="time" name="hora_inicio" required
-       value="{{ acta.hora_inicio|time:'H:i' }}"
-       class="w-full border p-2 rounded">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-numero_acta">
+                        Nº de Acta <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-numero_acta" type="text" name="numero_acta" value="{{ acta.numero_acta }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                </div>
 
-    <input type="text" name="lugar" value="{{ acta.lugar }}" class="w-full border p-2 rounded">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-nombre_entidad">
+                        Razón Social / Entidad <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-nombre_entidad" type="text" name="nombre_entidad" value="{{ acta.nombre_entidad }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
 
-    <input type="text" name="presidente" value="{{ acta.presidente }}" class="w-full border p-2 rounded">
-    <input type="text" name="secretario" value="{{ acta.secretario }}" class="w-full border p-2 rounded">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-nit">
+                        NIT <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-nit" type="text" name="nit" value="{{ acta.nit }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
+                </div>
+            </div>
 
-    <textarea name="orden_del_dia" class="w-full border p-2 rounded">{{ acta.orden_del_dia }}</textarea>
-    <textarea name="desarrollo" class="w-full border p-2 rounded">{{ acta.desarrollo }}</textarea>
-    <textarea name="proposiciones" class="w-full border p-2 rounded">{{ acta.proposiciones }}</textarea>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-fecha">
+                        Fecha de la Reunión <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-fecha" type="date" name="fecha" value="{{ acta.fecha|date:'Y-m-d' }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
 
-    <select name="estado" class="w-full border p-2 rounded">
-        <option value="borrador" {% if acta.estado == 'borrador' %}selected{% endif %}>Borrador</option>
-        <option value="aprobada" {% if acta.estado == 'aprobada' %}selected{% endif %}>Aprobada</option>
-        <option value="anulada" {% if acta.estado == 'anulada' %}selected{% endif %}>Anulada</option>
-    </select>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-hora_inicio">
+                        Hora de Inicio <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-hora_inicio" type="time" name="hora_inicio" value="{{ acta.hora_inicio|time:'H:i' }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
 
-    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-primary-hover">
-        Guardar cambios
-    </button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-estado">
+                        Estado Formal <span class="text-red-500">*</span>
+                    </label>
+                    <select id="campo-estado" name="estado" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                        <option value="borrador" {% if acta.estado == 'borrador' %}selected{% endif %}>Borrador</option>
+                        <option value="aprobada" {% if acta.estado == 'aprobada' %}selected{% endif %}>Aprobada</option>
+                        <option value="anulada" {% if acta.estado == 'anulada' %}selected{% endif %}>Anulada</option>
+                    </select>
+                </div>
+            </div>
 
-</form>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-lugar">
+                    Lugar de Reunión
+                </label>
+                <input id="campo-lugar" type="text" name="lugar" value="{{ acta.lugar }}"
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+            </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-presidente">
+                        Presidente de la Junta <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-presidente" type="text" name="presidente" value="{{ acta.presidente }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-secretario">
+                        Secretario de la Junta <span class="text-red-500">*</span>
+                    </label>
+                    <input id="campo-secretario" type="text" name="secretario" value="{{ acta.secretario }}" required
+                           class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">
+                </div>
+            </div>
+
+            <!-- CUSTODIA DIGITAL: ARCHIVO ESCANEADO FIRMADO -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="campo-archivo_firmado">
+                    Custodia Digital: Acta Escaneada con Firmas (PDF / Imagen)
+                </label>
+                <input id="campo-archivo_firmado" type="file" name="archivo_firmado" accept=".pdf,image/*"
+                       class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <p class="text-[10px] text-slate-500">Carga el documento físico escaneado con las firmas manuscritas para custodia digital y auditorías.</p>
+                {% if acta.archivo_firmado %}
+                <div class="mt-2 flex items-center justify-between text-xs bg-white p-2.5 rounded-lg border border-slate-200">
+                    <a href="{{ acta.archivo_firmado.url }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1 font-medium truncate max-w-sm">
+                        📎 Ver Archivo Firmado Actual
+                    </a>
+                    <label class="flex items-center gap-1.5 text-red-600 cursor-pointer font-medium text-[11px]">
+                        <input type="checkbox" name="eliminar_archivo_firmado" value="1" class="rounded text-red-600">
+                        Eliminar archivo
+                    </label>
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-orden_del_dia">
+                    Orden del Día <span class="text-red-500">*</span>
+                </label>
+                <textarea id="campo-orden_del_dia" name="orden_del_dia" required rows="3"
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">{{ acta.orden_del_dia }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-desarrollo">
+                    Desarrollo de la Sesión y Deliberaciones <span class="text-red-500">*</span>
+                </label>
+                <textarea id="campo-desarrollo" name="desarrollo" required rows="5"
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">{{ acta.desarrollo }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="campo-proposiciones">
+                    Proposiciones y Acuerdos Varios
+                </label>
+                <textarea id="campo-proposiciones" name="proposiciones" rows="3"
+                          class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none">{{ acta.proposiciones }}</textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <a href="{% url 'detalle_acta' acta.id %}"
+                   class="btn btn-secundario text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Guardar Cambios</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
 {% endblock %}

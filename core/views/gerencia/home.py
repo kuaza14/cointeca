@@ -1,41 +1,97 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from core.models import IndicadorEstrategico, ActaJuntaDirectiva, ProyectoFacturacion, SeguimientoFacturacion
+from django.utils import timezone
+from decimal import Decimal
+
+from core.models import (
+    IndicadorEstrategico,
+    ActaJuntaDirectiva,
+    ProyectoFacturacion,
+    SeguimientoFacturacion,
+    CajaMenor,
+    MovimientoCajaMenor,
+)
+from core.helpers.semaforo_indicadores import resumen_salud_indicadores, formatear_decimal
+
+
+MESES_MAP = {
+    1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril',
+    5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto',
+    9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
+}
+
+MESES_NOMBRES = {
+    'enero': 'Enero', 'febrero': 'Febrero', 'marzo': 'Marzo', 'abril': 'Abril',
+    'mayo': 'Mayo', 'junio': 'Junio', 'julio': 'Julio', 'agosto': 'Agosto',
+    'septiembre': 'Septiembre', 'octubre': 'Octubre', 'noviembre': 'Noviembre', 'diciembre': 'Diciembre'
+}
 
 
 @login_required
 def gerencia_home(request):
     """
-    Vista principal del Módulo de Gerencia & Gobernanza.
-    Centraliza Actas de Junta Directiva, Indicadores Estratégicos y Facturación.
+    Vista principal del Módulo de Gerencia & Gobernanza con Torre de Control Ejecutiva.
+    Centraliza Actas de Junta Directiva, Indicadores Estratégicos, Facturación y Caja Menor.
     """
-    try:
-        total_actas = ActaJuntaDirectiva.objects.count()
-    except Exception:
-        total_actas = 0
+    hoy = timezone.now().date()
+    mes_actual_cod = MESES_MAP.get(hoy.month, 'enero')
+    mes_actual_nombre = MESES_NOMBRES.get(mes_actual_cod, 'Mes Actual')
+    anio_actual = hoy.year
 
-    try:
-        total_indicadores = IndicadorEstrategico.objects.count()
-    except Exception:
-        total_indicadores = 0
+    # 1. Metas vs Facturación del Mes
+    segs_mes = SeguimientoFacturacion.objects.filter(mes=mes_actual_cod, anio=anio_actual)
+    meta_facturacion_mes = sum((s.meta_facturacion for s in segs_mes), Decimal('0'))
+    real_facturacion_mes = sum((s.facturacion_real for s in segs_mes), Decimal('0'))
+    if meta_facturacion_mes > 0:
+        pct_facturacion_num = round(float(real_facturacion_mes / meta_facturacion_mes * 100), 1)
+    else:
+        pct_facturacion_num = 0.0
+    pct_facturacion_str = formatear_decimal(pct_facturacion_num)
 
-    try:
-        total_proyectos_facturacion = ProyectoFacturacion.objects.filter(activo=True).count()
-        total_seguimientos_facturacion = SeguimientoFacturacion.objects.count()
-    except Exception:
-        total_proyectos_facturacion = 0
-        total_seguimientos_facturacion = 0
+    # 2. Salud de Indicadores Estratégicos (Balanced Scorecard)
+    salud_kpis = resumen_salud_indicadores()
 
-    return render(
-        request,
-        'gerencia/gerencia_home.html',
-        {
-            'total_actas': total_actas,
-            'total_indicadores': total_indicadores,
-            'total_proyectos_facturacion': total_proyectos_facturacion,
-            'total_seguimientos_facturacion': total_seguimientos_facturacion,
-        }
-    )
+    # 3. Caja Menor & Gastos Operativos
+    cajas = CajaMenor.objects.all()
+    caja_total_inicial = sum((c.valor_inicial for c in cajas), Decimal('0'))
+    caja_total_gastado = sum((c.total_gastado for c in cajas), Decimal('0'))
+    caja_total_restante = sum((c.valor_restante for c in cajas), Decimal('0'))
+
+    # Gastos de caja menor registrados en el mes actual
+    movs_mes = MovimientoCajaMenor.objects.filter(fecha__year=anio_actual, fecha__month=hoy.month)
+    gasto_caja_mes = sum((m.valor for m in movs_mes), Decimal('0'))
+
+    # 4. Gobernanza: Última Acta de Junta Directiva
+    ultima_acta = ActaJuntaDirectiva.objects.order_by('-fecha', '-numero_acta').first()
+
+    # Contadores generales
+    total_actas = ActaJuntaDirectiva.objects.count()
+    total_indicadores = IndicadorEstrategico.objects.count()
+    total_proyectos_facturacion = ProyectoFacturacion.objects.filter(activo=True).count()
+    total_seguimientos_facturacion = SeguimientoFacturacion.objects.count()
+
+    contexto = {
+        'hoy': hoy,
+        'mes_actual_nombre': mes_actual_nombre,
+        'anio_actual': anio_actual,
+        # Torre de Control
+        'meta_facturacion_mes': meta_facturacion_mes,
+        'real_facturacion_mes': real_facturacion_mes,
+        'pct_facturacion_num': pct_facturacion_num,
+        'pct_facturacion_str': pct_facturacion_str,
+        'salud_kpis': salud_kpis,
+        'caja_total_gastado': caja_total_gastado,
+        'caja_total_restante': caja_total_restante,
+        'gasto_caja_mes': gasto_caja_mes,
+        'ultima_acta': ultima_acta,
+        # Contadores de tarjetas
+        'total_actas': total_actas,
+        'total_indicadores': total_indicadores,
+        'total_proyectos_facturacion': total_proyectos_facturacion,
+        'total_seguimientos_facturacion': total_seguimientos_facturacion,
+    }
+
+    return render(request, 'gerencia/gerencia_home.html', contexto)
 
 
 @login_required

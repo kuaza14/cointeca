@@ -1,12 +1,33 @@
-{% extends 'rrhh/base_rrhh.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 
-<div class="max-w-4xl mx-auto bg-card shadow rounded p-6">
+<div class="max-w-4xl mx-auto space-y-4">
 
-    <h1 class="text-3xl font-bold mb-6">
-        Nueva Inducción / Capacitación
-    </h1>
+    <!-- BREADCRUMB & VOLVER -->
+    <div class="flex items-center justify-between gap-3">
+        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+            <span>/</span>
+            <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+            <span>/</span>
+            <a href="{% url 'empleados' %}" class="hover:text-primary transition">Empleados</a>
+            <span>/</span>
+            <a href="{% url 'detalle_empleado' empleado.id %}" class="hover:text-primary transition">{{ empleado.nombre_completo }}</a>
+            <span>/</span>
+            <a href="{% url 'inducciones_empleado' empleado.id %}" class="hover:text-primary transition">Inducciones</a>
+            <span>/</span>
+            <span class="text-[#1F2937] font-semibold">Nueva</span>
+        </nav>
+        <a href="{% url 'inducciones_empleado' empleado.id %}" class="btn btn-secundario text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+            ← Volver a Inducciones
+        </a>
+    </div>
+
+    <div class="bg-card shadow rounded-2xl border border-border p-6">
+        <h1 class="text-2xl font-bold mb-6 text-[#1F2937] flex items-center gap-2">
+            <span>🎓</span> <span>Nueva Inducción / Capacitación</span>
+        </h1>
 
     <form method="POST">
 

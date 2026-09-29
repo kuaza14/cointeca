@@ -5,7 +5,7 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Encabezado -->
+    <!-- Encabezado Principal -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
@@ -21,103 +21,273 @@
         </a>
     </div>
 
-    <!-- Grid de Tarjetas de Módulos de Gerencia -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-
-        <!-- 1. Indicadores Estratégicos -->
-        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50/20 to-transparent">
-            <div>
-                <div class="size-12 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center mb-4 text-2xl">
-                    📊
+    <!-- TORRE DE CONTROL EJECUTIVA (4 TARJETAS INTERACTIVAS CON MÉTRICAS EN VIVO) -->
+    <div class="tarjeta p-5 sm:p-6 bg-white border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xl font-bold border border-blue-100">
+                    📡
                 </div>
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-[#1F2937]">Indicadores Estratégicos</h2>
-                    {% if total_indicadores %}
-                        <span class="etiqueta etiqueta-info">{{ total_indicadores }} métricas</span>
-                    {% endif %}
+                <div>
+                    <h2 class="text-base font-extrabold tracking-tight text-[#1F2937] flex items-center gap-2">
+                        <span>Torre de Control Ejecutiva</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            ● En Vivo
+                        </span>
+                    </h2>
+                    <p class="text-xs text-[#64748B]">
+                        Métricas estratégicas consolidadas para {{ mes_actual_nombre }} {{ anio_actual }}
+                    </p>
                 </div>
-                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
-                    Balanced Scorecard: perspectivas Financiera, Clientes, Procesos Internos y Aprendizaje con metas anuales y seguimientos periódicos.
-                </p>
             </div>
-            <div class="mt-6">
-                <a href="{% url 'indicadores' %}" class="btn btn-primario w-full">
-                    <span>Gestionar Indicadores</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
+            <div class="text-xs text-slate-500 font-mono font-medium">
+                Actualizado: {{ hoy|date:"d/m/Y" }}
             </div>
         </div>
 
-        <!-- 2. Actas de Junta Directiva -->
-        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50/20 to-transparent">
-            <div>
-                <div class="size-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 text-2xl">
-                    📋
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- 1. Facturación del Mes (Tarjeta Clickeable) -->
+            <a href="{% url 'facturacion' %}" 
+               class="group block bg-slate-50 hover:bg-blue-50/60 border border-slate-200 hover:border-blue-500 rounded-xl p-4 transition-all duration-200 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer">
+                <div>
+                    <div class="flex items-center justify-between text-xs text-[#64748B] mb-1">
+                        <span class="font-bold uppercase tracking-wider text-[10px] text-slate-700">Facturación {{ mes_actual_nombre }}</span>
+                        <span class="font-mono font-bold text-xs px-2 py-0.5 rounded-full {% if pct_facturacion_num >= 100 %}bg-emerald-100 text-emerald-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ pct_facturacion_str }}%
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-[#1F2937] font-mono group-hover:text-blue-700 transition">
+                        ${{ real_facturacion_mes|floatformat:0 }}
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-1">
+                        Meta: <span class="font-mono font-bold text-slate-700">${{ meta_facturacion_mes|floatformat:0 }} COP</span>
+                    </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-[#1F2937]">Actas de Junta Directiva</h2>
-                    {% if total_actas %}
-                        <span class="etiqueta etiqueta-morado">{{ total_actas }} actas</span>
-                    {% endif %}
+                <div class="mt-4">
+                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div class="h-2 rounded-full {% if pct_facturacion_num >= 100 %}bg-emerald-500{% elif pct_facturacion_num >= 80 %}bg-blue-600{% else %}bg-amber-500{% endif %}"
+                             style="width: {% if pct_facturacion_num > 100 %}100{% else %}{{ pct_facturacion_num }}{% endif %}%;"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700 mt-3 pt-2 border-t border-slate-200/60">
+                        <span>Gestionar Facturación</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
                 </div>
-                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
-                    Registro formal de reuniones directivas, órdenes del día, proposiciones, acuerdos, compromisos y firmas oficiales.
-                </p>
-            </div>
-            <div class="mt-6">
-                <a href="{% url 'actas' %}" class="btn btn-primario w-full">
-                    <span>Ver Actas de Junta</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-            </div>
+            </a>
+
+            <!-- 2. Salud de Indicadores (Tarjeta Clickeable) -->
+            <a href="{% url 'indicadores' %}"
+               class="group block bg-slate-50 hover:bg-emerald-50/60 border border-slate-200 hover:border-emerald-500 rounded-xl p-4 transition-all duration-200 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer">
+                <div>
+                    <div class="flex items-center justify-between text-xs text-[#64748B] mb-1">
+                        <span class="font-bold uppercase tracking-wider text-[10px] text-slate-700">Salud de KPIs (BSC)</span>
+                        <span class="font-mono font-bold text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                            {{ salud_kpis.porcentaje_salud }}% salud
+                        </span>
+                    </div>
+                    <div class="text-2xl font-black text-[#1F2937] group-hover:text-emerald-700 transition">
+                        {{ salud_kpis.verdes }} <span class="text-xs font-semibold text-slate-500">de {{ salud_kpis.total }} cumplidos</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-2.5 flex-wrap text-xs font-mono font-bold">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200" title="Cumplidos">
+                            🟢 {{ salud_kpis.verdes }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200" title="En Seguimiento">
+                            🟡 {{ salud_kpis.amarillos }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 border border-rose-200" title="En Riesgo">
+                            🔴 {{ salud_kpis.rojos }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200 text-slate-700" title="Sin Mediciones">
+                            ⚪ {{ salud_kpis.sin_medicion }}
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
+                    <span>Ver Tablero Completo</span>
+                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+            </a>
+
+            <!-- 3. Caja Menor & Gastos Operativos (Tarjeta Clickeable) -->
+            <a href="{% url 'caja_menor' %}"
+               class="group block bg-slate-50 hover:bg-amber-50/60 border border-slate-200 hover:border-amber-500 rounded-xl p-4 transition-all duration-200 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer">
+                <div>
+                    <div class="flex items-center justify-between text-xs text-[#64748B] mb-1">
+                        <span class="font-bold uppercase tracking-wider text-[10px] text-slate-700">Gastos Caja Menor</span>
+                        <span class="text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full font-mono text-[10px] font-bold">Mes en curso</span>
+                    </div>
+                    <div class="text-2xl font-black text-[#1F2937] font-mono group-hover:text-amber-800 transition">
+                        ${{ gasto_caja_mes|floatformat:0 }}
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-1">
+                        Disponible en cajas: <span class="font-mono font-bold text-emerald-700">${{ caja_total_restante|floatformat:0 }} COP</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-amber-800 group-hover:text-amber-900">
+                    <span>Gestionar Caja Menor</span>
+                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+            </a>
+
+            <!-- 4. Gobernanza: Última Acta de Junta (Tarjeta Clickeable) -->
+            {% if ultima_acta %}
+            <a href="{% url 'detalle_acta' ultima_acta.id %}"
+               class="group block bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 hover:border-indigo-500 rounded-xl p-4 transition-all duration-200 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer">
+                <div>
+                    <div class="flex items-center justify-between text-xs text-[#64748B] mb-1">
+                        <span class="font-bold uppercase tracking-wider text-[10px] text-slate-700">Junta Directiva</span>
+                        <span class="text-indigo-800 bg-indigo-100 font-bold text-[10px] px-2 py-0.5 rounded-full">Acta #{{ ultima_acta.numero_acta }}</span>
+                    </div>
+                    <div class="text-base font-extrabold text-[#1F2937] truncate mt-1 group-hover:text-indigo-700 transition" title="{{ ultima_acta.lugar }}">
+                        {{ ultima_acta.lugar }}
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
+                        <span>📅 {{ ultima_acta.fecha|date:"d/m/Y" }}</span>
+                        {% if ultima_acta.archivo_firmado %}
+                            <span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200 font-bold text-[10px]">✓ Firmada</span>
+                        {% else %}
+                            <span class="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 font-bold text-[10px]">● En borrador</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-indigo-700 group-hover:text-indigo-800">
+                    <span>Ver Acta Directiva</span>
+                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+            </a>
+            {% else %}
+            <a href="{% url 'crear_acta' %}"
+               class="group block bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 hover:border-indigo-500 rounded-xl p-4 transition-all duration-200 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer">
+                <div>
+                    <div class="flex items-center justify-between text-xs text-[#64748B] mb-1">
+                        <span class="font-bold uppercase tracking-wider text-[10px] text-slate-700">Junta Directiva</span>
+                        <span class="text-indigo-800 bg-indigo-100 font-bold text-[10px] px-2 py-0.5 rounded-full">Nueva</span>
+                    </div>
+                    <div class="text-base font-extrabold text-[#1F2937] mt-1">
+                        Sin actas registradas
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-1">
+                        Comienza registrando la primera reunión directiva.
+                    </div>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-indigo-700 group-hover:text-indigo-800">
+                    <span>+ Crear Primera Acta</span>
+                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- MÓDULOS DE GERENCIA (LAS 4 CARPETAS / MÓDULOS DIRECTIVOS) -->
+    <div>
+        <div class="mb-3">
+            <h2 class="text-sm font-bold text-[#1F2937] uppercase tracking-wider flex items-center gap-2">
+                <span>📁</span> Módulos y Carpetas de Gestión Directiva
+            </h2>
+            <p class="text-xs text-[#64748B]">Acceso a los registros formales de gobernanza, estrategia y finanzas</p>
         </div>
 
-        <!-- 3. Seguimiento de Facturación & Metas -->
-        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/20 to-transparent">
-            <div>
-                <div class="size-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 text-2xl">
-                    💰
-                </div>
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-[#1F2937]">Seguimiento de Facturación</h2>
-                    {% if total_proyectos_facturacion %}
-                        <span class="etiqueta etiqueta-exito">{{ total_proyectos_facturacion }} proyectos</span>
-                    {% endif %}
-                </div>
-                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
-                    Control mensual de metas comerciales vs facturación real ejecutada por proyecto y cálculo de porcentaje de cumplimiento.
-                </p>
-            </div>
-            <div class="mt-6">
-                <a href="{% url 'facturacion' %}" class="btn btn-primario w-full">
-                    <span>Gestionar Facturación</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-            </div>
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-        <!-- 4. Plan Estratégico Corporativo 2026–2030 -->
-        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50/20 to-transparent">
-            <div>
-                <div class="size-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4 text-2xl">
-                    🏛️
+            <!-- 1. Indicadores Estratégicos -->
+            <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50/20 to-transparent hover:shadow-md transition">
+                <div>
+                    <div class="size-12 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center mb-4 text-2xl">
+                        📊
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-[#1F2937]">Indicadores Estratégicos</h3>
+                        {% if total_indicadores %}
+                            <span class="etiqueta etiqueta-info">{{ total_indicadores }} KPIs</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                        Balanced Scorecard institucional (GER-FR-02) con metas anuales, semáforo inteligente y mediciones periódicas.
+                    </p>
                 </div>
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-[#1F2937]">Plan Estratégico</h2>
-                    <span class="etiqueta etiqueta-morado">2026 – 2030</span>
+                <div class="mt-6 flex flex-col gap-2">
+                    <a href="{% url 'indicadores' %}" class="btn btn-primario w-full">
+                        <span>Gestionar Indicadores</span>
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
                 </div>
-                <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
-                    Misión, Visión, Valores corporativos y Pilares estratégicos institucionales (GR-PL-01) con descarga del documento oficial.
-                </p>
             </div>
-            <div class="mt-6 flex flex-col gap-2">
-                <a href="{% url 'plan_estrategico' %}" class="btn btn-primario w-full">
-                    <span>Ver Plan Estratégico</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-            </div>
-        </div>
 
+            <!-- 2. Actas de Junta Directiva -->
+            <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50/20 to-transparent hover:shadow-md transition">
+                <div>
+                    <div class="size-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 text-2xl">
+                        📋
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-[#1F2937]">Actas de Junta Directiva</h3>
+                        {% if total_actas %}
+                            <span class="etiqueta etiqueta-morado">{{ total_actas }} actas</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                        Registro oficial GR-FR-01 de reuniones, órdenes del día, acuerdos, exportación Word, vista PDF y custodia digital firmada.
+                    </p>
+                </div>
+                <div class="mt-6 flex flex-col gap-2">
+                    <a href="{% url 'actas' %}" class="btn btn-primario w-full bg-indigo-600 hover:bg-indigo-700">
+                        <span>Ver Actas de Junta</span>
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. Seguimiento de Facturación & Metas -->
+            <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/20 to-transparent hover:shadow-md transition">
+                <div>
+                    <div class="size-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 text-2xl">
+                        💰
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-[#1F2937]">Seguimiento Facturación</h3>
+                        {% if total_proyectos_facturacion %}
+                            <span class="etiqueta etiqueta-exito">{{ total_proyectos_facturacion }} proyectos</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                        Control mensual de metas comerciales vs facturación real con asistente de importación desde obras de ingeniería.
+                    </p>
+                </div>
+                <div class="mt-6 flex flex-col gap-2">
+                    <a href="{% url 'facturacion' %}" class="btn btn-primario w-full bg-emerald-600 hover:bg-emerald-700">
+                        <span>Gestionar Facturación</span>
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4. Plan Estratégico Corporativo 2026–2030 -->
+            <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50/20 to-transparent hover:shadow-md transition">
+                <div>
+                    <div class="size-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4 text-2xl">
+                        🏛️
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-[#1F2937]">Plan Estratégico</h3>
+                        <span class="etiqueta etiqueta-morado">2026 – 2030</span>
+                    </div>
+                    <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+                        Misión, Visión, Valores corporativos y Pilares estratégicos institucionales (GR-PL-01) con visor y descarga de Word oficial.
+                    </p>
+                </div>
+                <div class="mt-6 flex flex-col gap-2">
+                    <a href="{% url 'plan_estrategico' %}" class="btn btn-primario w-full bg-purple-600 hover:bg-purple-700">
+                        <span>Ver Plan Estratégico</span>
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 </div>

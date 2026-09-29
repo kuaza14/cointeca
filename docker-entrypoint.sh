@@ -23,4 +23,10 @@ PY
 echo "Aplicando migraciones ..."
 python manage.py migrate --noinput
 
+# Sincronizar archivos multimedia iniciales al volumen de media si no existen
+if [ -d "/app/documentos_rrhh" ]; then
+    mkdir -p /app/media/documentos_rrhh
+    cp -rn /app/documentos_rrhh/* /app/media/documentos_rrhh/ 2>/dev/null || true
+fi
+
 exec "$@"

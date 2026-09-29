@@ -26,6 +26,15 @@ class CajaMenor(models.Model):
         return f"Caja {self.id} - {self.fecha_tramite}"
 
 class MovimientoCajaMenor(models.Model):
+    CATEGORIA_CHOICES = [
+        ('combustible', 'Combustible y Lubricantes'),
+        ('viaticos', 'Viáticos y Alimentación'),
+        ('ferreteria', 'Ferretería y Compras Menores'),
+        ('peajes', 'Peajes y Transporte'),
+        ('papeleria', 'Papelería y Trámites'),
+        ('otros', 'Otros Gastos'),
+    ]
+
     caja = models.ForeignKey(CajaMenor, on_delete=models.CASCADE)
 
     fecha = models.DateField()
@@ -34,8 +43,10 @@ class MovimientoCajaMenor(models.Model):
 
     pagado_a = models.CharField(max_length=150)
     concepto = models.TextField()
+    categoria = models.CharField(max_length=30, choices=CATEGORIA_CHOICES, default='otros')
 
     valor = models.DecimalField(max_digits=12, decimal_places=2)
+    soporte = models.FileField(upload_to='caja_menor/soportes/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -68,6 +79,7 @@ class ActaJuntaDirectiva(models.Model):
     proposiciones = models.TextField(blank=True, null=True)
 
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
+    archivo_firmado = models.FileField(upload_to='actas/firmadas/', null=True, blank=True)
 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 

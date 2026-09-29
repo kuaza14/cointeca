@@ -2,9 +2,28 @@
 
 {% block content %}
 
-<div class="max-w-2xl mx-auto bg-card p-6 rounded shadow">
+<div class="max-w-2xl mx-auto space-y-4">
 
-    <h1 class="text-2xl font-bold mb-6">Crear Indicador Estratégico</h1>
+    <!-- BREADCRUMB & VOLVER -->
+    <div class="flex items-center justify-between gap-3">
+        <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+            <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+            <span>/</span>
+            <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+            <span>/</span>
+            <a href="{% url 'indicadores' %}" class="hover:text-primary transition">Indicadores</a>
+            <span>/</span>
+            <span class="text-[#1F2937] font-semibold">Crear</span>
+        </nav>
+        <a href="{% url 'indicadores' %}" class="btn btn-secundario text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+            ← Volver a Indicadores
+        </a>
+    </div>
+
+    <div class="bg-card p-6 rounded-2xl border border-border shadow-xs">
+        <h1 class="text-xl font-bold mb-4 text-[#1F2937] flex items-center gap-2">
+            <span>➕</span> <span>Crear Indicador Estratégico</span>
+        </h1>
 
     <form method="POST" class="space-y-4">
         {% csrf_token %}

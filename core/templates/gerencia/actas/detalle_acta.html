@@ -1,58 +1,206 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Acta de Junta Directiva #{{ acta.numero_acta }} | Gerencia Cointeca S.A.S.{% endblock %}
+
 {% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
 
-<h1 class="text-3xl font-bold mb-6">Acta {{ acta.numero_acta }}</h1>
+    <!-- BREADCRUMB & ACCIONES -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+                <span>/</span>
+                <a href="{% url 'actas' %}" class="hover:text-primary transition">Actas de Junta</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Acta #{{ acta.numero_acta }}</span>
+            </nav>
+            <div class="flex items-center gap-2.5">
+                <span class="text-2xl">📋</span>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                        Acta de Junta Directiva Nº {{ acta.numero_acta }}
+                    </h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[10px] font-mono bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-md">
+                            FORMATO: GR-FR-01
+                        </span>
+                        <span class="text-xs text-slate-500 font-medium">
+                            Fecha: {{ acta.fecha|date:"d/m/Y" }} · Hora: {{ acta.hora_inicio|time:"h:i A" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="bg-card p-6 rounded shadow space-y-4">
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="{% url 'imprimir_acta' acta.id %}" target="_blank"
+               title="Ver vista oficial imprimible y generar PDF"
+               class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.667-2.03-1.282-2.859M17.28 13.829c.24-1.076.667-2.03 1.282-2.859M6 18h12m-6-10V4m-4 4h8M4 14h16v6H4v-6z"/></svg>
+                <span>🖨️ Imprimir Acta (PDF)</span>
+            </a>
+            <a href="{% url 'exportar_acta_word' acta.id %}" 
+               class="btn btn-secundario bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Word (.docx)</span>
+            </a>
+            <a href="{% url 'editar_acta' acta.id %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                <span>Editar</span>
+            </a>
+            <a href="{% url 'eliminar_acta' acta.id %}" 
+               onclick="return confirm('¿Seguro que deseas eliminar el Acta Nº {{ acta.numero_acta }}?')"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 transition">
+                <span>Eliminar</span>
+            </a>
+            <a href="{% url 'actas' %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                <span>← Volver</span>
+            </a>
+        </div>
+    </div>
 
+    <!-- TARJETA DE CUSTODIA DIGITAL DEL ACTA FIRMADA -->
+    {% if acta.archivo_firmado %}
+    <div class="tarjeta p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
+                ✓
+            </div>
+            <div>
+                <h3 class="text-xs font-bold text-emerald-900 uppercase tracking-wide">
+                    Documento Original Escaneado en Custodia Digital
+                </h3>
+                <p class="text-[11px] text-emerald-700">
+                    Archivo firmado por Presidente y Secretario cargado en el sistema para auditoría y entes de control.
+                </p>
+            </div>
+        </div>
+        <a href="{{ acta.archivo_firmado.url }}" target="_blank"
+           class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.373L8.552 18.32a1.5 1.5 0 01-2.122-2.122l8.83-8.83"/></svg>
+            <span>Descargar / Ver PDF Firmado</span>
+        </a>
+    </div>
+    {% else %}
+    <div class="tarjeta p-4 bg-amber-50/60 border border-amber-200 rounded-2xl flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
+                ⚠️
+            </div>
+            <div>
+                <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                    Sin Acta Escaneada en Custodia
+                </h3>
+                <p class="text-[11px] text-amber-700">
+                    Aún no se ha adjuntado el PDF escaneado con las firmas físicas. Puedes adjuntarlo editando el acta.
+                </p>
+            </div>
+        </div>
+        <a href="{% url 'editar_acta' acta.id %}"
+           class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition">
+            <span>+ Adjuntar Escaneo Firmado</span>
+        </a>
+    </div>
+    {% endif %}
 
-    <p><strong>Entidad:</strong> {{ acta.nombre_entidad }}</p>
-    <p><strong>NIT:</strong> {{ acta.nit }}</p>
+    <!-- DATOS GENERALES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="tarjeta tarjeta-cuerpo">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Entidad</span>
+            <p class="text-sm font-bold text-slate-900 mt-0.5">{{ acta.nombre_entidad }}</p>
+            <p class="text-[10px] text-slate-400 font-mono mt-0.5">NIT: {{ acta.nit }}</p>
+        </div>
+        <div class="tarjeta tarjeta-cuerpo">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha y Hora</span>
+            <p class="text-sm font-bold text-slate-900 mt-0.5">{{ acta.fecha|date:"d/m/Y" }}</p>
+            <p class="text-[10px] text-slate-400 font-mono mt-0.5">{{ acta.hora_inicio|time:"h:i A" }}</p>
+        </div>
+        <div class="tarjeta tarjeta-cuerpo">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lugar</span>
+            <p class="text-sm font-bold text-slate-900 mt-0.5 truncate" title="{{ acta.lugar }}">{{ acta.lugar }}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Sede de reunión</p>
+        </div>
+        <div class="tarjeta tarjeta-cuerpo">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estado Formal</span>
+            <div class="mt-1">
+                {% if acta.estado == 'aprobada' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                        ✓ Aprobada
+                    </span>
+                {% elif acta.estado == 'anulada' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                        ✕ Anulada
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                        ● Borrador
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-    <p><strong>Fecha:</strong> {{ acta.fecha }}</p>
-    <p><strong>Hora:</strong> {{ acta.hora_inicio }}</p>
-    <p><strong>Lugar:</strong> {{ acta.lugar }}</p>
+    <!-- DIGNATARIOS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="tarjeta p-4 flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-lg">
+                👔
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Presidente de la Junta</span>
+                <p class="text-sm font-bold text-slate-900">{{ acta.presidente }}</p>
+            </div>
+        </div>
+        <div class="tarjeta p-4 flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-lg">
+                ✍️
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Secretario de la Junta</span>
+                <p class="text-sm font-bold text-slate-900">{{ acta.secretario }}</p>
+            </div>
+        </div>
+    </div>
 
-    <p><strong>Presidente:</strong> {{ acta.presidente }}</p>
-    <p><strong>Secretario:</strong> {{ acta.secretario }}</p>
+    <!-- SECCIONES DEL ACTA -->
+    <div class="tarjeta p-6 space-y-6">
+        <div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <span>📌</span>
+                <span>Orden del Día</span>
+            </h3>
+            <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-800 leading-relaxed whitespace-pre-line border border-slate-200">
+                {{ acta.orden_del_dia }}
+            </div>
+        </div>
 
-    <hr>
+        <div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <span>📝</span>
+                <span>Desarrollo de la Reunión y Deliberaciones</span>
+            </h3>
+            <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-800 leading-relaxed whitespace-pre-line border border-slate-200">
+                {{ acta.desarrollo }}
+            </div>
+        </div>
 
-    <p><strong>Orden del día:</strong></p>
-    <p class="text-foreground">{{ acta.orden_del_dia }}</p>
-
-    <p><strong>Desarrollo:</strong></p>
-    <p class="text-foreground">{{ acta.desarrollo }}</p>
-
-    <p><strong>Proposiciones:</strong></p>
-    <p class="text-foreground">{{ acta.proposiciones }}</p>
-
-    <p><strong>Estado:</strong> 
-        <span class="px-2 py-1 rounded bg-yellow-200 text-warning">
-            {{ acta.estado }}
-        </span>
-    </p>
+        {% if acta.proposiciones %}
+        <div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <span>💡</span>
+                <span>Proposiciones y Acuerdos</span>
+            </h3>
+            <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-800 leading-relaxed whitespace-pre-line border border-slate-200">
+                {{ acta.proposiciones }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
 
 </div>
-
-<a href="/actas/" class="mb-4 inline-block bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover font-semibold text-xs shadow-xs">
-    Volver
-</a>
-
-<a href="{% url 'exportar_acta_word' acta.id %}" 
-   class="mb-4 inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold text-xs shadow-xs">
-    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-    Descargar Acta Word (.docx)
-</a>
-
-<a href="/actas/{{ acta.id }}/editar/" 
-    class="mb-4 inline-block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 font-semibold text-xs shadow-xs">
-    Editar
-</a>
-<a href="/actas/{{ acta.id }}/eliminar/" 
-   class="ml-2 mb-4 inline-block bg-destructive text-white px-4 py-2 rounded hover:bg-destructive-hover font-semibold text-xs shadow-xs">
-   Eliminar
-</a>
-
 {% endblock %}

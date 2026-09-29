@@ -2,6 +2,25 @@
 
 {% block content %}
 
+<div class="mb-4 flex items-center justify-between gap-3">
+    <nav class="flex items-center gap-2 text-xs text-[#64748B] font-medium" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+        <span>/</span>
+        <a href="{% url 'rrhh' %}" class="hover:text-primary transition">RRHH</a>
+        <span>/</span>
+        <a href="{% url 'empleados' %}" class="hover:text-primary transition">Empleados</a>
+        <span>/</span>
+        <a href="{% url 'detalle_empleado' citacion.empleado.id %}" class="hover:text-primary transition">{{ citacion.empleado.nombre_completo }}</a>
+        <span>/</span>
+        <a href="{% url 'descargos_empleado' citacion.empleado.id %}" class="hover:text-primary transition">Descargos</a>
+        <span>/</span>
+        <span class="text-[#1F2937] font-semibold">Editar Citación</span>
+    </nav>
+    <a href="{% url 'descargos_empleado' citacion.empleado.id %}" class="btn btn-secundario text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+        ← Volver a Descargos
+    </a>
+</div>
+
 <h1 class="text-2xl font-bold mb-6">
     Editar citación de descargo
 </h1>
@@ -88,12 +107,17 @@
         >
     </div>
 
-    <button
-        type="submit"
-        class="bg-primary text-white px-4 py-2 rounded"
-    >
-        Guardar cambios
-    </button>
+    <div class="flex items-center gap-3">
+        <button
+            type="submit"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover font-semibold">
+            Guardar cambios
+        </button>
+        <a href="{% url 'descargos_empleado' citacion.empleado.id %}"
+           class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover font-semibold">
+            Cancelar
+        </a>
+    </div>
 
 </form>
 

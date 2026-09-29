@@ -1,7 +1,11 @@
+import os
+import mimetypes
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import FileResponse, Http404
+from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Avg, Count, Q, Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -486,3 +490,45 @@ def eliminar_documento(request, id):
     )
 
     return redirect(f'/rrhh/empleados/{empleado_id}/')
+
+
+@login_required
+def ver_documento(request, id):
+    """
+    Sirve el documento en línea (inline) con el Content-Type correcto para que
+    el navegador lo abra directamente en una pestaña nueva sin forzar la descarga.
+    """
+    documento = get_object_or_404(DocumentoEmpleado, id=id)
+    if not documento.archivo:
+        raise Http404("El documento no tiene un archivo adjunto.")
+
+    ruta = documento.archivo.path
+    if not os.path.exists(ruta):
+        # Fallback a raíz del proyecto si estuviera allí
+        alt_ruta = os.path.join(settings.BASE_DIR, documento.archivo.name)
+        if os.path.exists(alt_ruta):
+            ruta = alt_ruta
+        else:
+            raise Http404("El archivo no se encuentra físicamente en el servidor.")
+
+    ext = os.path.splitext(ruta)[1].lower()
+    content_types = {
+        '.pdf': 'application/pdf',
+        '.webp': 'image/webp',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.txt': 'text/plain; charset=utf-8',
+    }
+    content_type = content_types.get(ext)
+    if not content_type:
+        content_type, _ = mimetypes.guess_type(ruta)
+        if not content_type:
+            content_type = 'application/octet-stream'
+
+    response = FileResponse(open(ruta, 'rb'), content_type=content_type)
+    nombre_archivo = os.path.basename(ruta)
+    response['Content-Disposition'] = f'inline; filename="{nombre_archivo}"'
+    return response

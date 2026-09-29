@@ -1,63 +1,356 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Actas de Junta Directiva | Gerencia Cointeca S.A.S.{% endblock %}
+
 {% block content %}
+<div class="space-y-6">
 
-<h1 class="text-3xl font-bold mb-6">Actas de Junta</h1>
+    <!-- BREADCRUMB & ENCABEZADO -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" class="hover:text-primary transition">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'gerencia_home' %}" class="hover:text-primary transition">Gerencia</a>
+                <span>/</span>
+                <span class="text-[#1F2937] font-semibold">Actas de Junta Directiva</span>
+            </nav>
+            <div class="flex items-center gap-2.5">
+                <span class="text-2xl">📋</span>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                        Actas de Junta Directiva
+                    </h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[10px] font-mono bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-md">
+                            FORMATO: GR-FR-01
+                        </span>
+                        <span class="text-xs text-slate-500 font-medium">
+                            Control formal de acuerdos, decisiones y sesiones corporativas
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<a href="/actas/crear/" 
-   class="mb-4 inline-block bg-success text-white px-4 py-2 rounded hover:bg-success-hover font-semibold text-xs shadow-xs">
-   + Crear Acta
-</a>
-<a href="{% url 'gerencia_home' %}" class="mb-4 inline-block bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover font-semibold text-xs shadow-xs">
-    ← Volver a Gerencia
-</a>
-
-<div class="overflow-x-auto">
-<table class="min-w-full bg-card shadow rounded">
-    <thead class="bg-neutral text-white">
-        <tr>
-            <th class="px-4 py-2">Número</th>
-            <th class="px-4 py-2">Fecha</th>
-            <th class="px-4 py-2">Estado</th>
-            <th class="px-4 py-2 text-center">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for a in actas %}
-        <tr class="border-b hover:bg-muted">
-
-            <td class="px-4 py-2">
-                <a href="/actas/{{ a.id }}/" class="text-primary hover:underline">
-                    {{ a.numero_acta }}
-                </a>
-            </td>
-
-            <td class="px-4 py-2">{{ a.fecha }}</td>
-            <td class="px-4 py-2">{{ a.estado }}</td>
-
-        <!-- ACCIONES -->
-        <td class="px-4 py-2 text-center space-x-2">
-
-            <a href="{% url 'exportar_acta_word' a.id %}" 
-               title="Descargar en Word (.docx)"
-               class="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-xs">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span class="sr-only">Descargar Word</span>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{% url 'crear_acta' %}" 
+               class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>+ Nueva Acta</span>
             </a>
+            <a href="{% url 'gerencia_home' %}" 
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                <span>← Volver a Gerencia</span>
+            </a>
+        </div>
+    </div>
 
-            <a href="/actas/{{ a.id }}/editar/" 
-            class="inline-flex items-center justify-center w-8 h-8 bg-yellow-500 text-white rounded hover:bg-yellow-600 shadow-xs"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg><span class="sr-only">Editar</span></a>
+    <!-- TARJETAS DE CONTROL EJECUTIVO / KPIS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: Total Sesiones -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50/20 to-transparent">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Total de Sesiones</p>
+                <span class="text-base">📋</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
+                    {{ total_actas|default:actas|length }}
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">actas registradas</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Libro de actas corporativas</p>
+        </div>
 
-            <a href="/actas/{{ a.id }}/eliminar/" 
-            class="inline-flex items-center justify-center w-8 h-8 bg-destructive text-white rounded hover:bg-destructive-hover shadow-xs"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg><span class="sr-only">Eliminar</span></a>
+        <!-- KPI 2: Custodia Digital -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/20 to-transparent">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Custodia Digital</p>
+                <span class="text-base">🛡️</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-emerald-700 tracking-tight">
+                    {{ actas_custodiadas|default:0 }}
+                </span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono">
+                    {{ porcentaje_custodia|default:0 }}%
+                </span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Con PDF firmado adjunto</p>
+        </div>
 
-        </td>
+        <!-- KPI 3: En Borrador / Por Legalizar -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/20 to-transparent">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">En Borrador</p>
+                <span class="text-base">⏳</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-amber-700 tracking-tight">
+                    {{ actas_borrador|default:0 }}
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">sesiones</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Pendientes de formalización</p>
+        </div>
 
-    </tr>
+        <!-- KPI 4: Última Sesión -->
+        <div class="tarjeta tarjeta-cuerpo border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50/20 to-transparent">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Última Reunión</p>
+                <span class="text-base">🏛️</span>
+            </div>
+            <div class="mt-1">
+                {% if ultima_sesion %}
+                <div class="text-base font-extrabold text-[#1F2937] truncate">
+                    Acta #{{ ultima_sesion.numero_acta }}
+                </div>
+                <p class="text-[10px] text-indigo-700 font-semibold mt-0.5">
+                    {{ ultima_sesion.fecha|date:"d/m/Y" }} · {{ ultima_sesion.hora_inicio|time:"h:i A" }}
+                </p>
+                {% else %}
+                <span class="text-sm font-semibold text-slate-400">Sin sesiones</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-    {% endfor %}
-</tbody>
-</table>
+    <!-- TABLA DE ACTAS CON BUSCADOR Y FILTROS -->
+    <div class="tarjeta overflow-hidden border border-slate-200">
+        
+        <!-- BARRA SUPERIOR DE LA TABLA -->
+        <div class="px-5 py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-slate-50/50">
+            <div>
+                <h2 class="text-sm font-bold text-[#1F2937] flex items-center gap-2">
+                    <span>📑</span>
+                    <span>Libro Oficial de Actas de Junta Directiva (GR-FR-01)</span>
+                </h2>
+                <p class="text-[11px] text-[#64748B]">
+                    Registro oficial de sesiones corporativas con vista previa, impresión oficial PDF y edición
+                </p>
+            </div>
+
+            <!-- CONTROLES DE BÚSQUEDA Y FILTRADO EN VIVO -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <div class="relative min-w-[200px] sm:min-w-[240px]">
+                    <svg class="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="buscarActa" placeholder="Buscar por Nº, dignatario o lugar..."
+                           class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 placeholder-slate-400 transition">
+                </div>
+
+                <select id="filtroEstado" class="py-1.5 px-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                    <option value="todos">Todos los estados</option>
+                    <option value="firmada">Firmadas y Custodiadas</option>
+                    <option value="aprobada">Aprobadas</option>
+                    <option value="borrador">En Borrador</option>
+                </select>
+
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 font-mono whitespace-nowrap">
+                    <span id="contadorActas">{{ actas|length }}</span> actas
+                </span>
+            </div>
+        </div>
+
+        <!-- TABLA PRINCIPAL -->
+        <div class="overflow-x-auto">
+            <table class="tabla w-full text-xs text-left" id="tablaActas">
+                <thead class="bg-slate-50/90 text-slate-700 uppercase text-[10px] font-extrabold tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="px-5 py-3.5 min-w-[140px]">Sesión / Nº Acta</th>
+                        <th class="px-4 py-3.5 min-w-[130px]">Fecha y Hora</th>
+                        <th class="px-4 py-3.5 min-w-[170px]">Lugar / Sede</th>
+                        <th class="px-4 py-3.5 min-w-[200px]">Dignatarios Oficiales</th>
+                        <th class="px-4 py-3.5 text-center min-w-[140px]">Estado / Custodia</th>
+                        <th class="px-5 py-3.5 text-center min-w-[220px]">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for a in actas %}
+                    <tr class="fila-acta hover:bg-blue-50/30 transition-colors"
+                        data-estado="{% if a.archivo_firmado %}firmada{% else %}{{ a.estado }}{% endif %}">
+                        
+                        <!-- Nº Acta -->
+                        <td class="px-5 py-3.5">
+                            <a href="{% url 'detalle_acta' a.id %}" 
+                               title="Ver Detalle de la Sesión"
+                                class="inline-flex items-center gap-2.5 group">
+                                <span class="size-8 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-mono font-extrabold flex items-center justify-center text-xs group-hover:bg-[#1E63F0] group-hover:text-white transition shadow-2xs">
+                                    #{{ a.numero_acta }}
+                                </span>
+                                <div>
+                                    <div class="font-extrabold text-[#1F2937] group-hover:text-[#1E63F0] transition text-xs">
+                                        Acta Nº {{ a.numero_acta }}
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 font-mono">
+                                        GR-FR-01
+                                    </div>
+                                </div>
+                            </a>
+                        </td>
+
+                        <!-- Fecha y Hora -->
+                        <td class="px-4 py-3.5 whitespace-nowrap">
+                            <div class="font-bold text-[#1F2937] flex items-center gap-1.5">
+                                <span class="text-slate-400">📅</span>
+                                <span>{{ a.fecha|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 font-mono flex items-center gap-1 mt-0.5">
+                                <span class="text-slate-400">🕒</span>
+                                <span>{{ a.hora_inicio|time:"h:i A" }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Lugar -->
+                        <td class="px-4 py-3.5 text-slate-700">
+                            <div class="flex items-center gap-1.5 max-w-xs truncate" title="{{ a.lugar }}">
+                                <span class="text-slate-400 shrink-0">📍</span>
+                                <span class="truncate font-medium">{{ a.lugar|default:"Sede Principal" }}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 truncate">
+                                {{ a.nombre_entidad|default:"COINTECA S.A.S." }}
+                            </div>
+                        </td>
+
+                        <!-- Dignatarios -->
+                        <td class="px-4 py-3.5 text-slate-700">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-1.5 truncate text-xs" title="Presidente: {{ a.presidente }}">
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 font-mono shrink-0">PRES</span>
+                                    <span class="font-semibold text-slate-800 truncate">{{ a.presidente }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 truncate text-xs" title="Secretario: {{ a.secretario }}">
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-slate-100 text-slate-700 font-mono shrink-0">SEC</span>
+                                    <span class="text-slate-600 truncate">{{ a.secretario }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Estado / Custodia -->
+                        <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                            {% if a.archivo_firmado %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                                <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Firmada y Custodiada</span>
+                            </span>
+                            {% elif a.estado == 'aprobada' %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                <span class="size-1.5 rounded-full bg-blue-500"></span>
+                                <span>Aprobada</span>
+                            </span>
+                            {% elif a.estado == 'anulada' %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                                <span class="size-1.5 rounded-full bg-rose-500"></span>
+                                <span>Anulada</span>
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                <span>En Borrador</span>
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- ACCIONES (OPCIÓN 2: VER, PDF, EDITAR, ELIMINAR) -->
+                        <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                            <div class="inline-flex items-center justify-center gap-2">
+                                
+                                <!-- 1. Ver Detalle del Acta -->
+                                <a href="{% url 'detalle_acta' a.id %}"
+                                   title="Ver Detalle Completo"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-[#1E63F0] hover:text-white border border-blue-200 text-xs font-bold transition shadow-2xs">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    <span>Ver</span>
+                                </a>
+
+                                <!-- 2. Imprimir / Vista PDF Oficial -->
+                                <a href="{% url 'imprimir_acta' a.id %}" target="_blank"
+                                   title="Imprimir / Ver Formato PDF Oficial (GR-FR-01)"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 text-xs font-bold transition shadow-2xs">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.667-2.03-1.282-2.859M17.28 13.829c.24-1.076.667-2.03 1.282-2.859M6 18h12m-6-10V4m-4 4h8M4 14h16v6H4v-6z"/></svg>
+                                    <span>PDF</span>
+                                </a>
+
+                                <!-- 3. Editar -->
+                                <a href="{% url 'editar_acta' a.id %}"
+                                   title="Editar Acta"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 text-xs font-bold transition shadow-2xs">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                                    <span>Editar</span>
+                                </a>
+
+                                <!-- 4. Eliminar -->
+                                <a href="{% url 'eliminar_acta' a.id %}"
+                                   onclick="return confirm('¿Seguro que deseas eliminar el Acta Nº {{ a.numero_acta|escapejs }}?')"
+                                   title="Eliminar Acta"
+                                   class="size-8 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white border border-rose-200 flex items-center justify-center transition shadow-2xs">
+                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-16 text-center text-slate-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="size-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl mb-3 shadow-xs">
+                                    📋
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-700">No hay actas de junta registradas</h3>
+                                <p class="text-xs text-slate-400 mt-1 max-w-sm">
+                                    Crea la primera sesión formal para llevar la gobernanza corporativa y custodia de firmas.
+                                </p>
+                                <a href="{% url 'crear_acta' %}" 
+                                   class="btn btn-primario mt-4 text-xs bg-[#1E63F0] hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl shadow-xs">
+                                    + Crear Primera Acta
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
+<!-- SCRIPT DE FILTRADO Y BÚSQUEDA INSTANTÁNEA EN VIVO -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBuscar = document.getElementById('buscarActa');
+    const filtroEstado = document.getElementById('filtroEstado');
+    const filas = document.querySelectorAll('.fila-acta');
+    const contador = document.getElementById('contadorActas');
+
+    function aplicarFiltros() {
+        const query = (inputBuscar ? inputBuscar.value : '').toLowerCase().trim();
+        const estadoSel = filtroEstado ? filtroEstado.value : 'todos';
+        let visibles = 0;
+
+        filas.forEach(fila => {
+            const textoFila = fila.innerText.toLowerCase();
+            const estadoFila = fila.getAttribute('data-estado') || '';
+
+            const coincideTexto = !query || textoFila.includes(query);
+            const coincideEstado = (estadoSel === 'todos') || (estadoFila === estadoSel);
+
+            if (coincideTexto && coincideEstado) {
+                fila.style.display = '';
+                visibles++;
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+
+        if (contador) {
+            contador.textContent = visibles;
+        }
+    }
+
+    if (inputBuscar) inputBuscar.addEventListener('input', aplicarFiltros);
+    if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltros);
+});
+</script>
 {% endblock %}

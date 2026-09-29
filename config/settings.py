@@ -132,3 +132,7 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
+import mimetypes
+mimetypes.add_type('image/webp', '.webp')
+mimetypes.add_type('application/pdf', '.pdf')
+

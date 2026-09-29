@@ -1,14 +1,17 @@
 import os
 import openpyxl
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from decimal import Decimal
 
 from core.models import (
     ProyectoFacturacion,
     SeguimientoFacturacion,
+    ApoyoManoObra,
+    Proyecto,
 )
 
 MESES_ORDEN = [
@@ -106,6 +109,43 @@ def editar_facturacion(request, id):
         'seguimiento': seguimiento,
         'proyectos': proyectos
     })
+
+@login_required
+def api_liquidacion_ingenieria(request):
+    """
+    Retorna el acumulado liquidado en mano de obra desde Ingeniería,
+    opcionalmente buscando por proyecto o consolidado general de obras.
+    """
+    proyecto_fact_id = request.GET.get('proyecto_id')
+
+    total_liquidado = Decimal('0')
+    nombre_proyecto = "Todos los proyectos de Ingeniería"
+
+    if proyecto_fact_id:
+        p_fact = ProyectoFacturacion.objects.filter(id=proyecto_fact_id).first()
+        if p_fact:
+            p_ing = Proyecto.objects.filter(nombre__icontains=p_fact.nombre).first()
+            if p_ing:
+                nombre_proyecto = f"Proyecto: {p_ing.nombre}"
+                amos = ApoyoManoObra.objects.filter(apoyo__proyecto=p_ing).select_related('item_mano_obra')
+                total_liquidado = sum((a.cantidad * a.item_mano_obra.valor_unitario for a in amos), Decimal('0'))
+
+    if total_liquidado == Decimal('0'):
+        # Consolidado general de mano de obra liquidada en apoyos
+        amos_todos = ApoyoManoObra.objects.select_related('item_mano_obra').all()
+        total_liquidado = sum((a.cantidad * a.item_mano_obra.valor_unitario for a in amos_todos), Decimal('0'))
+        if total_liquidado > Decimal('0'):
+            nombre_proyecto = "Consolidado Obras de Ingeniería"
+
+    val_entero = int(total_liquidado)
+    formateado = f"{val_entero:,}".replace(',', '.')
+
+    return JsonResponse({
+        'total': float(total_liquidado),
+        'total_formateado': formateado,
+        'proyecto_referencia': nombre_proyecto,
+    })
+
 
 @login_required
 def exportar_facturacion_excel(request):

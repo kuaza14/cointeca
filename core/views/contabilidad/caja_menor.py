@@ -92,7 +92,7 @@ def eliminar_caja(request, id):
 @login_required
 def detalle_caja(request, id):
     """
-    Muestra el detalle del trámite de caja menor con sus movimientos.
+    Muestra el detalle del trámite de caja menor con sus movimientos y desglose de centros de costos.
     """
     caja = get_object_or_404(CajaMenor, id=id)
     movimientos = caja.movimientocajamenor_set.all().order_by('fecha', 'id')
@@ -102,23 +102,42 @@ def detalle_caja(request, id):
     if caja.valor_inicial > 0:
         porcentaje_consumido = round((caja.total_gastado / caja.valor_inicial) * 100, 1)
 
+    # Desglose de gastos por categoría (Centro de Costos)
+    resumen_categorias = []
+    for cat_cod, cat_nom in MovimientoCajaMenor.CATEGORIA_CHOICES:
+        movs_cat = [m for m in movimientos if m.categoria == cat_cod]
+        total_cat = sum(m.valor for m in movs_cat)
+        if total_cat > 0:
+            pct = round((total_cat / caja.total_gastado * 100), 1) if caja.total_gastado > 0 else 0
+            resumen_categorias.append({
+                'codigo': cat_cod,
+                'nombre': cat_nom,
+                'total': total_cat,
+                'porcentaje': pct,
+                'cantidad': len(movs_cat),
+            })
+    # Ordenar de mayor a menor gasto
+    resumen_categorias.sort(key=lambda x: x['total'], reverse=True)
+
     return render(request, 'contabilidad/detalle_caja.html', {
         'caja': caja,
         'movimientos': movimientos,
         'porcentaje_consumido': porcentaje_consumido,
+        'resumen_categorias': resumen_categorias,
     })
 
 
 @login_required
 def agregar_movimiento(request, id):
     """
-    Registra un gasto / factura a la caja menor.
+    Registra un gasto / factura a la caja menor con soporte digital y categoría.
     """
     caja = get_object_or_404(CajaMenor, id=id)
 
     if request.method == 'POST':
         valor_raw = request.POST.get('valor', '0').replace('$', '').replace('.', '').replace(',', '').strip()
         valor = Decimal(valor_raw) if valor_raw else Decimal('0')
+        soporte = request.FILES.get('soporte')
 
         MovimientoCajaMenor.objects.create(
             caja=caja,
@@ -127,17 +146,22 @@ def agregar_movimiento(request, id):
             nit=request.POST.get('nit', '').strip(),
             pagado_a=request.POST.get('pagado_a', '').strip(),
             concepto=request.POST.get('concepto', '').strip(),
-            valor=valor
+            categoria=request.POST.get('categoria', 'otros'),
+            valor=valor,
+            soporte=soporte,
         )
         return redirect('detalle_caja', id=caja.id)
 
-    return render(request, 'contabilidad/agregar_movimiento.html', {'caja': caja})
+    return render(request, 'contabilidad/agregar_movimiento.html', {
+        'caja': caja,
+        'categorias': MovimientoCajaMenor.CATEGORIA_CHOICES,
+    })
 
 
 @login_required
 def editar_movimiento(request, id):
     """
-    Edita un movimiento existente y recalcula los totales.
+    Edita un movimiento existente y actualiza soporte o categoría.
     """
     movimiento = get_object_or_404(MovimientoCajaMenor, id=id)
 
@@ -150,12 +174,24 @@ def editar_movimiento(request, id):
         movimiento.nit = request.POST.get('nit', '').strip()
         movimiento.pagado_a = request.POST.get('pagado_a', '').strip()
         movimiento.concepto = request.POST.get('concepto', '').strip()
+        movimiento.categoria = request.POST.get('categoria', movimiento.categoria)
         movimiento.valor = valor
+
+        if request.FILES.get('soporte'):
+            movimiento.soporte = request.FILES.get('soporte')
+        elif request.POST.get('eliminar_soporte'):
+            if movimiento.soporte:
+                movimiento.soporte.delete(save=False)
+            movimiento.soporte = None
+
         movimiento.save()
 
         return redirect('detalle_caja', id=movimiento.caja.id)
 
-    return render(request, 'contabilidad/editar_movimiento.html', {'m': movimiento})
+    return render(request, 'contabilidad/editar_movimiento.html', {
+        'm': movimiento,
+        'categorias': MovimientoCajaMenor.CATEGORIA_CHOICES,
+    })
 
 
 @login_required

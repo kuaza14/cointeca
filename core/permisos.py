@@ -46,6 +46,9 @@ def obtener_permisos_usuario(user):
             'roles': set(),
         }
 
+    if hasattr(user, '_permisos_cache'):
+        return user._permisos_cache
+
     # Grupos del usuario en minúsculas y sin acentos
     grupos_raw = list(user.groups.values_list('name', flat=True))
     roles = {normalizar_texto(g) for g in grupos_raw}
@@ -91,7 +94,7 @@ def obtener_permisos_usuario(user):
         else:
             rol_nombre = 'Colaborador'
 
-    return {
+    resultado = {
         'es_autenticado': True,
         'es_gerencia': es_gerencia,
         'puede_ver_gerencia': puede_gerencia,
@@ -102,6 +105,11 @@ def obtener_permisos_usuario(user):
         'rol_principal': rol_nombre,
         'roles': roles,
     }
+    try:
+        user._permisos_cache = resultado
+    except Exception:
+        pass
+    return resultado
 
 
 # Mapeo de prefijos de URL a claves de permisos y nombres de módulo legibles

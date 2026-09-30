@@ -3,7 +3,11 @@ from core.permisos import obtener_permisos_usuario
 
 
 def alertas(request):
-    return obtener_alertas_vacaciones()
+    if hasattr(request, 'user') and request.user.is_authenticated:
+        permisos = obtener_permisos_usuario(request.user)
+        if permisos.get('puede_ver_rrhh'):
+            return obtener_alertas_vacaciones()
+    return {}
 
 
 def permisos_usuario(request):

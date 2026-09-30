@@ -1,9 +1,27 @@
+import time
 from datetime import date, timedelta
 from django.db.models import Sum
 from core.models import Vacacion, Empleado
 
+# Cache en memoria para evitar ejecutar múltiples consultas pesadas en cada navegación
+_ALERTAS_CACHE = {
+    'timestamp': 0,
+    'data': None,
+}
+
+
+def invalidar_cache_alertas():
+    """Limpia el caché de alertas para forzar recálculo inmediato."""
+    _ALERTAS_CACHE['timestamp'] = 0
+    _ALERTAS_CACHE['data'] = None
+
 
 def obtener_alertas_vacaciones():
+    ahora_ts = time.time()
+    # Retornar caché en memoria si tiene menos de 5 minutos (300 segundos)
+    if _ALERTAS_CACHE['data'] is not None and (ahora_ts - _ALERTAS_CACHE['timestamp']) < 300:
+        return _ALERTAS_CACHE['data']
+
     hoy = date.today()
 
     # ==========================
@@ -18,15 +36,16 @@ def obtener_alertas_vacaciones():
         .order_by("fecha_regreso")
     )
 
-    actuales = []
-    for vacacion in vacaciones_actuales:
-        actuales.append({
-            "id": vacacion.empleado.id,
-            "empleado": vacacion.empleado.nombre_completo,
-            "inicio": vacacion.fecha_inicio,
-            "regreso": vacacion.fecha_regreso,
-            "dias_restantes": (vacacion.fecha_regreso - hoy).days,
-        })
+    actuales = [
+        {
+            "id": v.empleado.id,
+            "empleado": v.empleado.nombre_completo,
+            "inicio": v.fecha_inicio,
+            "regreso": v.fecha_regreso,
+            "dias_restantes": (v.fecha_regreso - hoy).days,
+        }
+        for v in vacaciones_actuales
+    ]
 
     # ==========================
     # 2. PRÓXIMAS VACACIONES (Salen en los próximos 15 días)
@@ -40,22 +59,33 @@ def obtener_alertas_vacaciones():
         .order_by("fecha_inicio")
     )
 
-    proximas = []
-    for vacacion in vacaciones_proximas:
-        proximas.append({
-            "id": vacacion.empleado.id,
-            "empleado": vacacion.empleado.nombre_completo,
-            "inicio": vacacion.fecha_inicio,
-            "dias_para_salir": (vacacion.fecha_inicio - hoy).days,
-        })
+    proximas = [
+        {
+            "id": v.empleado.id,
+            "empleado": v.empleado.nombre_completo,
+            "inicio": v.fecha_inicio,
+            "dias_para_salir": (v.fecha_inicio - hoy).days,
+        }
+        for v in vacaciones_proximas
+    ]
 
     # ==========================
-    # 3. PROGRAMAR VACACIONES (Cumplen año en 1 o 2 meses / hasta 60 días)
+    # 3. PROGRAMAR VACACIONES (Optimizado: 1 sola consulta SQL agrupada)
     # ==========================
     cumplen_anio = []
     pendientes_programar = []
 
-    empleados = Empleado.objects.all().order_by("nombre_completo")
+    # Obtenemos los días tomados de TODOS los empleados en una única consulta GROUP BY
+    dias_tomados_map = dict(
+        Vacacion.objects.values_list("empleado_id")
+        .annotate(total=Sum("dias_tomados"))
+    )
+
+    empleados = (
+        Empleado.objects.filter(fecha_ingreso__isnull=False)
+        .only("id", "nombre_completo", "fecha_ingreso")
+        .order_by("nombre_completo")
+    )
 
     for empleado in empleados:
         if not empleado.fecha_ingreso:
@@ -65,7 +95,6 @@ def obtener_alertas_vacaciones():
         try:
             aniversario = empleado.fecha_ingreso.replace(year=hoy.year)
         except ValueError:
-            # Caso 29 de febrero en años no bisiestos
             aniversario = empleado.fecha_ingreso.replace(year=hoy.year, day=28)
 
         if aniversario < hoy:
@@ -82,21 +111,10 @@ def obtener_alertas_vacaciones():
             anios_trabajados -= 1
 
         dias_acumulados = max(0, anios_trabajados * 15)
-
-        dias_tomados = (
-            Vacacion.objects.filter(
-                empleado=empleado
-            ).aggregate(
-                total=Sum("dias_tomados")
-            )["total"] or 0
-        )
-
+        dias_tomados = dias_tomados_map.get(empleado.id) or 0
         dias_pendientes = max(0, dias_acumulados - dias_tomados)
         proximo_anio_num = anios_trabajados + 1
 
-        # =======================================================
-        # ALERTA: Cumple aniversario laboral en 1 o 2 meses (0 a 60 días)
-        # =======================================================
         if 0 <= dias_para_aniversario <= 60:
             cumplen_anio.append({
                 "id": empleado.id,
@@ -106,10 +124,6 @@ def obtener_alertas_vacaciones():
                 "anio_num": proximo_anio_num,
                 "pendientes": dias_pendientes,
             })
-
-        # =======================================================
-        # ALERTA: Ya tiene vacaciones acumuladas sin programar
-        # =======================================================
         elif anios_trabajados >= 1 and dias_pendientes > 0:
             pendientes_programar.append({
                 "id": empleado.id,
@@ -118,10 +132,9 @@ def obtener_alertas_vacaciones():
                 "pendientes": dias_pendientes,
             })
 
-    # Ordenar por el que está más próximo a cumplir
     cumplen_anio.sort(key=lambda x: x["dias"])
 
-    return {
+    resultado = {
         "vacaciones_actuales": actuales,
         "vacaciones_proximas": proximas,
         "cumplen_anio": cumplen_anio,
@@ -133,3 +146,7 @@ def obtener_alertas_vacaciones():
             + len(pendientes_programar)
         ),
     }
+
+    _ALERTAS_CACHE['timestamp'] = ahora_ts
+    _ALERTAS_CACHE['data'] = resultado
+    return resultado

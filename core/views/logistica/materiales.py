@@ -91,9 +91,10 @@ def materiales_home(request):
 
             return redirect("materiales_home")
 
-    materiales = Material.objects.select_related(
-        "inventario"
-    ).order_by("descripcion")
+    materiales = list(
+        Material.objects.select_related("inventario").order_by("descripcion")
+    )
+    total_materiales = len(materiales)
 
     devoluciones_recientes = (
         DevolucionMaterialProyecto.objects.prefetch_related("proyecto", "detalles__material")
@@ -119,7 +120,7 @@ def materiales_home(request):
         "logistica/materiales/materiales_home.html",
         {
             "materiales": materiales,
-            "total_materiales": materiales.count(),
+            "total_materiales": total_materiales,
             "devoluciones_recientes": devoluciones_recientes,
             "retiros_apoyos": retiros_apoyos,
             "movimientos": movimientos,

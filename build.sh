@@ -11,4 +11,7 @@ python manage.py collectstatic --noinput
 echo ">>> Aplicando migraciones de base de datos..."
 python manage.py migrate --noinput
 
+echo ">>> Configurando cuentas y permisos de usuarios iniciales..."
+python manage.py crear_usuarios_iniciales
+
 echo ">>> ¡Construcción finalizada con éxito!"

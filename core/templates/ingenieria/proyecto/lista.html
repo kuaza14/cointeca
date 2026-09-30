@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Proyectos {% if macroproyecto %}- {{ macroproyecto.nombre }}{% endif %} | Cointeca S.A.S{% endblock %}
+{% block titulo %}{% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural }} - {{ macroproyecto.nombre }}{% else %}Proyectos & Maniobras{% endif %} | Cointeca S.A.S{% endblock %}
 {% block encabezado %}Ingeniería{% endblock %}
 
 {% block content %}
@@ -13,27 +13,30 @@
             <span>/</span>
             <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
             <span>/</span>
-            <a href="{% url 'lista_macroproyectos' %}" class="hover:underline">Macroproyectos</a>
+            <a href="{% url 'lista_macroproyectos' %}" class="hover:underline">{% if macroproyecto %}{{ macroproyecto.etiqueta_plural }}{% else %}Macroproyectos & Circuitos{% endif %}</a>
             {% if macroproyecto %}
                 <span>/</span>
                 <span class="text-foreground font-semibold">{{ macroproyecto.nombre }}</span>
+                <span>/</span>
+                <span class="text-foreground font-medium">{{ macroproyecto.etiqueta_hijo_plural }}</span>
+            {% else %}
+                <span>/</span>
+                <span class="text-foreground font-medium">Proyectos & Maniobras</span>
             {% endif %}
-            <span>/</span>
-            <span class="text-foreground font-medium">Proyectos</span>
         </div>
 
         <h1 class="titulo-pagina">
             {% if macroproyecto %}
-                Proyectos: <span class="text-primary">{{ macroproyecto.nombre }}</span>
+                {{ macroproyecto.etiqueta_hijo_plural }}: <span class="text-primary">{{ macroproyecto.nombre }}</span>
             {% else %}
-                Todos los Proyectos
+                Todos los Proyectos & Maniobras
             {% endif %}
         </h1>
         <p class="subtitulo-pagina">
             {% if macroproyecto %}
-                Proyectos y redes eléctricas vinculadas a <strong>{{ macroproyecto.nombre }}</strong>.
+                {{ macroproyecto.etiqueta_hijo_plural }} y redes eléctricas vinculadas a <strong>{{ macroproyecto.nombre }}</strong>.
             {% else %}
-                Listado consolidado de todos los proyectos registrados en el sistema.
+                Listado consolidado de proyectos (AP) y maniobras (MT) registrados en el sistema.
             {% endif %}
         </p>
         {% if macroproyecto and macroproyecto.numero_maniobra_emcali or macroproyecto and macroproyecto.numero_maniobra_cointeca %}
@@ -83,11 +86,11 @@
             <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color: #ffffff !important;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
-            <span style="color: #ffffff !important;">Nuevo Proyecto</span>
+            <span style="color: #ffffff !important;">{% if macroproyecto %}+ Nueva {{ macroproyecto.etiqueta_hijo }}{% else %}+ Nuevo Proyecto / Maniobra{% endif %}</span>
         </button>
 
         <a href="{% url 'lista_macroproyectos' %}" class="btn btn-secundario">
-            ← Volver a Macroproyectos
+            ← Volver a {% if macroproyecto %}{{ macroproyecto.etiqueta_plural }}{% else %}Macroproyectos / Circuitos{% endif %}
         </a>
     </div>
 </div>
@@ -136,9 +139,9 @@
     <table class="tabla" id="tablaProyectos">
         <thead>
             <tr>
-                <th scope="col">Proyecto</th>
+                <th scope="col">{% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %}</th>
                 {% if not macroproyecto %}
-                    <th scope="col">Macroproyecto</th>
+                    <th scope="col">Macroproyecto / Circuito</th>
                 {% endif %}
                 <th scope="col">Tipo de Red</th>
                 <th scope="col" class="text-center">Postes / Apoyos</th>
@@ -151,7 +154,12 @@
             {% for proyecto in proyectos %}
                 <tr class="fila-proyecto">
                     <td class="font-bold tabular text-foreground text-base">
-                        {{ proyecto.numero_emcali }}
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded font-extrabold {% if proyecto.es_mt %}bg-purple-100 text-purple-900 border border-purple-200{% else %}bg-blue-100 text-blue-900 border border-blue-200{% endif %}">
+                                {{ proyecto.etiqueta }}
+                            </span>
+                            <span>{{ proyecto.numero_emcali }}</span>
+                        </div>
                     </td>
 
                     {% if not macroproyecto %}
@@ -160,8 +168,9 @@
                             <a href="{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}" class="text-xs font-semibold text-primary hover:underline">
                                 {{ proyecto.macroproyecto.nombre }}
                             </a>
+                            <span class="block text-[10px] text-muted-foreground">{{ proyecto.etiqueta_padre }}</span>
                         {% else %}
-                            <span class="text-xs text-muted-foreground italic">Sin Macroproyecto</span>
+                            <span class="text-xs text-muted-foreground italic">Sin {{ proyecto.etiqueta_padre }}</span>
                         {% endif %}
                     </td>
                     {% endif %}
@@ -242,9 +251,11 @@
                                     data-id="{{ proyecto.id }}"
                                     data-numero="{{ proyecto.numero_emcali }}"
                                     data-tipo="{{ proyecto.tipo }}"
+                                    data-etiqueta="{{ proyecto.etiqueta }}"
+                                    data-etiqueta-padre="{{ proyecto.etiqueta_padre }}"
                                     data-estado="{{ proyecto.estado }}"
                                     data-macro-id="{{ proyecto.macroproyecto_id|default:'' }}"
-                                    title="Editar proyecto en modal">
+                                    title="Editar {{ proyecto.etiqueta|lower }} en modal">
                                 <span>Editar</span>
                             </button>
 
@@ -252,7 +263,9 @@
                                     class="btnEliminarProyecto inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-destructive text-xs font-semibold rounded-lg transition border border-red-200 cursor-pointer"
                                     data-id="{{ proyecto.id }}"
                                     data-numero="{{ proyecto.numero_emcali }}"
-                                    title="Eliminar proyecto en modal">
+                                    data-tipo="{{ proyecto.tipo }}"
+                                    data-etiqueta="{% if proyecto.es_mt %}la maniobra{% else %}el proyecto{% endif %}"
+                                    title="Eliminar {{ proyecto.etiqueta|lower }} en modal">
                                 <span>Eliminar</span>
                             </button>
                         </div>
@@ -263,13 +276,13 @@
                     <td colspan="{% if macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-10 text-center text-muted-foreground">
                         <div>
                             {% if query %}
-                                <p class="font-semibold text-foreground">No se encontraron proyectos que coincidan con «{{ query }}»</p>
+                                <p class="font-semibold text-foreground">No se encontraron {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural|lower }}{% else %}proyectos o maniobras{% endif %} que coincidan con «{{ query }}»</p>
                                 <div class="mt-2">
                                     <a href="{% if macroproyecto %}{% url 'proyectos_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}" class="btn btn-secundario text-xs">Limpiar búsqueda</a>
                                 </div>
                             {% else %}
-                                <p class="font-semibold text-foreground">No hay proyectos registrados {% if macroproyecto %}en este macroproyecto{% endif %}</p>
-                                <p class="text-xs text-muted-foreground mt-1">Haz clic en «Nuevo proyecto» para agregar el primero.</p>
+                                <p class="font-semibold text-foreground">No hay {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural|lower }}{% else %}proyectos o maniobras{% endif %} registrados {% if macroproyecto %}en este {{ macroproyecto.etiqueta|lower }}{% endif %}</p>
+                                <p class="text-xs text-muted-foreground mt-1">Haz clic en «{% if macroproyecto %}Nueva {{ macroproyecto.etiqueta_hijo|lower }}{% else %}Nuevo proyecto{% endif %}» para agregar el primero.</p>
                             {% endif %}
                         </div>
                     </td>
@@ -277,7 +290,7 @@
             {% endfor %}
             <tr id="sinResultadosLive" class="hidden">
                 <td colspan="{% if macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-8 text-center text-muted-foreground">
-                    No se encontraron proyectos con ese criterio de búsqueda.
+                    No se encontraron registros con ese criterio de búsqueda.
                 </td>
             </tr>
         </tbody>
@@ -299,7 +312,7 @@
         <div class="flex items-center justify-between border-b border-blue-800 px-6 py-4"
              style="background-color: #1e3a8a !important; color: #ffffff !important;">
             <h2 id="tituloModalProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
-                <span>📁</span> Nuevo Proyecto
+                <span>📁</span> {% if macroproyecto %}Nueva {{ macroproyecto.etiqueta_hijo }}{% else %}Nuevo Proyecto / Maniobra{% endif %}
             </h2>
 
             <button type="button" id="cerrarModal"
@@ -322,11 +335,11 @@
             <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 {% if macroproyecto %}
                     <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 font-semibold" style="background-color: #eff6ff !important; color: #1e3a8a !important;">
-                        <span>Macroproyecto: <strong>{{ macroproyecto.nombre }}</strong></span>
+                        <span>{{ macroproyecto.etiqueta }}: <strong>{{ macroproyecto.nombre }}</strong></span>
                     </div>
                 {% else %}
                     <div>
-                        <label for="macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto Asignado</label>
+                        <label for="macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto / Circuito Asignado</label>
                         <select id="macroproyecto_id" name="macroproyecto_id"
                                 style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                                 class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
@@ -339,14 +352,14 @@
                 {% endif %}
 
                 <div>
-                    <label for="numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de Proyecto <span class="text-red-600">*</span></label>
+                    <label for="numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %} <span class="text-red-600">*</span></label>
                     <input type="text" id="numero_emcali" name="numero_emcali" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                            class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 2024-BT-001, AP-CANCHA-01, etc.">
                 </div>
 
                 <div>
-                    <label for="tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Proyecto / Red <span class="text-red-600">*</span></label>
+                    <label for="tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Red <span class="text-red-600">*</span></label>
                     <select id="tipo" name="tipo" required
                             style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                             class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
@@ -377,7 +390,7 @@
                         class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
                 <button type="submit"
                         style="background-color: #1d4ed8 !important; color: #ffffff !important;"
-                        class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear Proyecto</button>
+                        class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %}</button>
             </div>
         </form>
     </div>
@@ -398,7 +411,7 @@
         <div class="flex items-center justify-between border-b border-blue-800 px-6 py-4"
              style="background-color: #1e3a8a !important; color: #ffffff !important;">
             <h2 id="tituloModalEditarProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
-                <span>✏️</span> Editar Proyecto
+                <span>✏️</span> <span id="textoTituloModalEditar">Editar Proyecto / Maniobra</span>
             </h2>
 
             <button type="button" id="cerrarModalEditar"
@@ -416,7 +429,7 @@
 
             <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 <div>
-                    <label for="edit_macroproyecto_id" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto</label>
+                    <label for="edit_macroproyecto_id" id="lblEditMacroproyecto" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Macroproyecto / Circuito</label>
                     <select id="edit_macroproyecto_id" name="macroproyecto_id"
                             style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                             class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
@@ -428,14 +441,14 @@
                 </div>
 
                 <div>
-                    <label for="edit_numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de Proyecto <span class="text-red-600">*</span></label>
+                    <label for="edit_numero_emcali" id="lblEditNumero" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código <span class="text-red-600">*</span></label>
                     <input type="text" id="edit_numero_emcali" name="numero_emcali" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                            class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 2024-BT-001">
                 </div>
 
                 <div>
-                    <label for="edit_tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Proyecto / Red <span class="text-red-600">*</span></label>
+                    <label for="edit_tipo" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Red <span class="text-red-600">*</span></label>
                     <select id="edit_tipo" name="tipo" required
                             style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                             class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
@@ -449,7 +462,7 @@
                 </div>
 
                 <div>
-                    <label for="edit_estado" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Estado del proyecto <span class="text-red-600">*</span></label>
+                    <label for="edit_estado" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Estado <span class="text-red-600">*</span></label>
                     <select id="edit_estado" name="estado" required
                             style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                             class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
@@ -506,10 +519,10 @@
 
             <div class="p-6 space-y-4" style="background-color: #ffffff !important; color: #0f172a !important;">
                 <p class="text-sm text-gray-800">
-                    ¿Estás seguro de que deseas eliminar el proyecto <strong id="deleteProyectoNombre" class="text-red-700 font-mono font-bold"></strong>?
+                    ¿Estás seguro de que deseas eliminar <span id="deleteTextoTipo">el proyecto</span> <strong id="deleteProyectoNombre" class="text-red-700 font-mono font-bold"></strong>?
                 </p>
                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed" style="background-color: #fffbeb !important; color: #78350f !important; border: 1px solid #fde68a !important;">
-                    <span><strong>Advertencia:</strong> Esta acción no se puede deshacer. Se eliminarán permanentemente todos los apoyos/postes, luminarias y asignaciones de materiales vinculados a este proyecto.</span>
+                    <span><strong>Advertencia:</strong> Esta acción no se puede deshacer. Se eliminarán permanentemente todos los apoyos/postes, luminarias y asignaciones de materiales vinculados.</span>
                 </div>
             </div>
 
@@ -520,7 +533,7 @@
                 <button type="submit"
                         style="background-color: #dc2626 !important; color: #ffffff !important;"
                         class="px-5 py-2 hover:bg-red-700 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">
-                    Eliminar Proyecto
+                    Eliminar
                 </button>
             </div>
         </form>
@@ -550,7 +563,7 @@
                         Imprimir Formato Poste a Poste
                     </h2>
                     <p class="text-xs text-slate-300">
-                        {% if macroproyecto %}Macroproyecto: <strong>{{ macroproyecto.nombre }}</strong> — {% endif %}Busca un proyecto para descargar su formato oficial pre-llenado listo para imprimir
+                        {% if macroproyecto %}{{ macroproyecto.etiqueta }}: <strong>{{ macroproyecto.nombre }}</strong> — {% endif %}Busca un proyecto o maniobra para descargar su formato oficial pre-llenado listo para imprimir
                     </p>
                 </div>
             </div>
@@ -575,7 +588,7 @@
                 </span>
                 <input type="text"
                        id="buscadorModalImprimir"
-                       placeholder="Escribe el número de proyecto (ej: 9901, 9902) o tipo..."
+                       placeholder="Escribe el número de proyecto o maniobra (ej: 9901, 9902) o tipo..."
                        autocomplete="off"
                        class="w-full border-2 border-slate-300 rounded-xl pl-11 pr-10 py-2.5 text-sm font-semibold text-slate-900 focus:border-slate-800 focus:ring-0 focus:outline-none transition">
                 <button type="button"
@@ -588,7 +601,7 @@
                 </button>
             </div>
             <div class="flex items-center justify-between text-xs text-slate-500 mt-2 px-1">
-                <span>Resultados: <strong id="contadorModalImprimir" class="text-slate-800 font-bold">{{ proyectos_imprimir|length }}</strong> proyectos</span>
+                <span>Resultados: <strong id="contadorModalImprimir" class="text-slate-800 font-bold">{{ proyectos_imprimir|length }}</strong> registros</span>
                 <span class="text-[11px] text-slate-400 hidden sm:inline italic">Presiona «Enter» para imprimir la primera coincidencia</span>
             </div>
         </div>
@@ -625,7 +638,7 @@
                             </div>
                             {% if not macroproyecto and proy.macroproyecto %}
                                 <p class="text-xs text-slate-500 mt-0.5 truncate">
-                                    Macroproyecto: <strong class="text-slate-700">{{ proy.macroproyecto.nombre }}</strong>
+                                    {{ proy.etiqueta_padre }}: <strong class="text-slate-700">{{ proy.macroproyecto.nombre }}</strong>
                                 </p>
                             {% endif %}
                         </div>
@@ -634,7 +647,7 @@
                     <div class="flex items-center gap-2 shrink-0">
                         <a href="{% url 'detalle_proyecto' proy.id %}"
                            class="hidden sm:inline-flex items-center px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg transition"
-                           title="Ver detalle del proyecto">
+                           title="Ver detalle">
                             Ver Postes
                         </a>
                         <a href="{% url 'imprimir_formato_poste_a_poste' proy.id %}" target="_blank"
@@ -648,14 +661,14 @@
                 </div>
             {% empty %}
                 <div class="text-center py-8 text-slate-500">
-                    <p class="font-semibold text-slate-700">No hay proyectos disponibles para imprimir.</p>
+                    <p class="font-semibold text-slate-700">No hay registros disponibles para imprimir.</p>
                 </div>
             {% endfor %}
 
             <div id="sinResultadosModalImprimir" class="hidden text-center py-10 text-slate-500">
                 <span class="text-3xl block mb-2">🔍</span>
-                <p class="font-semibold text-slate-700">No se encontraron proyectos con ese criterio.</p>
-                <p class="text-xs text-slate-400 mt-1">Verifica el número de proyecto o limpia el buscador.</p>
+                <p class="font-semibold text-slate-700">No se encontraron registros con ese criterio.</p>
+                <p class="text-xs text-slate-400 mt-1">Verifica el número o limpia el buscador.</p>
             </div>
         </div>
 
@@ -784,6 +797,8 @@
         const tipo = btn.dataset.tipo || "";
         const estado = btn.dataset.estado || "Planeación";
         const macroId = btn.dataset.macroId || "";
+        const etiqueta = btn.dataset.etiqueta || (tipo === "MT" ? "Maniobra" : "Proyecto");
+        const etiquetaPadre = btn.dataset.etiquetaPadre || (tipo === "MT" ? "Circuito" : "Macroproyecto");
 
         formEditar.action = "/ingenieria/proyectos/" + id + "/editar/";
         editNumero.value = numero;
@@ -792,6 +807,13 @@
         if (editMacroId) {
             editMacroId.value = macroId;
         }
+
+        const textoTitulo = document.getElementById("textoTituloModalEditar");
+        if (textoTitulo) textoTitulo.textContent = "Editar " + etiqueta;
+        const lblMacro = document.getElementById("lblEditMacroproyecto");
+        if (lblMacro) lblMacro.textContent = etiquetaPadre;
+        const lblNum = document.getElementById("lblEditNumero");
+        if (lblNum) lblNum.innerHTML = "Número o Código de " + etiqueta + ' <span class="text-red-600">*</span>';
 
         modalEditar.classList.remove("hidden");
         modalEditar.classList.add("flex");
@@ -823,15 +845,18 @@
     const modalEliminar = document.getElementById("modalEliminarProyecto");
     const formEliminar = document.getElementById("formEliminarProyecto");
     const deleteNombre = document.getElementById("deleteProyectoNombre");
+    const deleteTextoTipo = document.getElementById("deleteTextoTipo");
     const btnCerrarEliminar = document.getElementById("cerrarModalEliminar");
     const btnCancelarEliminar = document.getElementById("cancelarModalEliminar");
 
     function abrirEliminar(btn) {
         const id = btn.dataset.id;
         const numero = btn.dataset.numero || "";
+        const etiqueta = btn.dataset.etiqueta || "el proyecto";
 
         formEliminar.action = "/ingenieria/proyectos/" + id + "/eliminar/";
         deleteNombre.textContent = numero;
+        if (deleteTextoTipo) deleteTextoTipo.textContent = etiqueta;
 
         modalEliminar.classList.remove("hidden");
         modalEliminar.classList.add("flex");

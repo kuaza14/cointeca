@@ -215,8 +215,8 @@
                 <table class="w-full text-left text-xs">
                     <thead class="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-slate-100">
                         <tr>
-                            <th class="py-2.5 px-4">N° Proyecto</th>
-                            <th class="py-2.5 px-4">Macroproyecto</th>
+                            <th class="py-2.5 px-4">Código / Nombre</th>
+                            <th class="py-2.5 px-4">Macroproyecto / Circuito</th>
                             <th class="py-2.5 px-4">Tipo</th>
                             <th class="py-2.5 px-4">Estado</th>
                             <th class="py-2.5 px-3 text-right"></th>
@@ -225,8 +225,22 @@
                     <tbody class="divide-y divide-slate-100">
                         {% for p in proyectos_recientes %}
                             <tr onclick="window.location.href='{% url 'detalle_proyecto' p.id %}';" class="hover:bg-[#E6F1FF]/40 transition-colors group cursor-pointer">
-                                <td class="py-3 px-4 font-bold text-[#1F2937]">{{ p.numero_emcali }}</td>
-                                <td class="py-3 px-4 text-[#64748B]">{{ p.macroproyecto.nombre|default:"-" }}</td>
+                                <td class="py-3 px-4 font-bold text-[#1F2937]">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>{{ p.numero_emcali }}</span>
+                                        {% if p.es_mt %}
+                                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-100 text-purple-900 border border-purple-200">Maniobra</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-[#64748B]">
+                                    {% if p.macroproyecto %}
+                                        <span>{{ p.macroproyecto.nombre }}</span>
+                                        <span class="block text-[10px] text-slate-400">({{ p.etiqueta_padre }})</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                                 <td class="py-3 px-4">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700">
                                         {{ p.get_tipo_display|default:p.tipo }}

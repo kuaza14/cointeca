@@ -942,6 +942,32 @@ class Macroproyecto(models.Model):
         verbose_name_plural = "Macroproyectos"
         ordering = ["-id"]
 
+    @property
+    def es_mt(self):
+        """Determina si este macroproyecto corresponde a Media Tensión (Circuito)."""
+        if self.proyectos.filter(tipo="MT").exists():
+            return True
+        nom = (self.nombre or "").lower()
+        return "circuito" in nom or "mt" in nom.split()
+
+    @property
+    def etiqueta(self):
+        """Devuelve 'Circuito' si es MT o 'Macroproyecto' si es AP/otro."""
+        return "Circuito" if self.es_mt else "Macroproyecto"
+
+    @property
+    def etiqueta_plural(self):
+        return "Circuitos" if self.es_mt else "Macroproyectos"
+
+    @property
+    def etiqueta_hijo(self):
+        """Devuelve 'Maniobra' si es MT o 'Proyecto' si es AP/otro."""
+        return "Maniobra" if self.es_mt else "Proyecto"
+
+    @property
+    def etiqueta_hijo_plural(self):
+        return "Maniobras" if self.es_mt else "Proyectos"
+
     def __str__(self):
         return self.nombre
 
@@ -975,6 +1001,32 @@ class Proyecto(models.Model):
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
+
+    @property
+    def es_mt(self):
+        return self.tipo == self.Tipos.MT
+
+    @property
+    def es_ap(self):
+        return self.tipo in (self.Tipos.AP, self.Tipos.AP_BARRIO, self.Tipos.AP_PARQUE)
+
+    @property
+    def etiqueta(self):
+        """Devuelve 'Maniobra' si es MT, o 'Proyecto' si es AP/otro."""
+        return "Maniobra" if self.es_mt else "Proyecto"
+
+    @property
+    def etiqueta_plural(self):
+        return "Maniobras" if self.es_mt else "Proyectos"
+
+    @property
+    def etiqueta_padre(self):
+        """Devuelve 'Circuito' si es MT, o 'Macroproyecto' si es AP/otro."""
+        return "Circuito" if self.es_mt else "Macroproyecto"
+
+    @property
+    def etiqueta_padre_plural(self):
+        return "Circuitos" if self.es_mt else "Macroproyectos"
 
     def __str__(self):
         return self.numero_emcali

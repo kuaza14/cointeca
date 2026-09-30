@@ -71,40 +71,40 @@
             <form id="formFiltroGlobal" method="GET" action="{% url 'vista_global_logistica' %}"
                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-muted/50 p-4 rounded-xl border border-border">
 
-                <!-- 1. Selector de Macroproyecto -->
+                <!-- 1. Selector de Macroproyecto / Circuito -->
                 <div>
                     <label for="selectMacroproyecto" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        1. Macroproyecto
+                        1. Macroproyecto / Circuito
                     </label>
                     <select id="selectMacroproyecto" name="macroproyecto_id"
                             class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">-- Todos los Macroproyectos --</option>
+                        <option value="">-- Todos (Macroproyectos & Circuitos) --</option>
                         {% for m in todos_macroproyectos %}
                             <option value="{{ m.id }}" {% if macro_seleccionado and macro_seleccionado.id == m.id %}selected{% endif %}>
-                                {{ m.nombre }} ({{ m.proyectos.count }} proy.)
+                                {{ m.nombre }} ({{ m.proyectos.count }} {{ m.etiqueta_hijo_plural|lower }})
                             </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- 2. Selector de Proyecto / Consolidado -->
+                <!-- 2. Selector de Proyecto / Maniobra -->
                 <div>
                     <label for="selectProyecto" class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        2. Proyecto / Ámbito
+                        2. Proyecto / Maniobra
                     </label>
                     <select id="selectProyecto" name="proyecto_id"
                             class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="todos" {% if es_consolidado %}selected{% endif %}>
                             {% if macro_seleccionado %}
-                                🌐 Todos los Proyectos de {{ macro_seleccionado.nombre }} (Consolidado)
+                                🌐 Todas las {{ macro_seleccionado.etiqueta_hijo_plural|lower }} de {{ macro_seleccionado.nombre }} (Consolidado)
                             {% else %}
-                                🌐 Todos los Macroproyectos y Proyectos (Global)
+                                🌐 Todos los Macroproyectos, Circuitos y Obras (Global)
                             {% endif %}
                         </option>
                         {% for p in todos_proyectos %}
                             <option value="{{ p.id }}" data-macro="{{ p.macroproyecto_id|default:'' }}"
                                     {% if proyecto_seleccionado and proyecto_seleccionado.id == p.id %}selected{% endif %}>
-                                Proyecto {{ p.numero_emcali }} {% if p.macroproyecto %}({{ p.macroproyecto.nombre }}){% endif %} - {{ p.tipo }}
+                                {{ p.etiqueta }} {{ p.numero_emcali }} {% if p.macroproyecto %}({{ p.macroproyecto.nombre }}){% endif %} - {{ p.tipo }}
                             </option>
                         {% endfor %}
                     </select>

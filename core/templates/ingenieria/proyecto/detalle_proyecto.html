@@ -3,7 +3,7 @@
 {% load static %}
 {% load l10n %}
 
-{% block title %}Formato Poste a Poste - Proyecto {{ proyecto.numero_emcali }}{% endblock %}
+{% block title %}Formato Poste a Poste - {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}{% endblock %}
 
 {% block content %}
 <div class="max-w-[95rem] mx-auto p-4 sm:p-6 space-y-6">
@@ -135,7 +135,7 @@
             <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
                 <span>/</span>
-                <a href="{% url 'lista_macroproyectos' %}" class="hover:underline">Macroproyectos</a>
+                <a href="{% url 'lista_macroproyectos' %}" class="hover:underline">{{ proyecto.etiqueta_padre_plural }}</a>
                 {% if proyecto.macroproyecto %}
                     <span>/</span>
                     <a href="{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}" class="hover:underline font-semibold text-primary">{{ proyecto.macroproyecto.nombre }}</a>
@@ -144,7 +144,7 @@
                 <span class="text-foreground font-medium">{{ proyecto.numero_emcali }}</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3">
-                Proyecto {{ proyecto.numero_emcali }} — Formato Técnico & Liquidación
+                {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }} — Formato Técnico & Liquidación
             </h1>
         </div>
 
@@ -162,11 +162,11 @@
             <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
                class="inline-flex items-center px-4 py-2.5 text-sm font-bold rounded-lg transition border shadow-xs"
                style="background-color: #15803d; color: #ffffff !important; border-color: #166534;">
-                ← Volver a materiales de proyecto
+                ← Volver a materiales de {{ proyecto.etiqueta|lower }}
             </a>
             <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}"
                class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                ← Volver
+                ← Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}
             </a>
         </div>
     </div>
@@ -211,8 +211,14 @@
                             <th class="sticky-col-apoyo-header px-1 py-3 border-r border-gray-700 text-center whitespace-nowrap">N° APOYO</th>
                             <th class="px-4 py-3 border-r border-gray-700 whitespace-nowrap min-w-[170px]">QUIÉN EJECUTA</th>
                             <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap w-28">ESTADO</th>
+                            {% if proyecto.es_mt %}
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[130px]">ESTRUCTURA</th>
+                            <th class="px-2 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px]" title="Cantidad de Retenidas mecánicas (tirantes/riostras del poste)">CANT. RETENIDAS</th>
+                            <th class="px-2 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px]" title="Metros de cable de retenida instalados">METROS RETENIDA</th>
+                            {% else %}
                             <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px]">POT. INST.</th>
                             <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[150px]">CÓDIGO LUM. INST.</th>
+                            {% endif %}
 
                             {% for mat in materiales_columnas %}
                             <th class="px-3 py-3 border-r border-gray-700 text-center min-w-[140px] max-w-[180px] bg-slate-700" title="{{ mat.descripcion }}">
@@ -271,6 +277,34 @@
                                 {% endif %}
                             </td>
 
+                            {% if proyecto.es_mt %}
+                            <!-- Col: Tipo Estructura -->
+                            <td class="px-2.5 py-2.5 text-center border-r border-border text-xs text-foreground font-semibold">
+                                {{ fila.apoyo.tipo_estructura|default:"—" }}
+                            </td>
+
+                            <!-- Col: Cantidad Retenida -->
+                            <td class="px-2 py-2.5 text-center border-r border-border text-xs font-bold text-foreground">
+                                {% if fila.apoyo.cantidad_retenida is not None and fila.apoyo.cantidad_retenida > 0 %}
+                                    <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-extrabold border border-amber-300">
+                                        {{ fila.apoyo.cantidad_retenida|floatformat }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Col: Metros Retenido -->
+                            <td class="px-2 py-2.5 text-center border-r border-border text-xs font-bold text-foreground">
+                                {% if fila.apoyo.metros_retenido is not None and fila.apoyo.metros_retenido > 0 %}
+                                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900 font-extrabold border border-blue-300 font-mono">
+                                        {{ fila.apoyo.metros_retenido|floatformat }}m
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            {% else %}
                             <td class="px-3 py-2.5 text-center border-r border-border align-top">
                                 <div class="flex flex-col gap-1">
                                     {% for luminaria in fila.apoyo.luminarias.all %}
@@ -294,6 +328,7 @@
                                     {% endfor %}
                                 </div>
                             </td>
+                            {% endif %}
 
                             {% for celda in fila.celdas %}
                             <td class="px-2 py-2 text-center border-r border-border font-bold">
@@ -337,8 +372,8 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="{{ materiales_columnas|length|add:7 }}" class="px-4 py-12 text-center text-muted-foreground">
-                                No se han registrado postes ni nodos en este proyecto. Haz clic en <strong>+ Nuevo Nodo / Poste</strong> para comenzar.
+                            <td colspan="{% if proyecto.es_mt %}{{ materiales_columnas|length|add:8 }}{% else %}{{ materiales_columnas|length|add:7 }}{% endif %}" class="px-4 py-12 text-center text-muted-foreground">
+                                No se han registrado postes ni nodos en {{ proyecto.etiqueta|lower }}. Haz clic en <strong>+ Nuevo Nodo / Poste</strong> para comenzar.
                             </td>
                         </tr>
                         {% endfor %}
@@ -353,8 +388,8 @@
                             <td class="sticky-col-apoyo-footer px-1 py-3 text-center text-xs text-slate-400 font-bold border-r border-slate-700">
                                 —
                             </td>
-                            <td colspan="4" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
-                                TOTAL MATERIALES PROYECTO:
+                            <td colspan="{% if proyecto.es_mt %}5{% else %}4{% endif %}" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
+                                TOTAL MATERIALES {{ proyecto.etiqueta|upper }}:
                             </td>
                             {% for tot in fila_totales %}
                             <td class="px-2 py-3 text-center border-r border-slate-700">
@@ -474,7 +509,7 @@
                             </th>
                             {% empty %}
                             <th class="px-4 py-6 text-center text-gray-300 italic font-normal">
-                                (No se ha calculado mano de obra para este proyecto. Presiona "⚡ Generar Mano de Obra Automática" arriba).
+                                (No se ha calculado mano de obra para {{ proyecto.etiqueta|lower }}. Presiona "⚡ Generar Mano de Obra Automática" arriba).
                             </th>
                             {% endfor %}
 
@@ -566,7 +601,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="{{ mo_columnas|length|add:3 }}" class="px-4 py-12 text-center text-muted-foreground">
-                                No hay actividades de mano de obra generadas. Presiona <strong>⚡ Generar Mano de Obra Automática</strong> para liquidar el proyecto.
+                                No hay actividades de mano de obra generadas. Presiona <strong>⚡ Generar Mano de Obra Automática</strong> para liquidar {{ proyecto.etiqueta|lower }}.
                             </td>
                         </tr>
                         {% endfor %}
@@ -686,7 +721,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="7" class="px-4 py-10 text-center text-muted-foreground italic">
-                                Aún no se han generado actividades para este proyecto. Ve a la pestaña <strong>2. Liquidación de Mano de Obra</strong> y presiona <em>"⚡ Generar Mano de Obra Automática"</em>.
+                                Aún no se han generado actividades para {{ proyecto.etiqueta|lower }}. Ve a la pestaña <strong>2. Liquidación de Mano de Obra</strong> y presiona <em>"⚡ Generar Mano de Obra Automática"</em>.
                             </td>
                         </tr>
                         {% endfor %}
@@ -844,7 +879,7 @@
                     </div>
 
                     <!-- FILA 2: ESPECIFICACIONES & ESTADO -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 {% if proyecto.es_mt %}md:grid-cols-5{% else %}md:grid-cols-4{% endif %} gap-3">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_brazo">
                                 Brazo Instalado (m)
@@ -869,6 +904,7 @@
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
 
+                        {% if proyecto.es_mt %}
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_tipo_estructura">
                                 Tipo de Estructura
@@ -876,6 +912,9 @@
                             <input id="modalApoyo_tipo_estructura" type="text" name="tipo_estructura" placeholder="Ej: Concreto 12m, Metálico..." autocomplete="off"
                                    class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
                         </div>
+                        {% else %}
+                        <input type="hidden" id="modalApoyo_tipo_estructura" name="tipo_estructura" value="">
+                        {% endif %}
 
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_estado">
@@ -889,7 +928,8 @@
                         </div>
                     </div>
 
-                    <!-- FILA 3: RETENIDAS & OBSERVACIONES -->
+                    {% if proyecto.es_mt %}
+                    <!-- FILA 3: RETENIDAS & OBSERVACIONES (SOLO EN MEDIA TENSIÓN) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_cantidad_retenida">
@@ -935,6 +975,18 @@
                                       class="w-full border border-border rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground"></textarea>
                         </div>
                     </div>
+                    {% else %}
+                    <!-- FILA 3: OBSERVACIONES (ALUMBRADO PÚBLICO - SIN RETENIDAS) -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1" for="modalApoyo_observacion">
+                            Observaciones / Notas Técnicas
+                        </label>
+                        <textarea id="modalApoyo_observacion" name="observacion" rows="2" placeholder="Ej: Zona rocosa, autorización..."
+                                  class="w-full border border-border rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground"></textarea>
+                        <input type="hidden" id="modalApoyo_cantidad_retenida" name="cantidad_retenida" value="0">
+                        <input type="hidden" id="modalApoyo_metros_retenido" name="metros_retenido" value="0">
+                    </div>
+                    {% endif %}
 
                     <!-- LUMINARIAS -->
                     <div class="border-t border-border pt-4">
@@ -1329,12 +1381,16 @@ function abrirModalNuevoApoyo() {
     document.getElementById('modalApoyo_fecha').value = "{% now 'Y-m-d' %}";
     document.getElementById('modalApoyo_tipo_instalacion').value = '';
     document.getElementById('modalApoyo_direccion').value = '';
-    document.getElementById('modalApoyo_tipo_estructura').value = '';
+    const elTipoEst = document.getElementById('modalApoyo_tipo_estructura');
+    if (elTipoEst) elTipoEst.value = '';
     document.getElementById('modalApoyo_brazo').value = '2';
     document.getElementById('modalApoyo_estado').value = 'Pendiente';
-    document.getElementById('modalApoyo_cantidad_retenida').value = '';
-    document.getElementById('modalApoyo_altura_retenida').value = '';
-    document.getElementById('modalApoyo_metros_retenido').value = '';
+    const elCantRet = document.getElementById('modalApoyo_cantidad_retenida');
+    if (elCantRet) elCantRet.value = '';
+    const elAltRet = document.getElementById('modalApoyo_altura_retenida');
+    if (elAltRet) elAltRet.value = '';
+    const elMetRet = document.getElementById('modalApoyo_metros_retenido');
+    if (elMetRet) elMetRet.value = '';
     document.getElementById('modalApoyo_observacion').value = '';
     const infoRetNew = document.getElementById('modalApoyo_retenida_info');
     if (infoRetNew) infoRetNew.innerHTML = 'Cable EAR 3/8" (Ítem 43)';
@@ -1425,11 +1481,14 @@ function abrirModalEditarApoyo(apoyoId) {
     document.getElementById('modalApoyo_fecha').value = data.fecha || '';
     document.getElementById('modalApoyo_tipo_instalacion').value = data.tipo_instalacion || '';
     document.getElementById('modalApoyo_direccion').value = data.direccion || '';
-    document.getElementById('modalApoyo_tipo_estructura').value = data.tipo_estructura || '';
+    const elEditTipoEst = document.getElementById('modalApoyo_tipo_estructura');
+    if (elEditTipoEst) elEditTipoEst.value = data.tipo_estructura || '';
     document.getElementById('modalApoyo_brazo').value = data.brazo || '2';
     document.getElementById('modalApoyo_estado').value = data.estado || 'Pendiente';
-    document.getElementById('modalApoyo_cantidad_retenida').value = data.cantidad_retenida || '';
-    document.getElementById('modalApoyo_metros_retenido').value = data.metros_retenido || '';
+    const elEditCantRet = document.getElementById('modalApoyo_cantidad_retenida');
+    if (elEditCantRet) elEditCantRet.value = data.cantidad_retenida || '';
+    const elEditMetRet = document.getElementById('modalApoyo_metros_retenido');
+    if (elEditMetRet) elEditMetRet.value = data.metros_retenido || '';
     document.getElementById('modalApoyo_observacion').value = data.observacion || '';
 
     // Auto-detectar altura de retenida según cantidad y metros

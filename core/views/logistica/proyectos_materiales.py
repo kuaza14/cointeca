@@ -1096,17 +1096,17 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
             return 0
         return int(v) if v % 1 == 0 else float(v)
 
-    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else "Sin Macroproyecto"
+    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else f"Sin {proyecto.etiqueta_padre}"
     fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
     # ENCABEZADO INSTITUCIONAL
     ws1.merge_cells("A1:J1")
-    ws1["A1"] = f"COINTECA S.A.S. — MATRIZ DE BALANCE Y LIQUIDACIÓN (PROYECTO {proyecto.numero_emcali})"
+    ws1["A1"] = f"COINTECA S.A.S. — MATRIZ DE BALANCE Y LIQUIDACIÓN ({proyecto.etiqueta.upper()} {proyecto.numero_emcali})"
     ws1["A1"].font = font_titulo
     ws1["A1"].alignment = align_left
 
     ws1.merge_cells("A2:J2")
-    ws1["A2"] = f"PROYECTO: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  MACROPROYECTO: {macro_nom}  |  FECHA: {fecha_hoy}"
+    ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
 
@@ -1333,17 +1333,17 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
             return 0
         return int(v) if v % 1 == 0 else float(v)
 
-    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else "Sin Macroproyecto"
+    macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else f"Sin {proyecto.etiqueta_padre}"
     fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
     # ENCABEZADO INSTITUCIONAL
     ws1.merge_cells("A1:D1")
-    ws1["A1"] = f"COINTECA S.A.S. — MATERIALES A DEVOLVER (PROYECTO {proyecto.numero_emcali})"
+    ws1["A1"] = f"COINTECA S.A.S. — MATERIALES A DEVOLVER ({proyecto.etiqueta.upper()} {proyecto.numero_emcali})"
     ws1["A1"].font = font_titulo
     ws1["A1"].alignment = align_left
 
     ws1.merge_cells("A2:D2")
-    ws1["A2"] = f"PROYECTO: {proyecto.numero_emcali}  |  MACROPROYECTO: {macro_nom}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {fecha_hoy}"
+    ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
 

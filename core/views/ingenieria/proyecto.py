@@ -105,7 +105,7 @@ def crear_macroproyecto(request):
             descripcion=descripcion,
             estado=estado if estado in Macroproyecto.Estados.values else Macroproyecto.Estados.PLANEACION
         )
-        messages.success(request, f"Macroproyecto '{macro.nombre}' creado exitosamente.")
+        messages.success(request, f"{macro.etiqueta} '{macro.nombre}' creado exitosamente.")
         return redirect("lista_macroproyectos")
     return redirect("lista_macroproyectos")
 
@@ -121,11 +121,11 @@ def editar_macroproyecto(request, id):
         estado = request.POST.get("estado", macro.estado).strip()
 
         if not nombre:
-            messages.error(request, "El nombre del macroproyecto es obligatorio.")
+            messages.error(request, f"El nombre del {macro.etiqueta.lower()} es obligatorio.")
             return redirect("lista_macroproyectos")
 
         if Macroproyecto.objects.filter(nombre__iexact=nombre).exclude(id=macro.id).exists():
-            messages.error(request, f"Ya existe otro macroproyecto con el nombre '{nombre}'.")
+            messages.error(request, f"Ya existe otro {macro.etiqueta.lower()} con el nombre '{nombre}'.")
             return redirect("lista_macroproyectos")
 
         macro.nombre = nombre
@@ -136,7 +136,7 @@ def editar_macroproyecto(request, id):
             macro.estado = estado
         macro.save()
 
-        messages.success(request, f"Macroproyecto '{macro.nombre}' actualizado correctamente.")
+        messages.success(request, f"{macro.etiqueta} '{macro.nombre}' actualizado correctamente.")
         return redirect("lista_macroproyectos")
     return redirect("lista_macroproyectos")
 
@@ -145,13 +145,15 @@ def editar_macroproyecto(request, id):
 def eliminar_macroproyecto(request, id):
     macro = Macroproyecto.objects.filter(id=id).first()
     if not macro:
-        messages.warning(request, "El macroproyecto que intentas eliminar ya no existe.")
+        messages.warning(request, "El registro que intentas eliminar ya no existe.")
         return redirect("lista_macroproyectos")
 
     if request.method == "POST":
         nombre = macro.nombre
+        etiqueta = macro.etiqueta
+        etiqueta_hijo_pl = macro.etiqueta_hijo_plural.lower()
         macro.delete()
-        messages.success(request, f"Macroproyecto '{nombre}' y todos sus proyectos asociados han sido eliminados.")
+        messages.success(request, f"{etiqueta} '{nombre}' y todos sus {etiqueta_hijo_pl} asociados han sido eliminados.")
     return redirect("lista_macroproyectos")
 
 # ==============================================================================
@@ -241,7 +243,7 @@ def crear_proyecto(request, macroproyecto_id=None):
             tipo=tipo,
             estado=estado if estado in Proyecto.Estados.values else Proyecto.Estados.PLANEACION
         )
-        messages.success(request, f"Proyecto '{proyecto.numero_emcali}' creado exitosamente.")
+        messages.success(request, f"{proyecto.etiqueta} '{proyecto.numero_emcali}' creado exitosamente.")
         return _volver()
 
     if macroproyecto_id:
@@ -269,11 +271,11 @@ def editar_proyecto(request, id):
             return redirect("lista_proyectos")
 
         if not numero_emcali or not tipo:
-            messages.error(request, "El número de proyecto y el tipo de red son obligatorios.")
+            messages.error(request, f"El número de {proyecto.etiqueta.lower()} y el tipo de red son obligatorios.")
             return _volver()
 
         if Proyecto.objects.filter(numero_emcali__iexact=numero_emcali).exclude(id=proyecto.id).exists():
-            messages.error(request, f"Ya existe otro proyecto registrado con el número '{numero_emcali}'.")
+            messages.error(request, f"Ya existe otro registro con el número '{numero_emcali}'.")
             return _volver()
 
         proyecto.numero_emcali = numero_emcali
@@ -282,7 +284,7 @@ def editar_proyecto(request, id):
             proyecto.estado = estado
         proyecto.save()
 
-        messages.success(request, f"Proyecto '{proyecto.numero_emcali}' actualizado correctamente.")
+        messages.success(request, f"{proyecto.etiqueta} '{proyecto.numero_emcali}' actualizado correctamente.")
         return _volver()
 
     if proyecto.macroproyecto:
@@ -294,14 +296,15 @@ def editar_proyecto(request, id):
 def eliminar_proyecto(request, id):
     proyecto = Proyecto.objects.filter(id=id).first()
     if not proyecto:
-        messages.warning(request, "El proyecto que intentas eliminar ya no existe.")
+        messages.warning(request, "El registro que intentas eliminar ya no existe.")
         return redirect("lista_proyectos")
 
     macro_id = proyecto.macroproyecto_id
+    etiqueta = proyecto.etiqueta
     if request.method == "POST":
         nombre = proyecto.numero_emcali
         proyecto.delete()
-        messages.success(request, f"Proyecto '{nombre}' y todos sus apoyos/materiales han sido eliminados correctamente.")
+        messages.success(request, f"{etiqueta} '{nombre}' y todos sus apoyos/materiales han sido eliminados correctamente.")
     
     if macro_id:
         return redirect("proyectos_por_macroproyecto", macroproyecto_id=macro_id)
@@ -1589,7 +1592,7 @@ def exportar_liquidacion_proyecto_excel(request, proyecto_id):
         bottom=Side(style='thin', color='D1D5DB')
     )
 
-    ws_resumen.append(["", "MICROPROYECTO", proyecto.numero_emcali, "", "FECHA", timezone.now().strftime("%d/%m/%Y")])
+    ws_resumen.append(["", proyecto.etiqueta.upper(), proyecto.numero_emcali, "", "FECHA", timezone.now().strftime("%d/%m/%Y")])
     ws_resumen.append([])
     ws_resumen.append(["ITEM", "DESCRIPCIÓN DE ACTIVIDAD / SERVICIO", "CÓDIGO", "UND", "CANTIDAD", "VALOR UNITARIO", "VALOR TOTAL"])
 
@@ -1725,7 +1728,7 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
     # 1. BANNER PRINCIPAL
     ws_macro.merge_cells("A1:G1")
     cell_t = ws_macro["A1"]
-    cell_t.value = "COINTECA S.A.S. — LIQUIDACIÓN CONSOLIDADA DE MACROPROYECTO"
+    cell_t.value = f"COINTECA S.A.S. — LIQUIDACIÓN CONSOLIDADA DE {macro.etiqueta.upper()}"
     cell_t.font = font_titulo
     cell_t.fill = fill_navy
     cell_t.alignment = Alignment(horizontal="center", vertical="center")
@@ -1733,9 +1736,9 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
 
     # Metadatos del macroproyecto
     datos_meta = [
-        ("MACROPROYECTO:", macro.nombre.upper(), "ESTADO:", macro.estado),
+        (f"{macro.etiqueta.upper()}:", macro.nombre.upper(), "ESTADO:", macro.estado),
         ("MANIOBRA EMCALI:", macro.numero_maniobra_emcali or "N/A", "FECHA EMISIÓN:", timezone.now().strftime("%d/%m/%Y")),
-        ("MANIOBRA COINTECA:", macro.numero_maniobra_cointeca or "N/A", "TOTAL PROYECTOS:", f"{proyectos.count()} proyectos")
+        ("MANIOBRA COINTECA:", macro.numero_maniobra_cointeca or "N/A", f"TOTAL {macro.etiqueta_hijo_plural.upper()}:", f"{proyectos.count()} {macro.etiqueta_hijo_plural.lower()}")
     ]
 
     r_m = 3
@@ -1748,10 +1751,10 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
 
     # TABLA 1: RESUMEN POR PROYECTO
     r_m += 1
-    ws_macro.cell(row=r_m, column=1, value="1. CONSOLIDADO POR PROYECTO / CIRCUITO").font = font_subtitulo
+    ws_macro.cell(row=r_m, column=1, value=f"1. CONSOLIDADO POR {macro.etiqueta_hijo.upper()}").font = font_subtitulo
     r_m += 1
 
-    headers_proy = ["ITEM", "PROYECTO EMCALI", "TIPO DE RED", "ESTADO", "POSTES", "LUMINARIAS INST.", "TOTAL MANO DE OBRA ($)"]
+    headers_proy = ["ITEM", f"{macro.etiqueta_hijo.upper()} EMCALI", "TIPO DE RED", "ESTADO", "POSTES", "LUMINARIAS INST.", "TOTAL MANO DE OBRA ($)"]
     ws_macro.append(headers_proy)
     r_header_proy = ws_macro.max_row
     ws_macro.row_dimensions[r_header_proy].height = 24
@@ -1818,7 +1821,7 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
                 cell.number_format = '"$"#,##0'
 
     # Fila de totales de proyectos
-    ws_macro.append(["", "TOTAL MACROPROYECTO", "", "", tot_postes_macro, tot_lums_macro, float(tot_dinero_macro)])
+    ws_macro.append(["", f"TOTAL {macro.etiqueta.upper()}", "", "", tot_postes_macro, tot_lums_macro, float(tot_dinero_macro)])
     r_tot_p = ws_macro.max_row
     ws_macro.row_dimensions[r_tot_p].height = 22
     for c_i in range(1, 8):
@@ -1832,10 +1835,10 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
             cell.alignment = Alignment(horizontal="right")
             cell.number_format = '"$"#,##0'
 
-    # TABLA 2: CONSOLIDADO MAESTRO DE ACTIVIDADES (TODO EL MACROPROYECTO)
+    # TABLA 2: CONSOLIDADO MAESTRO DE ACTIVIDADES (TODO EL MACROPROYECTO / CIRCUITO)
     ws_macro.append([])
     ws_macro.append([])
-    ws_macro.cell(row=ws_macro.max_row, column=1, value="2. CONSOLIDADO GLOBAL DE ACTIVIDADES DE MANO DE OBRA (TODA LA OBRA)").font = font_subtitulo
+    ws_macro.cell(row=ws_macro.max_row, column=1, value=f"2. CONSOLIDADO GLOBAL DE ACTIVIDADES DE MANO DE OBRA ({macro.etiqueta.upper()} COMPLETO)").font = font_subtitulo
 
     headers_mo = ["ITEM", "CÓDIGO", "DESCRIPCIÓN DE LA ACTIVIDAD / SERVICIO", "UND", "CANTIDAD TOTAL", "VALOR UNITARIO ($)", "VALOR TOTAL ($)"]
     ws_macro.append(headers_mo)
@@ -1957,7 +1960,7 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
                     cell.alignment = Alignment(horizontal="center")
 
         # Fila total del proyecto
-        fila_tot_proy = ["", "TOTAL PROYECTO", "", "", "", float(pdata["dinero_total"])]
+        fila_tot_proy = ["", f"TOTAL {proy.etiqueta.upper()}", "", "", "", float(pdata["dinero_total"])]
         for _ in apoyos_proy:
             fila_tot_proy.append("")
         ws_det.append(fila_tot_proy)
@@ -1983,7 +1986,7 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
     wb.save(output)
     output.seek(0)
 
-    nombre_archivo = f"Liquidacion_Macroproyecto_{macro.nombre.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d')}.xlsx"
+    nombre_archivo = f"Liquidacion_{macro.etiqueta}_{macro.nombre.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d')}.xlsx"
     response = HttpResponse(
         output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

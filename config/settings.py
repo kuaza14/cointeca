@@ -159,16 +159,17 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'https://*.onrender.com',
+    'https://cointeca.onrender.com',
+]
 csrf_origins = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '')
 if csrf_origins:
-    CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_origins.split(',') if o.strip()]
-else:
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:8001',
-        'http://127.0.0.1:8001',
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-    ]
+    CSRF_TRUSTED_ORIGINS.extend([o.strip() for o in csrf_origins.split(',') if o.strip()])
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 

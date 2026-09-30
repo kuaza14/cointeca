@@ -14,4 +14,7 @@ python manage.py migrate --noinput
 echo ">>> Configurando cuentas y permisos de usuarios iniciales..."
 python manage.py crear_usuarios_iniciales
 
+echo ">>> Verificando y cargando catálogo limpio de materiales, mano de obra y empleados..."
+python manage.py cargar_datos_iniciales
+
 echo ">>> ¡Construcción finalizada con éxito!"

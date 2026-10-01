@@ -39,8 +39,7 @@ def macroproyectos_logistica(request):
     if query:
         macroproyectos = macroproyectos.filter(
             Q(nombre__icontains=query) |
-            Q(numero_maniobra_emcali__icontains=query) |
-            Q(numero_maniobra_cointeca__icontains=query) |
+            Q(tipo__icontains=query) |
             Q(descripcion__icontains=query) |
             Q(estado__icontains=query)
         )

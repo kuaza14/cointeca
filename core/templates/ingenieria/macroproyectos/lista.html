@@ -97,8 +97,6 @@
         <thead>
             <tr>
                 <th scope="col">Macroproyecto / Circuito</th>
-                <th scope="col">Proyecto / Maniobra EMCALI</th>
-                <th scope="col">Proyecto / Maniobra COINTECA</th>
                 <th scope="col">Estado</th>
                 <th scope="col" class="text-center">Postes / Apoyos</th>
                 <th scope="col">Fecha creación</th>
@@ -126,36 +124,6 @@
                                 </p>
                             {% endif %}
                         </div>
-                    </td>
-
-                    <td class="whitespace-nowrap">
-                        {% if item.macro.numero_maniobra_emcali %}
-                            <div class="flex items-center gap-1.5">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold {% if item.macro.es_mt %}bg-purple-50 text-purple-700 border border-purple-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}" title="{{ item.macro.etiqueta_codigo_emcali }}">
-                                    {{ item.macro.numero_maniobra_emcali }}
-                                </span>
-                                <span class="text-[10px] font-semibold {% if item.macro.es_mt %}text-purple-600{% else %}text-blue-600{% endif %}">
-                                    ({{ item.macro.etiqueta_codigo_emcali }})
-                                </span>
-                            </div>
-                        {% else %}
-                            <span class="text-muted-foreground text-xs italic">-</span>
-                        {% endif %}
-                    </td>
-
-                    <td class="whitespace-nowrap">
-                        {% if item.macro.numero_maniobra_cointeca %}
-                            <div class="flex items-center gap-1.5">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300" title="{{ item.macro.etiqueta_codigo_cointeca }}">
-                                    {{ item.macro.numero_maniobra_cointeca }}
-                                </span>
-                                <span class="text-[10px] font-semibold text-slate-500">
-                                    ({{ item.macro.etiqueta_codigo_cointeca }})
-                                </span>
-                            </div>
-                        {% else %}
-                            <span class="text-muted-foreground text-xs italic">-</span>
-                        {% endif %}
                     </td>
 
                     <td>
@@ -235,7 +203,7 @@
                 </tr>
             {% empty %}
                 <tr id="filaVaciaServidor">
-                    <td colspan="7" class="estado-vacio py-10 text-center text-muted-foreground">
+                    <td colspan="5" class="estado-vacio py-10 text-center text-muted-foreground">
                         <div>
                             {% if query %}
                                 <p class="font-semibold text-foreground">No se encontraron registros que coincidan con «{{ query }}»</p>
@@ -251,7 +219,7 @@
                 </tr>
             {% endfor %}
             <tr id="sinResultadosLive" class="hidden">
-                <td colspan="7" class="estado-vacio py-8 text-center text-muted-foreground">
+                <td colspan="5" class="estado-vacio py-8 text-center text-muted-foreground">
                     No se encontraron registros con ese criterio de búsqueda.
                 </td>
             </tr>

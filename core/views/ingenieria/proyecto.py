@@ -136,6 +136,13 @@ def editar_macroproyecto(request, id):
 
         macro.nombre = nombre
         if tipo in Macroproyecto.Tipos.values:
+            if tipo != macro.tipo:
+                if tipo == Macroproyecto.Tipos.MT and macro.proyectos.exclude(tipo=Proyecto.Tipos.MT).exists():
+                    messages.error(request, f"No se puede cambiar a Circuito (MT) porque ya contiene proyectos de Alumbrado Público (AP).")
+                    return redirect("lista_macroproyectos")
+                elif tipo == Macroproyecto.Tipos.AP and macro.proyectos.filter(tipo=Proyecto.Tipos.MT).exists():
+                    messages.error(request, f"No se puede cambiar a Macroproyecto (AP) porque ya contiene maniobras de Media Tensión (MT).")
+                    return redirect("lista_macroproyectos")
             macro.tipo = tipo
         macro.numero_maniobra_emcali = numero_maniobra_emcali
         macro.numero_maniobra_cointeca = numero_maniobra_cointeca
@@ -241,6 +248,21 @@ def crear_proyecto(request, macroproyecto_id=None):
             messages.error(request, "El número y el tipo de red son obligatorios.")
             return _volver()
 
+        # Validar coherencia entre Macroproyecto (AP) y Circuito (MT)
+        if macroproyecto:
+            if macroproyecto.es_mt and tipo != Proyecto.Tipos.MT:
+                messages.error(
+                    request,
+                    f"El contenedor '{macroproyecto.nombre}' es un Circuito de Media Tensión. Solo se pueden crear maniobras de tipo Media Tensión (MT)."
+                )
+                return _volver()
+            elif macroproyecto.es_ap and tipo == Proyecto.Tipos.MT:
+                messages.error(
+                    request,
+                    f"El contenedor '{macroproyecto.nombre}' es un Macroproyecto de Alumbrado Público. Solo se pueden crear proyectos de Alumbrado Público (AP), no maniobras de Media Tensión."
+                )
+                return _volver()
+
         # Validar si ya existe en el MISMO Macroproyecto o Circuito
         filtro_existente = Proyecto.objects.filter(
             numero_emcali__iexact=numero_emcali,
@@ -291,6 +313,21 @@ def editar_proyecto(request, id):
         if not numero_emcali or not tipo:
             messages.error(request, f"El número de {proyecto.etiqueta.lower()} y el tipo de red son obligatorios.")
             return _volver()
+
+        # Validar coherencia entre Macroproyecto (AP) y Circuito (MT)
+        if proyecto.macroproyecto:
+            if proyecto.macroproyecto.es_mt and tipo != Proyecto.Tipos.MT:
+                messages.error(
+                    request,
+                    f"El contenedor '{proyecto.macroproyecto.nombre}' es un Circuito de Media Tensión. Solo se permiten maniobras de tipo Media Tensión (MT)."
+                )
+                return _volver()
+            elif proyecto.macroproyecto.es_ap and tipo == Proyecto.Tipos.MT:
+                messages.error(
+                    request,
+                    f"El contenedor '{proyecto.macroproyecto.nombre}' es un Macroproyecto de Alumbrado Público. Solo se permiten proyectos de Alumbrado Público (AP), no maniobras de Media Tensión."
+                )
+                return _volver()
 
         # Validar si ya existe en el MISMO Macroproyecto o Circuito
         filtro_existente = Proyecto.objects.filter(

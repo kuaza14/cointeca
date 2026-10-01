@@ -284,7 +284,7 @@
         <div class="flex items-center justify-between border-b border-blue-800 px-6 py-4"
              style="background-color: #1e3a8a !important; color: #ffffff !important;">
             <h2 id="tituloModalNuevoProyecto" class="text-base font-bold text-white flex items-center gap-2" style="color: #ffffff !important;">
-                <span>📁</span> {% if macroproyecto %}Nueva {{ macroproyecto.etiqueta_hijo }}{% else %}Nuevo Proyecto / Maniobra{% endif %}
+                <span>📁</span> <span id="textoTituloModalNuevoLogistica">{% if macroproyecto %}Nueva {{ macroproyecto.etiqueta_hijo }}{% else %}Nuevo Proyecto / Maniobra{% endif %}</span>
             </h2>
             <button type="button" id="cerrarModalNuevo"
                     class="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-blue-800 hover:text-white"
@@ -299,6 +299,9 @@
         <form method="POST" action="{% if macroproyecto %}{% url 'crear_proyecto_en_macroproyecto' macroproyecto.id %}{% else %}{% url 'crear_proyecto' %}{% endif %}" style="background-color: #ffffff !important;">
             {% csrf_token %}
             <input type="hidden" name="origen" value="logistica">
+            {% if macroproyecto %}
+                <input type="hidden" name="macroproyecto_id" value="{{ macroproyecto.id }}">
+            {% endif %}
 
             <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 {% if macroproyecto %}
@@ -311,19 +314,19 @@
                         <select id="macroproyecto_id" name="macroproyecto_id"
                                 style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                                 class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
-                            <option value="">(Sin asignar o seleccionar después)</option>
+                            <option value="">(Seleccione Macroproyecto o Circuito)</option>
                             {% for m in macroproyectos %}
-                                <option value="{{ m.id }}">{{ m.nombre }}</option>
+                                <option value="{{ m.id }}" data-es-mt="{% if m.es_mt %}1{% else %}0{% endif %}" data-tipo="{{ m.tipo }}" data-etiqueta="{{ m.etiqueta }}" data-etiqueta-hijo="{{ m.etiqueta_hijo }}">{{ m.nombre }} ({{ m.etiqueta }})</option>
                             {% endfor %}
                         </select>
                     </div>
                 {% endif %}
 
                 <div>
-                    <label for="numero_emcali" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %} <span class="text-red-600">*</span></label>
+                    <label for="numero_emcali" id="lblNumeroEmcaliLogistica" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número o Código de {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %} <span class="text-red-600">*</span></label>
                     <input type="text" id="numero_emcali" name="numero_emcali" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 9901, AP-CANCHA-01, etc.">
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="{% if macroproyecto and macroproyecto.es_mt %}Ej: 001, MAN-01, etc.{% else %}Ej: 9901, AP-CANCHA-01, etc.{% endif %}">
                 </div>
 
                 <div>
@@ -331,13 +334,31 @@
                     <select id="tipo" name="tipo" required
                             style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                             class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
-                        <option value="">Seleccione…</option>
-                        <option value="BT">Baja Tensión (BT)</option>
-                        <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
-                        <option value="AP_PARQUE">Alumbrado Público Parque / Cancha (AP)</option>
-                        <option value="AP">Alumbrado Público (General)</option>
-                        <option value="MT">Media Tensión (MT)</option>
+                        {% if macroproyecto %}
+                            {% if macroproyecto.es_mt %}
+                                <option value="MT" selected>Media Tensión (MT)</option>
+                            {% else %}
+                                <option value="">Seleccione…</option>
+                                <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
+                                <option value="AP_PARQUE">Alumbrado Público Parque / Cancha (AP)</option>
+                                <option value="AP">Alumbrado Público (General)</option>
+                                <option value="BT">Baja Tensión (BT)</option>
+                            {% endif %}
+                        {% else %}
+                            <option value="">(Primero seleccione Macroproyecto o Circuito)</option>
+                            <option value="BT">Baja Tensión (BT)</option>
+                            <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
+                            <option value="AP_PARQUE">Alumbrado Público Parque / Cancha (AP)</option>
+                            <option value="AP">Alumbrado Público (General)</option>
+                            <option value="MT">Media Tensión (MT)</option>
+                        {% endif %}
                     </select>
+                    {% if macroproyecto and macroproyecto.es_mt %}
+                        <p class="text-[11px] text-purple-700 font-semibold mt-1">⚡ En un Circuito solo se pueden registrar maniobras de Media Tensión (MT).</p>
+                    {% elif macroproyecto and macroproyecto.es_ap %}
+                        <p class="text-[11px] text-blue-700 font-semibold mt-1">💡 En un Macroproyecto solo se pueden registrar proyectos de Alumbrado Público (AP).</p>
+                    {% endif %}
+                    <p id="ayudaTipoDinamicoLogistica" class="text-[11px] font-semibold mt-1 hidden"></p>
                 </div>
 
                 <div>
@@ -357,7 +378,7 @@
                 <button type="button" id="cancelarModalNuevo"
                         style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
                         class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
-                <button type="submit"
+                <button type="submit" id="btnSubmitCrearProyectoLogistica"
                         style="background-color: #1d4ed8 !important; color: #ffffff !important;"
                         class="px-5 py-2 hover:bg-blue-800 text-white text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %}</button>
             </div>
@@ -378,11 +399,86 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalNuevo = document.getElementById("modalNuevoProyecto");
     const cerrarModal = document.getElementById("cerrarModalNuevo");
     const cancelarModal = document.getElementById("cancelarModalNuevo");
+    const selectMacroLog = document.getElementById("macroproyecto_id");
+    const selectTipoLog = document.getElementById("tipo");
+    const lblNumeroLog = document.getElementById("lblNumeroEmcaliLogistica");
+    const inputNumeroLog = document.getElementById("numero_emcali");
+    const btnSubmitCrearLog = document.getElementById("btnSubmitCrearProyectoLogistica");
+    const textoTituloModalLog = document.getElementById("textoTituloModalNuevoLogistica");
+    const ayudaTipoLog = document.getElementById("ayudaTipoDinamicoLogistica");
+
+    const OPCIONES_AP_LOG = [
+        { valor: "AP_BARRIO", texto: "Alumbrado Público Barrio (AP)" },
+        { valor: "AP_PARQUE", texto: "Alumbrado Público Parque / Cancha (AP)" },
+        { valor: "AP", texto: "Alumbrado Público (General)" },
+        { valor: "BT", texto: "Baja Tensión (BT)" }
+    ];
+
+    function actualizarOpcionesTipoNuevoLogistica(macroOpt) {
+        if (!selectTipoLog) return;
+        if (!macroOpt || !macroOpt.value) {
+            selectTipoLog.innerHTML = `
+                <option value="">(Primero seleccione Macroproyecto o Circuito)</option>
+                <option value="BT">Baja Tensión (BT)</option>
+                <option value="AP_BARRIO">Alumbrado Público Barrio (AP)</option>
+                <option value="AP_PARQUE">Alumbrado Público Parque / Cancha (AP)</option>
+                <option value="AP">Alumbrado Público (General)</option>
+                <option value="MT">Media Tensión (MT)</option>
+            `;
+            if (lblNumeroLog) lblNumeroLog.innerHTML = 'Número o Código de Proyecto / Maniobra <span class="text-red-600">*</span>';
+            if (inputNumeroLog) inputNumeroLog.placeholder = "Ej: 9901, 001, etc.";
+            if (btnSubmitCrearLog) btnSubmitCrearLog.textContent = "Crear Proyecto / Maniobra";
+            if (textoTituloModalLog) textoTituloModalLog.textContent = "Nuevo Proyecto / Maniobra";
+            if (ayudaTipoLog) { ayudaTipoLog.classList.add("hidden"); ayudaTipoLog.textContent = ""; }
+            return;
+        }
+
+        const esMt = macroOpt.dataset.esMt === "1";
+        const etiquetaHijo = macroOpt.dataset.etiquetaHijo || (esMt ? "Maniobra" : "Proyecto");
+
+        if (esMt) {
+            selectTipoLog.innerHTML = '<option value="MT" selected>Media Tensión (MT)</option>';
+            if (lblNumeroLog) lblNumeroLog.innerHTML = 'Número o Código de ' + etiquetaHijo + ' <span class="text-red-600">*</span>';
+            if (inputNumeroLog) inputNumeroLog.placeholder = "Ej: 001, MAN-01, etc.";
+            if (btnSubmitCrearLog) btnSubmitCrearLog.textContent = "Crear " + etiquetaHijo;
+            if (textoTituloModalLog) textoTituloModalLog.textContent = "Nueva " + etiquetaHijo;
+            if (ayudaTipoLog) {
+                ayudaTipoLog.className = "text-[11px] text-purple-700 font-semibold mt-1";
+                ayudaTipoLog.textContent = "⚡ En un Circuito solo se pueden registrar maniobras de Media Tensión (MT).";
+                ayudaTipoLog.classList.remove("hidden");
+            }
+        } else {
+            let html = '<option value="">Seleccione tipo de AP…</option>';
+            OPCIONES_AP_LOG.forEach(function(op) {
+                html += '<option value="' + op.valor + '">' + op.texto + '</option>';
+            });
+            selectTipoLog.innerHTML = html;
+            if (lblNumeroLog) lblNumeroLog.innerHTML = 'Número o Código de ' + etiquetaHijo + ' <span class="text-red-600">*</span>';
+            if (inputNumeroLog) inputNumeroLog.placeholder = "Ej: 9901, AP-CANCHA-01, etc.";
+            if (btnSubmitCrearLog) btnSubmitCrearLog.textContent = "Crear " + etiquetaHijo;
+            if (textoTituloModalLog) textoTituloModalLog.textContent = "Nuevo " + etiquetaHijo;
+            if (ayudaTipoLog) {
+                ayudaTipoLog.className = "text-[11px] text-blue-700 font-semibold mt-1";
+                ayudaTipoLog.textContent = "💡 En un Macroproyecto solo se pueden registrar proyectos de Alumbrado Público (AP).";
+                ayudaTipoLog.classList.remove("hidden");
+            }
+        }
+    }
+
+    if (selectMacroLog) {
+        selectMacroLog.addEventListener("change", function() {
+            const opt = selectMacroLog.selectedOptions[0];
+            actualizarOpcionesTipoNuevoLogistica(opt);
+        });
+    }
 
     function abrirModal() {
         if (modalNuevo) {
             modalNuevo.classList.remove("hidden");
             modalNuevo.classList.add("flex");
+            if (selectMacroLog && selectMacroLog.value) {
+                actualizarOpcionesTipoNuevoLogistica(selectMacroLog.selectedOptions[0]);
+            }
             const inputNom = document.getElementById("numero_emcali");
             if (inputNom) inputNom.focus();
         }

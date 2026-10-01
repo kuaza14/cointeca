@@ -1038,7 +1038,16 @@ class Proyecto(models.Model):
 
     @property
     def es_ap(self):
-        return self.tipo in (self.Tipos.AP, self.Tipos.AP_BARRIO, self.Tipos.AP_PARQUE)
+        return self.tipo in (self.Tipos.AP, self.Tipos.AP_BARRIO, self.Tipos.AP_PARQUE, self.Tipos.BT)
+
+    def clean(self):
+        super().clean()
+        from django.core.exceptions import ValidationError
+        if self.macroproyecto:
+            if self.macroproyecto.es_mt and self.tipo != self.Tipos.MT:
+                raise ValidationError(f"En el Circuito '{self.macroproyecto.nombre}' solo se pueden registrar maniobras de Media Tensión (MT).")
+            elif self.macroproyecto.es_ap and self.tipo == self.Tipos.MT:
+                raise ValidationError(f"En el Macroproyecto '{self.macroproyecto.nombre}' solo se pueden registrar proyectos de Alumbrado Público (AP).")
 
     @property
     def etiqueta(self):

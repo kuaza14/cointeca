@@ -90,8 +90,8 @@
                 <thead class="bg-muted text-foreground uppercase text-xs font-semibold">
                     <tr>
                         <th class="px-5 py-3.5">Macroproyecto / Circuito</th>
-                        <th class="px-4 py-3.5">Maniobra EMCALI</th>
-                        <th class="px-4 py-3.5">Maniobra COINTECA</th>
+                        <th class="px-4 py-3.5">Proyecto / Maniobra EMCALI</th>
+                        <th class="px-4 py-3.5">Proyecto / Maniobra COINTECA</th>
                         <th class="px-4 py-3.5">Estado</th>
                         <th class="px-4 py-3.5 text-center">Proyectos / Maniobras</th>
                         <th class="px-4 py-3.5 text-center">Entradas Obra</th>
@@ -125,9 +125,14 @@
 
                         <td class="px-4 py-4 whitespace-nowrap">
                             {% if item.macro.numero_maniobra_emcali %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    {{ item.macro.numero_maniobra_emcali }}
-                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold {% if item.macro.es_mt %}bg-purple-50 text-purple-700 border border-purple-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+                                        {{ item.macro.numero_maniobra_emcali }}
+                                    </span>
+                                    <span class="text-[10px] font-semibold {% if item.macro.es_mt %}text-purple-600{% else %}text-blue-600{% endif %}">
+                                        ({{ item.macro.etiqueta_codigo_emcali }})
+                                    </span>
+                                </div>
                             {% else %}
                                 <span class="text-muted-foreground text-xs italic">-</span>
                             {% endif %}
@@ -135,9 +140,14 @@
 
                         <td class="px-4 py-4 whitespace-nowrap">
                             {% if item.macro.numero_maniobra_cointeca %}
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-                                    {{ item.macro.numero_maniobra_cointeca }}
-                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300">
+                                        {{ item.macro.numero_maniobra_cointeca }}
+                                    </span>
+                                    <span class="text-[10px] font-semibold text-slate-500">
+                                        ({{ item.macro.etiqueta_codigo_cointeca }})
+                                    </span>
+                                </div>
                             {% else %}
                                 <span class="text-muted-foreground text-xs italic">-</span>
                             {% endif %}

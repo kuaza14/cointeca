@@ -98,8 +98,13 @@ def crear_macroproyecto(request):
             messages.error(request, f"Ya existe un macroproyecto registrado con el nombre '{nombre}'.")
             return redirect("lista_macroproyectos")
 
+        tipo = request.POST.get("tipo", Macroproyecto.Tipos.AP).strip()
+        if tipo not in Macroproyecto.Tipos.values:
+            tipo = Macroproyecto.Tipos.AP
+
         macro = Macroproyecto.objects.create(
             nombre=nombre,
+            tipo=tipo,
             numero_maniobra_emcali=numero_maniobra_emcali,
             numero_maniobra_cointeca=numero_maniobra_cointeca,
             descripcion=descripcion,
@@ -115,6 +120,7 @@ def editar_macroproyecto(request, id):
 
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
+        tipo = request.POST.get("tipo", macro.tipo).strip()
         numero_maniobra_emcali = request.POST.get("numero_maniobra_emcali", "").strip()
         numero_maniobra_cointeca = request.POST.get("numero_maniobra_cointeca", "").strip()
         descripcion = request.POST.get("descripcion", "").strip()
@@ -129,6 +135,8 @@ def editar_macroproyecto(request, id):
             return redirect("lista_macroproyectos")
 
         macro.nombre = nombre
+        if tipo in Macroproyecto.Tipos.values:
+            macro.tipo = tipo
         macro.numero_maniobra_emcali = numero_maniobra_emcali
         macro.numero_maniobra_cointeca = numero_maniobra_cointeca
         macro.descripcion = descripcion
@@ -1737,8 +1745,8 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
     # Metadatos del macroproyecto
     datos_meta = [
         (f"{macro.etiqueta.upper()}:", macro.nombre.upper(), "ESTADO:", macro.estado),
-        ("MANIOBRA EMCALI:", macro.numero_maniobra_emcali or "N/A", "FECHA EMISIÓN:", timezone.now().strftime("%d/%m/%Y")),
-        ("MANIOBRA COINTECA:", macro.numero_maniobra_cointeca or "N/A", f"TOTAL {macro.etiqueta_hijo_plural.upper()}:", f"{proyectos.count()} {macro.etiqueta_hijo_plural.lower()}")
+        (f"{macro.etiqueta_codigo_emcali.upper()}:", macro.numero_maniobra_emcali or "N/A", "FECHA EMISIÓN:", timezone.now().strftime("%d/%m/%Y")),
+        (f"{macro.etiqueta_codigo_cointeca.upper()}:", macro.numero_maniobra_cointeca or "N/A", f"TOTAL {macro.etiqueta_hijo_plural.upper()}:", f"{proyectos.count()} {macro.etiqueta_hijo_plural.lower()}")
     ]
 
     r_m = 3

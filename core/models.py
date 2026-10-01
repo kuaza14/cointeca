@@ -930,9 +930,14 @@ class Macroproyecto(models.Model):
         FINALIZADO = "Finalizado", "Finalizado"
         CANCELADO = "Cancelado", "Cancelado"
 
+    class Tipos(models.TextChoices):
+        AP = "AP", "Alumbrado Público"
+        MT = "MT", "Media Tensión"
+
     nombre = models.CharField(max_length=150, unique=True, verbose_name="Nombre del Macroproyecto")
-    numero_maniobra_emcali = models.CharField(max_length=100, blank=True, default="", verbose_name="Número Maniobra EMCALI")
-    numero_maniobra_cointeca = models.CharField(max_length=100, blank=True, default="", verbose_name="Número Maniobra COINTECA")
+    tipo = models.CharField(max_length=10, choices=Tipos.choices, default=Tipos.AP, verbose_name="Tipo de Red")
+    numero_maniobra_emcali = models.CharField(max_length=100, blank=True, default="", verbose_name="Número Maniobra / Proyecto EMCALI")
+    numero_maniobra_cointeca = models.CharField(max_length=100, blank=True, default="", verbose_name="Número Maniobra / Proyecto COINTECA")
     descripcion = models.TextField(blank=True, default="", verbose_name="Descripción")
     estado = models.CharField(max_length=30, choices=Estados.choices, default=Estados.PLANEACION)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -945,19 +950,33 @@ class Macroproyecto(models.Model):
     @property
     def es_mt(self):
         """Determina si este macroproyecto corresponde a Media Tensión (Circuito)."""
-        if self.proyectos.filter(tipo="MT").exists():
-            return True
+        if self.tipo:
+            return self.tipo == self.Tipos.MT
         nom = (self.nombre or "").lower()
         return "circuito" in nom or "mt" in nom.split()
 
     @property
+    def es_ap(self):
+        return not self.es_mt
+
+    @property
     def etiqueta(self):
-        """Devuelve 'Circuito' si es MT o 'Macroproyecto' si es AP/otro."""
+        """Devuelve 'Circuito' si es MT o 'Macroproyecto' si es AP."""
         return "Circuito" if self.es_mt else "Macroproyecto"
 
     @property
     def etiqueta_plural(self):
         return "Circuitos" if self.es_mt else "Macroproyectos"
+
+    @property
+    def etiqueta_codigo_emcali(self):
+        """Devuelve 'Maniobra EMCALI' si es MT o 'Proyecto EMCALI' si es AP."""
+        return "Maniobra EMCALI" if self.es_mt else "Proyecto EMCALI"
+
+    @property
+    def etiqueta_codigo_cointeca(self):
+        """Devuelve 'Maniobra COINTECA' si es MT o 'Proyecto COINTECA' si es AP."""
+        return "Maniobra COINTECA" if self.es_mt else "Proyecto COINTECA"
 
     @property
     def etiqueta_hijo(self):
@@ -1027,6 +1046,16 @@ class Proyecto(models.Model):
     @property
     def etiqueta_padre_plural(self):
         return "Circuitos" if self.es_mt else "Macroproyectos"
+
+    @property
+    def etiqueta_codigo_emcali(self):
+        """Devuelve 'Maniobra EMCALI' si es MT o 'Proyecto EMCALI' si es AP."""
+        return "Maniobra EMCALI" if self.es_mt else "Proyecto EMCALI"
+
+    @property
+    def etiqueta_codigo_cointeca(self):
+        """Devuelve 'Maniobra COINTECA' si es MT o 'Proyecto COINTECA' si es AP."""
+        return "Maniobra COINTECA" if self.es_mt else "Proyecto COINTECA"
 
     def __str__(self):
         return self.numero_emcali

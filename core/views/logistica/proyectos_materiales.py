@@ -2693,9 +2693,9 @@ def exportar_vista_global_excel(request):
 
     ws2.append([])
     headers2 = [
-        "PROYECTO",
-        "MANIOBRA EMCALI",
-        "MANIOBRA COINTECA",
+        "PROYECTO / MANIOBRA",
+        "PROYECTO / MANIOBRA EMCALI",
+        "PROYECTO / MANIOBRA COINTECA",
         "NODO / POSTE",
         "FECHA",
         "DIRECCIÓN",

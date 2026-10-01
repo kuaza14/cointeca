@@ -97,8 +97,8 @@
         <thead>
             <tr>
                 <th scope="col">Macroproyecto / Circuito</th>
-                <th scope="col">Maniobra EMCALI</th>
-                <th scope="col">Maniobra COINTECA</th>
+                <th scope="col">Proyecto / Maniobra EMCALI</th>
+                <th scope="col">Proyecto / Maniobra COINTECA</th>
                 <th scope="col">Estado</th>
                 <th scope="col" class="text-center">Proyectos / Maniobras</th>
                 <th scope="col" class="text-center">Postes / Apoyos</th>
@@ -131,9 +131,14 @@
 
                     <td class="whitespace-nowrap">
                         {% if item.macro.numero_maniobra_emcali %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                {{ item.macro.numero_maniobra_emcali }}
-                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold {% if item.macro.es_mt %}bg-purple-50 text-purple-700 border border-purple-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}" title="{{ item.macro.etiqueta_codigo_emcali }}">
+                                    {{ item.macro.numero_maniobra_emcali }}
+                                </span>
+                                <span class="text-[10px] font-semibold {% if item.macro.es_mt %}text-purple-600{% else %}text-blue-600{% endif %}">
+                                    ({{ item.macro.etiqueta_codigo_emcali }})
+                                </span>
+                            </div>
                         {% else %}
                             <span class="text-muted-foreground text-xs italic">-</span>
                         {% endif %}
@@ -141,9 +146,14 @@
 
                     <td class="whitespace-nowrap">
                         {% if item.macro.numero_maniobra_cointeca %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-                                {{ item.macro.numero_maniobra_cointeca }}
-                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300" title="{{ item.macro.etiqueta_codigo_cointeca }}">
+                                    {{ item.macro.numero_maniobra_cointeca }}
+                                </span>
+                                <span class="text-[10px] font-semibold text-slate-500">
+                                    ({{ item.macro.etiqueta_codigo_cointeca }})
+                                </span>
+                            </div>
                         {% else %}
                             <span class="text-muted-foreground text-xs italic">-</span>
                         {% endif %}
@@ -204,12 +214,15 @@
                             <button type="button"
                                     class="btnEditarMacro inline-flex items-center gap-1 px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition border border-border cursor-pointer"
                                     data-id="{{ item.macro.id }}"
+                                    data-tipo="{{ item.macro.tipo }}"
                                     data-nombre="{{ item.macro.nombre }}"
                                     data-maniobra-emcali="{{ item.macro.numero_maniobra_emcali }}"
                                     data-maniobra-cointeca="{{ item.macro.numero_maniobra_cointeca }}"
                                     data-descripcion="{{ item.macro.descripcion }}"
                                     data-estado="{{ item.macro.estado }}"
                                     data-etiqueta="{{ item.macro.etiqueta }}"
+                                    data-etiqueta-emcali="{{ item.macro.etiqueta_codigo_emcali }}"
+                                    data-etiqueta-cointeca="{{ item.macro.etiqueta_codigo_cointeca }}"
                                     title="Editar {{ item.macro.etiqueta|lower }}">
                                 <span>Editar</span>
                             </button>
@@ -286,24 +299,34 @@
 
             <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 <div>
-                    <label for="nombre_macro" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Nombre del Macroproyecto o Circuito <span class="text-red-600">*</span></label>
+                    <label for="tipo_macro" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Red / Nivel <span class="text-red-600">*</span></label>
+                    <select id="tipo_macro" name="tipo" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
+                        <option value="AP" selected>Alumbrado Público (AP) → Macroproyecto & Proyectos</option>
+                        <option value="MT">Media Tensión (MT) → Circuito & Maniobras</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="nombre_macro" id="lblNombreMacro" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Nombre del Macroproyecto <span class="text-red-600">*</span></label>
                     <input type="text" id="nombre_macro" name="nombre" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                           class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: Macroproyecto Ciudad Córdoba, Circuito San Nicolás, etc.">
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: Macroproyecto Ciudad Córdoba...">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="numero_maniobra_emcali" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Maniobra EMCALI</label>
+                        <label for="numero_maniobra_emcali" id="lblNumeroEmcaliMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto EMCALI</label>
                         <input type="text" id="numero_maniobra_emcali" name="numero_maniobra_emcali"
                                 style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: MAN-EMCALI-001">
+                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 001, AP-2026...">
                     </div>
                     <div>
-                        <label for="numero_maniobra_cointeca" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Maniobra COINTECA</label>
+                        <label for="numero_maniobra_cointeca" id="lblNumeroCointecaMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto COINTECA</label>
                         <input type="text" id="numero_maniobra_cointeca" name="numero_maniobra_cointeca"
                                 style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: MAN-COIN-001">
+                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 1222, COIN-AP-01...">
                     </div>
                 </div>
 
@@ -331,9 +354,9 @@
                 <button type="button" id="cancelarModalMacro"
                         style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
                         class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
-                <button type="submit"
+                <button type="submit" id="btnSubmitCrearMacro"
                         style="background-color: #1d4ed8 !important; color: #ffffff !important;"
-                        class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear Registro</button>
+                        class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Crear Macroproyecto</button>
             </div>
         </form>
     </div>
@@ -372,6 +395,16 @@
 
             <div class="space-y-4 p-6" style="background-color: #ffffff !important; color: #0f172a !important;">
                 <div>
+                    <label for="edit_tipo_macro" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Tipo de Red / Nivel <span class="text-red-600">*</span></label>
+                    <select id="edit_tipo_macro" name="tipo" required
+                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none">
+                        <option value="AP">Alumbrado Público (AP) → Macroproyecto & Proyectos</option>
+                        <option value="MT">Media Tensión (MT) → Circuito & Maniobras</option>
+                    </select>
+                </div>
+
+                <div>
                     <label for="edit_nombre_macro" id="lblEditNombreMacro" class="campo campo-req block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Nombre <span class="text-red-600">*</span></label>
                     <input type="text" id="edit_nombre_macro" name="nombre" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
@@ -380,16 +413,16 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="edit_numero_maniobra_emcali" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Maniobra EMCALI</label>
+                        <label for="edit_numero_maniobra_emcali" id="lblEditNumeroEmcaliMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto EMCALI</label>
                         <input type="text" id="edit_numero_maniobra_emcali" name="numero_maniobra_emcali"
                                style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                               class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: MAN-EMCALI-001">
+                               class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 001">
                     </div>
                     <div>
-                        <label for="edit_numero_maniobra_cointeca" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Maniobra COINTECA</label>
+                        <label for="edit_numero_maniobra_cointeca" id="lblEditNumeroCointecaMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto COINTECA</label>
                         <input type="text" id="edit_numero_maniobra_cointeca" name="numero_maniobra_cointeca"
                                style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                               class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: MAN-COIN-001">
+                               class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 1222">
                     </div>
                 </div>
 
@@ -417,7 +450,7 @@
                 <button type="button" id="cancelarModalEditarMacro"
                         style="background-color: #f1f5f9 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important;"
                         class="px-4 py-2 hover:bg-slate-200 text-sm font-semibold rounded-lg transition cursor-pointer">Cancelar</button>
-                <button type="submit"
+                <button type="submit" id="btnSubmitEditarMacro"
                         style="background-color: #1d4ed8 !important; color: #ffffff !important;"
                         class="px-5 py-2 hover:bg-blue-800 text-sm font-bold rounded-lg shadow-sm transition cursor-pointer">Guardar Cambios</button>
             </div>
@@ -686,17 +719,57 @@
     }
 
     // ==========================================
-    // MODAL NUEVO MACROPROYECTO
+    // MODAL NUEVO MACROPROYECTO / CIRCUITO
     // ==========================================
     const modalMacro = document.getElementById("modalMacroproyecto");
     const btnNuevoMacro = document.getElementById("btnNuevoMacro");
     const btnCerrarMacro = document.getElementById("cerrarModalMacro");
     const btnCancelarMacro = document.getElementById("cancelarModalMacro");
     const primerCampoMacro = document.getElementById("nombre_macro");
+    const selectTipoMacro = document.getElementById("tipo_macro");
+    const tituloModalMacro = document.getElementById("tituloModalMacro");
+    const lblNombreMacro = document.getElementById("lblNombreMacro");
+    const inputNombreMacro = document.getElementById("nombre_macro");
+    const lblNumeroEmcaliMacro = document.getElementById("lblNumeroEmcaliMacro");
+    const inputNumeroEmcaliMacro = document.getElementById("numero_maniobra_emcali");
+    const lblNumeroCointecaMacro = document.getElementById("lblNumeroCointecaMacro");
+    const inputNumeroCointecaMacro = document.getElementById("numero_maniobra_cointeca");
+    const btnSubmitCrearMacro = document.getElementById("btnSubmitCrearMacro");
+
+    function actualizarLabelsCrearMacro(tipo) {
+        if (tipo === "MT") {
+            if (tituloModalMacro) tituloModalMacro.innerHTML = "<span>⚡</span> Nuevo Circuito (Media Tensión)";
+            if (lblNombreMacro) lblNombreMacro.innerHTML = 'Nombre del Circuito <span class="text-red-600">*</span>';
+            if (inputNombreMacro) inputNombreMacro.placeholder = "Ej: Circuito San Nicolás, Circuito Aguablanca...";
+            if (lblNumeroEmcaliMacro) lblNumeroEmcaliMacro.textContent = "Número Maniobra EMCALI";
+            if (inputNumeroEmcaliMacro) inputNumeroEmcaliMacro.placeholder = "Ej: MAN-001, MAN-EMCALI-01...";
+            if (lblNumeroCointecaMacro) lblNumeroCointecaMacro.textContent = "Número Maniobra COINTECA";
+            if (inputNumeroCointecaMacro) inputNumeroCointecaMacro.placeholder = "Ej: 1222, MAN-COIN-01...";
+            if (btnSubmitCrearMacro) btnSubmitCrearMacro.textContent = "Crear Circuito";
+        } else {
+            if (tituloModalMacro) tituloModalMacro.innerHTML = "<span>🏢</span> Nuevo Macroproyecto (Alumbrado Público)";
+            if (lblNombreMacro) lblNombreMacro.innerHTML = 'Nombre del Macroproyecto <span class="text-red-600">*</span>';
+            if (inputNombreMacro) inputNombreMacro.placeholder = "Ej: Macroproyecto Ciudad Córdoba...";
+            if (lblNumeroEmcaliMacro) lblNumeroEmcaliMacro.textContent = "Número Proyecto EMCALI";
+            if (inputNumeroEmcaliMacro) inputNumeroEmcaliMacro.placeholder = "Ej: 001, AP-2026...";
+            if (lblNumeroCointecaMacro) lblNumeroCointecaMacro.textContent = "Número Proyecto COINTECA";
+            if (inputNumeroCointecaMacro) inputNumeroCointecaMacro.placeholder = "Ej: 1222, COIN-AP-01...";
+            if (btnSubmitCrearMacro) btnSubmitCrearMacro.textContent = "Crear Macroproyecto";
+        }
+    }
+
+    if (selectTipoMacro) {
+        selectTipoMacro.addEventListener("change", function() {
+            actualizarLabelsCrearMacro(this.value);
+        });
+    }
 
     function abrirMacro() {
         modalMacro.classList.remove("hidden");
         modalMacro.classList.add("flex");
+        if (selectTipoMacro) {
+            actualizarLabelsCrearMacro(selectTipoMacro.value);
+        }
         if (primerCampoMacro) primerCampoMacro.focus();
     }
 
@@ -721,34 +794,60 @@
     // ==========================================
     const modalEditar = document.getElementById("modalEditarMacroproyecto");
     const formEditar = document.getElementById("formEditarMacroproyecto");
+    const selectEditTipoMacro = document.getElementById("edit_tipo_macro");
     const editNombre = document.getElementById("edit_nombre_macro");
     const editManiobraEmcali = document.getElementById("edit_numero_maniobra_emcali");
     const editManiobraCointeca = document.getElementById("edit_numero_maniobra_cointeca");
     const editDescripcion = document.getElementById("edit_descripcion_macro");
     const editEstado = document.getElementById("edit_estado_macro");
+    const textoTituloModalEditarMacro = document.getElementById("textoTituloModalEditarMacro");
+    const lblEditNombreMacro = document.getElementById("lblEditNombreMacro");
+    const lblEditNumeroEmcaliMacro = document.getElementById("lblEditNumeroEmcaliMacro");
+    const lblEditNumeroCointecaMacro = document.getElementById("lblEditNumeroCointecaMacro");
+    const btnSubmitEditarMacro = document.getElementById("btnSubmitEditarMacro");
     const btnCerrarEditar = document.getElementById("cerrarModalEditarMacro");
     const btnCancelarEditar = document.getElementById("cancelarModalEditarMacro");
 
+    function actualizarLabelsEditarMacro(tipo) {
+        if (tipo === "MT") {
+            if (textoTituloModalEditarMacro) textoTituloModalEditarMacro.textContent = "Editar Circuito (Media Tensión)";
+            if (lblEditNombreMacro) lblEditNombreMacro.innerHTML = 'Nombre del Circuito <span class="text-red-600">*</span>';
+            if (lblEditNumeroEmcaliMacro) lblEditNumeroEmcaliMacro.textContent = "Número Maniobra EMCALI";
+            if (lblEditNumeroCointecaMacro) lblEditNumeroCointecaMacro.textContent = "Número Maniobra COINTECA";
+            if (btnSubmitEditarMacro) btnSubmitEditarMacro.textContent = "Guardar Circuito";
+        } else {
+            if (textoTituloModalEditarMacro) textoTituloModalEditarMacro.textContent = "Editar Macroproyecto (Alumbrado Público)";
+            if (lblEditNombreMacro) lblEditNombreMacro.innerHTML = 'Nombre del Macroproyecto <span class="text-red-600">*</span>';
+            if (lblEditNumeroEmcaliMacro) lblEditNumeroEmcaliMacro.textContent = "Número Proyecto EMCALI";
+            if (lblEditNumeroCointecaMacro) lblEditNumeroCointecaMacro.textContent = "Número Proyecto COINTECA";
+            if (btnSubmitEditarMacro) btnSubmitEditarMacro.textContent = "Guardar Macroproyecto";
+        }
+    }
+
+    if (selectEditTipoMacro) {
+        selectEditTipoMacro.addEventListener("change", function() {
+            actualizarLabelsEditarMacro(this.value);
+        });
+    }
+
     function abrirEditar(btn) {
         const id = btn.dataset.id;
+        const tipo = btn.dataset.tipo || "AP";
         const nombre = btn.dataset.nombre || "";
         const maniobraEmcali = btn.dataset.maniobraEmcali || "";
         const maniobraCointeca = btn.dataset.maniobraCointeca || "";
         const descripcion = btn.dataset.descripcion || "";
         const estado = btn.dataset.estado || "Planeación";
-        const etiqueta = btn.dataset.etiqueta || "Macroproyecto / Circuito";
 
         formEditar.action = "/ingenieria/macroproyectos/" + id + "/editar/";
+        if (selectEditTipoMacro) selectEditTipoMacro.value = tipo;
         editNombre.value = nombre;
         if (editManiobraEmcali) editManiobraEmcali.value = maniobraEmcali;
         if (editManiobraCointeca) editManiobraCointeca.value = maniobraCointeca;
         editDescripcion.value = descripcion;
         editEstado.value = estado;
 
-        const textoTitulo = document.getElementById("textoTituloModalEditarMacro");
-        if (textoTitulo) textoTitulo.textContent = "Editar " + etiqueta;
-        const lblNombre = document.getElementById("lblEditNombreMacro");
-        if (lblNombre) lblNombre.innerHTML = "Nombre de " + etiqueta + ' <span class="text-red-600">*</span>';
+        actualizarLabelsEditarMacro(tipo);
 
         modalEditar.classList.remove("hidden");
         modalEditar.classList.add("flex");

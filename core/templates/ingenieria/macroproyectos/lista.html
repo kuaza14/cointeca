@@ -177,13 +177,9 @@
                                     data-id="{{ item.macro.id }}"
                                     data-tipo="{{ item.macro.tipo }}"
                                     data-nombre="{{ item.macro.nombre }}"
-                                    data-maniobra-emcali="{{ item.macro.numero_maniobra_emcali }}"
-                                    data-maniobra-cointeca="{{ item.macro.numero_maniobra_cointeca }}"
                                     data-descripcion="{{ item.macro.descripcion }}"
                                     data-estado="{{ item.macro.estado }}"
                                     data-etiqueta="{{ item.macro.etiqueta }}"
-                                    data-etiqueta-emcali="{{ item.macro.etiqueta_codigo_emcali }}"
-                                    data-etiqueta-cointeca="{{ item.macro.etiqueta_codigo_cointeca }}"
                                     title="Editar {{ item.macro.etiqueta|lower }}">
                                 <span>Editar</span>
                             </button>
@@ -276,21 +272,6 @@
                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: Macroproyecto Ciudad Córdoba...">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="numero_maniobra_emcali" id="lblNumeroEmcaliMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto EMCALI</label>
-                        <input type="text" id="numero_maniobra_emcali" name="numero_maniobra_emcali"
-                                style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 001, AP-2026...">
-                    </div>
-                    <div>
-                        <label for="numero_maniobra_cointeca" id="lblNumeroCointecaMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto COINTECA</label>
-                        <input type="text" id="numero_maniobra_cointeca" name="numero_maniobra_cointeca"
-                                style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                                class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 1222, COIN-AP-01...">
-                    </div>
-                </div>
-
                 <div>
                     <label for="descripcion_macro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Descripción / Alcance General</label>
                     <textarea id="descripcion_macro" name="descripcion" rows="3"
@@ -372,20 +353,7 @@
                            class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Nombre del macroproyecto o circuito">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="edit_numero_maniobra_emcali" id="lblEditNumeroEmcaliMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto EMCALI</label>
-                        <input type="text" id="edit_numero_maniobra_emcali" name="numero_maniobra_emcali"
-                               style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                               class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 001">
-                    </div>
-                    <div>
-                        <label for="edit_numero_maniobra_cointeca" id="lblEditNumeroCointecaMacro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Proyecto COINTECA</label>
-                        <input type="text" id="edit_numero_maniobra_cointeca" name="numero_maniobra_cointeca"
-                               style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
-                               class="w-full rounded-lg px-3.5 py-2 text-sm font-semibold focus:outline-none" placeholder="Ej: 1222">
-                    </div>
-                </div>
+
 
                 <div>
                     <label for="edit_descripcion_macro" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Descripción / Alcance General</label>
@@ -691,10 +659,6 @@
     const tituloModalMacro = document.getElementById("tituloModalMacro");
     const lblNombreMacro = document.getElementById("lblNombreMacro");
     const inputNombreMacro = document.getElementById("nombre_macro");
-    const lblNumeroEmcaliMacro = document.getElementById("lblNumeroEmcaliMacro");
-    const inputNumeroEmcaliMacro = document.getElementById("numero_maniobra_emcali");
-    const lblNumeroCointecaMacro = document.getElementById("lblNumeroCointecaMacro");
-    const inputNumeroCointecaMacro = document.getElementById("numero_maniobra_cointeca");
     const btnSubmitCrearMacro = document.getElementById("btnSubmitCrearMacro");
 
     function actualizarLabelsCrearMacro(tipo) {
@@ -702,19 +666,11 @@
             if (tituloModalMacro) tituloModalMacro.innerHTML = "<span>⚡</span> Nuevo Circuito (Media Tensión)";
             if (lblNombreMacro) lblNombreMacro.innerHTML = 'Nombre del Circuito <span class="text-red-600">*</span>';
             if (inputNombreMacro) inputNombreMacro.placeholder = "Ej: Circuito San Nicolás, Circuito Aguablanca...";
-            if (lblNumeroEmcaliMacro) lblNumeroEmcaliMacro.textContent = "Número Maniobra EMCALI";
-            if (inputNumeroEmcaliMacro) inputNumeroEmcaliMacro.placeholder = "Ej: MAN-001, MAN-EMCALI-01...";
-            if (lblNumeroCointecaMacro) lblNumeroCointecaMacro.textContent = "Número Maniobra COINTECA";
-            if (inputNumeroCointecaMacro) inputNumeroCointecaMacro.placeholder = "Ej: 1222, MAN-COIN-01...";
             if (btnSubmitCrearMacro) btnSubmitCrearMacro.textContent = "Crear Circuito";
         } else {
             if (tituloModalMacro) tituloModalMacro.innerHTML = "<span>🏢</span> Nuevo Macroproyecto (Alumbrado Público)";
             if (lblNombreMacro) lblNombreMacro.innerHTML = 'Nombre del Macroproyecto <span class="text-red-600">*</span>';
             if (inputNombreMacro) inputNombreMacro.placeholder = "Ej: Macroproyecto Ciudad Córdoba...";
-            if (lblNumeroEmcaliMacro) lblNumeroEmcaliMacro.textContent = "Número Proyecto EMCALI";
-            if (inputNumeroEmcaliMacro) inputNumeroEmcaliMacro.placeholder = "Ej: 001, AP-2026...";
-            if (lblNumeroCointecaMacro) lblNumeroCointecaMacro.textContent = "Número Proyecto COINTECA";
-            if (inputNumeroCointecaMacro) inputNumeroCointecaMacro.placeholder = "Ej: 1222, COIN-AP-01...";
             if (btnSubmitCrearMacro) btnSubmitCrearMacro.textContent = "Crear Macroproyecto";
         }
     }
@@ -757,14 +713,10 @@
     const formEditar = document.getElementById("formEditarMacroproyecto");
     const selectEditTipoMacro = document.getElementById("edit_tipo_macro");
     const editNombre = document.getElementById("edit_nombre_macro");
-    const editManiobraEmcali = document.getElementById("edit_numero_maniobra_emcali");
-    const editManiobraCointeca = document.getElementById("edit_numero_maniobra_cointeca");
     const editDescripcion = document.getElementById("edit_descripcion_macro");
     const editEstado = document.getElementById("edit_estado_macro");
     const textoTituloModalEditarMacro = document.getElementById("textoTituloModalEditarMacro");
     const lblEditNombreMacro = document.getElementById("lblEditNombreMacro");
-    const lblEditNumeroEmcaliMacro = document.getElementById("lblEditNumeroEmcaliMacro");
-    const lblEditNumeroCointecaMacro = document.getElementById("lblEditNumeroCointecaMacro");
     const btnSubmitEditarMacro = document.getElementById("btnSubmitEditarMacro");
     const btnCerrarEditar = document.getElementById("cerrarModalEditarMacro");
     const btnCancelarEditar = document.getElementById("cancelarModalEditarMacro");
@@ -773,14 +725,10 @@
         if (tipo === "MT") {
             if (textoTituloModalEditarMacro) textoTituloModalEditarMacro.textContent = "Editar Circuito (Media Tensión)";
             if (lblEditNombreMacro) lblEditNombreMacro.innerHTML = 'Nombre del Circuito <span class="text-red-600">*</span>';
-            if (lblEditNumeroEmcaliMacro) lblEditNumeroEmcaliMacro.textContent = "Número Maniobra EMCALI";
-            if (lblEditNumeroCointecaMacro) lblEditNumeroCointecaMacro.textContent = "Número Maniobra COINTECA";
             if (btnSubmitEditarMacro) btnSubmitEditarMacro.textContent = "Guardar Circuito";
         } else {
             if (textoTituloModalEditarMacro) textoTituloModalEditarMacro.textContent = "Editar Macroproyecto (Alumbrado Público)";
             if (lblEditNombreMacro) lblEditNombreMacro.innerHTML = 'Nombre del Macroproyecto <span class="text-red-600">*</span>';
-            if (lblEditNumeroEmcaliMacro) lblEditNumeroEmcaliMacro.textContent = "Número Proyecto EMCALI";
-            if (lblEditNumeroCointecaMacro) lblEditNumeroCointecaMacro.textContent = "Número Proyecto COINTECA";
             if (btnSubmitEditarMacro) btnSubmitEditarMacro.textContent = "Guardar Macroproyecto";
         }
     }
@@ -795,16 +743,12 @@
         const id = btn.dataset.id;
         const tipo = btn.dataset.tipo || "AP";
         const nombre = btn.dataset.nombre || "";
-        const maniobraEmcali = btn.dataset.maniobraEmcali || "";
-        const maniobraCointeca = btn.dataset.maniobraCointeca || "";
         const descripcion = btn.dataset.descripcion || "";
         const estado = btn.dataset.estado || "Planeación";
 
         formEditar.action = "/ingenieria/macroproyectos/" + id + "/editar/";
         if (selectEditTipoMacro) selectEditTipoMacro.value = tipo;
         editNombre.value = nombre;
-        if (editManiobraEmcali) editManiobraEmcali.value = maniobraEmcali;
-        if (editManiobraCointeca) editManiobraCointeca.value = maniobraCointeca;
         editDescripcion.value = descripcion;
         editEstado.value = estado;
 

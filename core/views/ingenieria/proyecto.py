@@ -144,8 +144,10 @@ def editar_macroproyecto(request, id):
                     messages.error(request, f"No se puede cambiar a Macroproyecto (AP) porque ya contiene maniobras de Media Tensión (MT).")
                     return redirect("lista_macroproyectos")
             macro.tipo = tipo
-        macro.numero_maniobra_emcali = numero_maniobra_emcali
-        macro.numero_maniobra_cointeca = numero_maniobra_cointeca
+        if "numero_maniobra_emcali" in request.POST:
+            macro.numero_maniobra_emcali = request.POST.get("numero_maniobra_emcali", "").strip()
+        if "numero_maniobra_cointeca" in request.POST:
+            macro.numero_maniobra_cointeca = request.POST.get("numero_maniobra_cointeca", "").strip()
         macro.descripcion = descripcion
         if estado in Macroproyecto.Estados.values:
             macro.estado = estado

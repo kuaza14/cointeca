@@ -238,11 +238,21 @@ def crear_proyecto(request, macroproyecto_id=None):
             return redirect("lista_proyectos")
 
         if not numero_emcali or not tipo:
-            messages.error(request, "El número de proyecto y el tipo de red son obligatorios.")
+            messages.error(request, "El número y el tipo de red son obligatorios.")
             return _volver()
 
-        if Proyecto.objects.filter(numero_emcali__iexact=numero_emcali).exists():
-            messages.error(request, f"Ya existe un proyecto registrado con el número '{numero_emcali}'.")
+        # Validar si ya existe en el MISMO Macroproyecto o Circuito
+        filtro_existente = Proyecto.objects.filter(
+            numero_emcali__iexact=numero_emcali,
+            macroproyecto=macroproyecto
+        )
+        if filtro_existente.exists():
+            etiqueta_padre = macroproyecto.etiqueta if macroproyecto else "Macroproyecto"
+            etiqueta_hijo = macroproyecto.etiqueta_hijo if macroproyecto else "Proyecto"
+            if macroproyecto:
+                messages.error(request, f"Ya existe una {etiqueta_hijo.lower()} con el número '{numero_emcali}' en el {etiqueta_padre.lower()} '{macroproyecto.nombre}'.")
+            else:
+                messages.error(request, f"Ya existe un proyecto sin macroproyecto con el número '{numero_emcali}'.")
             return _volver()
 
         proyecto = Proyecto.objects.create(
@@ -282,8 +292,18 @@ def editar_proyecto(request, id):
             messages.error(request, f"El número de {proyecto.etiqueta.lower()} y el tipo de red son obligatorios.")
             return _volver()
 
-        if Proyecto.objects.filter(numero_emcali__iexact=numero_emcali).exclude(id=proyecto.id).exists():
-            messages.error(request, f"Ya existe otro registro con el número '{numero_emcali}'.")
+        # Validar si ya existe en el MISMO Macroproyecto o Circuito
+        filtro_existente = Proyecto.objects.filter(
+            numero_emcali__iexact=numero_emcali,
+            macroproyecto=proyecto.macroproyecto
+        ).exclude(id=proyecto.id)
+        if filtro_existente.exists():
+            etiqueta_padre = proyecto.macroproyecto.etiqueta if proyecto.macroproyecto else "Macroproyecto"
+            etiqueta_hijo = proyecto.macroproyecto.etiqueta_hijo if proyecto.macroproyecto else "Proyecto"
+            if proyecto.macroproyecto:
+                messages.error(request, f"Ya existe una {etiqueta_hijo.lower()} con el número '{numero_emcali}' en el {etiqueta_padre.lower()} '{proyecto.macroproyecto.nombre}'.")
+            else:
+                messages.error(request, f"Ya existe otro proyecto registrado con el número '{numero_emcali}'.")
             return _volver()
 
         proyecto.numero_emcali = numero_emcali

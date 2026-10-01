@@ -1012,7 +1012,7 @@ class Proyecto(models.Model):
         blank=True,
         verbose_name="Macroproyecto"
     )
-    numero_emcali = models.CharField(max_length=50, unique=True, verbose_name="Número Proyecto")
+    numero_emcali = models.CharField(max_length=50, verbose_name="Número Proyecto")
     tipo = models.CharField(max_length=20, choices=Tipos.choices)
     estado = models.CharField(max_length=30, choices=Estados.choices, default=Estados.PLANEACION)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -1020,6 +1020,17 @@ class Proyecto(models.Model):
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["macroproyecto", "numero_emcali"],
+                name="unique_proyecto_por_macroproyecto"
+            ),
+            models.UniqueConstraint(
+                fields=["numero_emcali"],
+                condition=models.Q(macroproyecto__isnull=True),
+                name="unique_proyecto_sin_macroproyecto"
+            ),
+        ]
 
     @property
     def es_mt(self):

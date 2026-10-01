@@ -30,7 +30,7 @@
             </h1>
             <p class="text-sm text-muted-foreground mt-1">
                 {% if macroproyecto %}
-                    Gestión de entradas directas a obra, despachos y conciliación técnica para {{ macroproyecto.etiqueta_hijo_plural|lower }} de <strong>{{ macroproyecto.nombre }}</strong>.
+                    Gestión de entradas directas a obra, despachos y conciliación técnica para {{ macroproyecto.etiqueta_hijo_plural|lower }} del {{ macroproyecto.etiqueta|lower }} <strong>{{ macroproyecto.nombre }}</strong>.
                 {% else %}
                     Gestión de entradas directas a obra, despachos de bodega y conciliación con los apoyos de ingeniería.
                 {% endif %}
@@ -56,7 +56,7 @@
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
-                <span>{% if macroproyecto %}Nueva {{ macroproyecto.etiqueta_hijo }}{% else %}Nuevo Proyecto / Maniobra{% endif %}</span>
+                <span>{% if macroproyecto %}{% if macroproyecto.es_mt %}Nueva Maniobra{% else %}Nuevo Proyecto{% endif %}{% else %}Nuevo Proyecto / Maniobra{% endif %}</span>
             </button>
             <a href="{% url 'macroproyectos_logistica' %}"
                class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-sm font-semibold rounded-lg transition shadow-sm">

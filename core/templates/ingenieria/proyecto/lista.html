@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}{% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural }} - {{ macroproyecto.nombre }}{% else %}Proyectos & Maniobras{% endif %} | Cointeca S.A.S{% endblock %}
+{% block titulo %}{% if macroproyecto %}{{ macroproyecto.etiqueta }}: {{ macroproyecto.nombre }}{% else %}Proyectos & Maniobras{% endif %} | Cointeca S.A.S{% endblock %}
 {% block encabezado %}Ingeniería{% endblock %}
 
 {% block content %}
@@ -27,14 +27,14 @@
 
         <h1 class="titulo-pagina">
             {% if macroproyecto %}
-                {{ macroproyecto.etiqueta_hijo_plural }}: <span class="text-primary">{{ macroproyecto.nombre }}</span>
+                {{ macroproyecto.etiqueta }}: <span class="text-primary">{{ macroproyecto.nombre }}</span>
             {% else %}
                 Todos los Proyectos & Maniobras
             {% endif %}
         </h1>
         <p class="subtitulo-pagina">
             {% if macroproyecto %}
-                {{ macroproyecto.etiqueta_hijo_plural }} y redes eléctricas vinculadas a <strong>{{ macroproyecto.nombre }}</strong>.
+                {{ macroproyecto.etiqueta_hijo_plural }} y redes eléctricas vinculadas al {{ macroproyecto.etiqueta|lower }} <strong>{{ macroproyecto.nombre }}</strong>.
             {% else %}
                 Listado consolidado de proyectos (AP) y maniobras (MT) registrados en el sistema.
             {% endif %}
@@ -86,7 +86,7 @@
             <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color: #ffffff !important;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
-            <span style="color: #ffffff !important;">{% if macroproyecto %}+ Nueva {{ macroproyecto.etiqueta_hijo }}{% else %}+ Nuevo Proyecto / Maniobra{% endif %}</span>
+            <span style="color: #ffffff !important;">{% if macroproyecto %}{% if macroproyecto.es_mt %}Nueva Maniobra{% else %}Nuevo Proyecto{% endif %}{% else %}Nuevo Proyecto / Maniobra{% endif %}</span>
         </button>
 
         <a href="{% url 'lista_macroproyectos' %}" class="btn btn-secundario">
@@ -124,7 +124,7 @@
 
     <div class="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
         <span class="px-3 py-1.5 rounded-lg bg-muted border border-border">
-            Mostrando: <strong id="contadorVisibles" class="text-foreground text-sm">{{ proyectos|length }}</strong> de <strong class="text-foreground text-sm">{{ total_proyectos|default:proyectos|length }}</strong> proyectos
+            Mostrando: <strong id="contadorVisibles" class="text-foreground text-sm">{{ proyectos|length }}</strong> de <strong class="text-foreground text-sm">{{ total_proyectos|default:proyectos|length }}</strong> {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural|lower }}{% else %}proyectos{% endif %}
         </span>
         {% if query %}
         <a href="{% if macroproyecto %}{% url 'proyectos_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}" class="text-xs text-primary hover:underline font-semibold">
@@ -283,7 +283,7 @@
                                 </div>
                             {% else %}
                                 <p class="font-semibold text-foreground">No hay {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural|lower }}{% else %}proyectos o maniobras{% endif %} registrados {% if macroproyecto %}en este {{ macroproyecto.etiqueta|lower }}{% endif %}</p>
-                                <p class="text-xs text-muted-foreground mt-1">Haz clic en «{% if macroproyecto %}Nueva {{ macroproyecto.etiqueta_hijo|lower }}{% else %}Nuevo proyecto{% endif %}» para agregar el primero.</p>
+                                <p class="text-xs text-muted-foreground mt-1">Haz clic en «{% if macroproyecto %}{% if macroproyecto.es_mt %}Nueva maniobra{% else %}Nuevo proyecto{% endif %}{% else %}Nuevo proyecto{% endif %}» para agregar el primero.</p>
                             {% endif %}
                         </div>
                     </td>

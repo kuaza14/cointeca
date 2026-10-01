@@ -143,8 +143,14 @@
                 <span>/</span>
                 <span class="text-foreground font-medium">{{ proyecto.numero_emcali }}</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3">
-                {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }} — Formato Técnico & Liquidación
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3 flex-wrap">
+                <span>{{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}</span>
+                {% if proyecto.es_mt and proyecto.numero_cointeca %}
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 border border-slate-300 font-mono">
+                        COINTECA: {{ proyecto.numero_cointeca }}
+                    </span>
+                {% endif %}
+                <span>— Formato Técnico & Liquidación</span>
             </h1>
         </div>
 

@@ -201,6 +201,7 @@ def lista_proyectos(request, macroproyecto_id=None):
     if query:
         proyectos = proyectos.filter(
             Q(numero_emcali__icontains=query) |
+            Q(numero_cointeca__icontains=query) |
             Q(tipo__icontains=query) |
             Q(estado__icontains=query)
         )
@@ -228,6 +229,7 @@ def lista_proyectos(request, macroproyecto_id=None):
 def crear_proyecto(request, macroproyecto_id=None):
     if request.method == "POST":
         numero_emcali = request.POST.get("numero_emcali", "").strip()
+        numero_cointeca = request.POST.get("numero_cointeca", "").strip()
         tipo = request.POST.get("tipo", "").strip()
         estado = request.POST.get("estado", Proyecto.Estados.PLANEACION).strip()
         m_id = request.POST.get("macroproyecto_id") or macroproyecto_id
@@ -282,6 +284,7 @@ def crear_proyecto(request, macroproyecto_id=None):
         proyecto = Proyecto.objects.create(
             macroproyecto=macroproyecto,
             numero_emcali=numero_emcali,
+            numero_cointeca=numero_cointeca if tipo == Proyecto.Tipos.MT else "",
             tipo=tipo,
             estado=estado if estado in Proyecto.Estados.values else Proyecto.Estados.PLANEACION
         )
@@ -298,6 +301,7 @@ def editar_proyecto(request, id):
 
     if request.method == "POST":
         numero_emcali = request.POST.get("numero_emcali", "").strip()
+        numero_cointeca = request.POST.get("numero_cointeca", "").strip()
         tipo = request.POST.get("tipo", "").strip()
         estado = request.POST.get("estado", proyecto.estado).strip()
         m_id = request.POST.get("macroproyecto_id")
@@ -347,6 +351,10 @@ def editar_proyecto(request, id):
 
         proyecto.numero_emcali = numero_emcali
         proyecto.tipo = tipo
+        if tipo == Proyecto.Tipos.MT:
+            proyecto.numero_cointeca = numero_cointeca
+        else:
+            proyecto.numero_cointeca = ""
         if estado in Proyecto.Estados.values:
             proyecto.estado = estado
         proyecto.save()

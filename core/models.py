@@ -1013,6 +1013,7 @@ class Proyecto(models.Model):
         verbose_name="Macroproyecto"
     )
     numero_emcali = models.CharField(max_length=50, verbose_name="Número Proyecto")
+    numero_cointeca = models.CharField(max_length=50, blank=True, default="", verbose_name="Número Maniobra / Proyecto COINTECA")
     tipo = models.CharField(max_length=20, choices=Tipos.choices)
     estado = models.CharField(max_length=30, choices=Estados.choices, default=Estados.PLANEACION)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -1076,6 +1077,10 @@ class Proyecto(models.Model):
     def etiqueta_codigo_cointeca(self):
         """Devuelve 'Maniobra COINTECA' si es MT o 'Proyecto COINTECA' si es AP."""
         return "Maniobra COINTECA" if self.es_mt else "Proyecto COINTECA"
+
+    @property
+    def numero_maniobra_cointeca(self):
+        return self.numero_cointeca
 
     def __str__(self):
         return self.numero_emcali

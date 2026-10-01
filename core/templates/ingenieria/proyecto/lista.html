@@ -139,7 +139,10 @@
     <table class="tabla" id="tablaProyectos">
         <thead>
             <tr>
-                <th scope="col">{% if macroproyecto %}{{ macroproyecto.etiqueta_hijo }}{% else %}Proyecto / Maniobra{% endif %}</th>
+                <th scope="col">{% if macroproyecto %}{% if macroproyecto.es_mt %}Maniobra EMCALI{% else %}Proyecto EMCALI{% endif %}{% else %}Proyecto / Maniobra{% endif %}</th>
+                {% if macroproyecto and macroproyecto.es_mt %}
+                    <th scope="col">Maniobra COINTECA</th>
+                {% endif %}
                 {% if not macroproyecto %}
                     <th scope="col">Macroproyecto / Circuito</th>
                 {% endif %}
@@ -161,6 +164,18 @@
                             <span>{{ proyecto.numero_emcali }}</span>
                         </div>
                     </td>
+
+                    {% if macroproyecto and macroproyecto.es_mt %}
+                    <td class="whitespace-nowrap">
+                        {% if proyecto.numero_cointeca %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 font-mono">
+                                {{ proyecto.numero_cointeca }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted-foreground text-xs italic">-</span>
+                        {% endif %}
+                    </td>
+                    {% endif %}
 
                     {% if not macroproyecto %}
                     <td>
@@ -250,6 +265,7 @@
                                     class="btnEditarProyecto inline-flex items-center gap-1 px-2.5 py-1.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg transition border border-border cursor-pointer"
                                     data-id="{{ proyecto.id }}"
                                     data-numero="{{ proyecto.numero_emcali }}"
+                                    data-numero-cointeca="{{ proyecto.numero_cointeca|default:'' }}"
                                     data-tipo="{{ proyecto.tipo }}"
                                     data-es-mt="{% if proyecto.es_mt %}1{% else %}0{% endif %}"
                                     data-etiqueta="{{ proyecto.etiqueta }}"
@@ -274,7 +290,7 @@
                 </tr>
             {% empty %}
                 <tr id="filaVaciaServidor">
-                    <td colspan="{% if macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-10 text-center text-muted-foreground">
+                    <td colspan="{% if macroproyecto and macroproyecto.es_mt %}7{% elif macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-10 text-center text-muted-foreground">
                         <div>
                             {% if query %}
                                 <p class="font-semibold text-foreground">No se encontraron {% if macroproyecto %}{{ macroproyecto.etiqueta_hijo_plural|lower }}{% else %}proyectos o maniobras{% endif %} que coincidan con «{{ query }}»</p>
@@ -290,7 +306,7 @@
                 </tr>
             {% endfor %}
             <tr id="sinResultadosLive" class="hidden">
-                <td colspan="{% if macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-8 text-center text-muted-foreground">
+                <td colspan="{% if macroproyecto and macroproyecto.es_mt %}7{% elif macroproyecto %}6{% else %}7{% endif %}" class="estado-vacio py-8 text-center text-muted-foreground">
                     No se encontraron registros con ese criterio de búsqueda.
                 </td>
             </tr>
@@ -357,6 +373,13 @@
                     <input type="text" id="numero_emcali" name="numero_emcali" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                            class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="{% if macroproyecto and macroproyecto.es_mt %}Ej: 001, MAN-01, etc.{% else %}Ej: 2024-BT-001, AP-CANCHA-01, etc.{% endif %}">
+                </div>
+
+                <div id="contenedorCampoCointeca" class="{% if not macroproyecto or not macroproyecto.es_mt %}hidden{% endif %}">
+                    <label for="numero_cointeca" id="lblNumeroCointeca" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Maniobra COINTECA</label>
+                    <input type="text" id="numero_cointeca" name="numero_cointeca"
+                           style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 1222, MAN-COIN-01...">
                 </div>
 
                 <div>
@@ -465,6 +488,13 @@
                     <input type="text" id="edit_numero_emcali" name="numero_emcali" required
                            style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
                            class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 2024-BT-001">
+                </div>
+
+                <div id="editContenedorCampoCointeca" class="hidden">
+                    <label for="edit_numero_cointeca" id="lblEditNumeroCointeca" class="campo block text-xs font-bold uppercase tracking-wider mb-1" style="color: #334155 !important;">Número Maniobra COINTECA</label>
+                    <input type="text" id="edit_numero_cointeca" name="numero_cointeca"
+                           style="background-color: #ffffff !important; color: #0f172a !important; border: 1.5px solid #cbd5e1 !important;"
+                           class="w-full rounded-lg px-3.5 py-2 text-sm font-bold focus:outline-none" placeholder="Ej: 1222, MAN-COIN-01...">
                 </div>
 
                 <div>
@@ -798,6 +828,9 @@
 
     function actualizarOpcionesTipoNuevo(macroOpt) {
         if (!selectTipo) return;
+        const contenedorCampoCointeca = document.getElementById("contenedorCampoCointeca");
+        const inputNumeroCointeca = document.getElementById("numero_cointeca");
+
         if (!macroOpt || !macroOpt.value) {
             selectTipo.innerHTML = `
                 <option value="">(Primero seleccione Macroproyecto o Circuito)</option>
@@ -812,6 +845,10 @@
             if (btnSubmitCrear) btnSubmitCrear.textContent = "Crear Proyecto / Maniobra";
             if (textoTituloModal) textoTituloModal.textContent = "Nuevo Proyecto / Maniobra";
             if (ayudaTipo) { ayudaTipo.classList.add("hidden"); ayudaTipo.textContent = ""; }
+            if (contenedorCampoCointeca) {
+                contenedorCampoCointeca.classList.add("hidden");
+                if (inputNumeroCointeca) inputNumeroCointeca.value = "";
+            }
             return;
         }
 
@@ -822,8 +859,9 @@
         if (esMt) {
             // CIRCUITO -> Solo MT
             selectTipo.innerHTML = '<option value="MT" selected>Media Tensión (MT)</option>';
-            if (lblNumero) lblNumero.innerHTML = 'Número o Código de ' + etiquetaHijo + ' <span class="text-red-600">*</span>';
+            if (lblNumero) lblNumero.innerHTML = 'Número Maniobra EMCALI <span class="text-red-600">*</span>';
             if (primerCampo) primerCampo.placeholder = "Ej: 001, MAN-01, etc.";
+            if (contenedorCampoCointeca) contenedorCampoCointeca.classList.remove("hidden");
             if (btnSubmitCrear) btnSubmitCrear.textContent = "Crear " + etiquetaHijo;
             if (textoTituloModal) textoTituloModal.textContent = "Nueva " + etiquetaHijo;
             if (ayudaTipo) {
@@ -838,8 +876,12 @@
                 html += '<option value="' + op.valor + '">' + op.texto + '</option>';
             });
             selectTipo.innerHTML = html;
-            if (lblNumero) lblNumero.innerHTML = 'Número o Código de ' + etiquetaHijo + ' <span class="text-red-600">*</span>';
+            if (lblNumero) lblNumero.innerHTML = 'Número Proyecto EMCALI <span class="text-red-600">*</span>';
             if (primerCampo) primerCampo.placeholder = "Ej: 2024-BT-001, AP-CANCHA-01, etc.";
+            if (contenedorCampoCointeca) {
+                contenedorCampoCointeca.classList.add("hidden");
+                if (inputNumeroCointeca) inputNumeroCointeca.value = "";
+            }
             if (btnSubmitCrear) btnSubmitCrear.textContent = "Crear " + etiquetaHijo;
             if (textoTituloModal) textoTituloModal.textContent = "Nuevo " + etiquetaHijo;
             if (ayudaTipo) {
@@ -860,15 +902,28 @@
     function abrir() {
         modal.classList.remove("hidden");
         modal.classList.add("flex");
-        if (selectMacro && selectMacro.value) {
-            actualizarOpcionesTipoNuevo(selectMacro.selectedOptions[0]);
-        }
+        const contenedorCampoCointeca = document.getElementById("contenedorCampoCointeca");
+        {% if macroproyecto %}
+            const esMtFijo = {% if macroproyecto.es_mt %}true{% else %}false{% endif %};
+            if (contenedorCampoCointeca) {
+                if (esMtFijo) contenedorCampoCointeca.classList.remove("hidden");
+                else contenedorCampoCointeca.classList.add("hidden");
+            }
+        {% else %}
+            if (selectMacro && selectMacro.value) {
+                actualizarOpcionesTipoNuevo(selectMacro.selectedOptions[0]);
+            } else {
+                if (contenedorCampoCointeca) contenedorCampoCointeca.classList.add("hidden");
+            }
+        {% endif %}
         if (primerCampo) primerCampo.focus();
     }
 
     function cerrar() {
         modal.classList.remove("flex");
         modal.classList.add("hidden");
+        const inputNumeroCointeca = document.getElementById("numero_cointeca");
+        if (inputNumeroCointeca) inputNumeroCointeca.value = "";
         if (btnNuevo) btnNuevo.focus();
     }
 
@@ -890,6 +945,8 @@
     const modalEditar = document.getElementById("modalEditarProyecto");
     const formEditar = document.getElementById("formEditarProyecto");
     const editNumero = document.getElementById("edit_numero_emcali");
+    const editContenedorCampoCointeca = document.getElementById("editContenedorCampoCointeca");
+    const editNumeroCointeca = document.getElementById("edit_numero_cointeca");
     const editTipo = document.getElementById("edit_tipo");
     const editEstado = document.getElementById("edit_estado");
     const editMacroId = document.getElementById("edit_macroproyecto_id");
@@ -902,6 +959,7 @@
         if (esMt) {
             editTipo.innerHTML = '<option value="MT" selected>Media Tensión (MT)</option>';
             editTipo.value = "MT";
+            if (editContenedorCampoCointeca) editContenedorCampoCointeca.classList.remove("hidden");
             if (ayudaTipoEditar) {
                 ayudaTipoEditar.className = "text-[11px] text-purple-700 font-semibold mt-1";
                 ayudaTipoEditar.textContent = "⚡ En un Circuito solo se permiten maniobras de Media Tensión (MT).";
@@ -913,6 +971,10 @@
                 html += '<option value="' + op.valor + '">' + op.texto + '</option>';
             });
             editTipo.innerHTML = html;
+            if (editContenedorCampoCointeca) {
+                editContenedorCampoCointeca.classList.add("hidden");
+                if (editNumeroCointeca) editNumeroCointeca.value = "";
+            }
             if (valorSeleccionado && valorSeleccionado !== "MT") {
                 editTipo.value = valorSeleccionado;
             } else {
@@ -929,6 +991,7 @@
     function abrirEditar(btn) {
         const id = btn.dataset.id;
         const numero = btn.dataset.numero || "";
+        const numeroCointeca = btn.dataset.numeroCointeca || "";
         const tipo = btn.dataset.tipo || "";
         const estado = btn.dataset.estado || "Planeación";
         const macroId = btn.dataset.macroId || "";
@@ -945,12 +1008,20 @@
 
         actualizarOpcionesTipoEditar(esMt, tipo);
 
+        if (editNumeroCointeca) {
+            editNumeroCointeca.value = esMt ? numeroCointeca : "";
+        }
+        if (editContenedorCampoCointeca) {
+            if (esMt) editContenedorCampoCointeca.classList.remove("hidden");
+            else editContenedorCampoCointeca.classList.add("hidden");
+        }
+
         const textoTitulo = document.getElementById("textoTituloModalEditar");
         if (textoTitulo) textoTitulo.textContent = "Editar " + etiqueta;
         const lblMacro = document.getElementById("lblEditMacroproyecto");
         if (lblMacro) lblMacro.textContent = etiquetaPadre;
         const lblNum = document.getElementById("lblEditNumero");
-        if (lblNum) lblNum.innerHTML = "Número o Código de " + etiqueta + ' <span class="text-red-600">*</span>';
+        if (lblNum) lblNum.innerHTML = "Número " + (esMt ? "Maniobra EMCALI" : "Proyecto EMCALI") + ' <span class="text-red-600">*</span>';
 
         modalEditar.classList.remove("hidden");
         modalEditar.classList.add("flex");
@@ -978,6 +1049,7 @@
     function cerrarEditar() {
         modalEditar.classList.remove("flex");
         modalEditar.classList.add("hidden");
+        if (editNumeroCointeca) editNumeroCointeca.value = "";
     }
 
     document.querySelectorAll(".btnEditarProyecto").forEach(function(btn) {

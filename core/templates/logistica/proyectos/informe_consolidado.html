@@ -14,7 +14,11 @@
                     <span>/</span>
                     <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                     <span>/</span>
-                    <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
+                    <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">Macroproyectos & Circuitos</a>
+                    {% if macroproyecto %}
+                        <span>/</span>
+                        <a href="{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}" class="hover:underline">{{ macroproyecto.nombre }}</a>
+                    {% endif %}
                     <span>/</span>
                     <span class="text-foreground font-medium">Informe Consolidado</span>
                 </div>
@@ -39,9 +43,9 @@
                     <span>📊</span> Descargar en Excel
                 </a>
 
-                <a href="{% url 'proyectos_logistica' %}"
+                <a href="{% if macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'macroproyectos_logistica' %}{% endif %}"
                    class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                    ← Volver a Proyectos
+                    ← Volver a {% if macroproyecto %}{{ macroproyecto.nombre }}{% else %}Macroproyectos & Circuitos{% endif %}
                 </a>
             </div>
         </div>

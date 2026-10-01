@@ -83,11 +83,11 @@ def proyectos_logistica(request, macroproyecto_id=None):
         proyectos = Proyecto.objects.filter(macroproyecto=macroproyecto).order_by("-id")
     else:
         macro_param = request.GET.get("macroproyecto_id")
-        if macro_param and macro_param.isdigit():
+        if macro_param and str(macro_param).isdigit():
             macroproyecto = Macroproyecto.objects.filter(id=int(macro_param)).first()
-            proyectos = Proyecto.objects.filter(macroproyecto=macroproyecto).order_by("-id") if macroproyecto else Proyecto.objects.all().order_by("-id")
-        else:
-            proyectos = Proyecto.objects.all().order_by("-id")
+            if macroproyecto:
+                return redirect("proyectos_logistica_por_macroproyecto", macroproyecto_id=macroproyecto.id)
+        return redirect("macroproyectos_logistica")
 
     query = request.GET.get("q", "").strip()
     if query:
@@ -1533,18 +1533,32 @@ def informe_consolidado_proyectos(request):
         or request.POST.getlist("proyectos[]")
     )
 
+    macro_id = request.GET.get("macroproyecto_id") or request.POST.get("macroproyecto_id")
+    macroproyecto = None
+    if macro_id and str(macro_id).isdigit():
+        macroproyecto = Macroproyecto.objects.filter(id=int(macro_id)).first()
+
     if not proyecto_ids:
         raw_ids = request.GET.get("ids", "") or request.POST.get("ids", "")
         if raw_ids:
             proyecto_ids = [x.strip() for x in raw_ids.split(",") if x.strip()]
 
     if not proyecto_ids:
-        return redirect("proyectos_logistica")
+        if macroproyecto:
+            return redirect("proyectos_logistica_por_macroproyecto", macroproyecto_id=macroproyecto.id)
+        return redirect("macroproyectos_logistica")
 
-    proyectos_seleccionados = Proyecto.objects.filter(id__in=proyecto_ids).order_by("numero_emcali")
+    proyectos_seleccionados = Proyecto.objects.filter(id__in=proyecto_ids).select_related("macroproyecto").order_by("numero_emcali")
 
     if not proyectos_seleccionados.exists():
-        return redirect("proyectos_logistica")
+        if macroproyecto:
+            return redirect("proyectos_logistica_por_macroproyecto", macroproyecto_id=macroproyecto.id)
+        return redirect("macroproyectos_logistica")
+
+    if not macroproyecto:
+        primer_proy = proyectos_seleccionados.filter(macroproyecto__isnull=False).first()
+        if primer_proy:
+            macroproyecto = primer_proy.macroproyecto
 
     # 1. Consolidar Entradas
     ent_qs = (
@@ -1699,6 +1713,7 @@ def informe_consolidado_proyectos(request):
         request,
         "logistica/proyectos/informe_consolidado.html",
         {
+            "macroproyecto": macroproyecto,
             "proyectos_seleccionados": proyectos_seleccionados,
             "total_proyectos_sel": proyectos_seleccionados.count(),
             "tabla_consolidada": tabla_consolidada,
@@ -1724,14 +1739,14 @@ def exportar_informe_consolidado_excel(request):
     ids_param = request.GET.get("proyectos", "") or request.GET.get("ids", "")
     if not ids_param:
         messages.error(request, "No seleccionaste ningún proyecto para exportar el informe.")
-        return redirect("informe_consolidado_proyectos")
+        return redirect("macroproyectos_logistica")
 
     p_ids = [int(x) for x in ids_param.split(",") if x.strip().isdigit()]
     proyectos_seleccionados = Proyecto.objects.filter(id__in=p_ids).select_related("macroproyecto")
 
     if not proyectos_seleccionados.exists():
         messages.error(request, "Los proyectos seleccionados no existen.")
-        return redirect("informe_consolidado_proyectos")
+        return redirect("macroproyectos_logistica")
 
     ent_qs = DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_seleccionados).values("material_id").annotate(total=Sum("cantidad"))
     ent_map = {x["material_id"]: x["total"] for x in ent_qs}

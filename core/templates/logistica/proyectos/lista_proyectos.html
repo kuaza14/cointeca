@@ -57,6 +57,9 @@
 
     <!-- Barra de Informes Consolidados y Selector Multi-Proyecto -->
     <form id="formInformeConsolidado" method="GET" action="{% url 'informe_consolidado_proyectos' %}">
+        {% if macroproyecto %}
+            <input type="hidden" name="macroproyecto_id" value="{{ macroproyecto.id }}">
+        {% endif %}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
                 <h3 class="text-base font-black text-gray-900">

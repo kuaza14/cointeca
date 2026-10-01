@@ -11,7 +11,11 @@
             <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                 <span>/</span>
-                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
+                <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">Macroproyectos & Circuitos</a>
+                {% if proyecto.macroproyecto %}
+                    <span>/</span>
+                    <a href="{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}" class="hover:underline">{{ proyecto.macroproyecto.nombre }}</a>
+                {% endif %}
                 <span>/</span>
                 <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline">
                     {{ proyecto.numero_emcali }}

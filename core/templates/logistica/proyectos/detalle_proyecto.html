@@ -68,6 +68,11 @@
                     <span>+ Entrada Material</span>
                 </a>
 
+                <a href="{% url 'registrar_retiro_material' proyecto.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                    <span>+ Registrar Retiro</span>
+                </a>
+
                 <a href="{% url 'detalle_proyecto' proyecto.id %}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
                     <span>Apoyos & Retiros (Ing.)</span>
@@ -622,10 +627,16 @@
                     </h3>
                     <p class="text-xs text-muted-foreground">Listado de materiales antiguos bajados de cada poste durante la ejecución de la obra.</p>
                 </div>
-                <a href="{% url 'detalle_proyecto' proyecto.id %}"
-                   class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
-                    Ver Matriz Poste a Poste
-                </a>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'registrar_retiro_material' proyecto.id %}"
+                       class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                        + Registrar Retiro / Desmonte
+                    </a>
+                    <a href="{% url 'detalle_proyecto' proyecto.id %}"
+                       class="px-3.5 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                        Ver Matriz en Ingeniería
+                    </a>
+                </div>
             </div>
 
             {% if retiros_apoyo %}

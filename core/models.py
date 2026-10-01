@@ -950,8 +950,9 @@ class Macroproyecto(models.Model):
     @property
     def es_mt(self):
         """Determina si este macroproyecto corresponde a Media Tensión (Circuito)."""
-        if self.tipo:
-            return self.tipo == self.Tipos.MT
+        tipo_val = getattr(self, "tipo", None)
+        if tipo_val:
+            return tipo_val == self.Tipos.MT
         nom = (self.nombre or "").lower()
         return "circuito" in nom or "mt" in nom.split()
 
@@ -1035,11 +1036,11 @@ class Proyecto(models.Model):
 
     @property
     def es_mt(self):
-        return self.tipo == self.Tipos.MT
+        return getattr(self, "tipo", None) == self.Tipos.MT
 
     @property
     def es_ap(self):
-        return self.tipo in (self.Tipos.AP, self.Tipos.AP_BARRIO, self.Tipos.AP_PARQUE, self.Tipos.BT)
+        return getattr(self, "tipo", None) in (self.Tipos.AP, self.Tipos.AP_BARRIO, self.Tipos.AP_PARQUE, self.Tipos.BT)
 
     def clean(self):
         super().clean()

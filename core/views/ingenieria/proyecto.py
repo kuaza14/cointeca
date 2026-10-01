@@ -120,7 +120,8 @@ def editar_macroproyecto(request, id):
 
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
-        tipo = request.POST.get("tipo", macro.tipo).strip()
+        tipo_actual = getattr(macro, "tipo", Macroproyecto.Tipos.AP)
+        tipo = request.POST.get("tipo", tipo_actual).strip()
         numero_maniobra_emcali = request.POST.get("numero_maniobra_emcali", "").strip()
         numero_maniobra_cointeca = request.POST.get("numero_maniobra_cointeca", "").strip()
         descripcion = request.POST.get("descripcion", "").strip()
@@ -136,7 +137,7 @@ def editar_macroproyecto(request, id):
 
         macro.nombre = nombre
         if tipo in Macroproyecto.Tipos.values:
-            if tipo != macro.tipo:
+            if tipo != tipo_actual:
                 if tipo == Macroproyecto.Tipos.MT and macro.proyectos.exclude(tipo=Proyecto.Tipos.MT).exists():
                     messages.error(request, f"No se puede cambiar a Circuito (MT) porque ya contiene proyectos de Alumbrado Público (AP).")
                     return redirect("lista_macroproyectos")
@@ -167,8 +168,8 @@ def eliminar_macroproyecto(request, id):
 
     if request.method == "POST":
         nombre = macro.nombre
-        etiqueta = macro.etiqueta
-        etiqueta_hijo_pl = macro.etiqueta_hijo_plural.lower()
+        etiqueta = getattr(macro, "etiqueta", "Macroproyecto")
+        etiqueta_hijo_pl = getattr(macro, "etiqueta_hijo_plural", "Proyectos").lower()
         macro.delete()
         messages.success(request, f"{etiqueta} '{nombre}' y todos sus {etiqueta_hijo_pl} asociados han sido eliminados.")
     return redirect("lista_macroproyectos")
@@ -375,7 +376,7 @@ def eliminar_proyecto(request, id):
         return redirect("lista_proyectos")
 
     macro_id = proyecto.macroproyecto_id
-    etiqueta = proyecto.etiqueta
+    etiqueta = getattr(proyecto, "etiqueta", "Proyecto")
     if request.method == "POST":
         nombre = proyecto.numero_emcali
         proyecto.delete()

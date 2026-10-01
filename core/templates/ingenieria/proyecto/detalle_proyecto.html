@@ -164,9 +164,9 @@
                style="background-color: #15803d; color: #ffffff !important; border-color: #166534;">
                 ← Volver a materiales de {{ proyecto.etiqueta|lower }}
             </a>
-            <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'lista_proyectos' %}{% endif %}"
+            <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'lista_macroproyectos' %}{% endif %}"
                class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                ← Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}
+                ← Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}Macroproyectos & Circuitos{% endif %}
             </a>
         </div>
     </div>

@@ -83,7 +83,7 @@
 
         {% if puede_ver_ingenieria %}
         <!-- 1. Proyectos activos -->
-        <a href="{% url 'lista_proyectos' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E63F0]/50 transition-all flex flex-col justify-between group">
+        <a href="{% url 'lista_macroproyectos' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E63F0]/50 transition-all flex flex-col justify-between group">
             <div class="flex items-start justify-between">
                 <div class="size-9 rounded-lg bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -205,7 +205,7 @@
                 </svg>
                 <h2 class="font-bold text-sm text-[#1F2937]">Proyectos recientes</h2>
             </div>
-            <a href="{% url 'lista_proyectos' %}" class="text-[11px] font-semibold text-[#1E63F0] hover:underline flex items-center gap-0.5">
+            <a href="{% url 'lista_macroproyectos' %}" class="text-[11px] font-semibold text-[#1E63F0] hover:underline flex items-center gap-0.5">
                 Ver todos <span>→</span>
             </a>
         </div>

@@ -100,7 +100,6 @@
                 <th scope="col">Proyecto / Maniobra EMCALI</th>
                 <th scope="col">Proyecto / Maniobra COINTECA</th>
                 <th scope="col">Estado</th>
-                <th scope="col" class="text-center">Proyectos / Maniobras</th>
                 <th scope="col" class="text-center">Postes / Apoyos</th>
                 <th scope="col">Fecha creación</th>
                 <th scope="col" class="text-right">Acciones</th>
@@ -180,12 +179,6 @@
                     </td>
 
                     <td class="text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-primary-soft text-primary border border-blue-200">
-                            {{ item.num_proyectos }} {{ item.macro.etiqueta_hijo_plural|lower }}
-                        </span>
-                    </td>
-
-                    <td class="text-center">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                             {{ item.num_apoyos }} poste{{ item.num_apoyos|pluralize }}
                         </span>
@@ -242,7 +235,7 @@
                 </tr>
             {% empty %}
                 <tr id="filaVaciaServidor">
-                    <td colspan="8" class="estado-vacio py-10 text-center text-muted-foreground">
+                    <td colspan="7" class="estado-vacio py-10 text-center text-muted-foreground">
                         <div>
                             {% if query %}
                                 <p class="font-semibold text-foreground">No se encontraron registros que coincidan con «{{ query }}»</p>
@@ -258,7 +251,7 @@
                 </tr>
             {% endfor %}
             <tr id="sinResultadosLive" class="hidden">
-                <td colspan="8" class="estado-vacio py-8 text-center text-muted-foreground">
+                <td colspan="7" class="estado-vacio py-8 text-center text-muted-foreground">
                     No se encontraron registros con ese criterio de búsqueda.
                 </td>
             </tr>

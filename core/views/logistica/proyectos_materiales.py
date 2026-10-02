@@ -1,8 +1,27 @@
 import io
 import json
+import re
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+
+def extraer_potencia_luminaria(texto):
+    if not texto:
+        return ""
+    m = re.search(r'(?:DE\s+)?(\d+\s*W|6OW|\d+-\d+\s*W)', str(texto), re.IGNORECASE)
+    if m:
+        return m.group(1).upper().replace(" ", "").replace("6OW", "60W")
+    return ""
+
+def es_material_luminaria(material):
+    if not material or not getattr(material, 'descripcion', None):
+        return False
+    desc = material.descripcion.upper()
+    keywords = ["LUM", "SODIO", "NA ", "LED", "PROY", "FAROL"]
+    if any(k in desc for k in keywords):
+        return bool(extraer_potencia_luminaria(desc))
+    return False
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
@@ -297,12 +316,26 @@ def detalle_proyecto_logistica(request, proyecto_id):
     total_items_retirados = Decimal("0")
     total_devolucion = Decimal("0")
 
+    potencias_por_mat = {}
+    potencias_retiro_por_mat = {}
+    for am in ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto).select_related("material"):
+        pot = (am.potencia or "").strip()
+        if not pot and es_material_luminaria(am.material):
+            pot = extraer_potencia_luminaria(am.material.descripcion)
+        if pot:
+            potencias_por_mat.setdefault(am.material_id, set()).add(pot)
+            if am.cantidad_retirada > 0:
+                potencias_retiro_por_mat.setdefault(am.material_id, set()).add(pot)
+
     for mat in materiales_db:
         sum_req = req_map.get(mat.id, Decimal("0"))
         sum_inst = inst_map.get(mat.id, Decimal("0"))
         sum_ent = ent_map.get(mat.id, Decimal("0"))
         sum_ret = ret_map.get(mat.id, Decimal("0"))
         sum_dev_hecha = dev_map.get(mat.id, Decimal("0"))
+
+        pots = potencias_retiro_por_mat.get(mat.id) or potencias_por_mat.get(mat.id)
+        potencia_str = ", ".join(sorted(pots)) if pots else (extraer_potencia_luminaria(mat.descripcion) if es_material_luminaria(mat) else "")
 
         material_sobrante = max(Decimal("0"), sum_ent - sum_inst)
         material_sobrante_positivo = material_sobrante
@@ -315,6 +348,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
 
         balance_materiales.append({
             "material": mat,
+            "potencia": potencia_str,
             "requerido": sum_req,
             "instalado": sum_inst,
             "stock_bodega": stock_disponible,
@@ -1098,13 +1132,24 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else f"Sin {proyecto.etiqueta_padre}"
     fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
+    potencias_por_mat = {}
+    potencias_retiro_por_mat = {}
+    for am in ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto).select_related("material"):
+        pot = (am.potencia or "").strip()
+        if not pot and es_material_luminaria(am.material):
+            pot = extraer_potencia_luminaria(am.material.descripcion)
+        if pot:
+            potencias_por_mat.setdefault(am.material_id, set()).add(pot)
+            if am.cantidad_retirada > 0:
+                potencias_retiro_por_mat.setdefault(am.material_id, set()).add(pot)
+
     # ENCABEZADO INSTITUCIONAL
-    ws1.merge_cells("A1:J1")
+    ws1.merge_cells("A1:K1")
     ws1["A1"] = f"COINTECA S.A.S. — MATRIZ DE BALANCE Y LIQUIDACIÓN ({proyecto.etiqueta.upper()} {proyecto.numero_emcali})"
     ws1["A1"].font = font_titulo
     ws1["A1"].alignment = align_left
 
-    ws1.merge_cells("A2:J2")
+    ws1.merge_cells("A2:K2")
     ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
@@ -1113,6 +1158,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     headers1 = [
         "ÍTEM",
         "DESCRIPCIÓN DEL MATERIAL",
+        "POTENCIA / VOLTAJE",
         "UNIDAD",
         "MATERIALES REQUERIDOS",
         "SUMINISTRADO (ENTRADAS)",
@@ -1124,7 +1170,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     ]
     ws1.append(headers1)
 
-    for col in range(1, 11):
+    for col in range(1, 12):
         c = ws1.cell(row=4, column=col)
         c.font = font_header
         c.fill = fill_header
@@ -1150,6 +1196,9 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
         stock_obj = getattr(mat, "inventario", None)
         c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
+        pots = potencias_retiro_por_mat.get(mat.id) or potencias_por_mat.get(mat.id)
+        pot_str = ", ".join(sorted(pots)) if pots else (extraer_potencia_luminaria(mat.descripcion) if es_material_luminaria(mat) else "—")
+
         tot_req += c_req
         tot_ent += c_ent
         tot_inst += c_inst
@@ -1160,6 +1209,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
         ws1.append([
             mat.item or "",
             mat.descripcion,
+            pot_str,
             mat.unidad or "UN",
             fmt_v(c_req),
             fmt_v(c_ent),
@@ -1170,13 +1220,13 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
             fmt_v(c_stock),
         ])
 
-        for col in range(1, 11):
+        for col in range(1, 12):
             c = ws1.cell(row=row_idx, column=col)
             c.font = font_data
             c.border = border_cell
             if idx % 2 == 0:
                 c.fill = fill_zebra
-            if col in [1, 3]:
+            if col in [1, 3, 4]:
                 c.alignment = align_center
             elif col == 2:
                 c.alignment = align_left
@@ -1189,6 +1239,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     ws1.append([
         "",
         "TOTALES CONSOLIDADOS",
+        "",
         f"{len(materiales_db)} ÍTEMS",
         fmt_v(tot_req),
         fmt_v(tot_ent),
@@ -1198,12 +1249,12 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
         fmt_v(tot_dev),
         "—"
     ])
-    for col in range(1, 11):
+    for col in range(1, 12):
         c = ws1.cell(row=row_idx, column=col)
         c.font = font_total
         c.fill = fill_total
         c.border = border_total
-        if col in [1, 3, 10]:
+        if col in [1, 3, 4, 11]:
             c.alignment = align_center
         elif col == 2:
             c.alignment = align_left
@@ -1212,15 +1263,16 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
             c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
 
     ws1.column_dimensions["A"].width = 12
-    ws1.column_dimensions["B"].width = 46
-    ws1.column_dimensions["C"].width = 12
-    ws1.column_dimensions["D"].width = 22
-    ws1.column_dimensions["E"].width = 24
-    ws1.column_dimensions["F"].width = 22
-    ws1.column_dimensions["G"].width = 24
-    ws1.column_dimensions["H"].width = 22
-    ws1.column_dimensions["I"].width = 24
-    ws1.column_dimensions["J"].width = 18
+    ws1.column_dimensions["B"].width = 44
+    ws1.column_dimensions["C"].width = 20
+    ws1.column_dimensions["D"].width = 12
+    ws1.column_dimensions["E"].width = 22
+    ws1.column_dimensions["F"].width = 24
+    ws1.column_dimensions["G"].width = 22
+    ws1.column_dimensions["H"].width = 24
+    ws1.column_dimensions["I"].width = 22
+    ws1.column_dimensions["J"].width = 24
+    ws1.column_dimensions["K"].width = 18
 
     buffer = io.BytesIO()
     wb.save(buffer)
@@ -1335,13 +1387,24 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     macro_nom = proyecto.macroproyecto.nombre if proyecto.macroproyecto else f"Sin {proyecto.etiqueta_padre}"
     fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
+    potencias_por_mat = {}
+    potencias_retiro_por_mat = {}
+    for am in ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto).select_related("material"):
+        pot = (am.potencia or "").strip()
+        if not pot and es_material_luminaria(am.material):
+            pot = extraer_potencia_luminaria(am.material.descripcion)
+        if pot:
+            potencias_por_mat.setdefault(am.material_id, set()).add(pot)
+            if am.cantidad_retirada > 0:
+                potencias_retiro_por_mat.setdefault(am.material_id, set()).add(pot)
+
     # ENCABEZADO INSTITUCIONAL
-    ws1.merge_cells("A1:D1")
+    ws1.merge_cells("A1:E1")
     ws1["A1"] = f"COINTECA S.A.S. — MATERIALES A DEVOLVER ({proyecto.etiqueta.upper()} {proyecto.numero_emcali})"
     ws1["A1"].font = font_titulo
     ws1["A1"].alignment = align_left
 
-    ws1.merge_cells("A2:D2")
+    ws1.merge_cells("A2:E2")
     ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
@@ -1350,12 +1413,13 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     headers1 = [
         "ÍTEM",
         "DESCRIPCIÓN DEL MATERIAL",
+        "POTENCIA / VOLTAJE",
         "UNIDAD",
         "CANTIDAD A DEVOLVER",
     ]
     ws1.append(headers1)
 
-    for col in range(1, 5):
+    for col in range(1, 6):
         c = ws1.cell(row=4, column=col)
         c.font = font_header
         c.fill = fill_header
@@ -1385,23 +1449,27 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         if cant_mostrar <= 0:
             continue
 
+        pots = potencias_retiro_por_mat.get(mat.id) or potencias_por_mat.get(mat.id)
+        pot_mostrar = ", ".join(sorted(pots)) if pots else (extraer_potencia_luminaria(mat.descripcion) if es_material_luminaria(mat) else "—")
+
         filas_generadas += 1
         tot_cantidad += cant_mostrar
 
         ws1.append([
             mat.item or "",
             mat.descripcion,
+            pot_mostrar,
             mat.unidad or "UN",
             fmt_v(cant_mostrar),
         ])
 
-        for col in range(1, 5):
+        for col in range(1, 6):
             c = ws1.cell(row=row_idx, column=col)
             c.font = font_data
             c.border = border_cell
             if filas_generadas % 2 == 0:
                 c.fill = fill_zebra
-            if col in [1, 3]:
+            if col in [1, 3, 4]:
                 c.alignment = align_center
             elif col == 2:
                 c.alignment = align_left
@@ -1414,15 +1482,16 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     ws1.append([
         "",
         "TOTAL MATERIALES A DEVOLVER",
+        "",
         f"{filas_generadas} ÍTEMS",
         fmt_v(tot_cantidad),
     ])
-    for col in range(1, 5):
+    for col in range(1, 6):
         c = ws1.cell(row=row_idx, column=col)
         c.font = font_total
         c.fill = fill_total
         c.border = border_total
-        if col in [1, 3]:
+        if col in [1, 3, 4]:
             c.alignment = align_center
         elif col == 2:
             c.alignment = align_left
@@ -1431,15 +1500,117 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
             c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
 
     ws1.column_dimensions["A"].width = 14
-    ws1.column_dimensions["B"].width = 55
-    ws1.column_dimensions["C"].width = 14
-    ws1.column_dimensions["D"].width = 24
+    ws1.column_dimensions["B"].width = 50
+    ws1.column_dimensions["C"].width = 22
+    ws1.column_dimensions["D"].width = 14
+    ws1.column_dimensions["E"].width = 24
 
-    # HOJA 2: HISTORIAL DE ACTAS DE DEVOLUCIÓN (SI EXISTEN)
+    # HOJA 2: RETIROS DETALLADOS POR POSTE / APOYO (SI EXISTEN RETIROS EN APOYOS)
+    retiros_apoyos_db = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_retirada__gt=0)
+        .select_related("apoyo", "material")
+        .order_by("apoyo__numero_apoyo", "apoyo__nodo", "material__descripcion")
+    )
+    if retiros_apoyos_db.exists():
+        ws_ret = wb.create_sheet(title="Retiros por Poste")
+        ws_ret.merge_cells("A1:G1")
+        ws_ret["A1"] = f"DETALLE DE MATERIALES Y LUMINARIAS RETIRADAS POR POSTE — {proyecto.etiqueta.upper()} {proyecto.numero_emcali}"
+        ws_ret["A1"].font = font_titulo
+        ws_ret["A1"].alignment = align_left
+
+        ws_ret.merge_cells("A2:G2")
+        ws_ret["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  FECHA: {fecha_hoy}"
+        ws_ret["A2"].font = font_subtitulo
+        ws_ret["A2"].alignment = align_left
+
+        ws_ret.append([])
+        headers_ret = [
+            "NODO / APOYO",
+            "ÍTEM",
+            "MATERIAL RETIRADO",
+            "POTENCIA / VOLTAJE",
+            "CÓDIGO LUMINARIA",
+            "UNIDAD",
+            "CANTIDAD RETIRADA",
+        ]
+        ws_ret.append(headers_ret)
+        for col in range(1, 8):
+            c = ws_ret.cell(row=4, column=col)
+            c.font = font_header
+            c.fill = fill_header
+            c.alignment = align_center if col not in [3] else align_left
+            c.border = border_cell
+
+        r_ret_idx = 5
+        tot_ret_uds = Decimal("0")
+        for idx_r, ret_am in enumerate(retiros_apoyos_db, start=1):
+            tot_ret_uds += ret_am.cantidad_retirada
+            pot_am = (ret_am.potencia or "").strip() or (extraer_potencia_luminaria(ret_am.material.descripcion) if es_material_luminaria(ret_am.material) else "—")
+            cod_am = ret_am.codigo_luminaria or "—"
+            nodo_str = f"Nodo: {ret_am.apoyo.nodo or ret_am.apoyo.numero_apoyo or '—'}"
+            if ret_am.apoyo.numero_apoyo:
+                nodo_str += f" (Apoyo #{ret_am.apoyo.numero_apoyo})"
+
+            ws_ret.append([
+                nodo_str,
+                ret_am.material.item or "",
+                ret_am.material.descripcion,
+                pot_am,
+                cod_am,
+                ret_am.material.unidad or "UN",
+                fmt_v(ret_am.cantidad_retirada),
+            ])
+            for col in range(1, 8):
+                c = ws_ret.cell(row=r_ret_idx, column=col)
+                c.font = font_data
+                c.border = border_cell
+                if idx_r % 2 == 0:
+                    c.fill = fill_zebra
+                if col in [1, 2, 4, 5, 6]:
+                    c.alignment = align_center
+                elif col == 3:
+                    c.alignment = align_left
+                else:
+                    c.alignment = align_right
+                    c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+            r_ret_idx += 1
+
+        # Totales Retiros por Poste
+        ws_ret.append([
+            "",
+            "",
+            "TOTAL UNIDADES RETIRADAS",
+            "",
+            "",
+            f"{len(retiros_apoyos_db)} REGISTROS",
+            fmt_v(tot_ret_uds),
+        ])
+        for col in range(1, 8):
+            c = ws_ret.cell(row=r_ret_idx, column=col)
+            c.font = font_total
+            c.fill = fill_total
+            c.border = border_total
+            if col in [1, 2, 4, 5, 6]:
+                c.alignment = align_center
+            elif col == 3:
+                c.alignment = align_left
+            else:
+                c.alignment = align_right
+                c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
+
+        ws_ret.column_dimensions["A"].width = 24
+        ws_ret.column_dimensions["B"].width = 12
+        ws_ret.column_dimensions["C"].width = 48
+        ws_ret.column_dimensions["D"].width = 22
+        ws_ret.column_dimensions["E"].width = 20
+        ws_ret.column_dimensions["F"].width = 12
+        ws_ret.column_dimensions["G"].width = 20
+
+    # HOJA 3: HISTORIAL DE ACTAS DE DEVOLUCIÓN (SI EXISTEN)
     devoluciones_db = DevolucionMaterialProyecto.objects.filter(proyecto=proyecto).prefetch_related("detalles__material").order_by("-fecha", "-id")
     if devoluciones_db.exists():
         ws2 = wb.create_sheet(title="Historial de Actas")
-        ws2.merge_cells("A1:H1")
+        ws2.merge_cells("A1:I1")
         ws2["A1"] = f"HISTORIAL DE ACTAS Y COMPROBANTES DE DEVOLUCIÓN — PROYECTO {proyecto.numero_emcali}"
         ws2["A1"].font = font_titulo
         ws2["A1"].alignment = align_left
@@ -1451,39 +1622,44 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
             "RESPONSABLE / CUADRILLA",
             "ÍTEM",
             "MATERIAL",
+            "POTENCIA / VOLTAJE",
             "UNIDAD",
             "CANTIDAD DEVUELTA",
             "OBSERVACIONES",
         ]
         ws2.append(headers2)
 
-        for col in range(1, 9):
+        for col in range(1, 10):
             c = ws2.cell(row=3, column=col)
             c.font = font_header
             c.fill = fill_header
-            c.alignment = align_center if col not in [3, 5, 8] else align_left
+            c.alignment = align_center if col not in [3, 5, 9] else align_left
             c.border = border_cell
 
         r2_idx = 4
         for dev in devoluciones_db:
             for det in dev.detalles.all():
+                pots = potencias_retiro_por_mat.get(det.material_id) or potencias_por_mat.get(det.material_id)
+                pot_det = ", ".join(sorted(pots)) if pots else (extraer_potencia_luminaria(det.material.descripcion) if es_material_luminaria(det.material) else "—")
+
                 ws2.append([
                     dev.fecha.strftime('%d/%m/%Y') if dev.fecha else "",
                     dev.numero_acta or "—",
                     dev.responsable or "—",
                     det.material.item or "",
                     det.material.descripcion,
+                    pot_det,
                     det.material.unidad or "UN",
                     fmt_v(det.cantidad),
                     dev.observaciones or "",
                 ])
-                for col in range(1, 9):
+                for col in range(1, 10):
                     c = ws2.cell(row=r2_idx, column=col)
                     c.font = font_data
                     c.border = border_cell
-                    if col in [1, 2, 4, 6]:
+                    if col in [1, 2, 4, 6, 7]:
                         c.alignment = align_center
-                    elif col in [3, 5, 8]:
+                    elif col in [3, 5, 9]:
                         c.alignment = align_left
                     else:
                         c.alignment = align_right
@@ -1495,9 +1671,10 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         ws2.column_dimensions["C"].width = 28
         ws2.column_dimensions["D"].width = 12
         ws2.column_dimensions["E"].width = 44
-        ws2.column_dimensions["F"].width = 12
-        ws2.column_dimensions["G"].width = 20
-        ws2.column_dimensions["H"].width = 35
+        ws2.column_dimensions["F"].width = 20
+        ws2.column_dimensions["G"].width = 12
+        ws2.column_dimensions["H"].width = 20
+        ws2.column_dimensions["I"].width = 35
 
     buffer = io.BytesIO()
     wb.save(buffer)
@@ -2581,6 +2758,17 @@ def exportar_vista_global_excel(request):
             return 0
         return int(v) if v % 1 == 0 else float(v)
 
+    potencias_por_mat = {}
+    potencias_retiro_por_mat = {}
+    for am in ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope).select_related("material"):
+        pot = (am.potencia or "").strip()
+        if not pot and es_material_luminaria(am.material):
+            pot = extraer_potencia_luminaria(am.material.descripcion)
+        if pot:
+            potencias_por_mat.setdefault(am.material_id, set()).add(pot)
+            if am.cantidad_retirada > 0:
+                potencias_retiro_por_mat.setdefault(am.material_id, set()).add(pot)
+
     for idx, mat in enumerate(materiales_db, start=1):
         c_ent = ent_map.get(mat.id, Decimal("0"))
         c_inst = inst_map.get(mat.id, Decimal("0"))
@@ -2592,6 +2780,9 @@ def exportar_vista_global_excel(request):
         stock_obj = getattr(mat, "inventario", None)
         c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
 
+        pots = potencias_retiro_por_mat.get(mat.id) or potencias_por_mat.get(mat.id)
+        pot_str = ", ".join(sorted(pots)) if pots else (extraer_potencia_luminaria(mat.descripcion) if es_material_luminaria(mat) else "—")
+
         tot_ent += c_ent
         tot_inst += c_inst
         tot_ret += c_ret
@@ -2600,6 +2791,7 @@ def exportar_vista_global_excel(request):
         if c_dev > 0:
             materiales_devolucion.append({
                 "mat": mat,
+                "pot": pot_str,
                 "ent": c_ent,
                 "inst": c_inst,
                 "sob": c_sob_pos,
@@ -2831,17 +3023,18 @@ def exportar_vista_global_excel(request):
     # HOJA 3: DEVOLUCIÓN A BODEGA (REINTEGROS)
     if materiales_devolucion:
         ws3 = wb.create_sheet(title="Devolución a Bodega")
-        ws3.merge_cells("A1:I1")
+        ws3.merge_cells("A1:J1")
         ws3["A1"] = f"COINTECA S.A.S. — MATERIALES DE DEVOLUCIÓN A BODEGA ({nombre_scope})"
         ws3["A1"].font = font_titulo
         ws3["A1"].alignment = align_left
 
-        ws3.merge_cells("A2:I2")
+        ws3.merge_cells("A2:J2")
         ws3["A2"] = f"MATERIALES SOBRANTES Y DESINSTALADOS CONSOLIDADOS PARA DEVOLUCIÓN  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
         ws3.append([])
         ws3_headers = [
             "ÍTEM",
             "DESCRIPCIÓN DEL MATERIAL",
+            "POTENCIA / VOLTAJE",
             "UNIDAD",
             "SUMINISTRADO (ENTRADAS)",
             "INSTALADO EN POSTES",
@@ -2852,11 +3045,11 @@ def exportar_vista_global_excel(request):
         ]
         ws3.append(ws3_headers)
 
-        for col in range(1, 10):
+        for col in range(1, 11):
             c = ws3.cell(row=4, column=col)
             c.font = font_header
             c.fill = fill_header
-            c.alignment = align_center if col != 2 else align_left
+            c.alignment = align_center if col not in [2] else align_left
             c.border = border_cell
 
         row3_idx = 5
@@ -2876,6 +3069,7 @@ def exportar_vista_global_excel(request):
             ws3.append([
                 d["mat"].item or "",
                 d["mat"].descripcion,
+                d.get("pot", "—"),
                 d["mat"].unidad or "UN",
                 fmt_v(d["ent"]),
                 fmt_v(d["inst"]),
@@ -2885,13 +3079,13 @@ def exportar_vista_global_excel(request):
                 fmt_v(d["stock"])
             ])
 
-            for col in range(1, 10):
+            for col in range(1, 11):
                 c = ws3.cell(row=row3_idx, column=col)
                 c.font = font_data
                 c.border = border_cell
                 if idx % 2 == 0:
                     c.fill = fill_zebra
-                if col in [1, 3]:
+                if col in [1, 3, 4]:
                     c.alignment = align_center
                 elif col == 2:
                     c.alignment = align_left
@@ -2903,6 +3097,7 @@ def exportar_vista_global_excel(request):
         ws3.append([
             "",
             "TOTAL A DEVOLVER A BODEGA",
+            "",
             f"{len(materiales_devolucion)} ÍTEMS",
             fmt_v(tot_d_ent),
             fmt_v(tot_d_inst),
@@ -2911,12 +3106,12 @@ def exportar_vista_global_excel(request):
             fmt_v(tot_d_dev),
             "—"
         ])
-        for col in range(1, 10):
+        for col in range(1, 11):
             c = ws3.cell(row=row3_idx, column=col)
             c.font = font_total
             c.fill = fill_total
             c.border = border_total
-            if col in [1, 3, 9]:
+            if col in [1, 3, 4, 10]:
                 c.alignment = align_center
             elif col == 2:
                 c.alignment = align_left
@@ -2925,12 +3120,15 @@ def exportar_vista_global_excel(request):
                 c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
 
         ws3.column_dimensions["A"].width = 12
-        ws3.column_dimensions["B"].width = 48
-        ws3.column_dimensions["C"].width = 12
-        ws3.column_dimensions["D"].width = 24
-        ws3.column_dimensions["E"].width = 22
-        ws3.column_dimensions["F"].width = 28
-        ws3.column_dimensions["G"].width = 20
+        ws3.column_dimensions["B"].width = 46
+        ws3.column_dimensions["C"].width = 20
+        ws3.column_dimensions["D"].width = 12
+        ws3.column_dimensions["E"].width = 24
+        ws3.column_dimensions["F"].width = 22
+        ws3.column_dimensions["G"].width = 22
+        ws3.column_dimensions["H"].width = 22
+        ws3.column_dimensions["I"].width = 20
+        ws3.column_dimensions["J"].width = 20
 
     buffer = io.BytesIO()
     wb.save(buffer)

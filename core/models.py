@@ -1181,6 +1181,8 @@ class ApoyoMaterial(models.Model):
     material = models.ForeignKey(Material, on_delete=models.PROTECT, related_name="apoyos")
     cantidad_requerida = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cantidad Instalada")
     cantidad_retirada = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cantidad Retirada")
+    potencia = models.CharField(max_length=50, blank=True, null=True, verbose_name="Potencia (W)")
+    codigo_luminaria = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código Luminaria")
 
     class Meta:
         verbose_name = "Material por Apoyo"

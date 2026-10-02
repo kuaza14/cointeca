@@ -222,8 +222,9 @@
                             <th class="px-2 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px]" title="Cantidad de Retenidas mecánicas (tirantes/riostras del poste)">CANT. RETENIDAS</th>
                             <th class="px-2 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[95px]" title="Metros de cable de retenida instalados">METROS RETENIDA</th>
                             {% else %}
-                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px]">POT. INST.</th>
-                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[150px]">CÓDIGO LUM. INST.</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[100px]">POT. INST.</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[140px]">CÓDIGO LUM. INST.</th>
+                            <th class="px-3 py-3 border-r border-gray-700 text-center whitespace-nowrap min-w-[110px] bg-amber-950 text-amber-200" title="Potencia de luminaria(s) o proyector(es) retirados en este poste">POT. RETIRADA</th>
                             {% endif %}
 
                             {% for mat in materiales_columnas %}
@@ -334,6 +335,18 @@
                                     {% endfor %}
                                 </div>
                             </td>
+
+                            <td class="px-3 py-2.5 text-center border-r border-border align-top bg-amber-50/20">
+                                <div class="flex flex-col gap-1 items-center justify-center">
+                                    {% for pot in fila.potencias_retiradas %}
+                                        <span class="inline-block px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-[11px] whitespace-nowrap shadow-2xs">
+                                            ⚡ {{ pot }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-gray-400 font-normal">—</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
                             {% endif %}
 
                             {% for celda in fila.celdas %}
@@ -394,7 +407,7 @@
                             <td class="sticky-col-apoyo-footer px-1 py-3 text-center text-xs text-slate-400 font-bold border-r border-slate-700">
                                 —
                             </td>
-                            <td colspan="{% if proyecto.es_mt %}5{% else %}4{% endif %}" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
+                            <td colspan="5" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-amber-300 font-black border-r border-slate-700">
                                 TOTAL MATERIALES {{ proyecto.etiqueta|upper }}:
                             </td>
                             {% for tot in fila_totales %}
@@ -994,32 +1007,6 @@
                     </div>
                     {% endif %}
 
-                    <!-- LUMINARIAS -->
-                    <div class="border-t border-border pt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
-                                Luminarias Instaladas en este Apoyo
-                            </label>
-                            <button type="button" id="btnAgregarLuminaria"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition">
-                                <span>➕</span> Agregar luminaria
-                            </button>
-                        </div>
-                        <div class="overflow-x-auto border border-border rounded-lg">
-                            <table class="min-w-full divide-y border-border text-xs">
-                                <thead class="bg-neutral text-xs font-bold text-white uppercase">
-                                    <tr>
-                                        <th class="px-3 py-2 text-left">Potencia</th>
-                                        <th class="px-3 py-2 text-left">Código luminaria</th>
-                                        <th class="px-3 py-2 text-center w-16">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="filasLuminarias" class="divide-y divide-border bg-card">
-                                    <!-- Inyectado dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
                     <!-- RECUADRO ÁMBAR: DESPACHO DIRECTO DESDE BODEGA CENTRAL (MODO EDICIÓN) -->
                     <div id="seccionDespachoBodega" class="border-t border-amber-200 pt-4 hidden">
@@ -1121,7 +1108,7 @@
         <select class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
             <option value="">-- Seleccionar material de bodega --</option>
             {% for mat in materiales_catalogo %}
-                <option value="{{ mat.id }}">
+                <option value="{{ mat.id }}" data-es-luminaria="{% if mat.es_luminaria %}1{% else %}0{% endif %}" data-potencia="{{ mat.potencia_sugerida|default:'' }}">
                     [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% elif mat.inventario.cantidad < 0 %}[⚠️ Déficit: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[⚠️ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                 </option>
             {% endfor %}
@@ -1209,7 +1196,9 @@ const apoyosData = {
             {
                 "material_id": "{{ m.material_id }}",
                 "cant_inst": "{{ m.cantidad_requerida|unlocalize|default:'' }}",
-                "cant_ret": "{{ m.cantidad_retirada|unlocalize|default:'' }}"
+                "cant_ret": "{{ m.cantidad_retirada|unlocalize|default:'' }}",
+                "potencia": "{{ m.potencia|default:''|escapejs }}",
+                "codigo": "{{ m.codigo_luminaria|default:''|escapejs }}"
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ]
@@ -1273,44 +1262,123 @@ function crearFilaMO(itemId = '', cantidad = '1', observacion = '') {
     return tr;
 }
 
-function crearFilaLuminaria(potencia = '', codigo = '') {
-    const tr = document.createElement('tr');
-    tr.className = 'fila-luminaria';
-    tr.innerHTML = `
-        <td class="px-3 py-2">
-            <input type="text" name="potencia[]" value="${potencia}" placeholder="Ej: 90W"
-                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
-        </td>
-        <td class="px-3 py-2">
-            <input type="text" name="codigo_luminaria[]" value="${codigo}" placeholder="Ej: 123456"
-                   class="w-full border border-border rounded-lg px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground">
-        </td>
-        <td class="px-3 py-2 text-center">
-            <button type="button" class="btnEliminarLuminaria text-destructive hover:text-red-800 text-lg font-bold p-1 rounded">&times;</button>
-        </td>
-    `;
-    return tr;
+function extraerPotenciaDeTexto(texto) {
+    if (!texto) return '';
+    const m = String(texto).match(/(?:DE\s+)?(\d+\s*W|6OW|\d+-\d+\s*W)/i);
+    if (m) {
+        return m[1].toUpperCase().replace(/\s+/g, '').replace('6OW', '60W');
+    }
+    return '';
 }
 
-function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '') {
+function esLuminariaTexto(texto) {
+    if (!texto) return false;
+    const t = String(texto).toUpperCase();
+    return (t.includes('LUM') || t.includes('SODIO') || t.includes('NA ') || t.includes('LED') || t.includes('PROY') || t.includes('FAROL')) && Boolean(extraerPotenciaDeTexto(t));
+}
+
+function onSelectMaterialNodo(selectEl) {
+    const td = selectEl.closest('td');
+    if (!td) return;
+    const opt = selectEl.options[selectEl.selectedIndex];
+    const contenedor = td.querySelector('.contenedor-potencia-mat');
+    const inputVisible = td.querySelector('.input-potencia-material');
+    const inputCodigo = td.querySelector('.input-codigo-material');
+    const inputVacio = td.querySelector('.input-potencia-vacia');
+    const inputCodigoVacio = td.querySelector('.input-codigo-vacio');
+    if (!contenedor || !inputVisible || !inputVacio) return;
+
+    const esLuminaria = opt && (opt.dataset.esLuminaria === '1' || esLuminariaTexto(opt.text));
+    const potenciaSugerida = opt ? (opt.dataset.potencia || extraerPotenciaDeTexto(opt.text)) : '';
+
+    if (esLuminaria) {
+        contenedor.classList.remove('hidden');
+        inputVisible.disabled = false;
+        if (inputCodigo) inputCodigo.disabled = false;
+        inputVacio.disabled = true;
+        inputVacio.classList.add('hidden');
+        if (inputCodigoVacio) {
+            inputCodigoVacio.disabled = true;
+            inputCodigoVacio.classList.add('hidden');
+        }
+        inputVisible.value = potenciaSugerida;
+    } else {
+        contenedor.classList.add('hidden');
+        inputVisible.disabled = true;
+        inputVisible.value = '';
+        if (inputCodigo) {
+            inputCodigo.disabled = true;
+            inputCodigo.value = '';
+        }
+        inputVacio.disabled = false;
+        inputVacio.classList.remove('hidden');
+        inputVacio.value = '';
+        if (inputCodigoVacio) {
+            inputCodigoVacio.disabled = false;
+            inputCodigoVacio.classList.remove('hidden');
+            inputCodigoVacio.value = '';
+        }
+    }
+}
+
+function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potencia = '', codigo = '') {
     const tr = document.createElement('tr');
     tr.className = 'fila-material-nodo';
 
     const templateSelect = document.querySelector('#templateSelectMaterial select');
     let optionsHtml = '';
+    let selectedPotencia = potencia || '';
+    let selectedCodigo = codigo || '';
+    let selectedEsLuminaria = false;
+
     if (templateSelect) {
         Array.from(templateSelect.options).forEach(opt => {
-            const selected = (materialId && String(opt.value) === String(materialId)) ? 'selected' : '';
-            optionsHtml += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
+            const isSel = (materialId && String(opt.value) === String(materialId));
+            const selected = isSel ? 'selected' : '';
+            const esLumOpt = opt.dataset.esLuminaria === '1' || esLuminariaTexto(opt.text);
+            const potOpt = opt.dataset.potencia || extraerPotenciaDeTexto(opt.text);
+            if (isSel) {
+                selectedEsLuminaria = esLumOpt;
+                if (!selectedPotencia && potOpt) {
+                    selectedPotencia = potOpt;
+                }
+            }
+            optionsHtml += `<option value="${opt.value}" data-es-luminaria="${esLumOpt ? '1' : '0'}" data-potencia="${potOpt}" ${selected}>${opt.text}</option>`;
         });
     }
 
+    const mostrarPotencia = selectedEsLuminaria || Boolean(selectedPotencia) || Boolean(selectedCodigo);
+
     tr.innerHTML = `
         <td class="px-3 py-2">
-            <select name="material_id[]"
-                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+            <select name="material_id[]" onchange="onSelectMaterialNodo(this)"
+                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none select-material-nodo">
                 ${optionsHtml}
             </select>
+            <div class="contenedor-potencia-mat mt-1.5 ${mostrarPotencia ? '' : 'hidden'}">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-amber-50/90 border border-amber-300 rounded-lg p-2 shadow-2xs">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">
+                            ⚡ Potencia:
+                        </span>
+                        <input type="text" name="potencia_material[]" value="${selectedPotencia}" placeholder="Ej: 70W, 190W..."
+                               ${mostrarPotencia ? '' : 'disabled'}
+                               class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none input-potencia-material"
+                               title="Potencia de la luminaria (para instalación y retiro)">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">
+                            🏷️ Código:
+                        </span>
+                        <input type="text" name="codigo_luminaria_material[]" value="${selectedCodigo}" placeholder="Ej: 123456"
+                               ${mostrarPotencia ? '' : 'disabled'}
+                               class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none input-codigo-material"
+                               title="Código de la luminaria instalada en el poste">
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="potencia_material[]" value="" class="input-potencia-vacia ${mostrarPotencia ? 'hidden' : ''}" ${mostrarPotencia ? 'disabled' : ''}>
+            <input type="hidden" name="codigo_luminaria_material[]" value="" class="input-codigo-vacio ${mostrarPotencia ? 'hidden' : ''}" ${mostrarPotencia ? 'disabled' : ''}>
         </td>
         <td class="px-3 py-2">
             <input type="number" step="any" min="0" name="cantidad_instalada[]" value="${cantInst}" placeholder="0.00"
@@ -1400,10 +1468,6 @@ function abrirModalNuevoApoyo() {
     document.getElementById('modalApoyo_observacion').value = '';
     const infoRetNew = document.getElementById('modalApoyo_retenida_info');
     if (infoRetNew) infoRetNew.innerHTML = 'Cable EAR 3/8" (Ítem 43)';
-
-    const tbodyLum = document.getElementById('filasLuminarias');
-    tbodyLum.innerHTML = '';
-    tbodyLum.appendChild(crearFilaLuminaria());
 
     const tbodyMat = document.getElementById('filasMaterialesNodo');
     tbodyMat.innerHTML = '';
@@ -1517,16 +1581,6 @@ function abrirModalEditarApoyo(apoyoId) {
     }
     recalcularMetrosRetenidaModal();
 
-    const tbodyLum = document.getElementById('filasLuminarias');
-    tbodyLum.innerHTML = '';
-    if (data.luminarias && data.luminarias.length > 0) {
-        data.luminarias.forEach(lum => {
-            tbodyLum.appendChild(crearFilaLuminaria(lum.potencia, lum.codigo));
-        });
-    } else {
-        tbodyLum.appendChild(crearFilaLuminaria());
-    }
-
     const tbodyMat = document.getElementById('filasMaterialesNodo');
     tbodyMat.innerHTML = '';
     if (data.materiales && data.materiales.length > 0) {
@@ -1536,7 +1590,11 @@ function abrirModalEditarApoyo(apoyoId) {
             if (MAT_CABLE_ID && String(m.material_id) === String(MAT_CABLE_ID)) {
                 return;
             }
-            tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret));
+            let codLum = m.codigo || '';
+            if (!codLum && data.luminarias && data.luminarias.length > 0 && parseFloat(m.cant_inst) > 0) {
+                codLum = data.luminarias[0].codigo || '';
+            }
+            tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret, m.potencia, codLum));
             matsAgregados++;
         });
         if (matsAgregados === 0) {
@@ -1822,27 +1880,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Luminarias dinámicas (Botón agregar)
-    const btnAgregarLuminaria = document.getElementById("btnAgregarLuminaria");
-    const filasLuminarias = document.getElementById("filasLuminarias");
-    if (btnAgregarLuminaria && filasLuminarias) {
-        btnAgregarLuminaria.addEventListener("click", function () {
-            filasLuminarias.appendChild(crearFilaLuminaria());
-        });
-
-        filasLuminarias.addEventListener("click", function (event) {
-            const botonEliminar = event.target.closest(".btnEliminarLuminaria");
-            if (botonEliminar) {
-                const fila = botonEliminar.closest(".fila-luminaria");
-                const totalFilas = filasLuminarias.querySelectorAll(".fila-luminaria");
-                if (totalFilas.length > 1) {
-                    if (fila) fila.remove();
-                } else if (fila) {
-                    fila.querySelectorAll('input').forEach(inp => inp.value = '');
-                }
-            }
-        });
-    }
 
     // Materiales dinámicos (Botón agregar)
     const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
@@ -1862,7 +1899,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     const fila = btnEliminar.closest(".fila-material-nodo");
                     if (fila) {
                         const sel = fila.querySelector('select[name="material_id[]"]');
-                        if (sel) sel.selectedIndex = 0;
+                        if (sel) {
+                            sel.selectedIndex = 0;
+                            onSelectMaterialNodo(sel);
+                        }
                         const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
                         if (inInst) inInst.value = '';
                         const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
@@ -1903,9 +1943,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Inicializar con 1 fila si están vacíos al cargar
-    if (filasLuminarias && filasLuminarias.children.length === 0) {
-        filasLuminarias.appendChild(crearFilaLuminaria());
-    }
     if (filasMaterialesNodo && filasMaterialesNodo.children.length === 0) {
         filasMaterialesNodo.appendChild(crearFilaMaterial());
     }

@@ -68,10 +68,6 @@
                     <span>+ Entrada Material</span>
                 </a>
 
-                <a href="{% url 'registrar_retiro_material' proyecto.id %}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                    <span>+ Registrar Retiro</span>
-                </a>
 
                 <a href="{% url 'detalle_proyecto' proyecto.id %}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
@@ -304,7 +300,16 @@
                         {% for fila in materiales_devolucion %}
                         <tr class="hover:bg-amber-50/40 transition">
                             <td class="px-4 py-3 font-mono text-muted-foreground font-bold">{{ fila.material.item }}</td>
-                            <td class="px-5 py-3 font-semibold text-foreground text-sm">{{ fila.material.descripcion }}</td>
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                                <div>{{ fila.material.descripcion }}</div>
+                                {% if fila.potencia %}
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                                        ⚡ Potencia/Voltaje: {{ fila.potencia }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </td>
                             <td class="px-3 py-3 text-center font-bold text-muted-foreground">{{ fila.material.unidad|default:"UN" }}</td>
                             <td class="px-4 py-3 text-right font-bold text-emerald-700 bg-emerald-50/20 text-sm">
                                 {{ fila.entrada|default:0|floatformat }}
@@ -628,10 +633,6 @@
                     <p class="text-xs text-muted-foreground">Listado de materiales antiguos bajados de cada poste durante la ejecución de la obra.</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="{% url 'registrar_retiro_material' proyecto.id %}"
-                       class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
-                        + Registrar Retiro / Desmonte
-                    </a>
                     <a href="{% url 'detalle_proyecto' proyecto.id %}"
                        class="px-3.5 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm transition">
                         Ver Matriz en Ingeniería
@@ -699,7 +700,23 @@
                                 {% if ret.apoyo.numero_apoyo %}<span class="text-muted-foreground text-[10px]">(Apoyo #{{ ret.apoyo.numero_apoyo }})</span>{% endif %}
                             </td>
                             <td class="px-4 py-3 font-mono text-muted-foreground">{{ ret.material.item }}</td>
-                            <td class="px-5 py-3 font-semibold text-foreground text-sm">{{ ret.material.descripcion }}</td>
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                                <div>{{ ret.material.descripcion }}</div>
+                                {% if ret.potencia or ret.codigo_luminaria %}
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    {% if ret.potencia %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                                        ⚡ Potencia/Voltaje: {{ ret.potencia }}
+                                    </span>
+                                    {% endif %}
+                                    {% if ret.codigo_luminaria %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
+                                        🏷️ {{ ret.codigo_luminaria }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </td>
                             <td class="px-3 py-3 text-center font-bold text-muted-foreground">{{ ret.material.unidad|default:"UN" }}</td>
                             <td class="px-4 py-3 text-right font-black text-amber-900 bg-amber-50/30 text-sm">
                                 {{ ret.cantidad_retirada|floatformat }}
@@ -974,6 +991,11 @@
                                 <td class="px-4 py-2.5">
                                     <input type="hidden" name="material_id[]" value="{{ fila.material.id }}">
                                     <span class="font-semibold text-xs text-gray-900">{{ fila.material.descripcion }}</span>
+                                    {% if fila.potencia %}
+                                    <span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                        ⚡ {{ fila.potencia }}
+                                    </span>
+                                    {% endif %}
                                     <div class="text-[10px] text-gray-500 mt-0.5">
                                         Sobrante: {{ fila.material_sobrante_positivo|floatformat }} | Retirado: {{ fila.material_desinstalado|floatformat }}
                                     </div>

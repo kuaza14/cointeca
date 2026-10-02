@@ -3,7 +3,26 @@ from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo
 from core.helpers.inventario_historial import registrar_movimiento_inventario
 import io
 import os
+import re
 import openpyxl
+
+def extraer_potencia_luminaria(texto):
+    if not texto:
+        return ""
+    m = re.search(r'(?:DE\s+)?(\d+\s*W|6OW|\d+-\d+\s*W)', str(texto), re.IGNORECASE)
+    if m:
+        return m.group(1).upper().replace(" ", "").replace("6OW", "60W")
+    return ""
+
+def es_material_luminaria(material):
+    if not material or not getattr(material, 'descripcion', None):
+        return False
+    desc = material.descripcion.upper()
+    keywords = ["LUM", "SODIO", "NA ", "LED", "PROY", "FAROL"]
+    if any(k in desc for k in keywords):
+        return bool(extraer_potencia_luminaria(desc))
+    return False
+
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -439,10 +458,20 @@ def detalle_proyecto(request, id):
             totales_inst_columna[mat.id] += cant_inst
             totales_ret_columna[mat.id] += cant_ret
 
+        # Obtener potencias de luminarias/proyectores retirados
+        mats_asoc = apoyo_materiales_map.get(ap.id, [])
+        potencias_retiradas = []
+        for am in mats_asoc:
+            if am.cantidad_retirada > 0:
+                pot = (am.potencia or "").strip() or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else "")
+                if pot and pot not in potencias_retiradas:
+                    potencias_retiradas.append(pot)
+
         filas_matriz.append({
             "apoyo": ap,
             "celdas": celdas,
-            "materiales_asociados": apoyo_materiales_map.get(ap.id, []),
+            "materiales_asociados": mats_asoc,
+            "potencias_retiradas": potencias_retiradas,
         })
 
     fila_totales = []
@@ -548,6 +577,9 @@ def detalle_proyecto(request, id):
         presupuesto.save(update_fields=['valor_mano_obra', 'valor_total'])
 
     materiales_catalogo = list(Material.objects.select_related('inventario').all().order_by("descripcion"))
+    for mat in materiales_catalogo:
+        mat.potencia_sugerida = extraer_potencia_luminaria(mat.descripcion)
+        mat.es_luminaria = es_material_luminaria(mat)
     catalogo_mo_todos = list(ItemManoObra.objects.all().order_by("codigo"))
     empleados = list(Empleado.objects.filter(estado="activo").order_by("nombre_completo"))
 
@@ -682,17 +714,6 @@ def crear_apoyo(request, proyecto_id):
             estado=estado
         )
 
-        potencias = request.POST.getlist("potencia[]")
-        codigos = request.POST.getlist("codigo_luminaria[]")
-
-        for potencia, codigo in zip(potencias, codigos):
-            if potencia.strip() or codigo.strip():
-                ApoyoLuminaria.objects.create(
-                    apoyo=apoyo,
-                    potencia=potencia.strip(),
-                    codigo=codigo.strip()
-                )
-
         # Material cable retenida para no duplicarlo si se ingresa manualmente
         mat_cable_obj = (
             Material.objects.filter(item="43").first()
@@ -704,6 +725,8 @@ def crear_apoyo(request, proyecto_id):
         materiales_ids = request.POST.getlist("material_id[]")
         cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
         cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+        potencias_mat = request.POST.getlist("potencia_material[]")
+        codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
 
         materiales_creados = 0
         for i, mat_id in enumerate(materiales_ids):
@@ -727,6 +750,9 @@ def crear_apoyo(request, proyecto_id):
                 if c_inst <= 0 and c_ret <= 0:
                     continue
 
+                pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
+                cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
+
                 inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
                 if c_inst > 0:
                     inventario.cantidad -= c_inst
@@ -741,10 +767,32 @@ def crear_apoyo(request, proyecto_id):
                     material_id=mat_id,
                     cantidad_requerida=max(Decimal("0"), c_inst),
                     cantidad_retirada=max(Decimal("0"), c_ret),
+                    potencia=pot_val,
+                    codigo_luminaria=cod_val,
                 )
                 materiales_creados += 1
             except (ValueError, TypeError, ArithmeticError):
                 continue
+
+        # Sincronizar Luminarias para vistas y formatos que consultan apoyo.luminarias
+        for am in apoyo.materiales.select_related("material").all():
+            if am.cantidad_requerida > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
+                ApoyoLuminaria.objects.create(
+                    apoyo=apoyo,
+                    potencia=am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else ""),
+                    codigo=am.codigo_luminaria or ""
+                )
+
+        if not apoyo.luminarias.exists():
+            potencias = request.POST.getlist("potencia[]")
+            codigos = request.POST.getlist("codigo_luminaria[]")
+            for potencia, codigo in zip(potencias, codigos):
+                if potencia.strip() or codigo.strip():
+                    ApoyoLuminaria.objects.create(
+                        apoyo=apoyo,
+                        potencia=potencia.strip(),
+                        codigo=codigo.strip()
+                    )
 
         # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
         sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
@@ -813,18 +861,6 @@ def editar_apoyo(request, apoyo_id):
 
         apoyo.save()
 
-        # Actualizar Luminarias
-        apoyo.luminarias.all().delete()
-        potencias = request.POST.getlist("potencia[]")
-        codigos = request.POST.getlist("codigo_luminaria[]")
-        for potencia, codigo in zip(potencias, codigos):
-            if potencia.strip() or codigo.strip():
-                ApoyoLuminaria.objects.create(
-                    apoyo=apoyo,
-                    potencia=potencia.strip(),
-                    codigo=codigo.strip()
-                )
-
         # Material cable retenida para no duplicarlo si se ingresa manualmente
         mat_cable_obj = (
             Material.objects.filter(item="43").first()
@@ -836,6 +872,8 @@ def editar_apoyo(request, apoyo_id):
         materiales_ids = request.POST.getlist("material_id[]")
         cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
         cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+        potencias_mat = request.POST.getlist("potencia_material[]")
+        codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
 
         materiales_actuales = {am.material_id: am for am in apoyo.materiales.all()}
         materiales_nuevos_procesados = set()
@@ -862,6 +900,9 @@ def editar_apoyo(request, apoyo_id):
                 if c_inst <= 0 and c_ret <= 0:
                     continue
 
+                pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
+                cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
+
                 inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
 
                 if mat_id_int in materiales_actuales:
@@ -878,6 +919,8 @@ def editar_apoyo(request, apoyo_id):
 
                     am.cantidad_requerida = max(Decimal("0"), c_inst)
                     am.cantidad_retirada = max(Decimal("0"), c_ret)
+                    am.potencia = pot_val
+                    am.codigo_luminaria = cod_val
                     am.save()
                 else:
                     if c_inst > 0:
@@ -893,6 +936,8 @@ def editar_apoyo(request, apoyo_id):
                         material_id=mat_id_int,
                         cantidad_requerida=max(Decimal("0"), c_inst),
                         cantidad_retirada=max(Decimal("0"), c_ret),
+                        potencia=pot_val,
+                        codigo_luminaria=cod_val,
                     )
 
                 materiales_nuevos_procesados.add(mat_id_int)
@@ -911,6 +956,27 @@ def editar_apoyo(request, apoyo_id):
                     inv_del.cantidad -= am.cantidad_retirada
                 inv_del.save()
                 am.delete()
+
+        # Actualizar Luminarias instaladas para vistas y reportes que consulten apoyo.luminarias
+        apoyo.luminarias.all().delete()
+        for am in apoyo.materiales.select_related("material").all():
+            if am.cantidad_requerida > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
+                ApoyoLuminaria.objects.create(
+                    apoyo=apoyo,
+                    potencia=am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else ""),
+                    codigo=am.codigo_luminaria or ""
+                )
+
+        if not apoyo.luminarias.exists():
+            potencias = request.POST.getlist("potencia[]")
+            codigos = request.POST.getlist("codigo_luminaria[]")
+            for potencia, codigo in zip(potencias, codigos):
+                if potencia.strip() or codigo.strip():
+                    ApoyoLuminaria.objects.create(
+                        apoyo=apoyo,
+                        potencia=potencia.strip(),
+                        codigo=codigo.strip()
+                    )
 
         # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
         sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
@@ -1415,7 +1481,36 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
             c5.value = apoyo.brazo or "2"
             c5.font = font_brazo
 
-            # Cols 6..51: quedan vacías para llenado en terreno
+            # Col 6: CÓDIGO LUM.INST
+            if lum and lum.codigo:
+                c6 = sheet.cell(r, 6)
+                c6.value = lum.codigo
+                c6.font = font_potencia
+
+            # Cols 39 y 40: POTENCIA RETIRADA LUMI y PROYECTOR (Sección RETIRADO)
+            pot_ret_lumi = []
+            pot_ret_proye = []
+            for am in apoyo.materiales.select_related("material").all():
+                if am.cantidad_retirada > 0:
+                    desc_mat = (am.material.descripcion if am.material else "").upper()
+                    pot = (am.potencia or "").strip() or (extraer_potencia_luminaria(desc_mat) if es_material_luminaria(am.material) else "")
+                    if pot:
+                        if "PROY" in desc_mat:
+                            pot_ret_proye.append(pot)
+                        else:
+                            pot_ret_lumi.append(pot)
+
+            if pot_ret_lumi:
+                c39 = sheet.cell(r, 39)
+                c39.value = ", ".join(pot_ret_lumi)
+                c39.font = font_potencia
+
+            if pot_ret_proye:
+                c40 = sheet.cell(r, 40)
+                c40.value = ", ".join(pot_ret_proye)
+                c40.font = font_potencia
+
+            # Resto de columnas quedan para llenado en terreno
 
         # Ajuste de impresión para que encaje exactamente en 1 sola hoja de oficio (Legal) apaisada
         sheet.page_setup.orientation = sheet.ORIENTATION_LANDSCAPE

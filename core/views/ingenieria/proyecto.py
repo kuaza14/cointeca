@@ -23,6 +23,7 @@ from core.models import (
     Inventario,
     EntradaMaterialProyecto,
     DetalleEntradaMaterial,
+    DetalleDevolucionMaterial,
     ItemManoObra,
     ApoyoManoObra,
     Presupuesto,
@@ -462,6 +463,55 @@ def detalle_proyecto(request, id):
                 "cantidad_retirada": tot_ret,
             })
 
+    # Entradas suministradas a este proyecto y devoluciones
+    ent_qs = (
+        DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    ent_map = {item["material_id"]: item["total"] for item in ent_qs}
+
+    dev_qs = (
+        DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
+        .values("material_id")
+        .annotate(total=Sum("cantidad"))
+    )
+    dev_map = {item["material_id"]: item["total"] for item in dev_qs}
+
+    todos_mat_ids_dev = set(totales_ret_columna.keys()) | set(ent_map.keys())
+    mats_dev_db = Material.objects.filter(id__in=todos_mat_ids_dev).select_related("inventario")
+    mats_dev_map = {m.id: m for m in mats_dev_db}
+
+    tabla_resumen_devolucion = []
+    for m_id in sorted(
+        todos_mat_ids_dev,
+        key=lambda mid: (mats_dev_map.get(mid).item or "", mats_dev_map.get(mid).descripcion or "")
+        if mid in mats_dev_map else ("", "")
+    ):
+        mat = mats_dev_map.get(m_id)
+        if not mat:
+            continue
+        c_ent = ent_map.get(m_id, Decimal("0"))
+        c_inst = totales_inst_columna.get(m_id, Decimal("0"))
+        c_ret = totales_ret_columna.get(m_id, Decimal("0"))
+        c_dev_hecha = dev_map.get(m_id, Decimal("0"))
+        c_sob = max(Decimal("0"), c_ent - c_inst)
+        c_total_dev = max(Decimal("0"), (c_sob + c_ret) - c_dev_hecha)
+        stock_obj = getattr(mat, "inventario", None)
+        c_stock = stock_obj.cantidad if stock_obj else Decimal("0")
+
+        if c_ret > 0 or c_sob > 0 or c_total_dev > 0:
+            tabla_resumen_devolucion.append({
+                "material": mat,
+                "entrada": c_ent,
+                "instalado": c_inst,
+                "sobrante": c_sob,
+                "retirado": c_ret,
+                "devolucion": c_total_dev,
+                "devolucion_realizada": c_dev_hecha,
+                "stock_bodega": c_stock,
+            })
+
     # 3. Cargar TODA la Mano de Obra del proyecto en 1 sola consulta (sin N+1)
     apoyos_mo = list(
         ApoyoManoObra.objects.filter(
@@ -568,6 +618,7 @@ def detalle_proyecto(request, id):
             "filas_matriz": filas_matriz,
             "fila_totales": fila_totales,
             "tabla_resumen_retiros": tabla_resumen_retiros,
+            "tabla_resumen_devolucion": tabla_resumen_devolucion,
             "materiales_catalogo": materiales_catalogo,
             "empleados": empleados,
             "mat_cable_id": mat_cable_id,

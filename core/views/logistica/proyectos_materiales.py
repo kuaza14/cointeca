@@ -2226,81 +2226,28 @@ def exportar_informe_consolidado_excel(request):
 # ==============================================================================
 
 @login_required
-@transaction.atomic
 def registrar_retiro_material(request, proyecto_id):
     """
-    Registra actas/planillas de materiales desmontados o retirados en la obra.
+    Redirecciona al detalle logístico del proyecto indicando que los retiros
+    se gestionan directamente en los apoyos de ingeniería.
     """
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    materiales = Material.objects.all().order_by("descripcion")
-
-    retiros = (
-        RetiroMaterialProyecto.objects.filter(proyecto=proyecto)
-        .prefetch_related("detalles__material")
-        .order_by("-fecha", "-id")
-    )
-
-    if request.method == "POST":
-        fecha = request.POST.get("fecha")
-        if fecha:
-            retiro = RetiroMaterialProyecto.objects.create(
-                proyecto=proyecto,
-                fecha=fecha,
-                responsable=request.POST.get("responsable", "").strip(),
-                numero_acta=request.POST.get("numero_acta", "").strip(),
-                observaciones=request.POST.get("observaciones", "").strip(),
-            )
-
-            material_ids = request.POST.getlist("material_id[]")
-            cantidades = request.POST.getlist("cantidad[]")
-            estados = request.POST.getlist("estado_material[]")
-
-            detalles = []
-            for i, (mat_id, cant_str) in enumerate(zip(material_ids, cantidades)):
-                if not mat_id or not cant_str:
-                    continue
-                try:
-                    cant = Decimal(str(cant_str).strip())
-                    if cant > 0:
-                        est = estados[i] if i < len(estados) and estados[i] else "Bueno"
-                        detalles.append(
-                            DetalleRetiroMaterial(
-                                retiro=retiro,
-                                material_id=mat_id,
-                                cantidad=cant,
-                                estado_material=est
-                            )
-                        )
-                except (ValueError, TypeError, Decimal.InvalidOperation):
-                    continue
-
-            if detalles:
-                DetalleRetiroMaterial.objects.bulk_create(detalles)
-
-            return redirect("registrar_retiro_material", proyecto_id=proyecto.id)
-
-    return render(
-        request,
-        "logistica/proyectos/crear_retiro.html",
-        {
-            "proyecto": proyecto,
-            "materiales": materiales,
-            "retiros": retiros,
-        }
-    )
+    messages.info(request, "Los retiros de material se gestionan directamente en los apoyos de Ingeniería.")
+    return redirect("detalle_proyecto_logistica", proyecto_id=proyecto_id)
 
 
 @login_required
 @transaction.atomic
 def eliminar_retiro_material(request, retiro_id):
     """
-    Elimina un registro de retiro/desmonte de material.
+    Elimina un registro de retiro/desmonte de material y retorna al detalle del proyecto.
     """
     retiro = get_object_or_404(RetiroMaterialProyecto, id=retiro_id)
     proyecto_id = retiro.proyecto.id
     if request.method == "POST":
         retiro.delete()
-    return redirect("registrar_retiro_material", proyecto_id=proyecto_id)
+        messages.success(request, "Se eliminó el acta de retiro de material.")
+    return redirect("detalle_proyecto_logistica", proyecto_id=proyecto_id)
+
 
 
 # ==============================================================================

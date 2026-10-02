@@ -1336,12 +1336,12 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     fecha_hoy = timezone.now().strftime('%d/%m/%Y')
 
     # ENCABEZADO INSTITUCIONAL
-    ws1.merge_cells("A1:H1")
+    ws1.merge_cells("A1:D1")
     ws1["A1"] = f"COINTECA S.A.S. — MATERIALES A DEVOLVER ({proyecto.etiqueta.upper()} {proyecto.numero_emcali})"
     ws1["A1"].font = font_titulo
     ws1["A1"].alignment = align_left
 
-    ws1.merge_cells("A2:H2")
+    ws1.merge_cells("A2:D2")
     ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
@@ -1351,15 +1351,11 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         "ÍTEM",
         "DESCRIPCIÓN DEL MATERIAL",
         "UNIDAD",
-        "SUMINISTRADO (ENTRADAS)",
-        "INSTALADO EN OBRA",
-        "MATERIAL SOBRANTE (+)",
-        "RETIRADO EN TERRENO",
-        "TOTAL A DEVOLVER",
+        "CANTIDAD A DEVOLVER",
     ]
     ws1.append(headers1)
 
-    for col in range(1, 9):
+    for col in range(1, 5):
         c = ws1.cell(row=4, column=col)
         c.font = font_header
         c.fill = fill_header
@@ -1367,10 +1363,6 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         c.border = border_cell
 
     row_idx = 5
-    tot_ent = Decimal("0")
-    tot_inst = Decimal("0")
-    tot_sob = Decimal("0")
-    tot_ret = Decimal("0")
     tot_cantidad = Decimal("0")
     filas_generadas = 0
 
@@ -1394,24 +1386,16 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
             continue
 
         filas_generadas += 1
-        tot_ent += c_ent
-        tot_inst += c_inst
-        tot_sob += c_sob_pos
-        tot_ret += c_ret
         tot_cantidad += cant_mostrar
 
         ws1.append([
             mat.item or "",
             mat.descripcion,
             mat.unidad or "UN",
-            fmt_v(c_ent),
-            fmt_v(c_inst),
-            fmt_v(c_sob_pos),
-            fmt_v(c_ret),
             fmt_v(cant_mostrar),
         ])
 
-        for col in range(1, 9):
+        for col in range(1, 5):
             c = ws1.cell(row=row_idx, column=col)
             c.font = font_data
             c.border = border_cell
@@ -1431,13 +1415,9 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         "",
         "TOTAL MATERIALES A DEVOLVER",
         f"{filas_generadas} ÍTEMS",
-        fmt_v(tot_ent),
-        fmt_v(tot_inst),
-        fmt_v(tot_sob),
-        fmt_v(tot_ret),
         fmt_v(tot_cantidad),
     ])
-    for col in range(1, 9):
+    for col in range(1, 5):
         c = ws1.cell(row=row_idx, column=col)
         c.font = font_total
         c.fill = fill_total
@@ -1451,13 +1431,9 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
             c.number_format = "#,##0" if isinstance(c.value, int) else "0.##"
 
     ws1.column_dimensions["A"].width = 14
-    ws1.column_dimensions["B"].width = 50
-    ws1.column_dimensions["C"].width = 12
-    ws1.column_dimensions["D"].width = 18
-    ws1.column_dimensions["E"].width = 18
-    ws1.column_dimensions["F"].width = 18
-    ws1.column_dimensions["G"].width = 18
-    ws1.column_dimensions["H"].width = 20
+    ws1.column_dimensions["B"].width = 55
+    ws1.column_dimensions["C"].width = 14
+    ws1.column_dimensions["D"].width = 24
 
     # HOJA 2: HISTORIAL DE ACTAS DE DEVOLUCIÓN (SI EXISTEN)
     devoluciones_db = DevolucionMaterialProyecto.objects.filter(proyecto=proyecto).prefetch_related("detalles__material").order_by("-fecha", "-id")

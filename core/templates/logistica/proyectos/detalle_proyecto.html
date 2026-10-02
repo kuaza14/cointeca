@@ -84,13 +84,6 @@
                     <span>📊</span> Descargar Excel Balance
                 </a>
 
-                <a href="{% url 'exportar_materiales_devolucion_excel' proyecto.id %}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-lg shadow-sm transition"
-                   style="background-color: #b45309; color: #ffffff !important;"
-                   title="Descargar relación oficial de Materiales a Devolver (Sobrantes y Retirados) en Excel">
-                    <span>📑</span> Descargar Excel Devolución (Sobrantes y Retiros)
-                </a>
-
                 <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'proyectos_logistica' %}{% endif %}"
                    class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
                     ← Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}

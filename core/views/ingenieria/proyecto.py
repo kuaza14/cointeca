@@ -667,8 +667,28 @@ def crear_apoyo(request, proyecto_id):
     )
 
     if request.method == "POST":
+        import time
+
+        nodo_val = request.POST.get("nodo", "").strip()
         numero_apoyo_val = request.POST.get("numero_apoyo")
         numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
+
+        # 1. Protección contra doble clic / doble envío rápido (Idempotencia)
+        post_sig = f"{proyecto.id}_{nodo_val}_{numero_apoyo_val or ''}"
+        last_sig = request.session.get("_last_apoyo_sig")
+        last_time = request.session.get("_last_apoyo_time", 0)
+        now = time.time()
+        if last_sig == post_sig and (now - last_time) < 4:
+            messages.info(request, "El poste ya fue registrado exitosamente.")
+            return redirect("detalle_proyecto", id=proyecto.id)
+
+        # 2. Validación de nodo duplicado en el mismo proyecto
+        if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exists():
+            messages.warning(request, f"Ya existe un nodo con la identificación '{nodo_val}' en este proyecto.")
+            return redirect("detalle_proyecto", id=proyecto.id)
+
+        request.session["_last_apoyo_sig"] = post_sig
+        request.session["_last_apoyo_time"] = now
 
         fecha_val = request.POST.get("fecha")
         fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
@@ -702,7 +722,7 @@ def crear_apoyo(request, proyecto_id):
             proyecto=proyecto,
             quien_ejecuta_id=quien_ejecuta_id,
             numero_apoyo=numero_apoyo,
-            nodo=request.POST.get("nodo", "").strip(),
+            nodo=nodo_val,
             fecha=fecha,
             tipo_instalacion=tipo_instalacion,
             direccion=direccion,
@@ -834,7 +854,11 @@ def editar_apoyo(request, apoyo_id):
         fecha_val = request.POST.get("fecha")
         apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
 
-        apoyo.nodo = request.POST.get("nodo", "").strip()
+        nodo_val = request.POST.get("nodo", "").strip()
+        if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exclude(id=apoyo.id).exists():
+            messages.warning(request, f"Ya existe otro nodo con la identificación '{nodo_val}' en este proyecto.")
+            return redirect("detalle_proyecto", id=proyecto.id)
+        apoyo.nodo = nodo_val
         apoyo.brazo = request.POST.get("brazo", "2").strip() or "2"
         apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
         apoyo.direccion = request.POST.get("direccion", "").strip()

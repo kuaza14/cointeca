@@ -2,6 +2,7 @@ from collections import defaultdict
 from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo, calcular_mano_obra_para_apoyo, actualizar_presupuesto_proyecto
 from core.helpers.inventario_historial import registrar_movimiento_inventario
 import io
+import json
 import os
 import re
 import openpyxl
@@ -658,6 +659,84 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
             cantidad_retirada=Decimal("0"),
         )
 
+def sincronizar_luminarias_desde_post(apoyo, request, materiales_ids=None, potencias_mat=None, codigos_mat=None):
+    """
+    Sincroniza y crea registros en ApoyoLuminaria a partir de los datos recibidos
+    desde el formulario de materiales (JSON dinámico, listas por material o fallback de materiales).
+    """
+    lums_json_list = request.POST.getlist("luminarias_json_material[]")
+    sub_luminarias_a_crear = []
+
+    # 1. Prioridad: JSON estructurado por cada fila de material
+    if lums_json_list:
+        for raw_json in lums_json_list:
+            if raw_json and raw_json.strip():
+                try:
+                    items = json.loads(raw_json)
+                    if isinstance(items, list):
+                        for it in items:
+                            p = str(it.get("potencia", "")).strip()
+                            c = str(it.get("codigo", "")).strip()
+                            if p or c:
+                                sub_luminarias_a_crear.append((p, c))
+                except Exception:
+                    pass
+
+    # 2. Si no hubo JSON estructurado pero sí potencias_mat / codigos_mat
+    if not sub_luminarias_a_crear:
+        mat_ids = materiales_ids or request.POST.getlist("material_id[]")
+        pots_m = potencias_mat if potencias_mat is not None else request.POST.getlist("potencia_material[]")
+        cods_m = codigos_mat if codigos_mat is not None else request.POST.getlist("codigo_luminaria_material[]")
+        for i, mat_id in enumerate(mat_ids):
+            if not mat_id:
+                continue
+            p_raw = pots_m[i].strip() if i < len(pots_m) and pots_m[i] else ""
+            c_raw = cods_m[i].strip() if i < len(cods_m) and cods_m[i] else ""
+            if p_raw or c_raw:
+                p_parts = [x.strip() for x in p_raw.split(",")] if p_raw else []
+                c_parts = [x.strip() for x in c_raw.split(",")] if c_raw else []
+                max_len = max(len(p_parts), len(c_parts), 1)
+                for idx in range(max_len):
+                    p_val = p_parts[idx] if idx < len(p_parts) else (p_parts[0] if p_parts else "")
+                    c_val = c_parts[idx] if idx < len(c_parts) else ""
+                    if p_val or c_val:
+                        sub_luminarias_a_crear.append((p_val, c_val))
+
+    # 3. Soporte legacy para request.POST.getlist("potencia[]") / "codigo_luminaria[]"
+    if not sub_luminarias_a_crear:
+        potencias_legacy = request.POST.getlist("potencia[]")
+        codigos_legacy = request.POST.getlist("codigo_luminaria[]")
+        for pot, cod in zip(potencias_legacy, codigos_legacy):
+            p = (pot or "").strip()
+            c = (cod or "").strip()
+            if p or c:
+                sub_luminarias_a_crear.append((p, c))
+
+    # Guardar en base de datos (borra las previas del apoyo y crea las nuevas)
+    apoyo.luminarias.all().delete()
+    for p, c in sub_luminarias_a_crear:
+        ApoyoLuminaria.objects.create(
+            apoyo=apoyo,
+            potencia=p,
+            codigo=c
+        )
+
+    # 4. Fallback final: Si no vino ningún input pero hay materiales instalados de tipo luminaria
+    if not sub_luminarias_a_crear:
+        for am in apoyo.materiales.select_related("material").all():
+            if am.cantidad_requerida > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
+                cods = [x.strip() for x in am.codigo_luminaria.split(",")] if am.codigo_luminaria else []
+                pots = [x.strip() for x in am.potencia.split(",")] if am.potencia else []
+                default_pot = am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else "")
+                if not cods and not pots and default_pot:
+                    ApoyoLuminaria.objects.create(apoyo=apoyo, potencia=default_pot, codigo="")
+                else:
+                    for idx in range(max(len(cods), len(pots), 1)):
+                        p_val = pots[idx] if idx < len(pots) else (pots[0] if pots else default_pot)
+                        c_val = cods[idx] if idx < len(cods) else ""
+                        if p_val or c_val:
+                            ApoyoLuminaria.objects.create(apoyo=apoyo, potencia=p_val, codigo=c_val)
+
 @login_required
 @transaction.atomic
 def crear_apoyo(request, proyecto_id):
@@ -794,25 +873,8 @@ def crear_apoyo(request, proyecto_id):
             except (ValueError, TypeError, ArithmeticError):
                 continue
 
-        # Sincronizar Luminarias para vistas y formatos que consultan apoyo.luminarias
-        for am in apoyo.materiales.select_related("material").all():
-            if am.cantidad_requerida > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
-                ApoyoLuminaria.objects.create(
-                    apoyo=apoyo,
-                    potencia=am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else ""),
-                    codigo=am.codigo_luminaria or ""
-                )
-
-        if not apoyo.luminarias.exists():
-            potencias = request.POST.getlist("potencia[]")
-            codigos = request.POST.getlist("codigo_luminaria[]")
-            for potencia, codigo in zip(potencias, codigos):
-                if potencia.strip() or codigo.strip():
-                    ApoyoLuminaria.objects.create(
-                        apoyo=apoyo,
-                        potencia=potencia.strip(),
-                        codigo=codigo.strip()
-                    )
+        # Guardar y sincronizar luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
+        sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
 
         # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
         sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
@@ -981,26 +1043,8 @@ def editar_apoyo(request, apoyo_id):
                 inv_del.save()
                 am.delete()
 
-        # Actualizar Luminarias instaladas para vistas y reportes que consulten apoyo.luminarias
-        apoyo.luminarias.all().delete()
-        for am in apoyo.materiales.select_related("material").all():
-            if am.cantidad_requerida > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
-                ApoyoLuminaria.objects.create(
-                    apoyo=apoyo,
-                    potencia=am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else ""),
-                    codigo=am.codigo_luminaria or ""
-                )
-
-        if not apoyo.luminarias.exists():
-            potencias = request.POST.getlist("potencia[]")
-            codigos = request.POST.getlist("codigo_luminaria[]")
-            for potencia, codigo in zip(potencias, codigos):
-                if potencia.strip() or codigo.strip():
-                    ApoyoLuminaria.objects.create(
-                        apoyo=apoyo,
-                        potencia=potencia.strip(),
-                        codigo=codigo.strip()
-                    )
+        # Actualizar Luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
+        sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
 
         # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
         sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
@@ -1495,9 +1539,10 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
             c3.font = font_nodo
 
             # Col 4: POT.INST (Arial 11 Bold)
-            lum = apoyo.luminarias.first()
+            lums = list(apoyo.luminarias.all())
+            potencias_lums = [l.potencia for l in lums if l.potencia]
             c4 = sheet.cell(r, 4)
-            c4.value = lum.potencia if lum else ""
+            c4.value = " / ".join(potencias_lums) if potencias_lums else ""
             c4.font = font_potencia
 
             # Col 5: BRAZO INSTA (Arial 11 Bold)
@@ -1506,9 +1551,10 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
             c5.font = font_brazo
 
             # Col 6: CÓDIGO LUM.INST
-            if lum and lum.codigo:
+            codigos_lums = [l.codigo for l in lums if l.codigo]
+            if codigos_lums:
                 c6 = sheet.cell(r, 6)
-                c6.value = lum.codigo
+                c6.value = " / ".join(codigos_lums)
                 c6.font = font_potencia
 
             # Cols 39 y 40: POTENCIA RETIRADA LUMI y PROYECTOR (Sección RETIRADO)

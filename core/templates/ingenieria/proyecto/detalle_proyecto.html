@@ -10,9 +10,36 @@
 
     <style>
         /* ==========================================================================
-           COLUMNAS FIJAS / STICKY EN MATRICES DE INGENIERÍA (NODO Y APOYO)
+           MATRICES DE INGENIERÍA: SCROLL COORDINADO Y CABECERAS / COLUMNAS STICKY
            ========================================================================== */
-        /* Configuración de tabla con columnas fijas limpias */
+        /* Contenedor de la tabla con scroll vertical y horizontal coordinado */
+        .contenedor-tabla-matriz {
+            max-height: calc(100vh - 210px);
+            min-height: 380px;
+            overflow: auto !important;
+            position: relative;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
+        }
+        .contenedor-tabla-matriz::-webkit-scrollbar {
+            width: 10px;
+            height: 12px;
+        }
+        .contenedor-tabla-matriz::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        .contenedor-tabla-matriz::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 6px;
+            border: 2px solid #f1f5f9;
+        }
+        .contenedor-tabla-matriz::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Configuración de tabla con columnas y cabeceras fijas limpias */
         .tabla-fija {
             border-collapse: separate !important;
             border-spacing: 0 !important;
@@ -23,32 +50,59 @@
             border-bottom: 1px solid #e5e7eb;
         }
 
-        /* Encabezados Sticky (Thead) */
+        /* 1. Encabezados Sticky (Thead): Fijos al bajar (vertical) */
+        .tabla-fija thead th {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 30 !important;
+            background-color: #262626; /* Fondo neutral oscuro 100% opaco */
+            border-bottom: 2px solid #404040 !important;
+        }
+
+        /* Colores opacos específicos de las columnas de la cabecera */
+        .tabla-fija thead th.bg-slate-700 {
+            background-color: #334155 !important;
+        }
+        .tabla-fija thead th.bg-slate-800 {
+            background-color: #1e293b !important;
+        }
+        .tabla-fija thead th.bg-amber-950 {
+            background-color: #451a03 !important;
+        }
+        .tabla-fija thead th.bg-neutral {
+            background-color: #262626 !important;
+        }
+
+        /* Esquinas superiores izquierdas (Nodo y Apoyo en thead): Fijas tanto vertical (top: 0) como horizontal (left) */
         .sticky-col-nodo-header {
             position: sticky !important;
+            top: 0 !important;
             left: 0 !important;
             width: 120px !important;
             min-width: 120px !important;
             max-width: 120px !important;
-            z-index: 25 !important;
+            z-index: 40 !important;
             background-color: #262626 !important;
             color: #ffffff !important;
+            border-bottom: 2px solid #404040 !important;
         }
 
         .sticky-col-apoyo-header {
             position: sticky !important;
+            top: 0 !important;
             left: 120px !important;
             width: 70px !important;
             min-width: 70px !important;
             max-width: 70px !important;
-            z-index: 25 !important;
+            z-index: 40 !important;
             background-color: #262626 !important;
             color: #ffffff !important;
             border-right: 2px solid #404040 !important;
+            border-bottom: 2px solid #404040 !important;
             box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.35) !important;
         }
 
-        /* Celdas del Body Sticky */
+        /* 2. Celdas del Body Sticky (Horizontales): Pasan por DEBAJO de thead y tfoot */
         .sticky-col-nodo {
             position: sticky !important;
             left: 0 !important;
@@ -104,49 +158,45 @@
             background-color: #fef3c7 !important;
         }
 
-        /* Totales (Footer) */
+        /* 3. Totales (Footer): Fijos en la parte inferior al subir/bajar */
+        .tabla-fija tfoot {
+            position: sticky !important;
+            bottom: 0 !important;
+            z-index: 30 !important;
+        }
+        .tabla-fija tfoot td {
+            position: sticky !important;
+            bottom: 0 !important;
+            z-index: 30 !important;
+            background-color: #0f172a !important;
+            border-top: 2px solid #334155 !important;
+        }
+
         .sticky-col-nodo-footer {
             position: sticky !important;
+            bottom: 0 !important;
             left: 0 !important;
             width: 120px !important;
             min-width: 120px !important;
             max-width: 120px !important;
-            z-index: 20 !important;
+            z-index: 40 !important;
             background-color: #0f172a !important;
             color: #ffffff !important;
+            border-top: 2px solid #334155 !important;
         }
         .sticky-col-apoyo-footer {
             position: sticky !important;
+            bottom: 0 !important;
             left: 120px !important;
             width: 70px !important;
             min-width: 70px !important;
             max-width: 70px !important;
-            z-index: 20 !important;
+            z-index: 40 !important;
             background-color: #0f172a !important;
             color: #ffffff !important;
             border-right: 2px solid #334155 !important;
+            border-top: 2px solid #334155 !important;
             box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.35) !important;
-        }
-
-        /* Scrollbar horizontal visualmente cómodo y fácil de arrastrar */
-        .overflow-x-auto {
-            scrollbar-width: thin;
-            scrollbar-color: #94a3b8 #f1f5f9;
-        }
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 12px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 6px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 6px;
-            border: 2px solid #f1f5f9;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
         }
     </style>
 
@@ -230,7 +280,7 @@
     <!-- ======================================================================= -->
     <div id="panel-tab-materiales" class="tab-panel space-y-6 {% if tab_activa != 'materiales' %}hidden{% endif %}">
         <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
-            <div class="overflow-x-auto">
+            <div class="contenedor-tabla-matriz">
                 <table class="min-w-full tabla-fija text-left text-xs">
                     <thead>
                         <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
@@ -522,7 +572,7 @@
 
         <!-- TABLA MATRIZ POSTE A POSTE DE MANO DE OBRA -->
         <div class="bg-card rounded-xl shadow-sm border border-border-strong overflow-hidden">
-            <div class="overflow-x-auto">
+            <div class="contenedor-tabla-matriz">
                 <table class="min-w-full tabla-fija text-left text-xs">
                     <thead>
                         <tr class="bg-neutral text-white font-bold uppercase text-[11px] border-b border-gray-700">
@@ -787,7 +837,7 @@
     <!-- ======================================================================= -->
     <!-- MODAL 1: ASIGNAR ACTIVIDAD MANUAL A UN APOYO (MÚLTIPLES ACTIVIDADES)    -->
     <!-- ======================================================================= -->
-    <div id="modalAsignarMO" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div id="modalAsignarMO" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
         <div class="bg-card w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl border-2 border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div class="px-6 py-4 bg-neutral border-b border-border flex items-center justify-between text-white flex-shrink-0">
                 <div class="flex items-center gap-2">
@@ -860,7 +910,7 @@
          tabindex="-1"
          aria-hidden="true"
          style="background-color: rgba(15, 23, 42, 0.65) !important;"
-         class="fixed inset-0 z-50 hidden backdrop-blur-xs flex items-center justify-center p-4">
+         class="fixed inset-0 z-[60] hidden backdrop-blur-xs flex items-center justify-center p-4">
 
         <div class="bg-card w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl border-2 border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 
@@ -1027,7 +1077,6 @@
                         <input type="hidden" id="modalApoyo_metros_retenido" name="metros_retenido" value="0">
                     </div>
                     {% endif %}
-
 
                     <!-- RECUADRO ÁMBAR: DESPACHO DIRECTO DESDE BODEGA CENTRAL (MODO EDICIÓN) -->
                     <div id="seccionDespachoBodega" class="border-t border-amber-200 pt-4 hidden">
@@ -1283,6 +1332,69 @@ function crearFilaMO(itemId = '', cantidad = '1', observacion = '') {
     return tr;
 }
 
+function crearSubFilaLuminaria(potencia = '', codigo = '') {
+    const div = document.createElement('div');
+    div.className = 'fila-sub-lum flex flex-wrap sm:flex-nowrap items-center gap-2 bg-white/80 p-1.5 rounded border border-amber-200';
+    div.innerHTML = `
+        <div class="flex items-center gap-1 flex-1 min-w-[120px]">
+            <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">⚡ Potencia:</span>
+            <input type="text" value="${potencia}" placeholder="Ej: 70W, 190W..."
+                   class="input-sub-potencia w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs font-bold text-amber-900 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                   title="Potencia en vatios de la luminaria (W)">
+        </div>
+        <div class="flex items-center gap-1 flex-1 min-w-[130px]">
+            <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">🏷️ Código:</span>
+            <input type="text" value="${codigo}" placeholder="Ej: 6T0698, 9U7940..."
+                   class="input-sub-codigo w-full bg-white border border-blue-300 rounded px-2 py-1 text-xs font-bold font-mono text-blue-900 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   title="Código serial o placa de la luminaria">
+        </div>
+        <button type="button" class="btnQuitarSubLum text-destructive hover:text-red-800 text-lg font-bold px-2 py-0.5 rounded cursor-pointer leading-none" title="Quitar este código">&times;</button>
+    `;
+    return div;
+}
+
+function actualizarSerializacionLuminarias(td) {
+    if (!td) return;
+    const subFilas = td.querySelectorAll('.fila-sub-lum');
+    const btnQuitarList = td.querySelectorAll('.btnQuitarSubLum');
+
+    btnQuitarList.forEach(btn => {
+        btn.style.display = (subFilas.length > 1) ? '' : 'none';
+    });
+
+    const lista = [];
+    const potencias = [];
+    const codigos = [];
+
+    subFilas.forEach(f => {
+        const inPot = f.querySelector('.input-sub-potencia');
+        const inCod = f.querySelector('.input-sub-codigo');
+        const pot = inPot ? inPot.value.trim() : '';
+        const cod = inCod ? inCod.value.trim() : '';
+        if (pot || cod) {
+            lista.push({ potencia: pot, codigo: cod });
+            if (pot) potencias.push(pot);
+            if (cod) codigos.push(cod);
+        }
+    });
+
+    const inputJson = td.querySelector('.input-json-luminarias');
+    const inputPot = td.querySelector('.input-potencia-serializada');
+    const inputCod = td.querySelector('.input-codigo-serializado');
+
+    if (inputJson) inputJson.value = lista.length > 0 ? JSON.stringify(lista) : '';
+    if (inputPot) inputPot.value = potencias.join(', ');
+    if (inputCod) inputCod.value = codigos.join(', ');
+
+    const tr = td.closest('tr');
+    if (tr && lista.length > 1) {
+        const inInst = tr.querySelector('input[name="cantidad_instalada[]"]');
+        if (inInst && (!inInst.value || parseFloat(inInst.value) < lista.length)) {
+            inInst.value = lista.length;
+        }
+    }
+}
+
 function extraerPotenciaDeTexto(texto) {
     if (!texto) return '';
     const m = String(texto).match(/(?:DE\s+)?(\d+\s*W|6OW|\d+-\d+\s*W)/i);
@@ -1303,46 +1415,38 @@ function onSelectMaterialNodo(selectEl) {
     if (!td) return;
     const opt = selectEl.options[selectEl.selectedIndex];
     const contenedor = td.querySelector('.contenedor-potencia-mat');
-    const inputVisible = td.querySelector('.input-potencia-material');
-    const inputCodigo = td.querySelector('.input-codigo-material');
-    const inputVacio = td.querySelector('.input-potencia-vacia');
-    const inputCodigoVacio = td.querySelector('.input-codigo-vacio');
-    if (!contenedor || !inputVisible || !inputVacio) return;
+    if (!contenedor) return;
 
     const esLuminaria = opt && (opt.dataset.esLuminaria === '1' || esLuminariaTexto(opt.text));
     const potenciaSugerida = opt ? (opt.dataset.potencia || extraerPotenciaDeTexto(opt.text)) : '';
 
     if (esLuminaria) {
         contenedor.classList.remove('hidden');
-        inputVisible.disabled = false;
-        if (inputCodigo) inputCodigo.disabled = false;
-        inputVacio.disabled = true;
-        inputVacio.classList.add('hidden');
-        if (inputCodigoVacio) {
-            inputCodigoVacio.disabled = true;
-            inputCodigoVacio.classList.add('hidden');
+        const contSub = td.querySelector('.contenedor-sub-lums');
+        if (contSub) {
+            let subFilas = contSub.querySelectorAll('.fila-sub-lum');
+            if (subFilas.length === 0) {
+                contSub.appendChild(crearSubFilaLuminaria(potenciaSugerida, ''));
+            } else if (subFilas.length === 1) {
+                const inPot = subFilas[0].querySelector('.input-sub-potencia');
+                if (inPot && !inPot.value && potenciaSugerida) {
+                    inPot.value = potenciaSugerida;
+                }
+            }
         }
-        inputVisible.value = potenciaSugerida;
+        actualizarSerializacionLuminarias(td);
     } else {
         contenedor.classList.add('hidden');
-        inputVisible.disabled = true;
-        inputVisible.value = '';
-        if (inputCodigo) {
-            inputCodigo.disabled = true;
-            inputCodigo.value = '';
-        }
-        inputVacio.disabled = false;
-        inputVacio.classList.remove('hidden');
-        inputVacio.value = '';
-        if (inputCodigoVacio) {
-            inputCodigoVacio.disabled = false;
-            inputCodigoVacio.classList.remove('hidden');
-            inputCodigoVacio.value = '';
-        }
+        const inputJson = td.querySelector('.input-json-luminarias');
+        const inputPot = td.querySelector('.input-potencia-serializada');
+        const inputCod = td.querySelector('.input-codigo-serializado');
+        if (inputJson) inputJson.value = '';
+        if (inputPot) inputPot.value = '';
+        if (inputCod) inputCod.value = '';
     }
 }
 
-function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potencia = '', codigo = '') {
+function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potencia = '', codigo = '', subLuminariasList = null) {
     const tr = document.createElement('tr');
     tr.className = 'fila-material-nodo';
 
@@ -1368,7 +1472,8 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
         });
     }
 
-    const mostrarPotencia = selectedEsLuminaria || Boolean(selectedPotencia) || Boolean(selectedCodigo);
+    const esLuminariaReal = selectedEsLuminaria || Boolean(selectedPotencia) || Boolean(selectedCodigo);
+    const mostrarPotencia = esLuminariaReal;
 
     tr.innerHTML = `
         <td class="px-3 py-2">
@@ -1377,29 +1482,25 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
                 ${optionsHtml}
             </select>
             <div class="contenedor-potencia-mat mt-1.5 ${mostrarPotencia ? '' : 'hidden'}">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-amber-50/90 border border-amber-300 rounded-lg p-2 shadow-2xs">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">
-                            ⚡ Potencia:
+                <div class="bg-amber-50/90 border border-amber-300 rounded-lg p-2.5 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between border-b border-amber-200/80 pb-1.5">
+                        <span class="text-[10px] font-black text-amber-900 uppercase flex items-center gap-1">
+                            <span>⚡</span> Potencia y Código de Luminaria
                         </span>
-                        <input type="text" name="potencia_material[]" value="${selectedPotencia}" placeholder="Ej: 70W, 190W..."
-                               ${mostrarPotencia ? '' : 'disabled'}
-                               class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none input-potencia-material"
-                               title="Potencia de la luminaria (para instalación y retiro)">
+                        <button type="button" class="btnAgregarSubLum inline-flex items-center gap-1 px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold rounded shadow-2xs cursor-pointer" title="Agregar otra potencia y código a este poste">
+                            <span>➕</span> Agregar otra potencia / código
+                        </button>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">
-                            🏷️ Código:
-                        </span>
-                        <input type="text" name="codigo_luminaria_material[]" value="${selectedCodigo}" placeholder="Ej: 123456"
-                               ${mostrarPotencia ? '' : 'disabled'}
-                               class="w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none input-codigo-material"
-                               title="Código de la luminaria instalada en el poste">
-                    </div>
+
+                    <!-- Contenedor dinámico de potencias y códigos -->
+                    <div class="contenedor-sub-lums space-y-1.5"></div>
+
+                    <!-- Inputs serializados para el POST -->
+                    <input type="hidden" name="potencia_material[]" class="input-potencia-serializada" value="">
+                    <input type="hidden" name="codigo_luminaria_material[]" class="input-codigo-serializado" value="">
+                    <input type="hidden" name="luminarias_json_material[]" class="input-json-luminarias" value="">
                 </div>
             </div>
-            <input type="hidden" name="potencia_material[]" value="" class="input-potencia-vacia ${mostrarPotencia ? 'hidden' : ''}" ${mostrarPotencia ? 'disabled' : ''}>
-            <input type="hidden" name="codigo_luminaria_material[]" value="" class="input-codigo-vacio ${mostrarPotencia ? 'hidden' : ''}" ${mostrarPotencia ? 'disabled' : ''}>
         </td>
         <td class="px-3 py-2">
             <input type="number" step="any" min="0" name="cantidad_instalada[]" value="${cantInst}" placeholder="0.00"
@@ -1415,6 +1516,34 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
             </button>
         </td>
     `;
+
+    // Población de las sub-filas de luminaria
+    const contSub = tr.querySelector('.contenedor-sub-lums');
+    const td = tr.querySelector('td');
+    if (contSub && esLuminariaReal) {
+        let items = [];
+        if (selectedCodigo || selectedPotencia) {
+            const cods = selectedCodigo ? selectedCodigo.split(',').map(s => s.trim()) : [];
+            const pots = selectedPotencia ? selectedPotencia.split(',').map(s => s.trim()) : [];
+            const maxLen = Math.max(cods.length, pots.length, 1);
+            for (let i = 0; i < maxLen; i++) {
+                const p = pots[i] || (pots[0] || '');
+                const c = cods[i] || '';
+                items.push({ potencia: p, codigo: c });
+            }
+        } else if (subLuminariasList && Array.isArray(subLuminariasList) && subLuminariasList.length > 0) {
+            items = subLuminariasList;
+        } else {
+            items.push({ potencia: selectedPotencia, codigo: '' });
+        }
+
+        items.forEach(it => {
+            contSub.appendChild(crearSubFilaLuminaria(it.potencia || '', it.codigo || ''));
+        });
+
+        actualizarSerializacionLuminarias(td);
+    }
+
     return tr;
 }
 
@@ -1629,11 +1758,11 @@ function abrirModalEditarApoyo(apoyoId) {
             if (MAT_CABLE_ID && String(m.material_id) === String(MAT_CABLE_ID)) {
                 return;
             }
-            let codLum = m.codigo || '';
-            if (!codLum && data.luminarias && data.luminarias.length > 0 && parseFloat(m.cant_inst) > 0) {
-                codLum = data.luminarias[0].codigo || '';
+            let subLums = null;
+            if (data.luminarias && data.luminarias.length > 0 && parseFloat(m.cant_inst) > 0) {
+                subLums = data.luminarias;
             }
-            tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret, m.potencia, codLum));
+            tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret, m.potencia, m.codigo, subLums));
             matsAgregados++;
         });
         if (matsAgregados === 0) {
@@ -1929,8 +2058,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-
-    // Materiales dinámicos (Botón agregar)
+    // Materiales dinámicos (Botón agregar y sub-luminarias)
     const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
     const filasMaterialesNodo = document.getElementById("filasMaterialesNodo");
     if (btnAgregarMaterialNodo && filasMaterialesNodo) {
@@ -1938,7 +2066,36 @@ document.addEventListener("DOMContentLoaded", function () {
             filasMaterialesNodo.appendChild(crearFilaMaterial());
         });
 
+        // Eventos delegados de eliminación de material y sub-luminarias
         filasMaterialesNodo.addEventListener("click", function (e) {
+            // 1. Agregar otra potencia y código a este material de luminaria
+            const btnAddSub = e.target.closest(".btnAgregarSubLum");
+            if (btnAddSub) {
+                const td = btnAddSub.closest("td");
+                const contSub = td ? td.querySelector(".contenedor-sub-lums") : null;
+                if (contSub) {
+                    const ultPot = contSub.querySelector(".fila-sub-lum:last-child .input-sub-potencia");
+                    const potSug = ultPot ? ultPot.value : "";
+                    const nuevaSub = crearSubFilaLuminaria(potSug, "");
+                    contSub.appendChild(nuevaSub);
+                    actualizarSerializacionLuminarias(td);
+                    const nuevoInputCod = nuevaSub.querySelector(".input-sub-codigo");
+                    if (nuevoInputCod) nuevoInputCod.focus();
+                }
+                return;
+            }
+
+            // 2. Quitar sub-fila de luminaria
+            const btnQuitSub = e.target.closest(".btnQuitarSubLum");
+            if (btnQuitSub) {
+                const filaSub = btnQuitSub.closest(".fila-sub-lum");
+                const td = btnQuitSub.closest("td");
+                if (filaSub) filaSub.remove();
+                actualizarSerializacionLuminarias(td);
+                return;
+            }
+
+            // 3. Eliminar fila completa de material
             const btnEliminar = e.target.closest(".btnEliminarMaterialNodo");
             if (btnEliminar) {
                 const filas = filasMaterialesNodo.querySelectorAll(".fila-material-nodo");
@@ -1958,6 +2115,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (inRet) inRet.value = '';
                     }
                 }
+            }
+        });
+
+        // Sincronización en tiempo real al escribir potencia o código
+        filasMaterialesNodo.addEventListener("input", function (e) {
+            if (e.target.matches(".input-sub-potencia, .input-sub-codigo")) {
+                const td = e.target.closest("td");
+                actualizarSerializacionLuminarias(td);
             }
         });
     }
@@ -1988,6 +2153,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
             }
+        });
+    }
+
+    // Sincronización final antes del envío del formulario de apoyo
+    const formModalApoyo = document.getElementById("formModalApoyo");
+    if (formModalApoyo) {
+        formModalApoyo.addEventListener("submit", function () {
+            document.querySelectorAll("#filasMaterialesNodo .fila-material-nodo td:first-child").forEach(td => {
+                actualizarSerializacionLuminarias(td);
+            });
         });
     }
 

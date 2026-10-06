@@ -3204,2854 +3204,6 @@
   }
 },
 {
-  "model": "core.inventario",
-  "pk": 1,
-  "fields": {
-    "material": 1,
-    "cantidad": "10.50"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 2,
-  "fields": {
-    "material": 2,
-    "cantidad": "20.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 3,
-  "fields": {
-    "material": 3,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 4,
-  "fields": {
-    "material": 4,
-    "cantidad": "4.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 5,
-  "fields": {
-    "material": 5,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 6,
-  "fields": {
-    "material": 6,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 7,
-  "fields": {
-    "material": 7,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 8,
-  "fields": {
-    "material": 8,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 9,
-  "fields": {
-    "material": 9,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 10,
-  "fields": {
-    "material": 10,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 11,
-  "fields": {
-    "material": 11,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 12,
-  "fields": {
-    "material": 12,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 13,
-  "fields": {
-    "material": 13,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 14,
-  "fields": {
-    "material": 14,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 15,
-  "fields": {
-    "material": 15,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 16,
-  "fields": {
-    "material": 16,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 17,
-  "fields": {
-    "material": 17,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 18,
-  "fields": {
-    "material": 18,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 19,
-  "fields": {
-    "material": 19,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 20,
-  "fields": {
-    "material": 20,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 21,
-  "fields": {
-    "material": 21,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 22,
-  "fields": {
-    "material": 22,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 23,
-  "fields": {
-    "material": 23,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 24,
-  "fields": {
-    "material": 24,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 25,
-  "fields": {
-    "material": 25,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 26,
-  "fields": {
-    "material": 26,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 27,
-  "fields": {
-    "material": 27,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 28,
-  "fields": {
-    "material": 28,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 29,
-  "fields": {
-    "material": 29,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 30,
-  "fields": {
-    "material": 30,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 31,
-  "fields": {
-    "material": 31,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 32,
-  "fields": {
-    "material": 32,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 33,
-  "fields": {
-    "material": 33,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 34,
-  "fields": {
-    "material": 34,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 35,
-  "fields": {
-    "material": 35,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 36,
-  "fields": {
-    "material": 36,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 37,
-  "fields": {
-    "material": 37,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 38,
-  "fields": {
-    "material": 38,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 39,
-  "fields": {
-    "material": 39,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 40,
-  "fields": {
-    "material": 40,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 41,
-  "fields": {
-    "material": 41,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 42,
-  "fields": {
-    "material": 42,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 43,
-  "fields": {
-    "material": 43,
-    "cantidad": "42.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 44,
-  "fields": {
-    "material": 44,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 45,
-  "fields": {
-    "material": 45,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 46,
-  "fields": {
-    "material": 46,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 47,
-  "fields": {
-    "material": 47,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 48,
-  "fields": {
-    "material": 48,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 49,
-  "fields": {
-    "material": 49,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 50,
-  "fields": {
-    "material": 50,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 51,
-  "fields": {
-    "material": 51,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 52,
-  "fields": {
-    "material": 52,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 53,
-  "fields": {
-    "material": 53,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 54,
-  "fields": {
-    "material": 54,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 55,
-  "fields": {
-    "material": 55,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 56,
-  "fields": {
-    "material": 56,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 57,
-  "fields": {
-    "material": 57,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 58,
-  "fields": {
-    "material": 58,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 59,
-  "fields": {
-    "material": 59,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 60,
-  "fields": {
-    "material": 60,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 61,
-  "fields": {
-    "material": 61,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 62,
-  "fields": {
-    "material": 62,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 63,
-  "fields": {
-    "material": 63,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 64,
-  "fields": {
-    "material": 64,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 65,
-  "fields": {
-    "material": 65,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 66,
-  "fields": {
-    "material": 66,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 67,
-  "fields": {
-    "material": 67,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 68,
-  "fields": {
-    "material": 68,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 69,
-  "fields": {
-    "material": 69,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 70,
-  "fields": {
-    "material": 70,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 71,
-  "fields": {
-    "material": 71,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 72,
-  "fields": {
-    "material": 72,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 73,
-  "fields": {
-    "material": 73,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 74,
-  "fields": {
-    "material": 74,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 75,
-  "fields": {
-    "material": 75,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 76,
-  "fields": {
-    "material": 76,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 77,
-  "fields": {
-    "material": 77,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 78,
-  "fields": {
-    "material": 78,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 79,
-  "fields": {
-    "material": 79,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 80,
-  "fields": {
-    "material": 80,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 81,
-  "fields": {
-    "material": 81,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 82,
-  "fields": {
-    "material": 82,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 83,
-  "fields": {
-    "material": 83,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 84,
-  "fields": {
-    "material": 84,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 85,
-  "fields": {
-    "material": 85,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 86,
-  "fields": {
-    "material": 86,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 87,
-  "fields": {
-    "material": 87,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 88,
-  "fields": {
-    "material": 88,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 89,
-  "fields": {
-    "material": 89,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 90,
-  "fields": {
-    "material": 90,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 91,
-  "fields": {
-    "material": 91,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 92,
-  "fields": {
-    "material": 92,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 93,
-  "fields": {
-    "material": 93,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 94,
-  "fields": {
-    "material": 94,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 95,
-  "fields": {
-    "material": 95,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 96,
-  "fields": {
-    "material": 96,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 97,
-  "fields": {
-    "material": 97,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 98,
-  "fields": {
-    "material": 98,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 99,
-  "fields": {
-    "material": 99,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 100,
-  "fields": {
-    "material": 100,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 101,
-  "fields": {
-    "material": 101,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 102,
-  "fields": {
-    "material": 102,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 103,
-  "fields": {
-    "material": 103,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 104,
-  "fields": {
-    "material": 104,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 105,
-  "fields": {
-    "material": 105,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 106,
-  "fields": {
-    "material": 106,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 107,
-  "fields": {
-    "material": 107,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 108,
-  "fields": {
-    "material": 108,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 109,
-  "fields": {
-    "material": 109,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 110,
-  "fields": {
-    "material": 110,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 111,
-  "fields": {
-    "material": 111,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 112,
-  "fields": {
-    "material": 112,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 113,
-  "fields": {
-    "material": 113,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 114,
-  "fields": {
-    "material": 114,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 115,
-  "fields": {
-    "material": 115,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 116,
-  "fields": {
-    "material": 116,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 117,
-  "fields": {
-    "material": 117,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 118,
-  "fields": {
-    "material": 118,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 119,
-  "fields": {
-    "material": 119,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 120,
-  "fields": {
-    "material": 120,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 121,
-  "fields": {
-    "material": 121,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 122,
-  "fields": {
-    "material": 122,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 123,
-  "fields": {
-    "material": 123,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 124,
-  "fields": {
-    "material": 124,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 125,
-  "fields": {
-    "material": 125,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 126,
-  "fields": {
-    "material": 126,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 127,
-  "fields": {
-    "material": 127,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 128,
-  "fields": {
-    "material": 128,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 129,
-  "fields": {
-    "material": 129,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 130,
-  "fields": {
-    "material": 130,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 131,
-  "fields": {
-    "material": 131,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 132,
-  "fields": {
-    "material": 132,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 133,
-  "fields": {
-    "material": 133,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 134,
-  "fields": {
-    "material": 134,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 135,
-  "fields": {
-    "material": 135,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 136,
-  "fields": {
-    "material": 136,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 137,
-  "fields": {
-    "material": 137,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 138,
-  "fields": {
-    "material": 138,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 139,
-  "fields": {
-    "material": 139,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 140,
-  "fields": {
-    "material": 140,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 141,
-  "fields": {
-    "material": 141,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 142,
-  "fields": {
-    "material": 142,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 143,
-  "fields": {
-    "material": 143,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 144,
-  "fields": {
-    "material": 144,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 145,
-  "fields": {
-    "material": 145,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 146,
-  "fields": {
-    "material": 146,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 147,
-  "fields": {
-    "material": 147,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 148,
-  "fields": {
-    "material": 148,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 149,
-  "fields": {
-    "material": 149,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 150,
-  "fields": {
-    "material": 150,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 151,
-  "fields": {
-    "material": 151,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 152,
-  "fields": {
-    "material": 152,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 153,
-  "fields": {
-    "material": 153,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 154,
-  "fields": {
-    "material": 154,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 155,
-  "fields": {
-    "material": 155,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 156,
-  "fields": {
-    "material": 156,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 157,
-  "fields": {
-    "material": 157,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 158,
-  "fields": {
-    "material": 158,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 159,
-  "fields": {
-    "material": 159,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 160,
-  "fields": {
-    "material": 160,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 161,
-  "fields": {
-    "material": 161,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 162,
-  "fields": {
-    "material": 162,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 163,
-  "fields": {
-    "material": 163,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 164,
-  "fields": {
-    "material": 164,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 165,
-  "fields": {
-    "material": 165,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 166,
-  "fields": {
-    "material": 166,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 167,
-  "fields": {
-    "material": 167,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 168,
-  "fields": {
-    "material": 168,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 169,
-  "fields": {
-    "material": 169,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 170,
-  "fields": {
-    "material": 170,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 171,
-  "fields": {
-    "material": 171,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 172,
-  "fields": {
-    "material": 172,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 173,
-  "fields": {
-    "material": 173,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 174,
-  "fields": {
-    "material": 174,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 175,
-  "fields": {
-    "material": 175,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 176,
-  "fields": {
-    "material": 176,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 177,
-  "fields": {
-    "material": 177,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 178,
-  "fields": {
-    "material": 178,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 179,
-  "fields": {
-    "material": 179,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 180,
-  "fields": {
-    "material": 180,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 181,
-  "fields": {
-    "material": 181,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 182,
-  "fields": {
-    "material": 182,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 183,
-  "fields": {
-    "material": 183,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 184,
-  "fields": {
-    "material": 184,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 185,
-  "fields": {
-    "material": 185,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 186,
-  "fields": {
-    "material": 186,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 187,
-  "fields": {
-    "material": 187,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 188,
-  "fields": {
-    "material": 188,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 189,
-  "fields": {
-    "material": 189,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 190,
-  "fields": {
-    "material": 190,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 191,
-  "fields": {
-    "material": 191,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 192,
-  "fields": {
-    "material": 192,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 193,
-  "fields": {
-    "material": 193,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 194,
-  "fields": {
-    "material": 194,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 195,
-  "fields": {
-    "material": 195,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 196,
-  "fields": {
-    "material": 196,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 197,
-  "fields": {
-    "material": 197,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 198,
-  "fields": {
-    "material": 198,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 199,
-  "fields": {
-    "material": 199,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 200,
-  "fields": {
-    "material": 200,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 201,
-  "fields": {
-    "material": 201,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 202,
-  "fields": {
-    "material": 202,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 203,
-  "fields": {
-    "material": 203,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 204,
-  "fields": {
-    "material": 204,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 205,
-  "fields": {
-    "material": 205,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 206,
-  "fields": {
-    "material": 206,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 207,
-  "fields": {
-    "material": 207,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 208,
-  "fields": {
-    "material": 208,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 209,
-  "fields": {
-    "material": 209,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 210,
-  "fields": {
-    "material": 210,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 211,
-  "fields": {
-    "material": 211,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 212,
-  "fields": {
-    "material": 212,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 213,
-  "fields": {
-    "material": 213,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 214,
-  "fields": {
-    "material": 214,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 215,
-  "fields": {
-    "material": 215,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 216,
-  "fields": {
-    "material": 216,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 217,
-  "fields": {
-    "material": 217,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 218,
-  "fields": {
-    "material": 218,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 219,
-  "fields": {
-    "material": 219,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 220,
-  "fields": {
-    "material": 220,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 221,
-  "fields": {
-    "material": 221,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 222,
-  "fields": {
-    "material": 222,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 223,
-  "fields": {
-    "material": 223,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 224,
-  "fields": {
-    "material": 224,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 225,
-  "fields": {
-    "material": 225,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 226,
-  "fields": {
-    "material": 226,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 227,
-  "fields": {
-    "material": 227,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 228,
-  "fields": {
-    "material": 228,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 229,
-  "fields": {
-    "material": 229,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 230,
-  "fields": {
-    "material": 230,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 231,
-  "fields": {
-    "material": 231,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 232,
-  "fields": {
-    "material": 232,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 233,
-  "fields": {
-    "material": 233,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 234,
-  "fields": {
-    "material": 234,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 235,
-  "fields": {
-    "material": 235,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 236,
-  "fields": {
-    "material": 236,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 237,
-  "fields": {
-    "material": 237,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 238,
-  "fields": {
-    "material": 238,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 239,
-  "fields": {
-    "material": 239,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 240,
-  "fields": {
-    "material": 240,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 241,
-  "fields": {
-    "material": 241,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 242,
-  "fields": {
-    "material": 242,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 243,
-  "fields": {
-    "material": 243,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 244,
-  "fields": {
-    "material": 244,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 245,
-  "fields": {
-    "material": 245,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 246,
-  "fields": {
-    "material": 246,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 247,
-  "fields": {
-    "material": 247,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 248,
-  "fields": {
-    "material": 248,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 249,
-  "fields": {
-    "material": 249,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 250,
-  "fields": {
-    "material": 250,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 251,
-  "fields": {
-    "material": 251,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 252,
-  "fields": {
-    "material": 252,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 253,
-  "fields": {
-    "material": 253,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 254,
-  "fields": {
-    "material": 254,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 255,
-  "fields": {
-    "material": 255,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 256,
-  "fields": {
-    "material": 256,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 257,
-  "fields": {
-    "material": 257,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 258,
-  "fields": {
-    "material": 258,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 259,
-  "fields": {
-    "material": 259,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 260,
-  "fields": {
-    "material": 260,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 261,
-  "fields": {
-    "material": 261,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 262,
-  "fields": {
-    "material": 262,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 263,
-  "fields": {
-    "material": 263,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 264,
-  "fields": {
-    "material": 264,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 265,
-  "fields": {
-    "material": 265,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 266,
-  "fields": {
-    "material": 266,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 267,
-  "fields": {
-    "material": 267,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 268,
-  "fields": {
-    "material": 268,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 269,
-  "fields": {
-    "material": 269,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 270,
-  "fields": {
-    "material": 270,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 271,
-  "fields": {
-    "material": 271,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 272,
-  "fields": {
-    "material": 272,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 273,
-  "fields": {
-    "material": 273,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 274,
-  "fields": {
-    "material": 274,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 275,
-  "fields": {
-    "material": 275,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 276,
-  "fields": {
-    "material": 276,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 277,
-  "fields": {
-    "material": 277,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 278,
-  "fields": {
-    "material": 278,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 279,
-  "fields": {
-    "material": 279,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 280,
-  "fields": {
-    "material": 280,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 281,
-  "fields": {
-    "material": 281,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 282,
-  "fields": {
-    "material": 282,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 283,
-  "fields": {
-    "material": 283,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 284,
-  "fields": {
-    "material": 284,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 285,
-  "fields": {
-    "material": 285,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 286,
-  "fields": {
-    "material": 286,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 287,
-  "fields": {
-    "material": 287,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 288,
-  "fields": {
-    "material": 288,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 289,
-  "fields": {
-    "material": 289,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 290,
-  "fields": {
-    "material": 290,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 291,
-  "fields": {
-    "material": 291,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 292,
-  "fields": {
-    "material": 292,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 293,
-  "fields": {
-    "material": 293,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 294,
-  "fields": {
-    "material": 294,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 295,
-  "fields": {
-    "material": 295,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 296,
-  "fields": {
-    "material": 296,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 297,
-  "fields": {
-    "material": 297,
-    "cantidad": "2.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 298,
-  "fields": {
-    "material": 298,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 299,
-  "fields": {
-    "material": 299,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 300,
-  "fields": {
-    "material": 300,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 301,
-  "fields": {
-    "material": 301,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 302,
-  "fields": {
-    "material": 302,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 303,
-  "fields": {
-    "material": 303,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 304,
-  "fields": {
-    "material": 304,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 305,
-  "fields": {
-    "material": 305,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 306,
-  "fields": {
-    "material": 306,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 307,
-  "fields": {
-    "material": 307,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 308,
-  "fields": {
-    "material": 308,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 309,
-  "fields": {
-    "material": 309,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 310,
-  "fields": {
-    "material": 310,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 311,
-  "fields": {
-    "material": 311,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 312,
-  "fields": {
-    "material": 312,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 313,
-  "fields": {
-    "material": 313,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 314,
-  "fields": {
-    "material": 314,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 315,
-  "fields": {
-    "material": 315,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 316,
-  "fields": {
-    "material": 316,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 317,
-  "fields": {
-    "material": 317,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 318,
-  "fields": {
-    "material": 318,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 319,
-  "fields": {
-    "material": 319,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 320,
-  "fields": {
-    "material": 320,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 321,
-  "fields": {
-    "material": 321,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 322,
-  "fields": {
-    "material": 322,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 323,
-  "fields": {
-    "material": 323,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 324,
-  "fields": {
-    "material": 324,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 325,
-  "fields": {
-    "material": 325,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 326,
-  "fields": {
-    "material": 326,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 327,
-  "fields": {
-    "material": 327,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 328,
-  "fields": {
-    "material": 328,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 329,
-  "fields": {
-    "material": 329,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 330,
-  "fields": {
-    "material": 330,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 331,
-  "fields": {
-    "material": 331,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 332,
-  "fields": {
-    "material": 332,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 333,
-  "fields": {
-    "material": 333,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 334,
-  "fields": {
-    "material": 334,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 335,
-  "fields": {
-    "material": 335,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 336,
-  "fields": {
-    "material": 336,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 337,
-  "fields": {
-    "material": 337,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 338,
-  "fields": {
-    "material": 338,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 339,
-  "fields": {
-    "material": 339,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 340,
-  "fields": {
-    "material": 340,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 341,
-  "fields": {
-    "material": 341,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 342,
-  "fields": {
-    "material": 342,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 343,
-  "fields": {
-    "material": 343,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 344,
-  "fields": {
-    "material": 344,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 345,
-  "fields": {
-    "material": 345,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 346,
-  "fields": {
-    "material": 346,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 347,
-  "fields": {
-    "material": 347,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 348,
-  "fields": {
-    "material": 348,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 349,
-  "fields": {
-    "material": 349,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 350,
-  "fields": {
-    "material": 350,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 351,
-  "fields": {
-    "material": 351,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 352,
-  "fields": {
-    "material": 352,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 353,
-  "fields": {
-    "material": 353,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 354,
-  "fields": {
-    "material": 354,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 355,
-  "fields": {
-    "material": 355,
-    "cantidad": "0.00"
-  }
-},
-{
-  "model": "core.inventario",
-  "pk": 356,
-  "fields": {
-    "material": 356,
-    "cantidad": "0.00"
-  }
-},
-{
   "model": "core.itemmanoobra",
   "pk": 1,
   "fields": {
@@ -7588,47 +4740,2851 @@
   }
 },
 {
-  "model": "core.empleado",
+  "model": "core.inventario",
+  "pk": 1,
+  "fields": {
+    "material": 1,
+    "cantidad": "80.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 2,
+  "fields": {
+    "material": 2,
+    "cantidad": "55.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 3,
+  "fields": {
+    "material": 3,
+    "cantidad": "58.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 4,
+  "fields": {
+    "material": 4,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 5,
+  "fields": {
+    "material": 5,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 6,
+  "fields": {
+    "material": 6,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
   "pk": 7,
   "fields": {
-    "foto": "empleados/fotos/jose_dLRv6mP.jpg",
-    "nombre_completo": "jose david ramos",
-    "documento": "1110283626",
-    "ciudad_expedicion": "cali",
-    "fecha_nacimiento": "2004-03-15",
-    "nacionalidad": "Colombiano",
-    "direccion": "carrera 21 # 14 54",
-    "ciudad_residencia": "CALI",
-    "barrio": "guayaquil",
-    "estrato": 2,
-    "telefono": "3136787265",
-    "correo": "jose.david@gmail.com",
-    "estado_civil": "",
-    "cargo": "auxiliar SST",
-    "area": "administrativo",
-    "nivel_academico": "tecnologo",
-    "profesion": "tecnologia gestion de la reguridad y en el trabajo ",
-    "habilidades": "trabajo en equipo comunicacion",
-    "idiomas": "Español",
-    "fecha_ingreso": "2025-09-01",
-    "fecha_finalizacion": "2026-09-01",
-    "tipo_contrato": "fijo",
-    "salario": "2300000.00",
-    "jornada": "diurna",
-    "jefe": "darwin",
-    "estado": "activo",
-    "contacto_emergencia": "",
-    "telefono_emergencia": "",
-    "parentesco_emergencia": "",
-    "grupo_sanguineo": "",
-    "eps": "",
-    "arl": "",
-    "afp": "",
-    "cesantias": "",
-    "alergias": "",
-    "observaciones": "",
-    "fecha_retiro": null,
-    "motivo_retiro": ""
+    "material": 7,
+    "cantidad": "-2.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 8,
+  "fields": {
+    "material": 8,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 9,
+  "fields": {
+    "material": 9,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 10,
+  "fields": {
+    "material": 10,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 11,
+  "fields": {
+    "material": 11,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 12,
+  "fields": {
+    "material": 12,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 13,
+  "fields": {
+    "material": 13,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 14,
+  "fields": {
+    "material": 14,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 15,
+  "fields": {
+    "material": 15,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 16,
+  "fields": {
+    "material": 16,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 17,
+  "fields": {
+    "material": 17,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 18,
+  "fields": {
+    "material": 18,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 19,
+  "fields": {
+    "material": 19,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 20,
+  "fields": {
+    "material": 20,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 21,
+  "fields": {
+    "material": 21,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 22,
+  "fields": {
+    "material": 22,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 23,
+  "fields": {
+    "material": 23,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 24,
+  "fields": {
+    "material": 24,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 25,
+  "fields": {
+    "material": 25,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 26,
+  "fields": {
+    "material": 26,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 27,
+  "fields": {
+    "material": 27,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 28,
+  "fields": {
+    "material": 28,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 29,
+  "fields": {
+    "material": 29,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 30,
+  "fields": {
+    "material": 30,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 31,
+  "fields": {
+    "material": 31,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 32,
+  "fields": {
+    "material": 32,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 33,
+  "fields": {
+    "material": 33,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 34,
+  "fields": {
+    "material": 34,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 35,
+  "fields": {
+    "material": 35,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 36,
+  "fields": {
+    "material": 36,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 37,
+  "fields": {
+    "material": 37,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 38,
+  "fields": {
+    "material": 38,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 39,
+  "fields": {
+    "material": 39,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 40,
+  "fields": {
+    "material": 40,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 41,
+  "fields": {
+    "material": 41,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 42,
+  "fields": {
+    "material": 42,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 43,
+  "fields": {
+    "material": 43,
+    "cantidad": "70.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 44,
+  "fields": {
+    "material": 44,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 45,
+  "fields": {
+    "material": 45,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 46,
+  "fields": {
+    "material": 46,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 47,
+  "fields": {
+    "material": 47,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 48,
+  "fields": {
+    "material": 48,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 49,
+  "fields": {
+    "material": 49,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 50,
+  "fields": {
+    "material": 50,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 51,
+  "fields": {
+    "material": 51,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 52,
+  "fields": {
+    "material": 52,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 53,
+  "fields": {
+    "material": 53,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 54,
+  "fields": {
+    "material": 54,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 55,
+  "fields": {
+    "material": 55,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 56,
+  "fields": {
+    "material": 56,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 57,
+  "fields": {
+    "material": 57,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 58,
+  "fields": {
+    "material": 58,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 59,
+  "fields": {
+    "material": 59,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 60,
+  "fields": {
+    "material": 60,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 61,
+  "fields": {
+    "material": 61,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 62,
+  "fields": {
+    "material": 62,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 63,
+  "fields": {
+    "material": 63,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 64,
+  "fields": {
+    "material": 64,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 65,
+  "fields": {
+    "material": 65,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 66,
+  "fields": {
+    "material": 66,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 67,
+  "fields": {
+    "material": 67,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 68,
+  "fields": {
+    "material": 68,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 69,
+  "fields": {
+    "material": 69,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 70,
+  "fields": {
+    "material": 70,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 71,
+  "fields": {
+    "material": 71,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 72,
+  "fields": {
+    "material": 72,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 73,
+  "fields": {
+    "material": 73,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 74,
+  "fields": {
+    "material": 74,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 75,
+  "fields": {
+    "material": 75,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 76,
+  "fields": {
+    "material": 76,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 77,
+  "fields": {
+    "material": 77,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 78,
+  "fields": {
+    "material": 78,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 79,
+  "fields": {
+    "material": 79,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 80,
+  "fields": {
+    "material": 80,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 81,
+  "fields": {
+    "material": 81,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 82,
+  "fields": {
+    "material": 82,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 83,
+  "fields": {
+    "material": 83,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 84,
+  "fields": {
+    "material": 84,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 85,
+  "fields": {
+    "material": 85,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 86,
+  "fields": {
+    "material": 86,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 87,
+  "fields": {
+    "material": 87,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 88,
+  "fields": {
+    "material": 88,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 89,
+  "fields": {
+    "material": 89,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 90,
+  "fields": {
+    "material": 90,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 91,
+  "fields": {
+    "material": 91,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 92,
+  "fields": {
+    "material": 92,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 93,
+  "fields": {
+    "material": 93,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 94,
+  "fields": {
+    "material": 94,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 95,
+  "fields": {
+    "material": 95,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 96,
+  "fields": {
+    "material": 96,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 97,
+  "fields": {
+    "material": 97,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 98,
+  "fields": {
+    "material": 98,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 99,
+  "fields": {
+    "material": 99,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 100,
+  "fields": {
+    "material": 100,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 101,
+  "fields": {
+    "material": 101,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 102,
+  "fields": {
+    "material": 102,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 103,
+  "fields": {
+    "material": 103,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 104,
+  "fields": {
+    "material": 104,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 105,
+  "fields": {
+    "material": 105,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 106,
+  "fields": {
+    "material": 106,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 107,
+  "fields": {
+    "material": 107,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 108,
+  "fields": {
+    "material": 108,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 109,
+  "fields": {
+    "material": 109,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 110,
+  "fields": {
+    "material": 110,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 111,
+  "fields": {
+    "material": 111,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 112,
+  "fields": {
+    "material": 112,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 113,
+  "fields": {
+    "material": 113,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 114,
+  "fields": {
+    "material": 114,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 115,
+  "fields": {
+    "material": 115,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 116,
+  "fields": {
+    "material": 116,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 117,
+  "fields": {
+    "material": 117,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 118,
+  "fields": {
+    "material": 118,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 119,
+  "fields": {
+    "material": 119,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 120,
+  "fields": {
+    "material": 120,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 121,
+  "fields": {
+    "material": 121,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 122,
+  "fields": {
+    "material": 122,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 123,
+  "fields": {
+    "material": 123,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 124,
+  "fields": {
+    "material": 124,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 125,
+  "fields": {
+    "material": 125,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 126,
+  "fields": {
+    "material": 126,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 127,
+  "fields": {
+    "material": 127,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 128,
+  "fields": {
+    "material": 128,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 129,
+  "fields": {
+    "material": 129,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 130,
+  "fields": {
+    "material": 130,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 131,
+  "fields": {
+    "material": 131,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 132,
+  "fields": {
+    "material": 132,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 133,
+  "fields": {
+    "material": 133,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 134,
+  "fields": {
+    "material": 134,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 135,
+  "fields": {
+    "material": 135,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 136,
+  "fields": {
+    "material": 136,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 137,
+  "fields": {
+    "material": 137,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 138,
+  "fields": {
+    "material": 138,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 139,
+  "fields": {
+    "material": 139,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 140,
+  "fields": {
+    "material": 140,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 141,
+  "fields": {
+    "material": 141,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 142,
+  "fields": {
+    "material": 142,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 143,
+  "fields": {
+    "material": 143,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 144,
+  "fields": {
+    "material": 144,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 145,
+  "fields": {
+    "material": 145,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 146,
+  "fields": {
+    "material": 146,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 147,
+  "fields": {
+    "material": 147,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 148,
+  "fields": {
+    "material": 148,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 149,
+  "fields": {
+    "material": 149,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 150,
+  "fields": {
+    "material": 150,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 151,
+  "fields": {
+    "material": 151,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 152,
+  "fields": {
+    "material": 152,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 153,
+  "fields": {
+    "material": 153,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 154,
+  "fields": {
+    "material": 154,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 155,
+  "fields": {
+    "material": 155,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 156,
+  "fields": {
+    "material": 156,
+    "cantidad": "40.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 157,
+  "fields": {
+    "material": 157,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 158,
+  "fields": {
+    "material": 158,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 159,
+  "fields": {
+    "material": 159,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 160,
+  "fields": {
+    "material": 160,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 161,
+  "fields": {
+    "material": 161,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 162,
+  "fields": {
+    "material": 162,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 163,
+  "fields": {
+    "material": 163,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 164,
+  "fields": {
+    "material": 164,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 165,
+  "fields": {
+    "material": 165,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 166,
+  "fields": {
+    "material": 166,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 167,
+  "fields": {
+    "material": 167,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 168,
+  "fields": {
+    "material": 168,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 169,
+  "fields": {
+    "material": 169,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 170,
+  "fields": {
+    "material": 170,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 171,
+  "fields": {
+    "material": 171,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 172,
+  "fields": {
+    "material": 172,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 173,
+  "fields": {
+    "material": 173,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 174,
+  "fields": {
+    "material": 174,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 175,
+  "fields": {
+    "material": 175,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 176,
+  "fields": {
+    "material": 176,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 177,
+  "fields": {
+    "material": 177,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 178,
+  "fields": {
+    "material": 178,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 179,
+  "fields": {
+    "material": 179,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 180,
+  "fields": {
+    "material": 180,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 181,
+  "fields": {
+    "material": 181,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 182,
+  "fields": {
+    "material": 182,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 183,
+  "fields": {
+    "material": 183,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 184,
+  "fields": {
+    "material": 184,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 185,
+  "fields": {
+    "material": 185,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 186,
+  "fields": {
+    "material": 186,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 187,
+  "fields": {
+    "material": 187,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 188,
+  "fields": {
+    "material": 188,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 189,
+  "fields": {
+    "material": 189,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 190,
+  "fields": {
+    "material": 190,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 191,
+  "fields": {
+    "material": 191,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 192,
+  "fields": {
+    "material": 192,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 193,
+  "fields": {
+    "material": 193,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 194,
+  "fields": {
+    "material": 194,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 195,
+  "fields": {
+    "material": 195,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 196,
+  "fields": {
+    "material": 196,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 197,
+  "fields": {
+    "material": 197,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 198,
+  "fields": {
+    "material": 198,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 199,
+  "fields": {
+    "material": 199,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 200,
+  "fields": {
+    "material": 200,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 201,
+  "fields": {
+    "material": 201,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 202,
+  "fields": {
+    "material": 202,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 203,
+  "fields": {
+    "material": 203,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 204,
+  "fields": {
+    "material": 204,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 205,
+  "fields": {
+    "material": 205,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 206,
+  "fields": {
+    "material": 206,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 207,
+  "fields": {
+    "material": 207,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 208,
+  "fields": {
+    "material": 208,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 209,
+  "fields": {
+    "material": 209,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 210,
+  "fields": {
+    "material": 210,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 211,
+  "fields": {
+    "material": 211,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 212,
+  "fields": {
+    "material": 212,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 213,
+  "fields": {
+    "material": 213,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 214,
+  "fields": {
+    "material": 214,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 215,
+  "fields": {
+    "material": 215,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 216,
+  "fields": {
+    "material": 216,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 217,
+  "fields": {
+    "material": 217,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 218,
+  "fields": {
+    "material": 218,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 219,
+  "fields": {
+    "material": 219,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 220,
+  "fields": {
+    "material": 220,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 221,
+  "fields": {
+    "material": 221,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 222,
+  "fields": {
+    "material": 222,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 223,
+  "fields": {
+    "material": 223,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 224,
+  "fields": {
+    "material": 224,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 225,
+  "fields": {
+    "material": 225,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 226,
+  "fields": {
+    "material": 226,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 227,
+  "fields": {
+    "material": 227,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 228,
+  "fields": {
+    "material": 228,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 229,
+  "fields": {
+    "material": 229,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 230,
+  "fields": {
+    "material": 230,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 231,
+  "fields": {
+    "material": 231,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 232,
+  "fields": {
+    "material": 232,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 233,
+  "fields": {
+    "material": 233,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 234,
+  "fields": {
+    "material": 234,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 235,
+  "fields": {
+    "material": 235,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 236,
+  "fields": {
+    "material": 236,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 237,
+  "fields": {
+    "material": 237,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 238,
+  "fields": {
+    "material": 238,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 239,
+  "fields": {
+    "material": 239,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 240,
+  "fields": {
+    "material": 240,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 241,
+  "fields": {
+    "material": 241,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 242,
+  "fields": {
+    "material": 242,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 243,
+  "fields": {
+    "material": 243,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 244,
+  "fields": {
+    "material": 244,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 245,
+  "fields": {
+    "material": 245,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 246,
+  "fields": {
+    "material": 246,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 247,
+  "fields": {
+    "material": 247,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 248,
+  "fields": {
+    "material": 248,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 249,
+  "fields": {
+    "material": 249,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 250,
+  "fields": {
+    "material": 250,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 251,
+  "fields": {
+    "material": 251,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 252,
+  "fields": {
+    "material": 252,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 253,
+  "fields": {
+    "material": 253,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 254,
+  "fields": {
+    "material": 254,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 255,
+  "fields": {
+    "material": 255,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 256,
+  "fields": {
+    "material": 256,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 257,
+  "fields": {
+    "material": 257,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 258,
+  "fields": {
+    "material": 258,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 259,
+  "fields": {
+    "material": 259,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 260,
+  "fields": {
+    "material": 260,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 261,
+  "fields": {
+    "material": 261,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 262,
+  "fields": {
+    "material": 262,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 263,
+  "fields": {
+    "material": 263,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 264,
+  "fields": {
+    "material": 264,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 265,
+  "fields": {
+    "material": 265,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 266,
+  "fields": {
+    "material": 266,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 267,
+  "fields": {
+    "material": 267,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 268,
+  "fields": {
+    "material": 268,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 269,
+  "fields": {
+    "material": 269,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 270,
+  "fields": {
+    "material": 270,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 271,
+  "fields": {
+    "material": 271,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 272,
+  "fields": {
+    "material": 272,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 273,
+  "fields": {
+    "material": 273,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 274,
+  "fields": {
+    "material": 274,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 275,
+  "fields": {
+    "material": 275,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 276,
+  "fields": {
+    "material": 276,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 277,
+  "fields": {
+    "material": 277,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 278,
+  "fields": {
+    "material": 278,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 279,
+  "fields": {
+    "material": 279,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 280,
+  "fields": {
+    "material": 280,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 281,
+  "fields": {
+    "material": 281,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 282,
+  "fields": {
+    "material": 282,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 283,
+  "fields": {
+    "material": 283,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 284,
+  "fields": {
+    "material": 284,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 285,
+  "fields": {
+    "material": 285,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 286,
+  "fields": {
+    "material": 286,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 287,
+  "fields": {
+    "material": 287,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 288,
+  "fields": {
+    "material": 288,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 289,
+  "fields": {
+    "material": 289,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 290,
+  "fields": {
+    "material": 290,
+    "cantidad": "-1.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 291,
+  "fields": {
+    "material": 291,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 292,
+  "fields": {
+    "material": 292,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 293,
+  "fields": {
+    "material": 293,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 294,
+  "fields": {
+    "material": 294,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 295,
+  "fields": {
+    "material": 295,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 296,
+  "fields": {
+    "material": 296,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 297,
+  "fields": {
+    "material": 297,
+    "cantidad": "2.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 298,
+  "fields": {
+    "material": 298,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 299,
+  "fields": {
+    "material": 299,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 300,
+  "fields": {
+    "material": 300,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 301,
+  "fields": {
+    "material": 301,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 302,
+  "fields": {
+    "material": 302,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 303,
+  "fields": {
+    "material": 303,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 304,
+  "fields": {
+    "material": 304,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 305,
+  "fields": {
+    "material": 305,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 306,
+  "fields": {
+    "material": 306,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 307,
+  "fields": {
+    "material": 307,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 308,
+  "fields": {
+    "material": 308,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 309,
+  "fields": {
+    "material": 309,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 310,
+  "fields": {
+    "material": 310,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 311,
+  "fields": {
+    "material": 311,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 312,
+  "fields": {
+    "material": 312,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 313,
+  "fields": {
+    "material": 313,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 314,
+  "fields": {
+    "material": 314,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 315,
+  "fields": {
+    "material": 315,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 316,
+  "fields": {
+    "material": 316,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 317,
+  "fields": {
+    "material": 317,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 318,
+  "fields": {
+    "material": 318,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 319,
+  "fields": {
+    "material": 319,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 320,
+  "fields": {
+    "material": 320,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 321,
+  "fields": {
+    "material": 321,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 322,
+  "fields": {
+    "material": 322,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 323,
+  "fields": {
+    "material": 323,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 324,
+  "fields": {
+    "material": 324,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 325,
+  "fields": {
+    "material": 325,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 326,
+  "fields": {
+    "material": 326,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 327,
+  "fields": {
+    "material": 327,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 328,
+  "fields": {
+    "material": 328,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 329,
+  "fields": {
+    "material": 329,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 330,
+  "fields": {
+    "material": 330,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 331,
+  "fields": {
+    "material": 331,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 332,
+  "fields": {
+    "material": 332,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 333,
+  "fields": {
+    "material": 333,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 334,
+  "fields": {
+    "material": 334,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 335,
+  "fields": {
+    "material": 335,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 336,
+  "fields": {
+    "material": 336,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 337,
+  "fields": {
+    "material": 337,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 338,
+  "fields": {
+    "material": 338,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 339,
+  "fields": {
+    "material": 339,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 340,
+  "fields": {
+    "material": 340,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 341,
+  "fields": {
+    "material": 341,
+    "cantidad": "-5.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 342,
+  "fields": {
+    "material": 342,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 343,
+  "fields": {
+    "material": 343,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 344,
+  "fields": {
+    "material": 344,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 345,
+  "fields": {
+    "material": 345,
+    "cantidad": "-3.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 346,
+  "fields": {
+    "material": 346,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 347,
+  "fields": {
+    "material": 347,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 348,
+  "fields": {
+    "material": 348,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 349,
+  "fields": {
+    "material": 349,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 350,
+  "fields": {
+    "material": 350,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 351,
+  "fields": {
+    "material": 351,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 352,
+  "fields": {
+    "material": 352,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 353,
+  "fields": {
+    "material": 353,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 354,
+  "fields": {
+    "material": 354,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 355,
+  "fields": {
+    "material": 355,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 356,
+  "fields": {
+    "material": 356,
+    "cantidad": "0.00"
   }
 },
 {
@@ -7721,50 +7677,6 @@
 },
 {
   "model": "core.empleado",
-  "pk": 16,
-  "fields": {
-    "foto": "empleados/fotos/angelica_conrado_4Llgf1s.jpg",
-    "nombre_completo": "ANGELICA CONRADO GARCIA",
-    "documento": "1143847917",
-    "ciudad_expedicion": "cali",
-    "fecha_nacimiento": "1993-02-26",
-    "nacionalidad": "Colombiano",
-    "direccion": "CLL 56D #34-56 MORICHAL ",
-    "ciudad_residencia": "cali",
-    "barrio": "morichal",
-    "estrato": 2,
-    "telefono": "3182315715\t",
-    "correo": "angelicaconrado26@hotmail.com",
-    "estado_civil": "",
-    "cargo": "AUXILIAR ADMINISTRATIVA",
-    "area": "ADMINISTRATIVA",
-    "nivel_academico": "tecnologo ",
-    "profesion": "contabilidad",
-    "habilidades": "NA",
-    "idiomas": "Español",
-    "fecha_ingreso": "2026-09-20",
-    "fecha_finalizacion": "2027-01-10",
-    "tipo_contrato": "fijo",
-    "salario": "2123000.00",
-    "jornada": "diurna",
-    "jefe": "GERENTE",
-    "estado": "activo",
-    "contacto_emergencia": "miguel antonio conrado",
-    "telefono_emergencia": "3155654618",
-    "parentesco_emergencia": "HERMANO",
-    "grupo_sanguineo": null,
-    "eps": null,
-    "arl": null,
-    "afp": null,
-    "cesantias": null,
-    "alergias": "",
-    "observaciones": "",
-    "fecha_retiro": null,
-    "motivo_retiro": ""
-  }
-},
-{
-  "model": "core.empleado",
   "pk": 17,
   "fields": {
     "foto": "empleados/fotos/OCOR_DARWIN.jpg",
@@ -7840,50 +7752,6 @@
     "contacto_emergencia": null,
     "telefono_emergencia": null,
     "parentesco_emergencia": null,
-    "grupo_sanguineo": null,
-    "eps": null,
-    "arl": null,
-    "afp": null,
-    "cesantias": null,
-    "alergias": "",
-    "observaciones": "",
-    "fecha_retiro": null,
-    "motivo_retiro": ""
-  }
-},
-{
-  "model": "core.empleado",
-  "pk": 23,
-  "fields": {
-    "foto": "empleados/fotos/LIGERS_BALANTA.png",
-    "nombre_completo": "LIGERS BENNY BALANTA MOLINA",
-    "documento": "4662360",
-    "ciudad_expedicion": "PADILLA - CAUCA",
-    "fecha_nacimiento": "1977-12-12",
-    "nacionalidad": "Colombiano",
-    "direccion": "CALLE 26B #35 - 37",
-    "ciudad_residencia": "CIUDAD",
-    "barrio": "FORTALEZA",
-    "estrato": 3,
-    "telefono": "3138261203",
-    "correo": "ligerbalanta@gmail.com",
-    "estado_civil": "",
-    "cargo": "AUXILIAR",
-    "area": "OPERATIVO",
-    "nivel_academico": "BACHELLER",
-    "profesion": "NA",
-    "habilidades": "",
-    "idiomas": "Español",
-    "fecha_ingreso": "2025-10-20",
-    "fecha_finalizacion": null,
-    "tipo_contrato": "fijo",
-    "salario": "1750905.00",
-    "jornada": "diurna",
-    "jefe": "SUPERVISOR",
-    "estado": "activo",
-    "contacto_emergencia": "YURANY AGUILAR",
-    "telefono_emergencia": "3202558621",
-    "parentesco_emergencia": "ESPOSA",
     "grupo_sanguineo": null,
     "eps": null,
     "arl": null,
@@ -8029,37 +7897,37 @@
 },
 {
   "model": "core.empleado",
-  "pk": 27,
+  "pk": 29,
   "fields": {
-    "foto": "empleados/fotos/AVELINO_VARGAS_GALVIS.png",
-    "nombre_completo": "AVELINO VARGAS GALVIS",
-    "documento": "17.653.275",
-    "ciudad_expedicion": "FLORENCIA - CAQUETA",
-    "fecha_nacimiento": "1975-01-21",
+    "foto": "",
+    "nombre_completo": "BARRIOS MEDRANO ALEJANDRO ARTURO",
+    "documento": "92291731",
+    "ciudad_expedicion": "SAMPUES- SUCRE",
+    "fecha_nacimiento": "1984-12-13",
     "nacionalidad": "Colombiano",
-    "direccion": "CALLE 48 # 8A 19 ",
-    "ciudad_residencia": "CALI",
-    "barrio": "TRONCAL",
-    "estrato": null,
-    "telefono": "3206313663",
-    "correo": "",
+    "direccion": "CRA 14 #2A A-36 B/EL CARMEN",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3113343745",
+    "correo": "alejandrobarrios0413@gmail.com",
     "estado_civil": "",
-    "cargo": "LINIERO",
+    "cargo": "AUXILIAR",
     "area": "OPERATIVO",
-    "nivel_academico": "BACHILLER",
-    "profesion": "N/A",
-    "habilidades": "N/A",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
     "idiomas": "Español",
-    "fecha_ingreso": "2025-09-23",
+    "fecha_ingreso": "2026-08-07",
     "fecha_finalizacion": null,
     "tipo_contrato": "fijo",
-    "salario": "2327405.00",
+    "salario": "1600000.00",
     "jornada": "diurna",
     "jefe": "SUPERVISOR",
     "estado": "activo",
-    "contacto_emergencia": "CLAUDI KATHERIN",
-    "telefono_emergencia": "3134942527",
-    "parentesco_emergencia": "PRIMA",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
     "grupo_sanguineo": null,
     "eps": null,
     "arl": null,
@@ -8072,18 +7940,795 @@
   }
 },
 {
-  "model": "core.saludempleado",
-  "pk": 1,
+  "model": "core.empleado",
+  "pk": 30,
   "fields": {
-    "empleado": 7,
-    "grupo_sanguineo": "o+",
-    "eps": "sura",
-    "pension": "protexion",
-    "cesantias": "protexion",
-    "arl": "AXA colpatria",
-    "alergias": "N/A",
-    "contacto_emergencia": "3105168570",
-    "telefono_emergencia": "3105168570"
+    "foto": "",
+    "nombre_completo": "BOTINA RODRIGUEZ OSWALDO JAVIER",
+    "documento": "87473836",
+    "ciudad_expedicion": "BUESACO - NARIÑO",
+    "fecha_nacimiento": "1983-06-08",
+    "nacionalidad": "Colombiano",
+    "direccion": "VILLA DEL LAGO",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3104005586",
+    "correo": "87473836@cointeca.com",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2023-01-16",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 31,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "CAPOTE SHELCIN NICOOL",
+    "documento": "1193118542",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "2000-09-15",
+    "nacionalidad": "Colombiano",
+    "direccion": "CLL 82 #2AN-46",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3241718688",
+    "correo": "nicoolcapote1@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUX.CONTABLE",
+    "area": "ADMINISTRATIVA",
+    "nivel_academico": "Técnico",
+    "profesion": "AUX.CONTABLE",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-08-14",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1800000.00",
+    "jornada": "diurna",
+    "jefe": "GERENTE",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 32,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "CORDOBA PEREZ LUVIAN",
+    "documento": "3132512",
+    "ciudad_expedicion": "PUERTO SALGAR (CUNDINAMARCA)",
+    "fecha_nacimiento": "1980-02-29",
+    "nacionalidad": "Colombiano",
+    "direccion": "CORREGIMIENTO PUEBLO PANCE",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3188083563",
+    "correo": "cordobalivian9@gmail.com",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-10-01",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 33,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "FLOREZ ZULUAGA ARLETH FABIAN",
+    "documento": "1006745961",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "2001-05-03",
+    "nacionalidad": "Colombiano",
+    "direccion": "CALLE 82 # 2AN-85 FLORALIA",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3166428213",
+    "correo": "florezzuluaga@icloud.co",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-10-01",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 34,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "HERRERA CAPOTE JESUS DAVID",
+    "documento": "1144085288",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "1995-12-30",
+    "nacionalidad": "Colombiano",
+    "direccion": "LABUITRERA KM 3 CALI",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3235270653",
+    "correo": "herreracapote684@gmail.com",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2024-01-16",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 35,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "JIMENEZ VALENCIA HAMILTON",
+    "documento": "1144206847",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "1998-05-23",
+    "nacionalidad": "Colombiano",
+    "direccion": "CALLE 101D # 22B-41",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3218810218",
+    "correo": "valenciajimenezhamilton956@gmail.com",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-09-08",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 36,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "MOSQUERA GUITIERREZ MATEO",
+    "documento": "1115449495",
+    "ciudad_expedicion": "BUENAVENTURA-VALLE",
+    "fecha_nacimiento": "2005-05-25",
+    "nacionalidad": "Colombiano",
+    "direccion": "CLL 72B #3 AN-65",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3224950051",
+    "correo": "1115449495@cointeca.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-09-14",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 37,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "OSPINA FRANCO CRISTHIAN CAMILO",
+    "documento": "1144109447",
+    "ciudad_expedicion": "",
+    "fecha_nacimiento": null,
+    "nacionalidad": "Colombiano",
+    "direccion": "No registrada",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3000000000",
+    "correo": "1144109447@cointeca.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2024-01-15",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 38,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "OREJUELA RAMIREZ CARLOS ALBERTO",
+    "documento": "16687041",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "1963-07-21",
+    "nacionalidad": "Colombiano",
+    "direccion": "CLL 3A OESTE CRA 39-B/BELEN",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3234797761",
+    "correo": "16687041@cointeca.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-09-08",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 39,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "QUINTERO CARDONA GUSTAVO ADOLFO",
+    "documento": "4661306",
+    "ciudad_expedicion": "PADILLA - CAUCA",
+    "fecha_nacimiento": "1982-10-21",
+    "nacionalidad": "Colombiano",
+    "direccion": "CR 98B #45-200 TORRE 3 APTO 220 B/VALLE DEL LILI",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3025668720",
+    "correo": "cardonaadolfo618@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2025-09-01",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 40,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "RAMIREZ ZUÑIGA JADER",
+    "documento": "1144109612",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "1999-11-05",
+    "nacionalidad": "Colombiano",
+    "direccion": "KL 7 LA BUITRERA",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3104630444",
+    "correo": "jaderzuñiga683@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-10-01",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 41,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "RIVERA PABLO",
+    "documento": "1061689314",
+    "ciudad_expedicion": "POPAYAN - CAUCA",
+    "fecha_nacimiento": "1986-01-03",
+    "nacionalidad": "Colombiano",
+    "direccion": "VILLA DE LOS LAGOS",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3206161642",
+    "correo": "juanpablo@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-10-01",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 42,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "RODRIGUEZ ANGULO LUIS ALBERTO",
+    "documento": "16885097",
+    "ciudad_expedicion": "FLORIDA - VALLE",
+    "fecha_nacimiento": "1967-04-28",
+    "nacionalidad": "Colombiano",
+    "direccion": "CL 14 # 18 10 B/ VILLA GORGONA - CANDELARIA",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3000000000",
+    "correo": "luisalbertorodriguezangulo61@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2024-01-16",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 43,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "RUIZ JHONNY ALEXANDER",
+    "documento": "1006203103",
+    "ciudad_expedicion": "BUENAVENTURA-VALLE",
+    "fecha_nacimiento": "1994-04-02",
+    "nacionalidad": "Colombiano",
+    "direccion": "CASA 90 CORREGIMIENTO OBANDO",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3000000000",
+    "correo": "jonnyruiz423@gmail.com",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-09-08",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 44,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "SANCHEZ ADRIAN STIVEN",
+    "documento": "1115088288",
+    "ciudad_expedicion": "BUGA-VALLE",
+    "fecha_nacimiento": "1996-12-28",
+    "nacionalidad": "Colombiano",
+    "direccion": "No registrada",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3000000000",
+    "correo": "as9299375@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-09-14",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 45,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "VENTE GUZMAN HELMERSON",
+    "documento": "16888539",
+    "ciudad_expedicion": "FLORIDA - VALLE",
+    "fecha_nacimiento": "1973-03-05",
+    "nacionalidad": "Colombiano",
+    "direccion": "CR 17 #17 - 56 B/VILLA GORGONA",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3116067493",
+    "correo": "ventehelmerson@gmail.com",
+    "estado_civil": "",
+    "cargo": "AUXILIAR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "AUXILIAR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2022-10-21",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "1600000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 46,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "ZAPATA MINA MARVIN ANDRES",
+    "documento": "1107522437",
+    "ciudad_expedicion": "CALI - VALLE",
+    "fecha_nacimiento": "1984-06-23",
+    "nacionalidad": "Colombiano",
+    "direccion": "CLL 12C #20-35 MANZANARES SECTOR 17",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3017723036",
+    "correo": "marvinandreszapatamina1984@gmail.com",
+    "estado_civil": "",
+    "cargo": "CONDUCTOR",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "CONDUCTOR",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2024-01-15",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2000000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 47,
+  "fields": {
+    "foto": "",
+    "nombre_completo": "JOSE JIGNELO ZUÑIGA MOSQUERA",
+    "documento": "1060802089",
+    "ciudad_expedicion": "CAJIBIO - CAUCA",
+    "fecha_nacimiento": "1991-11-26",
+    "nacionalidad": "Colombiano",
+    "direccion": "KL 4 CORREGIMIENTO EL ORMIGUERO CS 05A",
+    "ciudad_residencia": "Cali",
+    "barrio": "",
+    "estrato": 2,
+    "telefono": "3176720804",
+    "correo": "josejignelo@gmail.com",
+    "estado_civil": "",
+    "cargo": "LINIERO",
+    "area": "OPERATIVO",
+    "nivel_academico": "Bachiller",
+    "profesion": "LINIERO",
+    "habilidades": "",
+    "idiomas": "Español",
+    "fecha_ingreso": "2026-09-14",
+    "fecha_finalizacion": null,
+    "tipo_contrato": "fijo",
+    "salario": "2650000.00",
+    "jornada": "diurna",
+    "jefe": "SUPERVISOR",
+    "estado": "activo",
+    "contacto_emergencia": "",
+    "telefono_emergencia": "",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
   }
 },
 {
@@ -8118,21 +8763,6 @@
 },
 {
   "model": "core.saludempleado",
-  "pk": 6,
-  "fields": {
-    "empleado": 16,
-    "grupo_sanguineo": "O+",
-    "eps": "sanitas",
-    "pension": "COLPENSIONES",
-    "cesantias": "FONDO NACIONAL",
-    "arl": "AXA COLPATRIA",
-    "alergias": "NA",
-    "contacto_emergencia": "",
-    "telefono_emergencia": ""
-  }
-},
-{
-  "model": "core.saludempleado",
   "pk": 7,
   "fields": {
     "empleado": 17,
@@ -8159,21 +8789,6 @@
     "alergias": "N/A",
     "contacto_emergencia": "ROBERT RAMOS / PADRE",
     "telefono_emergencia": "3158536414"
-  }
-},
-{
-  "model": "core.saludempleado",
-  "pk": 12,
-  "fields": {
-    "empleado": 23,
-    "grupo_sanguineo": "O+",
-    "eps": "NUEVA EPS",
-    "pension": "PROTECCION",
-    "cesantias": "PROTECCION",
-    "arl": "AXA COLPATRIA",
-    "alergias": "",
-    "contacto_emergencia": "",
-    "telefono_emergencia": ""
   }
 },
 {
@@ -8223,15 +8838,285 @@
 },
 {
   "model": "core.saludempleado",
-  "pk": 16,
+  "pk": 18,
   "fields": {
-    "empleado": 27,
-    "grupo_sanguineo": "A+",
+    "empleado": 29,
+    "grupo_sanguineo": "O+",
+    "eps": "SALUD TOTAL",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 19,
+  "fields": {
+    "empleado": 30,
+    "grupo_sanguineo": "O+",
     "eps": "NUEVA EPS",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 20,
+  "fields": {
+    "empleado": 31,
+    "grupo_sanguineo": "O+",
+    "eps": "SURA",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 21,
+  "fields": {
+    "empleado": 32,
+    "grupo_sanguineo": "A-",
+    "eps": "SALUD TOTAL",
+    "pension": "COLPENSIONES",
+    "cesantias": "COLPENSIONES",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 22,
+  "fields": {
+    "empleado": 33,
+    "grupo_sanguineo": "O+",
+    "eps": "NUEVA EPS",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 23,
+  "fields": {
+    "empleado": 34,
+    "grupo_sanguineo": "O+",
+    "eps": "SURA",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 24,
+  "fields": {
+    "empleado": 35,
+    "grupo_sanguineo": "O+",
+    "eps": "ASMET SALUD",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 25,
+  "fields": {
+    "empleado": 36,
+    "grupo_sanguineo": "O+",
+    "eps": "SALUD TOTAL",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 26,
+  "fields": {
+    "empleado": 37,
+    "grupo_sanguineo": "O+",
+    "eps": "SURA",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 27,
+  "fields": {
+    "empleado": 38,
+    "grupo_sanguineo": "O+",
+    "eps": "CONFENALCO",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 28,
+  "fields": {
+    "empleado": 39,
+    "grupo_sanguineo": "B+",
+    "eps": "ASMET SALUD",
+    "pension": "PROTECCION",
+    "cesantias": "PROTECCION",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 29,
+  "fields": {
+    "empleado": 40,
+    "grupo_sanguineo": "A+",
+    "eps": "SANITAS",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 30,
+  "fields": {
+    "empleado": 41,
+    "grupo_sanguineo": "O+",
+    "eps": "ASMET SALUD",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 31,
+  "fields": {
+    "empleado": 42,
+    "grupo_sanguineo": "O+",
+    "eps": "SALUD TOTAL",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 32,
+  "fields": {
+    "empleado": 43,
+    "grupo_sanguineo": "A+",
+    "eps": "S.O.S",
+    "pension": "PROTECCION",
+    "cesantias": "PROTECCION",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 33,
+  "fields": {
+    "empleado": 44,
+    "grupo_sanguineo": "O-",
+    "eps": "S.O.S",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 34,
+  "fields": {
+    "empleado": 45,
+    "grupo_sanguineo": "O+",
+    "eps": "S.O.S",
     "pension": "PROTECCION",
     "cesantias": "PORVENIR",
     "arl": "AXA COLPATRIA",
-    "alergias": "N/A",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 35,
+  "fields": {
+    "empleado": 46,
+    "grupo_sanguineo": "O+",
+    "eps": "SANITAS",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 36,
+  "fields": {
+    "empleado": 47,
+    "grupo_sanguineo": "AB+",
+    "eps": "S.O.S.",
+    "pension": "PORVENIR",
+    "cesantias": "PORVENIR",
+    "arl": "AXA COLPATRIA",
+    "alergias": "Ninguna",
     "contacto_emergencia": "",
     "telefono_emergencia": ""
   }

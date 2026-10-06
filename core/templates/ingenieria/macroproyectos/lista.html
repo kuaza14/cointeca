@@ -6,22 +6,45 @@
 {% block content %}
 
 <!-- Encabezado y Navegación -->
-<div class="flex flex-wrap items-start justify-between gap-4">
-    <div>
-        <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+<div class="space-y-4 pb-2">
+    <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
             <a href="/dashboard/" class="hover:underline">Inicio</a>
             <span>/</span>
             <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
             <span>/</span>
             <span class="text-foreground font-medium">Macroproyectos & Circuitos</span>
         </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{% url 'ingenieria_inicio' %}" 
+               class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+               style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                <span>←</span> <span>Volver a Ingeniería</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Título y Subtítulo -->
+    <div>
         <h1 class="titulo-pagina">
             Macroproyectos & Circuitos
         </h1>
         <p class="subtitulo-pagina">Gestión centralizada de macroproyectos (AP) y circuitos (MT) con agrupación de obras EMCALI.</p>
     </div>
 
-    <div class="flex flex-wrap gap-3">
+    <!-- Barra de Botones de Acción (Nuevo Macroproyecto primero a la izquierda) -->
+    <div class="flex flex-wrap items-center gap-3">
+        <button type="button" id="btnNuevoMacro" 
+                class="btn btn-primario font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
+                style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color: #ffffff !important;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            <span style="color: #ffffff !important;">Nuevo Macroproyecto / Circuito</span>
+        </button>
+
         <a href="{% url 'catalogo_mano_obra' %}" 
            class="btn btn-emerald font-bold inline-flex items-center gap-2 shadow-sm"
            style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;">
@@ -36,19 +59,6 @@
             </svg>
             <span style="color: #ffffff !important;">Imprimir Formato Poste a Poste</span>
         </button>
-
-        <button type="button" id="btnNuevoMacro" 
-                class="btn btn-primario font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
-                style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
-            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color: #ffffff !important;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-            </svg>
-            <span style="color: #ffffff !important;">Nuevo Macroproyecto / Circuito</span>
-        </button>
-
-        <a href="{% url 'ingenieria_inicio' %}" class="btn btn-secundario">
-            ← Volver a Ingeniería
-        </a>
     </div>
 </div>
 

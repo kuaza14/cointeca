@@ -9,9 +9,10 @@
     <!-- 1. ENCABEZADO PRINCIPAL Y ACCIONES RÁPIDAS -->
     <!-- ===================================================================== -->
     <div class="bg-card rounded-xl shadow-sm border border-border p-5 print:border-none print:p-0">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border">
-            <div>
-                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1 print:hidden">
+        <div class="space-y-4 pb-4 border-b border-border">
+            <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1 print:hidden flex-wrap">
                     <a href="/dashboard/" class="hover:underline">Inicio</a>
                     <span>/</span>
                     <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
@@ -24,6 +25,17 @@
                     <span>/</span>
                     <span class="text-foreground font-medium">Vista Global de Materiales y Nodos</span>
                 </div>
+
+                <div class="flex items-center gap-2 shrink-0 print:hidden">
+                    <a href="{% url 'macroproyectos_logistica' %}" 
+                       class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                       style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                        <span>←</span> <span>Volver a Macroproyectos</span>
+                    </a>
+                </div>
+            </div>
+
+            <div>
                 <h2 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
                     <span>🌐</span> Vista Global de Materiales
                 </h2>
@@ -33,36 +45,35 @@
             <div class="flex flex-wrap items-center gap-2.5 print:hidden">
                 {% if proyecto_seleccionado %}
                 <a href="{% url 'exportar_vista_global_excel' %}?proyecto_id={{ proyecto_seleccionado.id }}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                   class="btn font-bold inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs rounded-lg shadow-sm transition"
+                   style="background-color: #047857 !important; color: #ffffff !important; border: 1px solid #065f46 !important;"
                    title="Descargar este proyecto consolidado en Excel (Balance y Nodos)">
-                    <span>📊</span> Descargar Excel
+                    <span>📊</span> <span>Descargar Excel</span>
                 </a>
                 <a href="{% url 'detalle_proyecto' proyecto_seleccionado.id %}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg shadow-sm transition">
-                    <span>⚡</span> Postes (Ing.)
+                   class="btn font-bold inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs rounded-lg shadow-sm transition"
+                   style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
+                    <span>⚡</span> <span>Postes (Ing.)</span>
                 </a>
                 <a href="{% url 'detalle_proyecto_logistica' proyecto_seleccionado.id %}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-lg transition">
-                    <span>📦</span> Detalle Logística
+                   class="btn font-bold inline-flex items-center gap-1.5 px-3.5 py-2 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-xs rounded-lg transition">
+                    <span>📦</span> <span>Detalle Logística</span>
                 </a>
                 {% elif macro_seleccionado %}
                 <a href="{% url 'exportar_vista_global_excel' %}?macroproyecto_id={{ macro_seleccionado.id }}&proyecto_id=todos"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                   class="btn font-bold inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs rounded-lg shadow-sm transition"
+                   style="background-color: #047857 !important; color: #ffffff !important; border: 1px solid #065f46 !important;"
                    title="Descargar todos los proyectos de este macroproyecto en Excel">
-                    <span>📊</span> Descargar Consolidado Macro (Excel)
+                    <span>📊</span> <span>Descargar Consolidado Macro (Excel)</span>
                 </a>
                 {% else %}
                 <a href="{% url 'exportar_vista_global_excel' %}?proyecto_id=todos"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                   class="btn font-bold inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs rounded-lg shadow-sm transition"
+                   style="background-color: #047857 !important; color: #ffffff !important; border: 1px solid #065f46 !important;"
                    title="Descargar consolidado global en Excel">
-                    <span>📊</span> Descargar Consolidado Global (Excel)
+                    <span>📊</span> <span>Descargar Consolidado Global (Excel)</span>
                 </a>
                 {% endif %}
-
-                <a href="{% url 'macroproyectos_logistica' %}"
-                   class="inline-flex items-center px-3.5 py-2 bg-muted hover:bg-gray-200 text-foreground text-xs font-medium rounded-lg transition">
-                    ← Volver
-                </a>
             </div>
         </div>
 

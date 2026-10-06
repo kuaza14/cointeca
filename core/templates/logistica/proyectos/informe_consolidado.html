@@ -7,9 +7,10 @@
 
     <!-- Encabezado del Informe -->
     <div class="bg-card rounded-xl shadow-sm border border-border p-6 print:border-none print:p-0">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border">
-            <div>
-                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1 print:hidden">
+        <div class="space-y-4 pb-4 border-b border-border">
+            <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1 print:hidden flex-wrap">
                     <a href="/dashboard/" class="hover:underline">Inicio</a>
                     <span>/</span>
                     <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
@@ -17,11 +18,22 @@
                     <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">Macroproyectos & Circuitos</a>
                     {% if macroproyecto %}
                         <span>/</span>
-                        <a href="{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}" class="hover:underline">{{ macroproyecto.nombre }}</a>
+                        <a href="{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}" class="hover:underline font-semibold text-primary">{{ macroproyecto.nombre }}</a>
                     {% endif %}
                     <span>/</span>
                     <span class="text-foreground font-medium">Informe Consolidado</span>
                 </div>
+
+                <div class="flex items-center gap-2 shrink-0 print:hidden">
+                    <a href="{% if macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'macroproyectos_logistica' %}{% endif %}"
+                       class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                       style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                        <span>←</span> <span>Volver a {% if macroproyecto %}{{ macroproyecto.nombre }}{% else %}Macroproyectos & Circuitos{% endif %}</span>
+                    </a>
+                </div>
+            </div>
+
+            <div>
                 <h1 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
                     <span>📊</span> Informe Consolidado de Materiales y Retiros
                 </h1>
@@ -33,19 +45,16 @@
             <!-- Botones de Acción -->
             <div class="flex flex-wrap items-center gap-3 print:hidden">
                 <button type="button" onclick="window.print()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-sm transition">
-                    <span>🖨️</span> Imprimir Informe
+                        class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+                        style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;">
+                    <span>🖨️</span> <span>Imprimir Informe</span>
                 </button>
 
                 <a href="{% url 'exportar_informe_consolidado_excel' %}?ids={{ ids_string }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-bold rounded-lg shadow-sm transition"
+                   class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+                   style="background-color: #047857 !important; color: #ffffff !important; border: 1px solid #065f46 !important;"
                    title="Descargar este consolidado en Excel">
-                    <span>📊</span> Descargar en Excel
-                </a>
-
-                <a href="{% if macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'macroproyectos_logistica' %}{% endif %}"
-                   class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                    ← Volver a {% if macroproyecto %}{{ macroproyecto.nombre }}{% else %}Macroproyectos & Circuitos{% endif %}
+                    <span>📊</span> <span>Descargar en Excel</span>
                 </a>
             </div>
         </div>
@@ -115,6 +124,33 @@
             </button>
         </div>
 
+        <!-- Buscador en Vivo del Informe -->
+        <div class="bg-card rounded-xl p-3.5 shadow-xs border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
+            <div class="w-full sm:w-96 relative flex items-center">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </span>
+                <input type="text"
+                       id="buscadorInformeConsolidado"
+                       placeholder="Buscar por código de ítem o descripción de material..."
+                       autocomplete="off"
+                       class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background text-foreground">
+                <button type="button"
+                        id="btnLimpiarInforme"
+                        class="absolute inset-y-0 right-0 items-center pr-2.5 text-muted-foreground hover:text-foreground hidden cursor-pointer"
+                        title="Limpiar búsqueda">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="text-xs font-semibold text-muted-foreground">
+                <span id="contadorInformeFiltrados">Búsqueda rápida en la pestaña activa</span>
+            </div>
+        </div>
+
         <!-- TAB 1: MATRIZ CONSOLIDADA GENERAL -->
         <div id="panelInformeConsolidado" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden print:border-black print:rounded-none">
             <div class="p-4 bg-muted border-b border-border flex items-center justify-between">
@@ -144,7 +180,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-card">
                         {% for fila in tabla_consolidada %}
-                        <tr class="hover:bg-primary-soft/40 transition {% if forloop.counter|divisibleby:2 %}bg-muted/30{% endif %}">
+                        <tr class="hover:bg-primary-soft/40 transition fila-informe-consolidado {% if forloop.counter|divisibleby:2 %}bg-muted/30{% endif %}">
                             <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
                                 {{ fila.material.item }}
                             </td>
@@ -270,7 +306,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-card">
                             {% for item in dp.items %}
-                            <tr class="hover:bg-muted/40 transition">
+                            <tr class="hover:bg-muted/40 transition fila-informe-desglose">
                                 <td class="px-4 py-2.5 text-center font-mono text-muted-foreground">{{ item.material.item }}</td>
                                 <td class="px-5 py-2.5 font-medium text-foreground">{{ item.material.descripcion }}</td>
                                 <td class="px-3 py-2.5 text-center text-muted-foreground">{{ item.material.unidad|default:"UN" }}</td>
@@ -343,6 +379,74 @@ function cambiarPestanaInforme(tabName) {
         if (btnConsolidado) { btnConsolidado.className = 'py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe'; }
         if (btnDesglose) { btnDesglose.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-indigo-600 text-indigo-600 font-bold tab-btn-informe'; }
     }
+
+    filtrarInformeActivo();
 }
+
+function filtrarInformeActivo() {
+    const input = document.getElementById('buscadorInformeConsolidado');
+    const btnLimpiar = document.getElementById('btnLimpiarInforme');
+    const contador = document.getElementById('contadorInformeFiltrados');
+    if (!input) return;
+
+    const q = input.value.toLowerCase().trim();
+
+    if (btnLimpiar) {
+        if (q.length > 0) {
+            btnLimpiar.classList.remove('hidden');
+            btnLimpiar.classList.add('flex');
+        } else {
+            btnLimpiar.classList.add('hidden');
+            btnLimpiar.classList.remove('flex');
+        }
+    }
+
+    const pConsolidado = document.getElementById('panelInformeConsolidado');
+    const esConsolidadoVisible = pConsolidado && !pConsolidado.classList.contains('hidden') && pConsolidado.style.display !== 'none';
+
+    let selector = esConsolidadoVisible ? '.fila-informe-consolidado' : '.fila-informe-desglose';
+    const filas = document.querySelectorAll(selector);
+    let visibles = 0;
+
+    filas.forEach(f => {
+        const texto = f.textContent.toLowerCase();
+        const match = (q === '' || texto.includes(q));
+        f.style.display = match ? '' : 'none';
+        if (match) visibles++;
+    });
+
+    if (contador) {
+        if (q.length > 0) {
+            contador.textContent = `${visibles} de ${filas.length} registros encontrados`;
+        } else {
+            contador.textContent = `Búsqueda rápida en la pestaña activa (${filas.length} registros)`;
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBuscador = document.getElementById('buscadorInformeConsolidado');
+    const btnLimpiar = document.getElementById('btnLimpiarInforme');
+
+    if (inputBuscador) {
+        inputBuscador.addEventListener('input', filtrarInformeActivo);
+        inputBuscador.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                inputBuscador.value = '';
+                filtrarInformeActivo();
+            }
+        });
+    }
+
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function () {
+            if (inputBuscador) {
+                inputBuscador.value = '';
+                filtrarInformeActivo();
+                inputBuscador.focus();
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

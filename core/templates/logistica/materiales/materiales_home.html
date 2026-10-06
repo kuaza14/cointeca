@@ -6,15 +6,27 @@
 <div class="max-w-7xl mx-auto p-6 space-y-6">
 
     <!-- Encabezado y Navegación -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
-        <div>
-            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+    <div class="space-y-4 pb-2">
+        <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                 <a href="/dashboard/" class="hover:underline">Inicio</a>
                 <span>/</span>
                 <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                 <span>/</span>
                 <span class="text-foreground font-medium">Inventario Central</span>
             </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{% url 'logistica_home' %}" 
+                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <span>←</span> <span>Volver a Logística</span>
+                </a>
+            </div>
+        </div>
+
+        <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
                 Inventario y Catálogo de Bodega Central
             </h1>
@@ -23,18 +35,18 @@
             </p>
         </div>
 
+        <!-- Barra de Botones de Acción (+ Nuevo Material primero a la izquierda) -->
         <div class="flex flex-wrap items-center gap-3">
             <button type="button" onclick="abrirModalNuevoMaterial()"
-                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                <span>+</span> Nuevo Material
+                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+                    style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
+                <span>+</span> <span>Nuevo Material</span>
             </button>
+
             <a href="{% url 'macroproyectos_logistica' %}"
-               class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                Macroproyectos & Circuitos
-            </a>
-            <a href="{% url 'logistica_home' %}"
-               class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                Volver a Logística
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;">
+                <span>🏢</span> <span>Macroproyectos & Circuitos</span>
             </a>
         </div>
     </div>
@@ -68,14 +80,27 @@
     <div id="panelStockBodega" class="space-y-4 pestana-panel-bodega">
         <!-- Buscador y Métricas -->
         <div class="bg-card rounded-xl shadow-sm border border-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="w-full sm:w-96 relative">
+            <div class="w-full sm:w-96 relative flex items-center">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </span>
                 <input type="text" id="buscadorMateriales" placeholder="Buscar por nombre o código de ítem..."
-                       class="w-full border border-border-strong rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                       autocomplete="off"
+                       class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button type="button" id="btnLimpiarStock"
+                        class="absolute inset-y-0 right-0 items-center pr-2.5 text-muted-foreground hover:text-foreground hidden cursor-pointer"
+                        title="Limpiar búsqueda">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
 
             <div class="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
                 <span class="px-3 py-1.5 rounded-lg bg-muted border">
-                    Total Materiales: <strong class="text-foreground text-sm">{{ total_materiales }}</strong>
+                    Mostrando: <strong id="contadorStockVisible" class="text-foreground text-sm">{{ total_materiales }}</strong> de <strong class="text-foreground text-sm">{{ total_materiales }}</strong> materiales
                 </span>
             </div>
         </div>
@@ -151,14 +176,27 @@
     <div id="panelHistorialBodega" class="space-y-4 pestana-panel-bodega hidden">
         <!-- Buscador y Métricas del Historial -->
         <div class="bg-card rounded-xl shadow-sm border border-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="w-full sm:w-96 relative">
+            <div class="w-full sm:w-96 relative flex items-center">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </span>
                 <input type="text" id="buscadorHistorial" placeholder="Buscar por material, usuario, proyecto, tipo..."
-                       class="w-full border border-border-strong rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                       autocomplete="off"
+                       class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button type="button" id="btnLimpiarHistorial"
+                        class="absolute inset-y-0 right-0 items-center pr-2.5 text-muted-foreground hover:text-foreground hidden cursor-pointer"
+                        title="Limpiar búsqueda">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground">
                 <span class="px-3 py-1.5 rounded-lg bg-muted border">
-                    Total Movimientos: <strong class="text-foreground text-sm">{{ total_movimientos }}</strong>
+                    Mostrando: <strong id="contadorHistorialVisible" class="text-foreground text-sm">{{ total_movimientos }}</strong> de <strong class="text-foreground text-sm">{{ total_movimientos }}</strong> movimientos
                 </span>
                 <span class="px-2.5 py-1 rounded bg-red-50 text-red-700 border border-red-200">
                     🔴 Despachos / Salidas
@@ -290,6 +328,33 @@
     <!-- PANEL 3: HISTORIAL DE RETIROS DE APOYOS Y DEVOLUCIONES A BODEGA -->
     <div id="panelDevolucionesBodega" class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-6 pestana-panel-bodega hidden">
         
+        <!-- Buscador y Métricas de Devoluciones y Retiros -->
+        <div class="bg-card rounded-xl shadow-xs border border-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="w-full sm:w-96 relative flex items-center">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </span>
+                <input type="text" id="buscadorDevoluciones" placeholder="Buscar por proyecto, poste, ítem o material..."
+                       autocomplete="off"
+                       class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button type="button" id="btnLimpiarDevoluciones"
+                        class="absolute inset-y-0 right-0 items-center pr-2.5 text-muted-foreground hover:text-foreground hidden cursor-pointer"
+                        title="Limpiar búsqueda">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
+                <span class="px-3 py-1.5 rounded-lg bg-muted border">
+                    Mostrando: <strong id="contadorDevolucionesVisible" class="text-foreground text-sm">{{ retiros_apoyos|length }}</strong> de <strong class="text-foreground text-sm">{{ retiros_apoyos|length }}</strong> retiros
+                </span>
+            </div>
+        </div>
+
         <!-- SECCIÓN A: RETIROS DIRECTOS DE APOYOS / POSTES -->
         <div class="space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
@@ -322,7 +387,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-card">
                         {% for am in retiros_apoyos %}
-                        <tr class="hover:bg-amber-50/30 transition">
+                        <tr class="hover:bg-amber-50/30 transition fila-retiro-bodega">
                             <td class="px-4 py-2.5 font-bold text-primary">
                                 <a href="{% url 'detalle_proyecto_logistica' am.apoyo.proyecto.id %}" class="hover:underline">
                                     {{ am.apoyo.proyecto.numero_emcali }}
@@ -559,31 +624,147 @@
 <script>
     // Buscadores en tiempo real
     document.addEventListener('DOMContentLoaded', function () {
-        // Buscador de existencias
+        // 1. Buscador de existencias (Stock)
         const inputBuscador = document.getElementById('buscadorMateriales');
-        const filas = document.querySelectorAll('.fila-inventario');
+        const btnLimpiarStock = document.getElementById('btnLimpiarStock');
+        const contadorStock = document.getElementById('contadorStockVisible');
+        const filasStock = document.querySelectorAll('.fila-inventario');
+
+        function filtrarStock() {
+            const query = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
+            if (btnLimpiarStock) {
+                if (query.length > 0) {
+                    btnLimpiarStock.classList.remove('hidden');
+                    btnLimpiarStock.classList.add('flex');
+                } else {
+                    btnLimpiarStock.classList.add('hidden');
+                    btnLimpiarStock.classList.remove('flex');
+                }
+            }
+
+            let visibles = 0;
+            filasStock.forEach(function (fila) {
+                const texto = fila.textContent.toLowerCase();
+                const match = (query === '' || texto.includes(query));
+                fila.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+
+            if (contadorStock) contadorStock.textContent = visibles;
+        }
 
         if (inputBuscador) {
-            inputBuscador.addEventListener('input', function () {
-                const query = this.value.toLowerCase().trim();
-                filas.forEach(function (fila) {
-                    const texto = fila.textContent.toLowerCase();
-                    fila.style.display = texto.includes(query) ? '' : 'none';
-                });
+            inputBuscador.addEventListener('input', filtrarStock);
+            inputBuscador.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    inputBuscador.value = '';
+                    filtrarStock();
+                }
+            });
+        }
+        if (btnLimpiarStock) {
+            btnLimpiarStock.addEventListener('click', function() {
+                if (inputBuscador) {
+                    inputBuscador.value = '';
+                    filtrarStock();
+                    inputBuscador.focus();
+                }
             });
         }
 
-        // Buscador de historial
+        // 2. Buscador de historial
         const inputHistorial = document.getElementById('buscadorHistorial');
+        const btnLimpiarHistorial = document.getElementById('btnLimpiarHistorial');
+        const contadorHistorial = document.getElementById('contadorHistorialVisible');
         const filasHistorial = document.querySelectorAll('.fila-historial');
 
+        function filtrarHistorial() {
+            const query = inputHistorial ? inputHistorial.value.toLowerCase().trim() : '';
+            if (btnLimpiarHistorial) {
+                if (query.length > 0) {
+                    btnLimpiarHistorial.classList.remove('hidden');
+                    btnLimpiarHistorial.classList.add('flex');
+                } else {
+                    btnLimpiarHistorial.classList.add('hidden');
+                    btnLimpiarHistorial.classList.remove('flex');
+                }
+            }
+
+            let visibles = 0;
+            filasHistorial.forEach(function (fila) {
+                const texto = fila.textContent.toLowerCase();
+                const match = (query === '' || texto.includes(query));
+                fila.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+
+            if (contadorHistorial) contadorHistorial.textContent = visibles;
+        }
+
         if (inputHistorial) {
-            inputHistorial.addEventListener('input', function () {
-                const query = this.value.toLowerCase().trim();
-                filasHistorial.forEach(function (fila) {
-                    const texto = fila.textContent.toLowerCase();
-                    fila.style.display = texto.includes(query) ? '' : 'none';
-                });
+            inputHistorial.addEventListener('input', filtrarHistorial);
+            inputHistorial.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    inputHistorial.value = '';
+                    filtrarHistorial();
+                }
+            });
+        }
+        if (btnLimpiarHistorial) {
+            btnLimpiarHistorial.addEventListener('click', function() {
+                if (inputHistorial) {
+                    inputHistorial.value = '';
+                    filtrarHistorial();
+                    inputHistorial.focus();
+                }
+            });
+        }
+
+        // 3. Buscador de devoluciones y retiros
+        const inputDev = document.getElementById('buscadorDevoluciones');
+        const btnLimpiarDev = document.getElementById('btnLimpiarDevoluciones');
+        const contadorDev = document.getElementById('contadorDevolucionesVisible');
+        const filasDev = document.querySelectorAll('.fila-retiro-bodega');
+
+        function filtrarDevoluciones() {
+            const query = inputDev ? inputDev.value.toLowerCase().trim() : '';
+            if (btnLimpiarDev) {
+                if (query.length > 0) {
+                    btnLimpiarDev.classList.remove('hidden');
+                    btnLimpiarDev.classList.add('flex');
+                } else {
+                    btnLimpiarDev.classList.add('hidden');
+                    btnLimpiarDev.classList.remove('flex');
+                }
+            }
+
+            let visibles = 0;
+            filasDev.forEach(function (fila) {
+                const texto = fila.textContent.toLowerCase();
+                const match = (query === '' || texto.includes(query));
+                fila.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+
+            if (contadorDev) contadorDev.textContent = visibles;
+        }
+
+        if (inputDev) {
+            inputDev.addEventListener('input', filtrarDevoluciones);
+            inputDev.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    inputDev.value = '';
+                    filtrarDevoluciones();
+                }
+            });
+        }
+        if (btnLimpiarDev) {
+            btnLimpiarDev.addEventListener('click', function() {
+                if (inputDev) {
+                    inputDev.value = '';
+                    filtrarDevoluciones();
+                    inputDev.focus();
+                }
             });
         }
 

@@ -6,15 +6,28 @@
 <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- Encabezado y Navegación -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
-        <div>
-            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+    <div class="space-y-4 pb-4 border-b border-border">
+        <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                 <a href="/dashboard/" class="hover:underline">Inicio</a>
                 <span>/</span>
                 <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                 <span>/</span>
                 <span class="text-foreground font-medium">Macroproyectos & Circuitos</span>
             </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{% url 'logistica_home' %}"
+                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <span>←</span> <span>Volver a Logística</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Título y Subtítulo -->
+        <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
                 Control de Materiales por Macroproyecto o Circuito
             </h1>
@@ -23,14 +36,12 @@
             </p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <!-- Barra de Botones de Acción -->
+        <div class="flex flex-wrap items-center gap-3">
             <a href="{% url 'materiales_home' %}"
-               class="inline-flex items-center px-4 py-2 bg-primary-soft hover:bg-blue-100 text-primary text-sm font-medium rounded-lg transition border border-blue-200">
-                Catálogo de Materiales
-            </a>
-            <a href="{% url 'logistica_home' %}"
-               class="inline-flex items-center px-4 py-2 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition shadow-sm">
-                ← Volver
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
+                <span>📦</span> <span>Catálogo de Materiales</span>
             </a>
         </div>
     </div>

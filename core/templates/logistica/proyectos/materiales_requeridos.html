@@ -6,46 +6,52 @@
 <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- Encabezado y Navegación -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
-        <div>
-            <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                <a href="/dashboard/" class="hover:underline text-blue-600">Inicio</a>
+    <div class="space-y-4 pb-2">
+        <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                <a href="/dashboard/" class="hover:underline">Inicio</a>
                 <span>/</span>
-                <a href="{% url 'logistica_home' %}" class="hover:underline text-blue-600">Logística</a>
+                <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
                 <span>/</span>
-                <a href="{% url 'proyectos_logistica' %}" class="hover:underline text-blue-600">Proyectos</a>
+                <a href="{% url 'proyectos_logistica' %}" class="hover:underline">Proyectos</a>
                 <span>/</span>
-                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline text-blue-600">{{ proyecto.numero_emcali }}</a>
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="hover:underline font-semibold text-primary">{{ proyecto.numero_emcali }}</a>
                 <span>/</span>
-                <span class="text-gray-900 font-bold">Materiales Requeridos</span>
+                <span class="text-foreground font-medium">Materiales Requeridos</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-2">
-                📋 Materiales Requeridos — Proyecto {{ proyecto.numero_emcali }}
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" 
+                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <span>←</span> <span>Volver al Proyecto</span>
+                </a>
+            </div>
+        </div>
+
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
+                <span>📋</span> Materiales Requeridos — Proyecto {{ proyecto.numero_emcali }}
             </h1>
-            <p class="text-sm text-gray-600 mt-1">
+            <p class="text-sm text-muted-foreground mt-1">
                 Consolidado oficial de materiales requeridos para la ejecución técnica de la obra.
             </p>
         </div>
 
-        <!-- Botones de Acción -->
+        <!-- Botones de Acción (Pedir Material primero a la izquierda) -->
         <div class="flex flex-wrap items-center gap-3">
-            <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg shadow-sm transition"
-               style="background-color: #047857; color: #ffffff !important;"
-               title="Descargar y abrir en Excel">
-                <span>📊</span> <span>Descargar / Imprimir en Excel</span>
-            </a>
-
             <button type="button" onclick="abrirModalAgregar()"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg shadow-sm transition"
-                    style="background-color: #1d4ed8; color: #ffffff !important;">
+                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+                    style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
                 <span>➕</span> <span>Pedir / Agregar Material</span>
             </button>
 
-            <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-               class="inline-flex items-center px-4 py-2.5 text-sm font-semibold rounded-lg transition border"
-               style="background-color: #ffffff; color: #0f172a !important; border-color: #94a3b8;">
-                ← Volver al Proyecto
+            <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;"
+               title="Descargar y abrir en Excel">
+                <span>📊</span> <span>Descargar / Imprimir en Excel</span>
             </a>
         </div>
     </div>
@@ -87,6 +93,36 @@
         </div>
     </div>
 
+    <!-- Buscador en Vivo de Materiales Requeridos -->
+    <div class="bg-card rounded-xl shadow-sm border border-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="w-full sm:w-96 relative flex items-center">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                </svg>
+            </span>
+            <input type="text"
+                   id="buscadorRequeridos"
+                   placeholder="Buscar material requerido por ítem o descripción..."
+                   autocomplete="off"
+                   class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background text-foreground">
+            <button type="button"
+                    id="btnLimpiarRequeridos"
+                    class="absolute inset-y-0 right-0 items-center pr-2.5 text-muted-foreground hover:text-foreground hidden cursor-pointer"
+                    title="Limpiar búsqueda">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
+            <span class="px-3 py-1.5 rounded-lg bg-muted border border-border">
+                Mostrando: <strong id="contadorRequeridosVisible" class="text-foreground text-sm">{{ total_items }}</strong> de <strong class="text-foreground text-sm">{{ total_items }}</strong> materiales
+            </span>
+        </div>
+    </div>
+
     <!-- TABLA OFICIAL DE MATERIALES REQUERIDOS -->
     <div class="rounded-xl shadow-sm border border-gray-300 overflow-hidden" style="background-color: #ffffff;">
         <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -106,7 +142,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-left text-sm" style="color: #0f172a;">
+            <table class="min-w-full divide-y divide-gray-200 text-left text-sm" id="tablaMaterialesRequeridos" style="color: #0f172a;">
                 <thead class="bg-gray-800 text-black uppercase text-xs font-bold">
                     <tr>
                         <th class="px-5 py-3.5 w-24">Ítem</th>
@@ -118,7 +154,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200" style="background-color: #ffffff;">
                     {% for item in lista_requeridos %}
-                    <tr class="hover:bg-blue-50/50 transition">
+                    <tr class="hover:bg-blue-50/50 transition fila-requerido-tabla">
                         <td class="px-5 py-3 font-mono font-bold text-gray-700 text-xs">
                             {{ item.material.item }}
                         </td>
@@ -432,6 +468,60 @@
             tbody.appendChild(tr);
         });
     }
+
+    // Buscador en vivo de materiales requeridos
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputBuscador = document.getElementById("buscadorRequeridos");
+        const btnLimpiar = document.getElementById("btnLimpiarRequeridos");
+        const contador = document.getElementById("contadorRequeridosVisible");
+        const filas = document.querySelectorAll(".fila-requerido-tabla");
+
+        function filtrarRequeridos() {
+            const q = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+
+            if (btnLimpiar) {
+                if (q.length > 0) {
+                    btnLimpiar.classList.remove("hidden");
+                    btnLimpiar.classList.add("flex");
+                } else {
+                    btnLimpiar.classList.add("hidden");
+                    btnLimpiar.classList.remove("flex");
+                }
+            }
+
+            let visibles = 0;
+            filas.forEach(function (fila) {
+                const texto = fila.textContent.toLowerCase();
+                const match = (q === "" || texto.includes(q));
+                fila.style.display = match ? "" : "none";
+                if (match) visibles++;
+            });
+
+            if (contador) {
+                contador.textContent = visibles;
+            }
+        }
+
+        if (inputBuscador) {
+            inputBuscador.addEventListener("input", filtrarRequeridos);
+            inputBuscador.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    inputBuscador.value = "";
+                    filtrarRequeridos();
+                }
+            });
+        }
+
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener("click", function () {
+                if (inputBuscador) {
+                    inputBuscador.value = "";
+                    filtrarRequeridos();
+                    inputBuscador.focus();
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}
 

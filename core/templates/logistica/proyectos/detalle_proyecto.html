@@ -6,86 +6,96 @@
 <div class="max-w-7xl mx-auto p-6 space-y-6">
 
     <!-- Encabezado del Proyecto -->
-    <div class="bg-card rounded-xl shadow-sm border border-border p-6">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                    <a href="/dashboard/" class="hover:underline">Inicio</a>
+    <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
+        <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                <a href="/dashboard/" class="hover:underline">Inicio</a>
+                <span>/</span>
+                <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
+                <span>/</span>
+                <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">{{ proyecto.etiqueta_padre_plural }}</a>
+                {% if proyecto.macroproyecto %}
                     <span>/</span>
-                    <a href="{% url 'logistica_home' %}" class="hover:underline">Logística</a>
-                    <span>/</span>
-                    <a href="{% url 'macroproyectos_logistica' %}" class="hover:underline">{{ proyecto.etiqueta_padre_plural }}</a>
-                    {% if proyecto.macroproyecto %}
-                        <span>/</span>
-                        <a href="{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}" class="hover:underline font-semibold text-primary">{{ proyecto.macroproyecto.nombre }}</a>
-                    {% endif %}
-                    <span>/</span>
-                    <span class="text-foreground font-medium">{{ proyecto.numero_emcali }}</span>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
-                        {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}
-                    </h1>
-                    {% if proyecto.tipo == "AP_BARRIO" %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-900 border border-amber-300">
-                            AP Barrio
-                        </span>
-                    {% elif proyecto.tipo == "AP_PARQUE" %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">
-                            AP Parque / Cancha
-                        </span>
-                    {% elif proyecto.tipo == "AP" %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
-                            Alumbrado Público (AP)
-                        </span>
-                    {% elif proyecto.tipo == "BT" %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-primary-soft text-primary border border-blue-200">
-                            Baja Tensión (BT)
-                        </span>
-                    {% elif proyecto.tipo == "MT" %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
-                            Media Tensión (MT)
-                        </span>
-                    {% endif %}
-                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-success border border-green-200">
-                        {{ proyecto.estado }}
-                    </span>
-                </div>
-                <p class="text-xs text-muted-foreground mt-2">
-                    Control logístico de materiales: Requerimientos, Materiales Instalados en Apoyos, Retiros y Suministros.
-                </p>
+                    <a href="{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}" class="hover:underline font-semibold text-primary">{{ proyecto.macroproyecto.nombre }}</a>
+                {% endif %}
+                <span>/</span>
+                <span class="text-foreground font-medium">{{ proyecto.numero_emcali }}</span>
             </div>
 
-            <!-- Botones de Acción Rápida -->
-            <div class="flex flex-wrap items-center gap-3">
-                <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.remove('hidden'); document.getElementById('modalPedirRequerido').classList.add('flex');"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                    <span>+ Pedir Material Requerido</span>
-                </button>
-
-                <a href="{% url 'registrar_entrada_material' proyecto.id %}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                    <span>+ Entrada Material</span>
-                </a>
-
-
-                <a href="{% url 'detalle_proyecto' proyecto.id %}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg shadow-sm transition">
-                    <span>Apoyos & Retiros (Ing.)</span>
-                </a>
-
-                <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-lg shadow-sm transition"
-                   title="Descargar libro Excel con Matriz de Balance, Requeridos, Devoluciones y Nodos">
-                    <span>📊</span> Descargar Excel Balance
-                </a>
-
+            <!-- Botón Volver arriba a la derecha en gris sólido (no blanco) -->
+            <div class="flex items-center gap-2 shrink-0">
                 <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'proyectos_logistica' %}{% endif %}"
-                   class="inline-flex items-center px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-sm font-medium rounded-lg transition">
-                    ← Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}
+                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <span>←</span> <span>Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}</span>
                 </a>
             </div>
+        </div>
 
+        <!-- Título, Badges y Subtítulo -->
+        <div>
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground">
+                    {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}
+                </h1>
+                {% if proyecto.tipo == "AP_BARRIO" %}
+                    <span class="px-3 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                        AP Barrio
+                    </span>
+                {% elif proyecto.tipo == "AP_PARQUE" %}
+                    <span class="px-3 py-1 text-xs font-semibold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">
+                        AP Parque / Cancha
+                    </span>
+                {% elif proyecto.tipo == "AP" %}
+                    <span class="px-3 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+                        Alumbrado Público (AP)
+                    </span>
+                {% elif proyecto.tipo == "BT" %}
+                    <span class="px-3 py-1 text-xs font-semibold rounded-md bg-primary-soft text-primary border border-blue-200">
+                        Baja Tensión (BT)
+                    </span>
+                {% elif proyecto.tipo == "MT" %}
+                    <span class="px-3 py-1 text-xs font-semibold rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+                        Media Tensión (MT)
+                    </span>
+                {% endif %}
+                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-success border border-green-200">
+                    {{ proyecto.estado }}
+                </span>
+            </div>
+            <p class="text-xs text-muted-foreground mt-2">
+                Control logístico de materiales: Requerimientos, Materiales Instalados en Apoyos, Retiros y Suministros.
+            </p>
+        </div>
+
+        <!-- Botones de Acción Rápida -->
+        <div class="flex flex-wrap items-center gap-3">
+            <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.remove('hidden'); document.getElementById('modalPedirRequerido').classList.add('flex');"
+                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+                    style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
+                <span>+</span> <span>Pedir Material Requerido</span>
+            </button>
+
+            <a href="{% url 'registrar_entrada_material' proyecto.id %}"
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;">
+                <span>+</span> <span>Entrada Material</span>
+            </a>
+
+            <a href="{% url 'detalle_proyecto' proyecto.id %}"
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #4338ca !important; color: #ffffff !important; border: 1px solid #3730a3 !important;"
+               title="Ir a matriz poste a poste y liquidación de apoyos en Ingeniería">
+                <span>📍</span> <span>Apoyos & Retiros (Ing.)</span>
+            </a>
+
+            <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b !important;"
+               title="Descargar libro Excel con Matriz de Balance, Requeridos, Devoluciones y Nodos">
+                <span>📊</span> <span>Descargar Excel Balance</span>
+            </a>
         </div>
     </div>
 
@@ -129,8 +139,35 @@
             </button>
         </div>
 
+        <!-- Buscador de Materiales en Vivo -->
+        <div class="bg-card rounded-xl p-3.5 shadow-xs border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
+            <div class="w-full sm:w-96 relative flex items-center">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </span>
+                <input type="text"
+                       id="buscadorMaterialesProyecto"
+                       placeholder="Buscar material por ítem o descripción..."
+                       autocomplete="off"
+                       class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-background text-foreground">
+                <button type="button"
+                        id="btnLimpiarBuscadorMat"
+                        class="absolute inset-y-0 right-0 items-center pr-2.5 text-muted-foreground hover:text-foreground hidden cursor-pointer"
+                        title="Limpiar búsqueda">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="text-xs font-semibold text-muted-foreground">
+                <span id="contadorMaterialesFiltrados">Búsqueda rápida en la pestaña activa</span>
+            </div>
+        </div>
+
         <!-- TAB 1: MATRIZ DE BALANCE -->
-        <div id="panelDetalleBalance" class="bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden pestana-panel-detalle">
+        <div id="panelDetalleBalance" class="bg-card rounded-xl shadow-sm border border-border overflow-hidden pestana-panel-detalle">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-left text-sm" id="tablaDetalleBalance">
                     <thead class="bg-muted text-foreground uppercase text-xs font-semibold select-none">
@@ -1203,6 +1240,55 @@ function cambiarPestanaDetalle(tabName) {
             }
         }
     }
+
+    filtrarMaterialesActivos();
+}
+
+// ---------- BUSCADOR EN VIVO DE MATERIALES POR PESTAÑA ----------
+function filtrarMaterialesActivos() {
+    const input = document.getElementById("buscadorMaterialesProyecto");
+    const btnLimpiar = document.getElementById("btnLimpiarBuscadorMat");
+    const contador = document.getElementById("contadorMaterialesFiltrados");
+    if (!input) return;
+
+    const q = input.value.toLowerCase().trim();
+
+    if (btnLimpiar) {
+        if (q.length > 0) {
+            btnLimpiar.classList.remove("hidden");
+            btnLimpiar.classList.add("flex");
+        } else {
+            btnLimpiar.classList.add("hidden");
+            btnLimpiar.classList.remove("flex");
+        }
+    }
+
+    const panelActivo = document.querySelector(".pestana-panel-detalle:not(.hidden)");
+    if (!panelActivo) return;
+
+    const filas = Array.from(panelActivo.querySelectorAll("tbody tr:not(.fila-vacia):not(.fila-no-filtro)"));
+    let visibles = 0;
+
+    filas.forEach(f => {
+        const texto = f.textContent.toLowerCase();
+        const coincideBuscador = (q === "" || texto.includes(q));
+        const ocultoPorExcel = f.dataset.ocultoPorExcel === "true";
+
+        if (coincideBuscador && !ocultoPorExcel) {
+            f.style.display = "";
+            visibles++;
+        } else {
+            f.style.display = "none";
+        }
+    });
+
+    if (contador) {
+        if (q.length > 0) {
+            contador.textContent = `${visibles} de ${filas.length} registros encontrados`;
+        } else {
+            contador.textContent = `Búsqueda rápida en la pestaña activa (${filas.length} registros)`;
+        }
+    }
 }
 
 // ---------- GESTIÓN DE MODALES REQUERIDOS Y ESCAPE ----------
@@ -1256,6 +1342,28 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
+
+    const buscadorMat = document.getElementById("buscadorMaterialesProyecto");
+    const btnLimpiarMat = document.getElementById("btnLimpiarBuscadorMat");
+    if (buscadorMat) {
+        buscadorMat.addEventListener("input", filtrarMaterialesActivos);
+        buscadorMat.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                buscadorMat.value = "";
+                filtrarMaterialesActivos();
+            }
+        });
+    }
+    if (btnLimpiarMat) {
+        btnLimpiarMat.addEventListener("click", function() {
+            if (buscadorMat) {
+                buscadorMat.value = "";
+                filtrarMaterialesActivos();
+                buscadorMat.focus();
+            }
+        });
+    }
+    filtrarMaterialesActivos();
 });
 
 document.addEventListener("keydown", function (e) {
@@ -1563,12 +1671,14 @@ function ejecutarFiltradoTabla(tablaId) {
         }
 
         if (cumple) {
-            f.style.display = "";
+            f.dataset.ocultoPorExcel = "false";
             visiblesCount++;
         } else {
-            f.style.display = "none";
+            f.dataset.ocultoPorExcel = "true";
         }
     });
+
+    filtrarMaterialesActivos();
 
     // Actualizar botones de encabezado para esta tabla
     const ths = tabla.querySelectorAll("th.th-excel-col");

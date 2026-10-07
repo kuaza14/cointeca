@@ -1674,4 +1674,156 @@ class MovimientoInventario(models.Model):
     def __str__(self):
         return f"{self.fecha.strftime('%d/%m/%Y %H:%M')} - {self.material.descripcion} ({self.get_tipo_movimiento_display()}): {self.cantidad}"
 
+
+class PeriodoNomina(models.Model):
+    TIPO_CHOICES = [
+        ('MENSUAL', 'Mensual'),
+        ('QUINCENAL_1', 'Primera Quincena (1-15)'),
+        ('QUINCENAL_2', 'Segunda Quincena (16-Fin)'),
+    ]
+    ESTADO_CHOICES = [
+        ('BORRADOR', 'Borrador'),
+        ('APROBADO', 'Aprobado'),
+        ('PAGADO', 'Pagado'),
+    ]
+    MESES = [
+        (1, 'Enero'), (2, 'Febrero'), (3, 'Marzo'), (4, 'Abril'),
+        (5, 'Mayo'), (6, 'Junio'), (7, 'Julio'), (8, 'Agosto'),
+        (9, 'Septiembre'), (10, 'Octubre'), (11, 'Noviembre'), (12, 'Diciembre'),
+    ]
+
+    ano = models.PositiveIntegerField(default=2026, verbose_name="Año")
+    mes = models.PositiveSmallIntegerField(choices=MESES, default=10, verbose_name="Mes")
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='MENSUAL', verbose_name="Tipo de Período")
+    fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
+    fecha_fin = models.DateField(verbose_name="Fecha de Fin")
+    
+    # Parámetros legales del período
+    smmlv_base = models.DecimalField(max_digits=12, decimal_places=2, default=1750905, verbose_name="SMMLV Base")
+    auxilio_transporte_base = models.DecimalField(max_digits=12, decimal_places=2, default=249095, verbose_name="Auxilio de Transporte Base")
+    
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='BORRADOR', verbose_name="Estado")
+    
+    # Totales acumulados
+    total_devengado = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="Total Devengado")
+    total_deducciones = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="Total Deducciones")
+    total_neto = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="Total Neto")
+    
+    observaciones = models.TextField(blank=True, default="", verbose_name="Observaciones")
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Período de Nómina"
+        verbose_name_plural = "Períodos de Nómina"
+        ordering = ['-ano', '-mes', '-id']
+
+    def __str__(self):
+        return f"Nómina {self.get_mes_display()} {self.ano} ({self.get_tipo_display()})"
+
+    def recalcular_totales(self):
+        detalles = self.detalles.all()
+        dev = sum(d.total_devengado for d in detalles)
+        ded = sum(d.total_deducciones for d in detalles)
+        net = sum(d.neto_pagar for d in detalles)
+        self.total_devengado = dev
+        self.total_deducciones = ded
+        self.total_neto = net
+        self.save(update_fields=['total_devengado', 'total_deducciones', 'total_neto', 'actualizado_en'])
+
+
+class DetalleNominaEmpleado(models.Model):
+    periodo = models.ForeignKey(PeriodoNomina, on_delete=models.CASCADE, related_name="detalles", verbose_name="Período")
+    empleado = models.ForeignKey('Empleado', on_delete=models.SET_NULL, null=True, blank=True, related_name="nominas", verbose_name="Empleado Vinculado")
+    
+    nombre_empleado = models.CharField(max_length=200, verbose_name="Nombre Completo")
+    cedula = models.CharField(max_length=30, blank=True, default="", verbose_name="Cédula / Documento")
+    cargo = models.CharField(max_length=150, blank=True, default="", verbose_name="Cargo")
+    
+    # Salario pactado
+    salario_basico = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Salario Básico Mensual")
+    auxilio_transporte_pactado = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Auxilio Transporte Pactado")
+    es_aprendiz_sena = models.BooleanField(default=False, verbose_name="Es Aprendiz SENA")
+    
+    # Días
+    dias_laborados = models.DecimalField(max_digits=5, decimal_places=2, default=30, verbose_name="Días Laborados")
+    dias_incapacidad = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Días Incapacidad")
+    dias_no_remunerados = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Días No Remunerados")
+    
+    # Devengados
+    basico_devengado = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Básico Devengado")
+    auxilio_transporte_devengado = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Auxilio Transporte Devengado")
+    horas_extras_recargos = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Horas Extras y Recargos")
+    otros_devengados = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Otros Devengados / Bonos")
+    total_devengado = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Total Devengado")
+    
+    # Deducciones
+    deduccion_salud = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Salud (4%)")
+    deduccion_pension = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Pensión (4%)")
+    deduccion_afsp = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Fondo Solidaridad Pensional")
+    retencion_fuente = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Retención en la Fuente")
+    otras_deducciones = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Otras Deducciones / Préstamos")
+    total_deducciones = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Total Deducciones")
+    
+    # Neto
+    neto_pagar = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Neto a Pagar")
+    
+    observaciones = models.CharField(max_length=255, blank=True, default="", verbose_name="Novedades / Observaciones")
+
+    class Meta:
+        verbose_name = "Detalle de Nómina"
+        verbose_name_plural = "Detalles de Nómina"
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.nombre_empleado} - {self.periodo}"
+
+    def calcular_automatico(self):
+        from decimal import Decimal
+        dias = Decimal(str(self.dias_laborados or 0))
+        dias_mes = Decimal('30')
+        salario = Decimal(str(self.salario_basico or 0))
+        smmlv = Decimal(str(self.periodo.smmlv_base or 1750905))
+        aux_trans = Decimal(str(self.periodo.auxilio_transporte_base or 249095))
+        
+        # Básico devengado
+        self.basico_devengado = (salario / dias_mes) * dias
+        
+        # Auxilio transporte: Solo si salario <= 2 SMMLV y no es aprendiz SENA
+        if not self.es_aprendiz_sena and salario <= (smmlv * Decimal('2')) and salario > Decimal('0'):
+            self.auxilio_transporte_pactado = aux_trans
+            self.auxilio_transporte_devengado = (aux_trans / dias_mes) * dias
+        else:
+            self.auxilio_transporte_pactado = Decimal('0')
+            self.auxilio_transporte_devengado = Decimal('0')
+            
+        extras = Decimal(str(self.horas_extras_recargos or 0))
+        otros_dev = Decimal(str(self.otros_devengados or 0))
+        
+        self.total_devengado = self.basico_devengado + self.auxilio_transporte_devengado + extras + otros_dev
+        
+        # IBC (Ingreso Base de Cotización): No incluye auxilio de transporte
+        ibc = self.basico_devengado + extras + otros_dev
+        
+        if self.es_aprendiz_sena:
+            # Aprendices solo cotizan salud 4% sobre apoyo de sostenimiento, no pensión
+            self.deduccion_salud = ibc * Decimal('0.04')
+            self.deduccion_pension = Decimal('0')
+            self.deduccion_afsp = Decimal('0')
+        else:
+            self.deduccion_salud = ibc * Decimal('0.04')
+            self.deduccion_pension = ibc * Decimal('0.04')
+            # Fondo Solidaridad Pensional: si IBC >= 4 SMMLV
+            if ibc >= (smmlv * Decimal('4')):
+                self.deduccion_afsp = ibc * Decimal('0.01')
+            else:
+                self.deduccion_afsp = Decimal('0')
+                
+        rte = Decimal(str(self.retencion_fuente or 0))
+        otras_d = Decimal(str(self.otras_deducciones or 0))
+        
+        self.total_deducciones = self.deduccion_salud + self.deduccion_pension + self.deduccion_afsp + rte + otras_d
+        self.neto_pagar = self.total_devengado - self.total_deducciones
+
+
 

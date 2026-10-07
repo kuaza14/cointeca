@@ -122,9 +122,9 @@
         </div>
 
         <!-- 5. Nómina -->
-        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-75">
+        <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between">
             <div>
-                <div class="size-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
+                <div class="size-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
                     <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="1" x2="12" y2="23"></line>
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
@@ -132,16 +132,17 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[#1F2937]">Nómina & Liquidaciones</h2>
-                    <span class="etiqueta etiqueta-info">Próximamente</span>
+                    <span class="etiqueta etiqueta-exito">Activo</span>
                 </div>
                 <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
-                    Liquidación periódica, novedades, horas extras, prestaciones y comprobantes de pago.
+                    Liquidación periódica, novedades, horas extras, prestaciones, tabla interactiva y colillas de pago.
                 </p>
             </div>
             <div class="mt-6">
-                <button disabled class="btn btn-secundario w-full opacity-60 cursor-not-allowed">
-                    <span>En desarrollo</span>
-                </button>
+                <a href="{% url 'lista_nominas' %}" class="btn btn-primario w-full">
+                    <span>Gestionar Nómina</span>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
             </div>
         </div>
 

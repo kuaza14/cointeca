@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% load filtros %}
+
+{% block title %}Comprobante de Pago - {{ detalle.nombre_empleado }} - {{ periodo.get_mes_display }} {{ periodo.ano }}{% endblock %}
+
+{% block extra_head %}
+<style>
+@media print {
+    .no-print, header, nav, aside, footer, .sidebar, #sidebar-wrapper {
+        display: none !important;
+    }
+    body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #000 !important;
+        font-size: 11pt !important;
+    }
+    .print-card {
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 15px !important;
+    }
+    .page-break {
+        page-break-after: always;
+    }
+}
+
+.voucher-container {
+    max-width: 820px;
+    margin: 20px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.voucher-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: white;
+    padding: 24px 32px;
+}
+
+.voucher-body {
+    padding: 28px 32px;
+}
+
+.section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 24px;
+    font-size: 0.88rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #e2e8f0;
+    padding-bottom: 4px;
+}
+
+.info-item .label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.info-item .val {
+    color: #0f172a;
+    font-weight: 600;
+    text-align: right;
+}
+
+.breakdown-table {
+    width: 100%;
+    font-size: 0.87rem;
+    border-collapse: collapse;
+}
+
+.breakdown-table th {
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.breakdown-table td {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+.net-banner {
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.signature-box {
+    margin-top: 45px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding-top: 10px;
+}
+
+.signature-line {
+    border-top: 1.5px solid #64748b;
+    padding-top: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #334155;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 py-3">
+    <!-- Action buttons (no-print) -->
+    <div class="no-print d-flex justify-content-between align-items-center mb-4 max-w-820 mx-auto" style="max-width: 820px;">
+        <a href="{% url 'detalle_nomina' periodo.id %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Nómina {{ periodo.get_mes_display }} {{ periodo.ano }}
+        </a>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary btn-sm px-3 shadow-sm">
+                <i class="bi bi-printer me-1"></i> Imprimir / Descargar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Voucher Container -->
+    <div class="voucher-container print-card">
+        <!-- Header -->
+        <div class="voucher-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1 fw-bold tracking-tight text-white">{{ empresa_nombre }}</h4>
+                    <p class="mb-0 text-white-50 small">NIT: {{ empresa_nit }} | Régimen Común</p>
+                    <p class="mb-0 text-white-50 small">Servicios Integrales de Ingeniería y Telecomunicaciones</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-white text-dark px-3 py-2 fw-bold text-uppercase fs-6 shadow-sm">
+                        Comprobante de Nómina
+                    </span>
+                    <p class="mb-0 mt-2 text-white-50 small">Periodo: <strong class="text-white">{{ periodo.get_mes_display|upper }} {{ periodo.ano }}</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="voucher-body">
+            <!-- Empleado Info -->
+            <div class="section-title mb-3">Información del Empleado</div>
+            <div class="info-grid mb-4">
+                <div class="info-item">
+                    <span class="label">Nombre Completo:</span>
+                    <span class="val">{{ detalle.nombre_empleado }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Documento C.C.:</span>
+                    <span class="val">{{ detalle.cedula|default:'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Cargo / Función:</span>
+                    <span class="val">{{ detalle.cargo|default:'Operativo' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Días Liquidados:</span>
+                    <span class="val">{{ detalle.dias_laborados|floatformat:0 }} días</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Salario Básico Mensual:</span>
+                    <span class="val">${{ detalle.salario_basico|pesos_colombianos }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Modalidad:</span>
+                    <span class="val">{% if detalle.es_aprendiz_sena %}<span class="badge bg-warning text-dark">Aprendiz SENA</span>{% else %}Contrato Laboral{% endif %}</span>
+                </div>
+            </div>
+
+            <!-- Tabla Devengados y Deducciones -->
+            <div class="row g-3 mb-4">
+                <!-- Columna Devengados -->
+                <div class="col-md-6">
+                    <div class="section-title text-success border-success">Conceptos Devengados</div>
+                    <table class="breakdown-table">
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Básico Devengado ({{ detalle.dias_laborados|floatformat:0 }} d)</td>
+                                <td class="text-end fw-semibold">${{ detalle.basico_devengado|pesos_colombianos }}</td>
+                            </tr>
+                            {% if detalle.auxilio_transporte_devengado > 0 %}
+                            <tr>
+                                <td>Auxilio de Transporte</td>
+                                <td class="text-end fw-semibold">${{ detalle.auxilio_transporte_devengado|pesos_colombianos }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if detalle.horas_extras_recargos > 0 %}
+                            <tr>
+                                <td>Horas Extras y Recargos</td>
+                                <td class="text-end fw-semibold">${{ detalle.horas_extras_recargos|pesos_colombianos }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if detalle.otros_devengados > 0 %}
+                            <tr>
+                                <td>Otros Devengados / Bonos</td>
+                                <td class="text-end fw-semibold">${{ detalle.otros_devengados|pesos_colombianos }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <td class="fw-bold text-success">TOTAL DEVENGADO:</td>
+                                <td class="text-end fw-bold text-success">${{ detalle.total_devengado|pesos_colombianos }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Columna Deducciones -->
+                <div class="col-md-6">
+                    <div class="section-title text-danger border-danger">Deducciones de Ley</div>
+                    <table class="breakdown-table">
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Aporte Salud (4%)</td>
+                                <td class="text-end fw-semibold text-danger">-${{ detalle.deduccion_salud|pesos_colombianos }}</td>
+                            </tr>
+                            <tr>
+                                <td>Aporte Pensión ({% if detalle.es_aprendiz_sena %}0%{% else %}4%{% endif %})</td>
+                                <td class="text-end fw-semibold text-danger">-${{ detalle.deduccion_pension|pesos_colombianos }}</td>
+                            </tr>
+                            {% if detalle.deduccion_afsp > 0 %}
+                            <tr>
+                                <td>Fondo Solidaridad Pensional</td>
+                                <td class="text-end fw-semibold text-danger">-${{ detalle.deduccion_afsp|pesos_colombianos }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if detalle.retencion_fuente > 0 %}
+                            <tr>
+                                <td>Retención en la Fuente</td>
+                                <td class="text-end fw-semibold text-danger">-${{ detalle.retencion_fuente|pesos_colombianos }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if detalle.otras_deducciones > 0 %}
+                            <tr>
+                                <td>Otras Deducciones / Préstamos</td>
+                                <td class="text-end fw-semibold text-danger">-${{ detalle.otras_deducciones|pesos_colombianos }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <td class="fw-bold text-danger">TOTAL DEDUCCIONES:</td>
+                                <td class="text-end fw-bold text-danger">-${{ detalle.total_deducciones|pesos_colombianos }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Total Neto -->
+            <div class="net-banner">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase d-block">Valor Líquido a Transferir</span>
+                    <strong class="fs-4 text-dark">NETO A PAGAR:</strong>
+                </div>
+                <div class="text-end">
+                    <span class="fs-3 fw-bold text-success">${{ detalle.neto_pagar|pesos_colombianos }}</span>
+                    <span class="text-muted small d-block">Moneda: COP</span>
+                </div>
+            </div>
+
+            {% if detalle.observaciones %}
+            <div class="mt-3 p-2 bg-light rounded small text-muted">
+                <strong>Observaciones / Novedades:</strong> {{ detalle.observaciones }}
+            </div>
+            {% endif %}
+
+            <!-- Firmas -->
+            <div class="signature-box">
+                <div>
+                    <div style="height: 45px;"></div>
+                    <div class="signature-line">
+                        <strong>{{ detalle.nombre_empleado }}</strong><br>
+                        <span>C.C. {{ detalle.cedula|default:'___________________' }}</span><br>
+                        <span class="text-muted" style="font-size: 0.75rem;">Firma del Trabajador (Recibí conforme)</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="height: 45px;"></div>
+                    <div class="signature-line">
+                        <strong>COINTECA S.A.S.</strong><br>
+                        <span>NIT: {{ empresa_nit }}</span><br>
+                        <span class="text-muted" style="font-size: 0.75rem;">Representante Legal / Pagaduría</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center text-muted mt-4" style="font-size: 0.72rem;">
+                Documento generado el {{ fecha_impresion|date:"d/m/Y" }} por el Sistema Integral Cointeca.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

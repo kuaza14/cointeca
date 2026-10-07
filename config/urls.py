@@ -161,6 +161,19 @@ from core.views.rrhh.historial_clinico import generar_historia_clinica_laboral
 
 from core.views.rrhh.acuerdo_responsabilidad import generar_acuerdo_responsabilidad
 
+from core.views.rrhh.nomina import (
+    lista_nominas,
+    detalle_nomina,
+    generar_periodo_nomina,
+    guardar_nomina_ajax,
+    agregar_empleado_nomina,
+    eliminar_empleado_nomina,
+    cambiar_estado_nomina,
+    importar_nomina_excel,
+    exportar_nomina_excel,
+    comprobante_pago,
+)
+
 from core.views.logistica import(
     logistica_home,
     dotacion_home,
@@ -392,6 +405,18 @@ urlpatterns = [
 
     # Acuerdo de Responsabilidad
     path('rrhh/empleados/<int:id>/acuerdo_responsabilidad/', generar_acuerdo_responsabilidad, name='generar_acuerdo_responsabilidad'),
+
+    # NÓMINA & LIQUIDACIONES
+    path('rrhh/nomina/', lista_nominas, name='lista_nominas'),
+    path('rrhh/nomina/generar/', generar_periodo_nomina, name='generar_periodo_nomina'),
+    path('rrhh/nomina/importar/', importar_nomina_excel, name='importar_nomina_excel'),
+    path('rrhh/nomina/<int:periodo_id>/', detalle_nomina, name='detalle_nomina'),
+    path('rrhh/nomina/<int:periodo_id>/guardar/', guardar_nomina_ajax, name='guardar_nomina_ajax'),
+    path('rrhh/nomina/<int:periodo_id>/agregar-empleado/', agregar_empleado_nomina, name='agregar_empleado_nomina'),
+    path('rrhh/nomina/<int:periodo_id>/eliminar-empleado/<int:detalle_id>/', eliminar_empleado_nomina, name='eliminar_empleado_nomina'),
+    path('rrhh/nomina/<int:periodo_id>/cambiar-estado/', cambiar_estado_nomina, name='cambiar_estado_nomina'),
+    path('rrhh/nomina/<int:periodo_id>/exportar/', exportar_nomina_excel, name='exportar_nomina_excel'),
+    path('rrhh/nomina/comprobante/<int:detalle_id>/', comprobante_pago, name='comprobante_pago'),
 
     #Dotacion
     path('logistica/', logistica_home, name='logistica_home'),

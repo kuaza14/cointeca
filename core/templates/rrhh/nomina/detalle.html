@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+
+{% block titulo %}Nómina {{ periodo.get_mes_display }} {{ periodo.ano }} | COINTECA S.A.S.{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+
+    <!-- BARRA SUPERIOR: ENCABEZADO Y ACCIONES -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-3 border-b border-slate-200">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                <a href="{% url 'rrhh' %}" class="hover:underline">Recursos Humanos</a>
+                <span>/</span>
+                <a href="{% url 'lista_nominas' %}" class="hover:underline">Nóminas</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold">{{ periodo.get_mes_display }} {{ periodo.ano }}</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-xl md:text-2xl font-black text-[#1F2937] tracking-tight">
+                    Nómina {{ periodo.get_mes_display }} {{ periodo.ano }}
+                </h1>
+
+                <span class="text-xs px-2.5 py-1 rounded-lg font-bold {% if periodo.estado == 'PAGADO' %}bg-emerald-100 text-emerald-800 border border-emerald-200{% elif periodo.estado == 'APROBADO' %}bg-blue-100 text-blue-800 border border-blue-200{% else %}bg-amber-100 text-amber-800 border border-amber-200{% endif %}">
+                    {{ periodo.get_estado_display }}
+                </span>
+
+                <span class="text-xs text-slate-500 font-medium bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                    {{ periodo.get_tipo_display }} ({{ periodo.fecha_inicio|date:"d/m/Y" }} al {{ periodo.fecha_fin|date:"d/m/Y" }})
+                </span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <!-- Indicador de guardado -->
+            <div id="indicador-guardado" class="hidden text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                <span id="texto-guardado"></span>
+            </div>
+
+            <button type="button" id="btn-guardar-cambios" onclick="guardarCambiosEnServidor()"
+                    class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Guardar Cambios</span>
+            </button>
+
+            <button type="button" onclick="abrirModalAgregarEmpleado()"
+                    class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                <svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Colaborador</span>
+            </button>
+
+            <a href="{% url 'exportar_nomina_excel' periodo.id %}"
+               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition flex items-center gap-1.5 shadow-2xs"
+               title="Descargar en formato Excel">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Excel</span>
+            </a>
+
+            <!-- Dropdown o selector de estado -->
+            <form method="POST" action="{% url 'cambiar_estado_nomina' periodo.id %}" class="inline-flex items-center">
+                {% csrf_token %}
+                <select name="estado" onchange="this.form.submit()"
+                        class="text-xs font-bold bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 outline-none cursor-pointer">
+                    <option value="BORRADOR" {% if periodo.estado == 'BORRADOR' %}selected{% endif %}>Borrador</option>
+                    <option value="APROBADO" {% if periodo.estado == 'APROBADO' %}selected{% endif %}>Aprobado</option>
+                    <option value="PAGADO" {% if periodo.estado == 'PAGADO' %}selected{% endif %}>Pagado</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- BARRA INFORMATIVA DE PARÁMETROS LEGALES -->
+    <div class="bg-gradient-to-r from-blue-50/70 via-slate-50 to-emerald-50/70 p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700">
+        <div class="flex items-center gap-3">
+            <span class="font-bold text-slate-900 flex items-center gap-1.5">
+                <span>⚡ Parámetros Legales (2026):</span>
+            </span>
+            <span>SMMLV: <strong class="font-mono text-blue-700">${{ periodo.smmlv_base|floatformat:0 }}</strong></span>
+            <span>Aux. Transporte: <strong class="font-mono text-blue-700">${{ periodo.auxilio_transporte_base|floatformat:0 }}</strong></span>
+            <span>Salud: <strong class="font-mono text-slate-800">4%</strong></span>
+            <span>Pensión: <strong class="font-mono text-slate-800">4%</strong></span>
+        </div>
+        <div class="text-[11px] text-slate-500 font-medium">
+            💡 <em>Edita los días o montos directamente en las celdas y la nómina se recalculará automáticamente.</em>
+        </div>
+    </div>
+
+    <!-- TABLA INTERACTIVA TIPO HOJA DE CÁLCULO (EN VIVO) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col" style="max-height: calc(100vh - 270px);">
+        <div class="overflow-x-auto overflow-y-auto flex-1">
+            <table id="tabla-nomina" class="w-full text-left border-collapse text-xs select-none">
+                <thead class="sticky top-0 z-20 bg-slate-900 text-white font-bold text-[11px] uppercase tracking-wider shadow-sm">
+                    <tr>
+                        <th class="py-2.5 px-3 w-10 text-center border-r border-slate-700">#</th>
+                        <th class="py-2.5 px-3 min-w-[200px] border-r border-slate-700">Colaborador / Nombre</th>
+                        <th class="py-2.5 px-3 min-w-[90px] border-r border-slate-700">Cédula</th>
+                        <th class="py-2.5 px-3 min-w-[130px] border-r border-slate-700">Cargo</th>
+                        <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700 bg-slate-800">Básico Pactado</th>
+                        <th class="py-2.5 px-2 w-16 text-center border-r border-slate-700 bg-blue-900/60" title="Días trabajados del mes (por defecto 30)">Días</th>
+                        <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700">Básico Dev.</th>
+                        <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700">Aux. Transp.</th>
+                        <th class="py-2.5 px-2 w-24 text-right border-r border-slate-700" title="Horas extras, recargos o bonificaciones salariales">Extras / Bonos</th>
+                        <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700 bg-blue-950 font-black text-amber-300">Total Devengado</th>
+                        <th class="py-2.5 px-3 w-24 text-right border-r border-slate-700 text-rose-300">Salud (4%)</th>
+                        <th class="py-2.5 px-3 w-24 text-right border-r border-slate-700 text-rose-300">Pensión (4%)</th>
+                        <th class="py-2.5 px-2 w-24 text-right border-r border-slate-700 text-rose-200" title="Retención en la fuente y otras deducciones">Otras Dctos.</th>
+                        <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700 bg-rose-950/60 font-black text-rose-300">Total Dctos.</th>
+                        <th class="py-2.5 px-3.5 w-32 text-right border-r border-slate-700 bg-emerald-950 font-black text-emerald-300">Neto a Pagar</th>
+                        <th class="py-2.5 px-3 min-w-[140px] border-r border-slate-700">Novedad / Nota</th>
+                        <th class="py-2.5 px-2 w-20 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-nomina" class="divide-y divide-slate-100 text-slate-800">
+                    <!-- Filas renderizadas dinámicamente por JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BARRA INFERIOR DE TOTALES GENERALES (FIJA) -->
+        <div class="sticky bottom-0 z-20 bg-slate-100 border-t-2 border-slate-300 p-3 px-5 flex flex-wrap items-center justify-between gap-4 font-mono text-xs shadow-md">
+            <div class="flex items-center gap-2">
+                <span class="font-sans font-bold text-slate-800 uppercase tracking-wider text-[11px]">Resumen de Nómina:</span>
+                <span id="tot-colaboradores" class="font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200 font-sans">0 personas</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-5 text-right">
+                <div>
+                    <span class="block text-[10px] text-slate-500 font-sans uppercase font-bold">Total Devengado</span>
+                    <span id="tot-devengado" class="font-bold text-slate-900 text-sm">$0</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] text-slate-500 font-sans uppercase font-bold">Salud (4%)</span>
+                    <span id="tot-salud" class="font-bold text-rose-600 text-xs">$0</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] text-slate-500 font-sans uppercase font-bold">Pensión (4%)</span>
+                    <span id="tot-pension" class="font-bold text-rose-600 text-xs">$0</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] text-slate-500 font-sans uppercase font-bold">Total Deducciones</span>
+                    <span id="tot-deducciones" class="font-bold text-rose-700 text-sm">-$0</span>
+                </div>
+                <div class="pl-4 border-l border-slate-300">
+                    <span class="block text-[10px] text-emerald-800 font-sans uppercase font-black tracking-wider">NETO TOTAL A PAGAR</span>
+                    <span id="tot-neto" class="font-black text-emerald-700 text-base">$0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: AGREGAR COLABORADOR A ESTE PERÍODO -->
+<div id="modalAgregarEmpleado" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-fade-in">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-extrabold text-slate-900">
+                <span>➕ Agregar Colaborador a la Nómina</span>
+            </h3>
+            <button type="button" onclick="cerrarModalAgregarEmpleado()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer">✕</button>
+        </div>
+
+        <form method="POST" action="{% url 'agregar_empleado_nomina' periodo.id %}" class="p-5 space-y-3.5">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Seleccionar Empleado de Cointeca</label>
+                <select name="empleado_id" id="select-empleado-modal" onchange="autocompletarDesdeSelect()"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-blue-500">
+                    <option value="">-- O escribir nombre manual abajo --</option>
+                    {% for emp in empleados_disponibles %}
+                    <option value="{{ emp.id }}" data-cedula="{{ emp.documento }}" data-cargo="{{ emp.cargo }}" data-salario="{{ emp.salario }}">
+                        {{ emp.nombre_completo }} ({{ emp.cargo|default:"Sin cargo" }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100">
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nombre Completo (Manual)</label>
+                <input type="text" name="nombre_custom" id="modal-nombre-custom" placeholder="Ej: JUAN PEREZ..."
+                       class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-blue-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cédula</label>
+                    <input type="text" name="cedula" id="modal-cedula" placeholder="Cédula"
+                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cargo</label>
+                    <input type="text" name="cargo" id="modal-cargo" placeholder="Cargo"
+                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Salario Básico ($)</label>
+                    <input type="number" name="salario_basico" id="modal-salario" value="1750905" step="1"
+                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono font-bold text-slate-800 outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Días Laborados</label>
+                    <input type="number" name="dias_laborados" value="30" min="0" max="30" step="1"
+                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono font-bold text-slate-800 outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button type="button" onclick="cerrarModalAgregarEmpleado()" class="btn btn-secundario text-xs px-4 py-2">Cancelar</button>
+                <button type="submit" class="btn btn-primario bg-[#1E63F0] text-xs px-5 py-2 font-bold text-white">+ Agregar a Nómina</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PAYLOAD SEGURO DE DATOS JSON (DESACOPLADO DE JAVASCRIPT) -->
+<script id="datos-detalles-json" type="application/json">
+{{ detalles_json|safe }}
+</script>
+
+<script>
+// Constantes legales recibidas del servidor
+const SMMLV_BASE = parseFloat("{{ smmlv_base }}") || 1750905;
+const AUX_TRANSPORTE_BASE = parseFloat("{{ auxilio_transporte_base }}") || 249095;
+const PERIODO_ID = parseInt("{{ periodo.id }}");
+
+// Estado local de los detalles
+let detallesData = [];
+let hayCambiosSinGuardar = false;
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function () {
+    const scriptEl = document.getElementById('datos-detalles-json');
+    if (scriptEl && scriptEl.textContent) {
+        try {
+            detallesData = JSON.parse(scriptEl.textContent);
+        } catch (e) {
+            console.error('Error al parsear datos de nómina:', e);
+            detallesData = [];
+        }
+    }
+    renderizarTabla();
+    actualizarTotalesGenerales();
+});
+
+// Renderizar la tabla completa
+function renderizarTabla() {
+    const tbody = document.getElementById('tbody-nomina');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (detallesData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="17" class="py-8 text-center text-slate-400 font-medium">No hay registros en esta nómina. Agrega un colaborador con el botón superior.</td></tr>`;
+        return;
+    }
+
+    detallesData.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.id = `fila-${item.id}`;
+        tr.className = 'hover:bg-blue-50/50 transition border-b border-slate-100';
+
+        tr.innerHTML = `
+            <td class="py-1.5 px-3 text-center text-slate-400 font-mono text-[11px] border-r border-slate-100">${index + 1}</td>
+            <td class="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-100">
+                <span class="block truncate max-w-[220px]" title="${item.nombre_empleado}">${item.nombre_empleado}</span>
+            </td>
+            <td class="py-1.5 px-3 text-slate-500 font-mono text-[11px] border-r border-slate-100">${item.cedula || '-'}</td>
+            <td class="py-1.5 px-3 text-slate-600 text-[11px] border-r border-slate-100">
+                <span class="block truncate max-w-[140px]" title="${item.cargo}">${item.cargo || '-'}</span>
+            </td>
+
+            <!-- BÁSICO PACTADO -->
+            <td class="py-1 px-2 text-right border-r border-slate-100 bg-slate-50/50">
+                <input type="number" step="1" value="${Math.round(item.salario_basico)}"
+                       onchange="actualizarCelda(${item.id}, 'salario_basico', this.value)"
+                       class="w-full text-right font-mono font-bold text-slate-900 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5">
+            </td>
+
+            <!-- DÍAS LABORADOS -->
+            <td class="py-1 px-1 text-center border-r border-slate-100 bg-blue-50/40">
+                <input type="number" min="0" max="30" step="1" value="${item.dias_laborados}"
+                       onchange="actualizarCelda(${item.id}, 'dias_laborados', this.value)"
+                       class="w-full text-center font-mono font-black text-blue-900 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-0.5 py-0.5">
+            </td>
+
+            <!-- BÁSICO DEVENGADO -->
+            <td class="py-1.5 px-3 text-right font-mono text-slate-800 border-r border-slate-100" id="basico-dev-${item.id}">
+                ${formatoDinero(item.basico_devengado)}
+            </td>
+
+            <!-- AUXILIO TRANSPORTE -->
+            <td class="py-1.5 px-3 text-right font-mono text-slate-800 border-r border-slate-100" id="aux-trans-${item.id}">
+                ${formatoDinero(item.auxilio_transporte_devengado)}
+            </td>
+
+            <!-- EXTRAS / BONOS -->
+            <td class="py-1 px-1.5 text-right border-r border-slate-100">
+                <input type="number" step="1" value="${Math.round(item.horas_extras_recargos + item.otros_devengados)}"
+                       onchange="actualizarCelda(${item.id}, 'horas_extras_recargos', this.value)"
+                       class="w-full text-right font-mono text-slate-800 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5">
+            </td>
+
+            <!-- TOTAL DEVENGADO -->
+            <td class="py-1.5 px-3 text-right font-mono font-bold text-slate-900 border-r border-slate-100 bg-amber-50/30" id="total-dev-${item.id}">
+                ${formatoDinero(item.total_devengado)}
+            </td>
+
+            <!-- SALUD (4%) -->
+            <td class="py-1.5 px-3 text-right font-mono text-rose-600 border-r border-slate-100" id="salud-${item.id}">
+                ${formatoDinero(item.deduccion_salud)}
+            </td>
+
+            <!-- PENSIÓN (4%) -->
+            <td class="py-1.5 px-3 text-right font-mono text-rose-600 border-r border-slate-100" id="pension-${item.id}">
+                ${formatoDinero(item.deduccion_pension)}
+            </td>
+
+            <!-- OTRAS DEDUCCIONES -->
+            <td class="py-1 px-1.5 text-right border-r border-slate-100">
+                <input type="number" step="1" value="${Math.round(item.retencion_fuente + item.otras_deducciones + item.deduccion_afsp)}"
+                       onchange="actualizarCelda(${item.id}, 'otras_deducciones', this.value)"
+                       class="w-full text-right font-mono text-rose-700 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-rose-500 rounded px-1 py-0.5">
+            </td>
+
+            <!-- TOTAL DEDUCCIONES -->
+            <td class="py-1.5 px-3 text-right font-mono font-bold text-rose-700 border-r border-slate-100 bg-rose-50/30" id="total-ded-${item.id}">
+                -${formatoDinero(item.total_deducciones)}
+            </td>
+
+            <!-- NETO A PAGAR -->
+            <td class="py-1.5 px-3 text-right font-mono font-black text-emerald-700 text-xs border-r border-slate-100 bg-emerald-50/40" id="neto-${item.id}">
+                ${formatoDinero(item.neto_pagar)}
+            </td>
+
+            <!-- NOVEDAD / NOTA -->
+            <td class="py-1 px-2 border-r border-slate-100">
+                <input type="text" value="${item.observaciones || ''}"
+                       placeholder="Nota..."
+                       onchange="actualizarCelda(${item.id}, 'observaciones', this.value)"
+                       class="w-full text-xs text-slate-600 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5">
+            </td>
+
+            <!-- ACCIONES -->
+            <td class="py-1.5 px-2 text-center whitespace-nowrap space-x-1">
+                <a href="/rrhh/nomina/comprobante/${item.id}/" target="_blank"
+                   class="inline-flex items-center justify-center p-1 rounded-lg text-blue-600 hover:bg-blue-100 transition"
+                   title="Imprimir Colilla de Pago">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                </a>
+                <form method="POST" action="/rrhh/nomina/${PERIODO_ID}/eliminar-empleado/${item.id}/"
+                      onsubmit="return confirm('¿Eliminar a ${item.nombre_empleado} de esta nómina?');" class="inline">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${obtenerCsrfToken()}">
+                    <button type="submit" class="p-1 rounded-lg text-rose-500 hover:bg-rose-100 transition cursor-pointer" title="Eliminar fila">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </form>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Recalcular fila individual en tiempo real en JavaScript
+function recalcularFila(item) {
+    const dias = parseFloat(item.dias_laborados) || 0;
+    const salario = parseFloat(item.salario_basico) || 0;
+    const extras = parseFloat(item.horas_extras_recargos) || 0;
+    const otrasDctos = parseFloat(item.otras_deducciones) || 0;
+    const esAprendiz = !!item.es_aprendiz_sena;
+
+    // Básico proporcional a días trabajados (base 30)
+    item.basico_devengado = (salario / 30.0) * dias;
+
+    // Auxilio de transporte: solo si salario <= 2 SMMLV y no es aprendiz SENA
+    if (!esAprendiz && salario <= (SMMLV_BASE * 2.0) && salario > 0) {
+        item.auxilio_transporte_pactado = AUX_TRANSPORTE_BASE;
+        item.auxilio_transporte_devengado = (AUX_TRANSPORTE_BASE / 30.0) * dias;
+    } else {
+        item.auxilio_transporte_pactado = 0;
+        item.auxilio_transporte_devengado = 0;
+    }
+
+    item.total_devengado = item.basico_devengado + item.auxilio_transporte_devengado + extras;
+
+    // IBC (Ingreso Base de Cotización, sin auxilio de transporte)
+    const ibc = item.basico_devengado + extras;
+
+    if (esAprendiz) {
+        item.deduccion_salud = ibc * 0.04;
+        item.deduccion_pension = 0;
+        item.deduccion_afsp = 0;
+    } else {
+        item.deduccion_salud = ibc * 0.04;
+        item.deduccion_pension = ibc * 0.04;
+        if (ibc >= (SMMLV_BASE * 4.0)) {
+            item.deduccion_afsp = ibc * 0.01;
+        } else {
+            item.deduccion_afsp = 0;
+        }
+    }
+
+    item.total_deducciones = item.deduccion_salud + item.deduccion_pension + item.deduccion_afsp + otrasDctos;
+    item.neto_pagar = item.total_devengado - item.total_deducciones;
+
+    // Actualizar DOM de la fila
+    const tdBasicoDev = document.getElementById(`basico-dev-${item.id}`);
+    const tdAuxTrans = document.getElementById(`aux-trans-${item.id}`);
+    const tdTotalDev = document.getElementById(`total-dev-${item.id}`);
+    const tdSalud = document.getElementById(`salud-${item.id}`);
+    const tdPension = document.getElementById(`pension-${item.id}`);
+    const tdTotalDed = document.getElementById(`total-ded-${item.id}`);
+    const tdNeto = document.getElementById(`neto-${item.id}`);
+
+    if (tdBasicoDev) tdBasicoDev.textContent = formatoDinero(item.basico_devengado);
+    if (tdAuxTrans) tdAuxTrans.textContent = formatoDinero(item.auxilio_transporte_devengado);
+    if (tdTotalDev) tdTotalDev.textContent = formatoDinero(item.total_devengado);
+    if (tdSalud) tdSalud.textContent = formatoDinero(item.deduccion_salud);
+    if (tdPension) tdPension.textContent = formatoDinero(item.deduccion_pension);
+    if (tdTotalDed) tdTotalDed.textContent = '-' + formatoDinero(item.total_deducciones);
+    if (tdNeto) tdNeto.textContent = formatoDinero(item.neto_pagar);
+}
+
+// Actualizar valor de celda editada
+function actualizarCelda(id, campo, valor) {
+    const item = detallesData.find(d => d.id === id);
+    if (!item) return;
+
+    if (campo === 'observaciones') {
+        item[campo] = valor;
+    } else {
+        item[campo] = parseFloat(valor) || 0;
+    }
+
+    recalcularFila(item);
+    actualizarTotalesGenerales();
+    marcarCambiosPendientes();
+}
+
+// Actualizar totales generales en la barra inferior
+function actualizarTotalesGenerales() {
+    let totDev = 0;
+    let totSalud = 0;
+    let totPension = 0;
+    let totDed = 0;
+    let totNeto = 0;
+
+    detallesData.forEach(item => {
+        totDev += item.total_devengado || 0;
+        totSalud += item.deduccion_salud || 0;
+        totPension += item.deduccion_pension || 0;
+        totDed += item.total_deducciones || 0;
+        totNeto += item.neto_pagar || 0;
+    });
+
+    const elColab = document.getElementById('tot-colaboradores');
+    const elDev = document.getElementById('tot-devengado');
+    const elSalud = document.getElementById('tot-salud');
+    const elPension = document.getElementById('tot-pension');
+    const elDed = document.getElementById('tot-deducciones');
+    const elNeto = document.getElementById('tot-neto');
+
+    if (elColab) elColab.textContent = `${detallesData.length} personas`;
+    if (elDev) elDev.textContent = '$' + formatoDinero(totDev);
+    if (elSalud) elSalud.textContent = '$' + formatoDinero(totSalud);
+    if (elPension) elPension.textContent = '$' + formatoDinero(totPension);
+    if (elDed) elDed.textContent = '-$' + formatoDinero(totDed);
+    if (elNeto) elNeto.textContent = '$' + formatoDinero(totNeto);
+}
+
+// Marcar indicador visual de cambios pendientes
+function marcarCambiosPendientes() {
+    hayCambiosSinGuardar = true;
+    const ind = document.getElementById('indicador-guardado');
+    const txt = document.getElementById('texto-guardado');
+    if (ind && txt) {
+        ind.className = 'text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-amber-100 text-amber-800 border border-amber-200';
+        txt.textContent = '● Cambios sin guardar';
+        ind.classList.remove('hidden');
+    }
+}
+
+// Guardar cambios en el servidor vía AJAX
+function guardarCambiosEnServidor() {
+    const btn = document.getElementById('btn-guardar-cambios');
+    const ind = document.getElementById('indicador-guardado');
+    const txt = document.getElementById('texto-guardado');
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳ Guardando...</span>`;
+    }
+
+    const payload = {
+        filas: detallesData.map(d => ({
+            id: d.id,
+            salario_basico: d.salario_basico,
+            dias_laborados: d.dias_laborados,
+            dias_incapacidad: d.dias_incapacidad,
+            dias_no_remunerados: d.dias_no_remunerados,
+            horas_extras_recargos: d.horas_extras_recargos,
+            otros_devengados: d.otros_devengados,
+            retencion_fuente: d.retencion_fuente,
+            otras_deducciones: d.otras_deducciones,
+            observaciones: d.observaciones,
+        }))
+    };
+
+    fetch(`/rrhh/nomina/${PERIODO_ID}/guardar/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': obtenerCsrfToken(),
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span>Guardar Cambios</span>`;
+        }
+        if (data.status === 'ok') {
+            hayCambiosSinGuardar = false;
+            if (ind && txt) {
+                ind.className = 'text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-200';
+                txt.textContent = '✓ Guardado exitoso';
+                setTimeout(() => {
+                    if (!hayCambiosSinGuardar) ind.classList.add('hidden');
+                }, 3000);
+            }
+        } else {
+            alert('Error al guardar: ' + (data.message || 'Error desconocido'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span>Reintentar Guardar</span>`;
+        }
+        alert('Ocurrió un error al guardar los cambios en el servidor.');
+    });
+}
+
+// Formateador de moneda en pesos colombianos
+function formatoDinero(valor) {
+    if (isNaN(valor) || valor === null || valor === undefined) return '0';
+    return Math.round(valor).toLocaleString('es-CO');
+}
+
+// Obtener token CSRF
+function obtenerCsrfToken() {
+    const input = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (input) return input.value;
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : '';
+}
+
+// Modales
+function abrirModalAgregarEmpleado() {
+    document.getElementById('modalAgregarEmpleado').classList.remove('hidden');
+}
+function cerrarModalAgregarEmpleado() {
+    document.getElementById('modalAgregarEmpleado').classList.add('hidden');
+}
+function autocompletarDesdeSelect() {
+    const sel = document.getElementById('select-empleado-modal');
+    if (!sel || !sel.value) return;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt) {
+        const cedula = opt.getAttribute('data-cedula') || '';
+        const cargo = opt.getAttribute('data-cargo') || '';
+        const salario = opt.getAttribute('data-salario') || '1750905';
+        document.getElementById('modal-cedula').value = cedula;
+        document.getElementById('modal-cargo').value = cargo;
+        document.getElementById('modal-salario').value = salario;
+        document.getElementById('modal-nombre-custom').value = '';
+    }
+}
+</script>
+{% endblock %}

@@ -327,6 +327,8 @@
      MODAL: NUEVO PROYECTO
      ====================================================================== -->
 <div id="modalProyecto"
+     data-en-macro="{% if macroproyecto %}1{% else %}0{% endif %}"
+     data-es-mt="{% if macroproyecto and macroproyecto.es_mt %}1{% else %}0{% endif %}"
      class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
      style="background-color: rgba(2, 6, 23, 0.75) !important;"
      role="dialog"
@@ -912,19 +914,21 @@
         modal.classList.remove("hidden");
         modal.classList.add("flex");
         const contenedorCampoCointeca = document.getElementById("contenedorCampoCointeca");
-        {% if macroproyecto %}
-            const esMtFijo = {% if macroproyecto.es_mt %}true{% else %}false{% endif %};
+        const enMacro = modal && modal.dataset.enMacro === "1";
+        const esMtFijo = modal && modal.dataset.esMt === "1";
+
+        if (enMacro) {
             if (contenedorCampoCointeca) {
                 if (esMtFijo) contenedorCampoCointeca.classList.remove("hidden");
                 else contenedorCampoCointeca.classList.add("hidden");
             }
-        {% else %}
+        } else {
             if (selectMacro && selectMacro.value) {
                 actualizarOpcionesTipoNuevo(selectMacro.selectedOptions[0]);
             } else {
                 if (contenedorCampoCointeca) contenedorCampoCointeca.classList.add("hidden");
             }
-        {% endif %}
+        }
         if (primerCampo) primerCampo.focus();
     }
 

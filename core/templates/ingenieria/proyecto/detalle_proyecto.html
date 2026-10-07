@@ -1244,6 +1244,10 @@
 
 <script src="{% static 'js/ingenieria.js' %}"></script>
 
+<!-- Datos de apoyos y mano de obra en JSON nativo (evita errores de sintaxis en el editor y navegador) -->
+<script id="datos-apoyos-json" type="application/json">{{ apoyos_data_json|default:'{}'|safe }}</script>
+<script id="datos-apoyos-mo-json" type="application/json">{{ apoyos_mo_data_json|default:'{}'|safe }}</script>
+
 <script>
 function cambiarPestana(tabName) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
@@ -1280,63 +1284,8 @@ function cambiarPestana(tabName) {
 
 const MAT_CABLE_ID = "{{ mat_cable_id|default:'' }}";
 
-const apoyosData = {
-    {% for fila in filas_matriz %}
-    "{{ fila.apoyo.id }}": {
-        "id": "{{ fila.apoyo.id }}",
-        "nodo": "{{ fila.apoyo.nodo|default:''|escapejs }}",
-        "numero_apoyo": "{{ fila.apoyo.numero_apoyo|default:'' }}",
-        "fecha": "{{ fila.apoyo.fecha|date:'Y-m-d'|default:'' }}",
-        "tipo_instalacion": "{{ fila.apoyo.tipo_instalacion|default:''|escapejs }}",
-        "direccion": "{{ fila.apoyo.direccion|default:''|escapejs }}",
-        "tipo_estructura": "{{ fila.apoyo.tipo_estructura|default:''|escapejs }}",
-        "brazo": "{{ fila.apoyo.brazo|default:'2'|escapejs }}",
-        "cantidad_retenida": "{{ fila.apoyo.cantidad_retenida|unlocalize|default:'' }}",
-        "metros_retenido": "{{ fila.apoyo.metros_retenido|unlocalize|default:'' }}",
-        "estado": "{{ fila.apoyo.estado|default:'Pendiente'|escapejs }}",
-        "quien_ejecuta_id": "{{ fila.apoyo.quien_ejecuta_id|default:'' }}",
-        "observacion": "{{ fila.apoyo.observacion|default:''|escapejs }}",
-        "luminarias": [
-            {% for lum in fila.apoyo.luminarias.all %}
-            {
-                "potencia": "{{ lum.potencia|escapejs }}",
-                "codigo": "{{ lum.codigo|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        "materiales": [
-            {% for m in fila.materiales_asociados %}
-            {
-                "material_id": "{{ m.material_id }}",
-                "cant_inst": "{{ m.cantidad_requerida|unlocalize|default:'' }}",
-                "cant_ret": "{{ m.cantidad_retirada|unlocalize|default:'' }}",
-                "potencia": "{{ m.potencia|default:''|escapejs }}",
-                "codigo": "{{ m.codigo_luminaria|default:''|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ]
-    }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-};
-
-const apoyosMOData = {
-    {% for fila in mo_filas_matriz %}
-    "{{ fila.apoyo.id }}": [
-        {% for mo in fila.manos_obra_list %}
-        {% if mo.origen == "MANUAL" %}
-        {
-            "id": "{{ mo.id }}",
-            "item_id": "{{ mo.item_mano_obra_id }}",
-            "codigo": "{{ mo.item_mano_obra.codigo|escapejs }}",
-            "descripcion": "{{ mo.item_mano_obra.descripcion|escapejs }}",
-            "cantidad": "{{ mo.cantidad|unlocalize }}",
-            "observacion": "{{ mo.observacion|default:''|escapejs }}"
-        }{% if not forloop.last %},{% endif %}
-        {% endif %}
-        {% endfor %}
-    ]{% if not forloop.last %},{% endif %}
-    {% endfor %}
-};
+const apoyosData = JSON.parse(document.getElementById('datos-apoyos-json')?.textContent || '{}');
+const apoyosMOData = JSON.parse(document.getElementById('datos-apoyos-mo-json')?.textContent || '{}');
 
 function crearFilaMO(itemId = '', cantidad = '1', observacion = '') {
     const tr = document.createElement('tr');

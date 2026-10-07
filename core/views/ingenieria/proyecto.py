@@ -590,6 +590,59 @@ def detalle_proyecto(request, id):
     )
     mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
 
+    # Serializar apoyosData y apoyosMOData en JSON nativo y seguro
+    apoyos_data_dict = {}
+    for fila in filas_matriz:
+        ap = fila["apoyo"]
+        luminarias_list = [
+            {"potencia": lum.potencia or "", "codigo": lum.codigo or ""}
+            for lum in ap.luminarias.all()
+        ]
+        materiales_list = [
+            {
+                "material_id": str(m.material_id),
+                "cant_inst": str(m.cantidad_requerida) if m.cantidad_requerida is not None else "",
+                "cant_ret": str(m.cantidad_retirada) if m.cantidad_retirada is not None else "",
+                "potencia": m.potencia or "",
+                "codigo": m.codigo_luminaria or "",
+            }
+            for m in fila["materiales_asociados"]
+        ]
+        apoyos_data_dict[str(ap.id)] = {
+            "id": str(ap.id),
+            "nodo": ap.nodo or "",
+            "numero_apoyo": str(ap.numero_apoyo or ""),
+            "fecha": ap.fecha.strftime("%Y-%m-%d") if ap.fecha else "",
+            "tipo_instalacion": ap.tipo_instalacion or "",
+            "direccion": ap.direccion or "",
+            "tipo_estructura": ap.tipo_estructura or "",
+            "brazo": str(ap.brazo if ap.brazo is not None else "2"),
+            "cantidad_retenida": str(ap.cantidad_retenida) if ap.cantidad_retenida is not None else "",
+            "metros_retenido": str(ap.metros_retenido) if ap.metros_retenido is not None else "",
+            "estado": ap.estado or "Pendiente",
+            "quien_ejecuta_id": str(ap.quien_ejecuta_id or ""),
+            "observacion": ap.observacion or "",
+            "luminarias": luminarias_list,
+            "materiales": materiales_list,
+        }
+
+    apoyos_mo_data_dict = {}
+    for fila in mo_filas_matriz:
+        ap = fila["apoyo"]
+        mo_list = [
+            {
+                "id": str(mo.id),
+                "item_id": str(mo.item_mano_obra_id),
+                "codigo": mo.item_mano_obra.codigo or "",
+                "descripcion": mo.item_mano_obra.descripcion or "",
+                "cantidad": str(mo.cantidad) if mo.cantidad is not None else "",
+                "observacion": mo.observacion or "",
+            }
+            for mo in fila["manos_obra_list"]
+            if mo.origen == "MANUAL"
+        ]
+        apoyos_mo_data_dict[str(ap.id)] = mo_list
+
     return render(
         request,
         "ingenieria/proyecto/detalle_proyecto.html",
@@ -604,6 +657,8 @@ def detalle_proyecto(request, id):
             "materiales_catalogo": materiales_catalogo,
             "empleados": empleados,
             "mat_cable_id": mat_cable_id,
+            "apoyos_data_json": json.dumps(apoyos_data_dict),
+            "apoyos_mo_data_json": json.dumps(apoyos_mo_data_dict),
             # Mano de Obra
             "mo_columnas": mo_columnas,
             "mo_filas_matriz": mo_filas_matriz,

@@ -1318,6 +1318,9 @@
 }
 </style>
 
+<!-- Datos de proyectos en JSON nativo (evita errores de sintaxis en editor) -->
+<script id="proyectos-global-json" type="application/json">{{ proyectos_js|default:'[]'|safe }}</script>
+
 <script>
 // ---------- ESTADO GLOBAL DE FILTROS TIPO EXCEL POR TABLA ----------
 let colActualFiltro = null;
@@ -1773,7 +1776,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectMacro = document.getElementById("selectMacroproyecto");
     const selectProy = document.getElementById("selectProyecto");
     const inputBuscador = document.getElementById("inputBuscadorGlobal");
-    const todosProyectosData = {{ proyectos_js|safe }};
+    const todosProyectosData = JSON.parse(document.getElementById("proyectos-global-json")?.textContent || "[]");
 
     // Selector dependiente con envío automático
     if (selectMacro && selectProy) {

@@ -180,6 +180,55 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
                     Agregar material
                 </button>
             </div>
+
+            <template id="plantillaMaterialRow">
+                <div class="material-row border border-border rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                        <!-- MATERIAL -->
+                        <div class="md:col-span-7">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1">
+                                Material
+                            </label>
+
+                            <select name="material_id[]"
+                                    class="material-select w-full border border-border-strong rounded-lg px-3 py-2 text-sm"
+                                    required>
+                                <option value="">
+                                    Seleccionar material...
+                                </option>
+                                {% for material in materiales %}
+                                    <option value="{{ material.id }}">
+                                        {{ material.item }} - {{ material.descripcion }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- CANTIDAD -->
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1">
+                                Cantidad
+                            </label>
+
+                            <input type="number"
+                                   name="cantidad[]"
+                                   step="0.01"
+                                   min="0.01"
+                                   required
+                                   class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold">
+                        </div>
+
+                        <!-- ELIMINAR -->
+                        <div class="md:col-span-2">
+                            <button type="button"
+                                    onclick="eliminarMaterial(this)"
+                                    class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-destructive rounded-lg text-sm font-semibold">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <!-- BOTONES -->
@@ -212,60 +261,14 @@ function agregarMaterial() {
     const container = document.getElementById(
         "materiales-container"
     );
+    const plantilla = document.getElementById(
+        "plantillaMaterialRow"
+    );
+    if (!container || !plantilla) {
+        return;
+    }
 
-    const fila = document.createElement("div");
-    fila.className =
-        "material-row border border-border rounded-lg p-4";
-
-    fila.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-
-            <!-- MATERIAL -->
-            <div class="md:col-span-7">
-                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-material_id---2">
-                    Material
-                </label>
-
-                <select id="campo-material_id---2" name="material_id[]"
-                        class="material-select w-full border border-border-strong rounded-lg px-3 py-2 text-sm"
-                        required>
-
-                    <option value="">
-                        Seleccionar material...
-                    </option>
-
-                    {% for material in materiales %}
-                        <option value="{{ material.id }}">
-                            {{ material.item }} - {{ material.descripcion }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <!-- CANTIDAD -->
-            <div class="md:col-span-3">
-                <label class="block text-xs font-semibold uppercase text-muted-foreground mb-1" for="campo-cantidad---2">
-                    Cantidad
-                </label>
-
-                <input id="campo-cantidad---2" type="number"
-                       name="cantidad[]"
-                       step="0.01"
-                       min="0.01"
-                       required
-                       class="w-full border border-border-strong rounded-lg px-3 py-2 text-sm font-bold">
-            </div>
-
-            <!-- ELIMINAR -->
-            <div class="md:col-span-2">
-                <button type="button"
-                        onclick="eliminarMaterial(this)"
-                        class="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-destructive rounded-lg text-sm font-semibold">
-                    Eliminar
-                </button>
-            </div>
-        </div>
-    `;
+    const fila = plantilla.content.firstElementChild.cloneNode(true);
     container.appendChild(fila);
 }
 

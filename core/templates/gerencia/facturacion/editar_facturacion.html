@@ -89,6 +89,7 @@
                         Facturación Real ($ COP) <span class="text-red-500">*</span>
                     </label>
                     <button type="button" id="btn-importar-ingenieria"
+                            data-url="{% url 'api_liquidacion_ingenieria' %}"
                             title="Consulta el valor liquidado en los postes/apoyos de ingeniería y lo ingresa automáticamente"
                             class="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-lg transition cursor-pointer shadow-2xs">
                         <span>⚡ Importar Liquidación Mano de Obra</span>
@@ -126,11 +127,12 @@ document.getElementById('btn-importar-ingenieria').addEventListener('click', fun
     const proyectoSelect = document.getElementById('campo-proyecto');
     const proyectoId = proyectoSelect ? proyectoSelect.value : '';
     const btn = this;
+    const apiUrl = btn.dataset.url;
     const originalText = btn.innerHTML;
     btn.innerHTML = '<span>⏳ Consultando...</span>';
     btn.disabled = true;
 
-    fetch(`{% url 'api_liquidacion_ingenieria' %}?proyecto_id=${proyectoId}`)
+    fetch(`${apiUrl}?proyecto_id=${proyectoId}`)
         .then(response => response.json())
         .then(data => {
             btn.innerHTML = originalText;

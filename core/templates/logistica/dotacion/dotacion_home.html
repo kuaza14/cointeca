@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Entrega de Dotación | COINTECA S.A.S.{% endblock %}
 
@@ -123,67 +124,9 @@
 
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const inputBuscador = document.getElementById("buscadorDotacion");
-    const btnLimpiar = document.getElementById("btnLimpiarBuscadorDotacion");
-    const contador = document.getElementById("contadorEmpleadosVisible");
-    const sinResultados = document.getElementById("sinResultadosDotacion");
-    const filas = document.querySelectorAll(".fila-empleado-dotacion");
 
-    function filtrarEmpleados() {
-        const q = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+{% endblock %}
 
-        if (btnLimpiar) {
-            if (q.length > 0) {
-                btnLimpiar.classList.remove("hidden");
-                btnLimpiar.classList.add("flex");
-            } else {
-                btnLimpiar.classList.add("hidden");
-                btnLimpiar.classList.remove("flex");
-            }
-        }
-
-        let visibles = 0;
-        filas.forEach(function (fila) {
-            const texto = fila.textContent.toLowerCase();
-            const match = (q === "" || texto.includes(q));
-            fila.style.display = match ? "" : "none";
-            if (match) visibles++;
-        });
-
-        if (contador) {
-            contador.textContent = visibles;
-        }
-
-        if (sinResultados) {
-            if (visibles === 0 && filas.length > 0) {
-                sinResultados.classList.remove("hidden");
-            } else {
-                sinResultados.classList.add("hidden");
-            }
-        }
-    }
-
-    if (inputBuscador) {
-        inputBuscador.addEventListener("input", filtrarEmpleados);
-        inputBuscador.addEventListener("keydown", function (e) {
-            if (e.key === "Escape") {
-                inputBuscador.value = "";
-                filtrarEmpleados();
-            }
-        });
-    }
-
-    if (btnLimpiar) {
-        btnLimpiar.addEventListener("click", function () {
-            if (inputBuscador) {
-                inputBuscador.value = "";
-                filtrarEmpleados();
-                inputBuscador.focus();
-            }
-        });
-    }
-});
-</script>
+{% block extra_js %}
+<script src="{% static 'js/logistica/dotacion_home.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

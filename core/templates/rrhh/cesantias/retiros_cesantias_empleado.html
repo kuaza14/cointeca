@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
@@ -174,15 +175,11 @@
         </div>
     </div>
 
-    <script>
-        function confirmarEliminar(id) {
-            document.getElementById('modalEliminar').classList.remove('hidden');
-            document.getElementById('formEliminar').action = `/rrhh/cesantias/${id}/eliminar/`;
-        }
-
-        function cerrarModal() {
-            document.getElementById('modalEliminar').classList.add('hidden');
-        }
-    </script>
+    
 
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/rrhh/cesantias_empleado.js' %}?v={% now 'U' %}"></script>
+{% endblock %}
+

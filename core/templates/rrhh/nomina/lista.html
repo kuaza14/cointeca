@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Nómina & Liquidaciones | COINTECA S.A.S.{% endblock %}
 
@@ -313,18 +314,10 @@
     </div>
 </div>
 
-<script>
-function abrirModalNuevoPeriodo() {
-    document.getElementById('modalNuevoPeriodo').classList.remove('hidden');
-}
-function cerrarModalNuevoPeriodo() {
-    document.getElementById('modalNuevoPeriodo').classList.add('hidden');
-}
-function abrirModalImportar() {
-    document.getElementById('modalImportar').classList.remove('hidden');
-}
-function cerrarModalImportar() {
-    document.getElementById('modalImportar').classList.add('hidden');
-}
-</script>
+
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/rrhh/nomina_lista.js' %}?v={% now 'U' %}"></script>
+{% endblock %}
+

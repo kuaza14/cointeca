@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %}Agregar Gasto a Caja Menor #{{ caja.id }} | Contabilidad Cointeca S.A.S.{% endblock %}
 
@@ -134,12 +135,10 @@
 
 </div>
 
-<script>
-document.getElementById("campo-valor").addEventListener("input", function (e) {
-    const soloDigitos = e.target.value.replace(/\D/g, "");
-    e.target.value = soloDigitos
-        ? new Intl.NumberFormat("es-CO").format(soloDigitos)
-        : "";
-});
-</script>
+
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/contabilidad/caja_menor.js' %}?v={% now 'U' %}"></script>
+{% endblock %}
+

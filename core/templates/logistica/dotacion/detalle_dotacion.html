@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
@@ -262,54 +263,10 @@
     </div>
 </div>
 
-<script>
 
-function abrirModalDotacion(){
 
-    const modal = document.getElementById("modalDotacion");
+{% endblock %}
 
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-
-}
-
-function cerrarModalDotacion() {
-
-    const modal = document.getElementById("modalDotacion");
-
-    modal.classList.remove("flex");
-    modal.classList.add("hidden");
-
-}
-
-function editarRegistro(id, fecha, observacion){
-
-    document.getElementById("registro_id").value = id;
-
-    document.getElementById("accion").value = "editar";
-
-    document.getElementsByName("fecha_entrega")[0].value = fecha;
-
-    document.getElementsByName("observacion")[0].value = observacion;
-
-    abrirModalDotacion();
-
-}
-
-function eliminarRegistro(id){
-
-    if(!confirm("¿Desea eliminar esta entrega de dotación?")){
-        return;
-    }
-
-    document.getElementById("accion").value = "eliminar";
-
-    document.getElementById("eliminar_id").value = id;
-
-    document.querySelector("form").submit();
-
-}
-
-</script>
-
+{% block extra_js %}
+<script src="{% static 'js/logistica/detalle_dotacion.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

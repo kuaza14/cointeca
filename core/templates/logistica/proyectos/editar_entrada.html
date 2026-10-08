@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
 Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
@@ -246,42 +247,10 @@ Editar Entrada - Proyecto {{ proyecto.numero_emcali }}
     </form>
 </div>
 
-<script>
-
-function eliminarMaterial(boton) {
-    const fila = boton.closest(".material-row");
-    if (!fila) {
-        return;
-    }
-    fila.remove();
-}
 
 
-function agregarMaterial() {
-    const container = document.getElementById(
-        "materiales-container"
-    );
-    const plantilla = document.getElementById(
-        "plantillaMaterialRow"
-    );
-    if (!container || !plantilla) {
-        return;
-    }
+{% endblock %}
 
-    const fila = plantilla.content.firstElementChild.cloneNode(true);
-    container.appendChild(fila);
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll('input[name="cantidad[]"]').forEach(function (input) {
-        if (input.value) {
-            input.value = parseFloat(input.value);
-        }
-
-    });
-
-});
-
-</script>
-
+{% block extra_js %}
+<script src="{% static 'js/logistica/editar_entrada.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

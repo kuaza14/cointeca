@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,38 +7,9 @@
     <title>Acta Nº {{ acta.numero_acta }} - Cointeca S.A.S. (GR-FR-01)</title>
     <!-- Tailwind CSS CDN for printable styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @page {
-            size: letter;
-            margin: 18mm 15mm 18mm 15mm;
-        }
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                background-color: #ffffff !important;
-                color: #000000 !important;
-                font-size: 11pt;
-            }
-            .page-break {
-                page-break-before: always;
-            }
-            .avoid-break {
-                page-break-inside: avoid;
-            }
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-        }
-        .borde-oficial {
-            border: 1px solid #cbd5e1;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/print.css' %}?v={% now 'U' %}">
 </head>
-<body class="py-8">
+<body class="acta-body py-8">
 
     <!-- BARRA FLOTANTE DE ACCIONES (NO IMPRIMIBLE) -->
     <div class="no-print max-w-4xl mx-auto mb-6 px-4">

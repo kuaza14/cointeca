@@ -6,36 +6,51 @@
 <div class="space-y-6">
 
     <!-- Encabezado y Navegación -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+    <div class="space-y-4 pb-3 border-b border-slate-200">
+        <!-- Fila Superior: Breadcrumb a la izquierda y Botón Volver arriba a la derecha en gris oficial -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 flex-wrap">
                 <a href="{% url 'rrhh' %}" class="hover:underline">Recursos Humanos</a>
                 <span>/</span>
                 <span class="text-slate-800 font-semibold">Nómina & Liquidaciones</span>
             </div>
-            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2.5">
-                <span>Nómina & Liquidaciones</span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    Colombia 2026
-                </span>
-            </h1>
-            <p class="text-xs text-slate-500 mt-1">
-                Gestión integral de períodos de pago, cálculo automático de deducciones legales (Salud 4%, Pensión 4%), tabla interactiva y exportación a Excel.
-            </p>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{% url 'rrhh' %}" 
+                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <span>←</span> <span>Volver a RRHH</span>
+                </a>
+            </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button type="button" onclick="abrirModalImportar()"
-                    class="btn btn-secundario text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 shadow-2xs cursor-pointer">
-                <svg class="size-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Importar Excel</span>
-            </button>
+        <!-- Fila Inferior: Título y Botones de Acción -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2.5">
+                    <span>Nómina & Liquidaciones</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Colombia 2026
+                    </span>
+                </h1>
+                <p class="text-xs text-slate-500 mt-1">
+                    Gestión integral de períodos de pago, cálculo automático de deducciones legales (Salud 4%, Pensión 4%), tabla interactiva y exportación a Excel.
+                </p>
+            </div>
 
-            <button type="button" onclick="abrirModalNuevoPeriodo()"
-                    class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2 cursor-pointer">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>+ Generar Período</span>
-            </button>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button type="button" onclick="abrirModalImportar()"
+                        class="btn btn-secundario text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 shadow-2xs cursor-pointer">
+                    <svg class="size-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Importar Excel</span>
+                </button>
+
+                <button type="button" onclick="abrirModalNuevoPeriodo()"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2 cursor-pointer">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>+ Generar Período</span>
+                </button>
+            </div>
         </div>
     </div>
 

@@ -1,0 +1,256 @@
+/* =========================================================================
+   COINTECA S.A.S. - ESTILOS GLOBALES DE LAYOUT Y COMPONENTES
+   Archivo: static/css/layout.css
+   Extraído de: core/templates/base.html
+   ========================================================================= */
+
+/* =========================================================================
+   LAYOUT PRINCIPAL: SIDEBAR Y CONTENIDO PRINCIPAL ADYACENTES (SIN SUPERPOSICIÓN)
+   ========================================================================= */
+.app-layout-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+    align-items: stretch !important;
+}
+
+#barraLateral {
+    width: 16rem !important; /* 256px */
+    min-width: 16rem !important;
+    max-width: 16rem !important;
+    flex-shrink: 0 !important;
+    background-color: #0b2d6b !important;
+    color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+
+.app-main-content {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background-color: #f8fafc !important;
+}
+
+/* En pantallas de escritorio (>= 1024px) */
+@media (min-width: 1024px) {
+    #barraLateral {
+        position: sticky !important;
+        top: 0 !important;
+        height: 100vh !important;
+        transform: none !important;
+        z-index: 30 !important;
+        box-shadow: 4px 0 15px -3px rgba(0, 0, 0, 0.08) !important;
+    }
+    .app-main-content {
+        width: calc(100% - 16rem) !important;
+    }
+}
+
+/* En pantallas móviles y tablets (< 1024px) */
+@media (max-width: 1023px) {
+    #barraLateral {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.25s ease-in-out !important;
+        z-index: 50 !important;
+        box-shadow: 10px 0 25px -5px rgba(0, 0, 0, 0.4) !important;
+    }
+    #barraLateral.menu-abierto {
+        transform: translateX(0) !important;
+    }
+    .app-main-content {
+        width: 100% !important;
+    }
+}
+
+/* =========================================================================
+   ESTILOS CRÍTICOS INLINE: MODALES, FONDOS, BOTONES Y FORMULARIOS
+   ========================================================================= */
+
+/* Fondo oscuro de superposición */
+[role="dialog"],
+div[id^="modal"],
+.modal-backdrop,
+.modal-overlay {
+    background-color: rgba(15, 23, 42, 0.75) !important;
+}
+
+/* Tarjeta / Contenedor de Modal (100% Sólido) */
+[role="dialog"] > div,
+div[id^="modal"] > div,
+.modal-card,
+.modal-box,
+.modal-container,
+.modal-contenido {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Formularios y cuerpos dentro del modal */
+[role="dialog"] form,
+div[id^="modal"] form,
+[role="dialog"] .bg-white,
+div[id^="modal"] .bg-white {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* Cabeceras de Modales */
+[role="dialog"] .bg-blue-900,
+[role="dialog"] .bg-blue-800,
+div[id^="modal"] .bg-blue-900,
+div[id^="modal"] .bg-blue-800,
+.modal-header-blue {
+    background-color: #0b2d6b !important;
+    color: #ffffff !important;
+}
+[role="dialog"] .bg-blue-900 *,
+div[id^="modal"] .bg-blue-900 * {
+    color: #ffffff !important;
+}
+
+[role="dialog"] .bg-red-700,
+[role="dialog"] .bg-red-800,
+div[id^="modal"] .bg-red-700,
+div[id^="modal"] .bg-red-800,
+.modal-header-red {
+    background-color: #b91c1c !important;
+    color: #ffffff !important;
+}
+[role="dialog"] .bg-red-700 *,
+div[id^="modal"] .bg-red-700 * {
+    color: #ffffff !important;
+}
+
+/* Pie del modal */
+[role="dialog"] .bg-slate-50,
+div[id^="modal"] .bg-slate-50,
+[role="dialog"] .border-t,
+div[id^="modal"] .border-t {
+    background-color: #f8fafc !important;
+}
+
+/* Inputs, selects y textareas */
+[role="dialog"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+[role="dialog"] select,
+[role="dialog"] textarea,
+div[id^="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+div[id^="modal"] select,
+div[id^="modal"] textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #cbd5e1 !important;
+}
+
+/* Botones universales */
+.btn-primario,
+.bg-blue-700,
+.bg-primary {
+    background-color: #1e63f0 !important;
+    color: #ffffff !important;
+}
+.btn-primario:hover,
+.bg-blue-700:hover,
+.hover\:bg-blue-800:hover,
+.bg-primary:hover {
+    background-color: #1651c7 !important;
+    color: #ffffff !important;
+}
+
+.btn-secundario,
+.bg-slate-100 {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+.btn-secundario:hover,
+.hover\:bg-slate-200:hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.btn-peligro,
+.bg-red-600,
+.bg-destructive {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+.btn-peligro:hover,
+.hover\:bg-red-700:hover,
+.bg-destructive:hover {
+    background-color: #b91c1c !important;
+    color: #ffffff !important;
+}
+
+.btn-exito,
+.btn-verde,
+.bg-green-700,
+.bg-emerald-600 {
+    background-color: #15803d !important;
+    color: #ffffff !important;
+}
+.btn-exito:hover,
+.btn-verde:hover,
+.hover\:bg-green-800:hover,
+.hover\:bg-emerald-700:hover {
+    background-color: #166534 !important;
+    color: #ffffff !important;
+}
+
+/* Botones Ámbar / Devolución / Alertas */
+.btn-amber,
+.bg-amber-600,
+.bg-amber-700,
+.bg-amber-800 {
+    background-color: #b45309 !important;
+    color: #ffffff !important;
+}
+.btn-amber:hover,
+.hover\:bg-amber-700:hover,
+.hover\:bg-amber-800:hover {
+    background-color: #92400e !important;
+    color: #ffffff !important;
+}
+
+/* =========================================================================
+   FILTROS EN ENCABEZADOS DE TABLAS (TIPO EXCEL)
+   ========================================================================= */
+.btn-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.btn-filter-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}
+.btn-filter-trigger.filter-active {
+    background-color: #f59e0b !important;
+    color: #78350f !important;
+    border-color: #d97706 !important;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.7);
+}
+.th-excel-col.has-active-filter {
+    background-color: #1e3a8a !important;
+}

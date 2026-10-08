@@ -5,10 +5,11 @@
 {% block content %}
 <div class="space-y-4">
 
-    <!-- BARRA SUPERIOR: ENCABEZADO Y ACCIONES -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-3 border-b border-slate-200">
-        <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+    <!-- ENCABEZADO Y NAVEGACIÓN -->
+    <div class="space-y-3 pb-3 border-b border-slate-200">
+        <!-- Fila Superior: Breadcrumbs a la izquierda y Botón Volver arriba a la derecha en gris oficial -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 flex-wrap">
                 <a href="{% url 'rrhh' %}" class="hover:underline">Recursos Humanos</a>
                 <span>/</span>
                 <a href="{% url 'lista_nominas' %}" class="hover:underline">Nóminas</a>
@@ -16,6 +17,17 @@
                 <span class="text-slate-800 font-semibold">{{ periodo.get_mes_display }} {{ periodo.ano }}</span>
             </div>
 
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{% url 'lista_nominas' %}" 
+                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
+                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
+                    <span>←</span> <span>Volver a Nóminas</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Fila Inferior: Título, Estado y Botones de Acción -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-1">
             <div class="flex flex-wrap items-center gap-3">
                 <h1 class="text-xl md:text-2xl font-black text-[#1F2937] tracking-tight">
                     Nómina {{ periodo.get_mes_display }} {{ periodo.ano }}
@@ -29,43 +41,43 @@
                     {{ periodo.get_tipo_display }} ({{ periodo.fecha_inicio|date:"d/m/Y" }} al {{ periodo.fecha_fin|date:"d/m/Y" }})
                 </span>
             </div>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <!-- Indicador de guardado -->
-            <div id="indicador-guardado" class="hidden text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
-                <span id="texto-guardado"></span>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <!-- Indicador de guardado -->
+                <div id="indicador-guardado" class="hidden text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                    <span id="texto-guardado"></span>
+                </div>
+
+                <button type="button" id="btn-guardar-cambios" onclick="guardarCambiosEnServidor()"
+                        class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span>Guardar Cambios</span>
+                </button>
+
+                <button type="button" onclick="abrirModalAgregarEmpleado()"
+                        class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                    <svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>+ Colaborador</span>
+                </button>
+
+                <a href="{% url 'exportar_nomina_excel' periodo.id %}"
+                   class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition flex items-center gap-1.5 shadow-2xs"
+                   title="Descargar en formato Excel">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Excel</span>
+                </a>
+
+                <!-- Dropdown o selector de estado -->
+                <form method="POST" action="{% url 'cambiar_estado_nomina' periodo.id %}" class="inline-flex items-center">
+                    {% csrf_token %}
+                    <select name="estado" onchange="this.form.submit()"
+                            class="text-xs font-bold bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 outline-none cursor-pointer">
+                        <option value="BORRADOR" {% if periodo.estado == 'BORRADOR' %}selected{% endif %}>Borrador</option>
+                        <option value="APROBADO" {% if periodo.estado == 'APROBADO' %}selected{% endif %}>Aprobado</option>
+                        <option value="PAGADO" {% if periodo.estado == 'PAGADO' %}selected{% endif %}>Pagado</option>
+                    </select>
+                </form>
             </div>
-
-            <button type="button" id="btn-guardar-cambios" onclick="guardarCambiosEnServidor()"
-                    class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                <span>Guardar Cambios</span>
-            </button>
-
-            <button type="button" onclick="abrirModalAgregarEmpleado()"
-                    class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                <svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>+ Colaborador</span>
-            </button>
-
-            <a href="{% url 'exportar_nomina_excel' periodo.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition flex items-center gap-1.5 shadow-2xs"
-               title="Descargar en formato Excel">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Excel</span>
-            </a>
-
-            <!-- Dropdown o selector de estado -->
-            <form method="POST" action="{% url 'cambiar_estado_nomina' periodo.id %}" class="inline-flex items-center">
-                {% csrf_token %}
-                <select name="estado" onchange="this.form.submit()"
-                        class="text-xs font-bold bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 outline-none cursor-pointer">
-                    <option value="BORRADOR" {% if periodo.estado == 'BORRADOR' %}selected{% endif %}>Borrador</option>
-                    <option value="APROBADO" {% if periodo.estado == 'APROBADO' %}selected{% endif %}>Aprobado</option>
-                    <option value="PAGADO" {% if periodo.estado == 'PAGADO' %}selected{% endif %}>Pagado</option>
-                </select>
-            </form>
         </div>
     </div>
 

@@ -1,0 +1,218 @@
+/* ==========================================================================
+   COINTECA S.A.S. - MATRICES TÉCNICAS DE INGENIERÍA
+   Archivo: static/css/ingenieria_matriz.css
+   Extraído de: core/templates/ingenieria/proyecto/detalle_proyecto.html
+   ========================================================================== */
+
+/* Contenedor de la tabla con scroll vertical y horizontal coordinado */
+.contenedor-tabla-matriz {
+    max-height: calc(100vh - 210px);
+    min-height: 380px;
+    overflow: auto !important;
+    position: relative;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #f1f5f9;
+}
+.contenedor-tabla-matriz::-webkit-scrollbar {
+    width: 10px;
+    height: 12px;
+}
+.contenedor-tabla-matriz::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 6px;
+}
+.contenedor-tabla-matriz::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 6px;
+    border: 2px solid #f1f5f9;
+}
+.contenedor-tabla-matriz::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Configuración de tabla con columnas y cabeceras fijas limpias */
+.tabla-fija {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.tabla-fija th,
+.tabla-fija td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* 1. Encabezados Sticky (Thead): Fijos al bajar (vertical) */
+.tabla-fija thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    background-color: #262626; /* Fondo neutral oscuro 100% opaco */
+    border-bottom: 2px solid #404040 !important;
+}
+
+/* Colores opacos específicos de las columnas de la cabecera */
+.tabla-fija thead th.bg-slate-700 {
+    background-color: #334155 !important;
+}
+.tabla-fija thead th.bg-slate-800 {
+    background-color: #1e293b !important;
+}
+.tabla-fija thead th.bg-amber-950 {
+    background-color: #451a03 !important;
+}
+.tabla-fija thead th.bg-neutral {
+    background-color: #262626 !important;
+}
+
+/* Esquinas superiores izquierdas (Nodo y Apoyo en thead): Fijas tanto vertical (top: 0) como horizontal (left) */
+.sticky-col-nodo-header {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    z-index: 40 !important;
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #404040 !important;
+}
+
+.sticky-col-apoyo-header {
+    position: sticky !important;
+    top: 0 !important;
+    left: 120px !important;
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    z-index: 40 !important;
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    border-right: 2px solid #404040 !important;
+    border-bottom: 2px solid #404040 !important;
+    box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 2. Celdas del Body Sticky (Horizontales): Pasan por DEBAJO de thead y tfoot */
+.sticky-col-nodo {
+    position: sticky !important;
+    left: 0 !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    z-index: 15 !important;
+}
+
+.sticky-col-apoyo {
+    position: sticky !important;
+    left: 120px !important;
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    z-index: 15 !important;
+    border-right: 2px solid #cbd5e1 !important;
+    box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Fondos 100% opacos sólidos (evita transparencias y superposiciones al mover el scroll) */
+/* Matriz Materiales */
+#panel-tab-materiales tr.fila-par .sticky-col-nodo,
+#panel-tab-materiales tr.fila-par .sticky-col-apoyo {
+    background-color: #f1f5f9 !important;
+}
+#panel-tab-materiales tr.fila-impar .sticky-col-nodo,
+#panel-tab-materiales tr.fila-impar .sticky-col-apoyo {
+    background-color: #ffffff !important;
+}
+#panel-tab-materiales tr:hover .sticky-col-nodo,
+#panel-tab-materiales tr:hover .sticky-col-apoyo {
+    background-color: #e2e8f0 !important;
+}
+
+/* Matriz Mano de Obra */
+#panel-tab-mano_obra tr.fila-mo-par .sticky-col-nodo,
+#panel-tab-mano_obra tr.fila-mo-par .sticky-col-apoyo {
+    background-color: #f1f5f9 !important;
+}
+#panel-tab-mano_obra tr.fila-mo-impar .sticky-col-nodo,
+#panel-tab-mano_obra tr.fila-mo-impar .sticky-col-apoyo {
+    background-color: #ffffff !important;
+}
+#panel-tab-mano_obra tr:hover .sticky-col-nodo,
+#panel-tab-mano_obra tr:hover .sticky-col-apoyo {
+    background-color: #e2e8f0 !important;
+}
+
+/* Resaltado de fila seleccionada */
+tr.bg-amber-100 .sticky-col-nodo,
+tr.bg-amber-100 .sticky-col-apoyo {
+    background-color: #fef3c7 !important;
+}
+
+/* 3. Totales (Footer): Fijos en la parte inferior al subir/bajar */
+.tabla-fija tfoot {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 30 !important;
+}
+.tabla-fija tfoot td {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 30 !important;
+    background-color: #0f172a !important;
+    border-top: 2px solid #334155 !important;
+}
+
+.sticky-col-nodo-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    z-index: 40 !important;
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    border-top: 2px solid #334155 !important;
+}
+.sticky-col-apoyo-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    left: 120px !important;
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    z-index: 40 !important;
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    border-right: 2px solid #334155 !important;
+    border-top: 2px solid #334155 !important;
+    box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Modales siempre por encima de cualquier cabecera o elemento sticky */
+#modalNuevoApoyo,
+#modalAsignarMO {
+    z-index: 99999 !important;
+}
+
+/* Botón gris para Volver y verde para Nuevo Nodo */
+.btn-gris-volver {
+    background-color: #475569 !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+}
+.btn-gris-volver:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+}
+.btn-verde-nuevo {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    border: 1px solid #047857 !important;
+}
+.btn-verde-nuevo:hover {
+    background-color: #047857 !important;
+    color: #ffffff !important;
+}

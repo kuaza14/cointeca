@@ -1,6 +1,7 @@
 /**
  * COINTECA S.A.S. - Recursos Humanos
- * nomina_detalle.js - Matriz interactiva de nómina en vivo, recálculos en navegador y persistencia AJAX.
+ * nomina_detalle.js - Matriz interactiva de nómina en vivo, recálculos en navegador,
+ * gestión visual de ausencias injustificadas con descuento dominical (Art. 173 CST) y persistencia AJAX.
  */
 
 (function () {
@@ -20,10 +21,22 @@
     const SMMLV_BASE = parseFloat(config.smmlvBase) || 1750905;
     const AUX_TRANSPORTE_BASE = parseFloat(config.auxTransporteBase) || 249095;
     const PERIODO_ID = parseInt(config.periodoId) || 0;
+    const PERIODO_MES = parseInt(config.periodoMes) || (new Date().getMonth() + 1);
+    const PERIODO_ANO = parseInt(config.periodoAno) || new Date().getFullYear();
 
     // Estado local de los registros de empleados
     let detallesData = [];
     let hayCambiosSinGuardar = false;
+
+    // Estado local del modal de ausencias
+    let empleadoActualModal = null;
+    let fechasSeleccionadasModal = new Set();
+    let descontarDominicalModal = true;
+
+    const NOMBRES_MESES = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
 
     // Inicialización del DOM
     document.addEventListener('DOMContentLoaded', function () {
@@ -54,6 +67,56 @@
         return cookie ? cookie.split('=')[1] : '';
     }
 
+    // Utilidades de Fechas y Semanas ISO (Lunes a Domingo)
+    function parseDateISO(str) {
+        const [y, m, d] = str.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    }
+
+    function formatDateISO(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function getMondayOfWeek(d) {
+        const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const day = copy.getDay(); // 0: Dom, 1: Lun, ..., 6: Sáb
+        const diff = (day === 0 ? -6 : 1 - day);
+        copy.setDate(copy.getDate() + diff);
+        return copy;
+    }
+
+    function getSundayOfWeek(mondayDate) {
+        const copy = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate());
+        copy.setDate(copy.getDate() + 6);
+        return copy;
+    }
+
+    // Renderizar botón de ausencias por fila
+    function renderizarBotonAusencias(item) {
+        const faltas = parseFloat(item.dias_faltas_injustificadas) || 0;
+        const dom = parseFloat(item.domingos_descontados) || 0;
+        if (faltas > 0) {
+            return `
+                <button type="button" id="btn-ausencias-${item.id}" onclick="abrirModalAusencias(${item.id})"
+                        class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition cursor-pointer flex items-center justify-center gap-1 mx-auto shadow-2xs"
+                        title="Ver / modificar ausencias registradas (${item.fechas_faltas_json ? item.fechas_faltas_json.length : 0} fechas)">
+                    <span>📅 ${Math.round(faltas)}d</span>
+                    <span class="text-[10px] text-rose-700 font-black">(-${Math.round(dom)} dom)</span>
+                </button>
+            `;
+        }
+        return `
+            <button type="button" id="btn-ausencias-${item.id}" onclick="abrirModalAusencias(${item.id})"
+                    class="px-2 py-0.5 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-blue-700 hover:bg-blue-50 border border-dashed border-slate-300 hover:border-blue-400 transition cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                    title="Registrar ausencias y domingos (Art. 173 CST)">
+                <span>📅 0 d</span>
+            </button>
+        `;
+    }
+
     // Renderizar la tabla completa
     function renderizarTabla() {
         const tbody = document.getElementById('tbody-nomina');
@@ -61,7 +124,7 @@
         tbody.innerHTML = '';
 
         if (detallesData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="17" class="py-8 text-center text-slate-400 font-medium">No hay registros en esta nómina. Agrega un colaborador con el botón superior.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="18" class="py-8 text-center text-slate-400 font-medium">No hay registros en esta nómina. Agrega un colaborador con el botón superior.</td></tr>';
             return;
         }
 
@@ -89,9 +152,14 @@
 
                 <!-- DÍAS LABORADOS -->
                 <td class="py-1 px-1 text-center border-r border-slate-100 bg-blue-50/40">
-                    <input type="number" min="0" max="30" step="1" value="${item.dias_laborados}"
+                    <input type="number" min="0" max="30" step="1" value="${item.dias_laborados}" id="input-dias-${item.id}"
                            onchange="actualizarCelda(${item.id}, 'dias_laborados', this.value)"
                            class="w-full text-center font-mono font-black text-blue-900 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-0.5 py-0.5">
+                </td>
+
+                <!-- AUSENCIAS / ART. 173 -->
+                <td class="py-1 px-1 text-center border-r border-slate-100 bg-amber-50/30">
+                    ${renderizarBotonAusencias(item)}
                 </td>
 
                 <!-- BÁSICO DEVENGADO -->
@@ -106,7 +174,7 @@
 
                 <!-- EXTRAS / BONOS -->
                 <td class="py-1 px-1.5 text-right border-r border-slate-100">
-                    <input type="number" step="1" value="${Math.round(item.horas_extras_recargos + item.otros_devengados)}"
+                    <input type="number" step="1" value="${Math.round((item.horas_extras_recargos || 0) + (item.otros_devengados || 0))}"
                            onchange="actualizarCelda(${item.id}, 'horas_extras_recargos', this.value)"
                            class="w-full text-right font-mono text-slate-800 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5">
                 </td>
@@ -128,7 +196,7 @@
 
                 <!-- OTRAS DEDUCCIONES -->
                 <td class="py-1 px-1.5 text-right border-r border-slate-100">
-                    <input type="number" step="1" value="${Math.round(item.retencion_fuente + item.otras_deducciones + item.deduccion_afsp)}"
+                    <input type="number" step="1" value="${Math.round((item.retencion_fuente || 0) + (item.otras_deducciones || 0) + (item.deduccion_afsp || 0))}"
                            onchange="actualizarCelda(${item.id}, 'otras_deducciones', this.value)"
                            class="w-full text-right font-mono text-rose-700 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-rose-500 rounded px-1 py-0.5">
                 </td>
@@ -153,6 +221,11 @@
 
                 <!-- ACCIONES -->
                 <td class="py-1.5 px-2 text-center whitespace-nowrap space-x-1">
+                    <button type="button" onclick="abrirModalAusencias(${item.id})"
+                            class="inline-flex items-center justify-center p-1 rounded-lg text-amber-600 hover:bg-amber-100 transition cursor-pointer"
+                            title="Gestionar Ausencias (Art. 173 CST)">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    </button>
                     <a href="/rrhh/nomina/comprobante/${item.id}/" target="_blank"
                        class="inline-flex items-center justify-center p-1 rounded-lg text-blue-600 hover:bg-blue-100 transition"
                        title="Imprimir Colilla de Pago">
@@ -174,18 +247,21 @@
     // Recalcular fila individual en tiempo real en JavaScript
     function recalcularFila(item) {
         const dias = parseFloat(item.dias_laborados) || 0;
+        const domDesc = parseFloat(item.domingos_descontados) || 0;
         const salario = parseFloat(item.salario_basico) || 0;
         const extras = parseFloat(item.horas_extras_recargos) || 0;
         const otrasDctos = parseFloat(item.otras_deducciones) || 0;
         const esAprendiz = !!item.es_aprendiz_sena;
 
-        // Básico proporcional a días trabajados (base 30)
+        // Básico proporcional a días liquidados (base 30)
         item.basico_devengado = (salario / 30.0) * dias;
 
         // Auxilio de transporte: solo si salario <= 2 SMMLV y no es aprendiz SENA
+        // Nota legal: solo se descuentan las faltas físicas reales (los domingos no generan desplazamiento)
         if (!esAprendiz && salario <= (SMMLV_BASE * 2.0) && salario > 0) {
             item.auxilio_transporte_pactado = AUX_TRANSPORTE_BASE;
-            item.auxilio_transporte_devengado = (AUX_TRANSPORTE_BASE / 30.0) * dias;
+            const diasTransporte = Math.max(0, Math.min(30, dias + domDesc));
+            item.auxilio_transporte_devengado = (AUX_TRANSPORTE_BASE / 30.0) * diasTransporte;
         } else {
             item.auxilio_transporte_pactado = 0;
             item.auxilio_transporte_devengado = 0;
@@ -221,6 +297,7 @@
         const tdPension = document.getElementById(`pension-${item.id}`);
         const tdTotalDed = document.getElementById(`total-ded-${item.id}`);
         const tdNeto = document.getElementById(`neto-${item.id}`);
+        const inputDias = document.getElementById(`input-dias-${item.id}`);
 
         if (tdBasicoDev) tdBasicoDev.textContent = formatoDinero(item.basico_devengado);
         if (tdAuxTrans) tdAuxTrans.textContent = formatoDinero(item.auxilio_transporte_devengado);
@@ -229,9 +306,16 @@
         if (tdPension) tdPension.textContent = formatoDinero(item.deduccion_pension);
         if (tdTotalDed) tdTotalDed.textContent = '-' + formatoDinero(item.total_deducciones);
         if (tdNeto) tdNeto.textContent = formatoDinero(item.neto_pagar);
+        if (inputDias) inputDias.value = item.dias_laborados;
+
+        // Actualizar botón de ausencias
+        const btnAusencias = document.getElementById(`btn-ausencias-${item.id}`);
+        if (btnAusencias) {
+            btnAusencias.outerHTML = renderizarBotonAusencias(item);
+        }
     }
 
-    // Actualizar valor de celda editada
+    // Actualizar valor de celda editada manualmente
     function actualizarCelda(id, campo, valor) {
         const item = detallesData.find(d => d.id === id);
         if (!item) return;
@@ -308,6 +392,10 @@
                 dias_laborados: d.dias_laborados,
                 dias_incapacidad: d.dias_incapacidad,
                 dias_no_remunerados: d.dias_no_remunerados,
+                dias_faltas_injustificadas: d.dias_faltas_injustificadas || 0,
+                domingos_descontados: d.domingos_descontados || 0,
+                fechas_faltas_json: d.fechas_faltas_json || [],
+                descontar_dominical: d.descontar_dominical !== false,
                 horas_extras_recargos: d.horas_extras_recargos,
                 otros_devengados: d.otros_devengados,
                 retencion_fuente: d.retencion_fuente,
@@ -353,6 +441,243 @@
         });
     }
 
+    // ==========================================
+    // GESTIÓN DEL MODAL DE CALENDARIO DE AUSENCIAS
+    // ==========================================
+
+    function abrirModalAusencias(id) {
+        const item = detallesData.find(d => d.id === id);
+        if (!item) return;
+
+        empleadoActualModal = item;
+        fechasSeleccionadasModal = new Set(Array.isArray(item.fechas_faltas_json) ? item.fechas_faltas_json : []);
+        descontarDominicalModal = item.descontar_dominical !== false;
+
+        const infoEl = document.getElementById('modal-ausencias-empleado');
+        if (infoEl) {
+            infoEl.textContent = `Colaborador: ${item.nombre_empleado} | Cédula: ${item.cedula || 'N/A'} | Salario Básico: $${formatoDinero(item.salario_basico)}`;
+        }
+
+        const toggleEl = document.getElementById('toggle-descontar-dominical');
+        if (toggleEl) {
+            toggleEl.checked = descontarDominicalModal;
+        }
+
+        const tituloMes = document.getElementById('calendario-titulo-mes');
+        if (tituloMes) {
+            tituloMes.textContent = `${NOMBRES_MESES[PERIODO_MES - 1]} ${PERIODO_ANO}`;
+        }
+
+        renderizarCalendarioModal();
+        actualizarResumenModal();
+
+        const modal = document.getElementById('modalCalendarioAusencias');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function cerrarModalAusencias() {
+        const modal = document.getElementById('modalCalendarioAusencias');
+        if (modal) modal.classList.add('hidden');
+        empleadoActualModal = null;
+    }
+
+    function alCambiarToggleDominical() {
+        const toggleEl = document.getElementById('toggle-descontar-dominical');
+        descontarDominicalModal = toggleEl ? toggleEl.checked : true;
+        renderizarCalendarioModal();
+        actualizarResumenModal();
+    }
+
+    function toggleFechaModal(fechaStr) {
+        if (fechasSeleccionadasModal.has(fechaStr)) {
+            fechasSeleccionadasModal.delete(fechaStr);
+        } else {
+            fechasSeleccionadasModal.add(fechaStr);
+        }
+        renderizarCalendarioModal();
+        actualizarResumenModal();
+    }
+
+    function limpiarAusenciasModal() {
+        fechasSeleccionadasModal.clear();
+        renderizarCalendarioModal();
+        actualizarResumenModal();
+    }
+
+    function calcularBalanceAusencias() {
+        const faltas = fechasSeleccionadasModal.size;
+        const semanasMap = new Map(); // key: mondayISO -> { monday, sunday, fechas: [] }
+
+        fechasSeleccionadasModal.forEach(fechaStr => {
+            const dateObj = parseDateISO(fechaStr);
+            const mondayObj = getMondayOfWeek(dateObj);
+            const sundayObj = getSundayOfWeek(mondayObj);
+            const mondayKey = formatDateISO(mondayObj);
+
+            if (!semanasMap.has(mondayKey)) {
+                semanasMap.set(mondayKey, {
+                    monday: mondayKey,
+                    sunday: formatDateISO(sundayObj),
+                    fechas: []
+                });
+            }
+            semanasMap.get(mondayKey).fechas.push(fechaStr);
+        });
+
+        const numSemanas = semanasMap.size;
+        const domingosPerdidos = descontarDominicalModal ? numSemanas : 0;
+        const totalDiasDescontados = faltas + domingosPerdidos;
+        const diasLaboradosLiquidados = Math.max(0, 30 - totalDiasDescontados);
+        const diasTransporteLiquidados = Math.max(0, 30 - faltas);
+
+        return {
+            faltas,
+            semanasMap,
+            numSemanas,
+            domingosPerdidos,
+            totalDiasDescontados,
+            diasLaboradosLiquidados,
+            diasTransporteLiquidados
+        };
+    }
+
+    function renderizarCalendarioModal() {
+        const grid = document.getElementById('calendario-grid-dias');
+        if (!grid) return;
+        grid.innerHTML = '';
+        grid.style.cssText = 'display: grid !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 6px !important; width: 100% !important; box-sizing: border-box !important;';
+
+        const ano = PERIODO_ANO;
+        const mes = PERIODO_MES;
+        const diasEnMes = new Date(ano, mes, 0).getDate();
+        const primerDia = new Date(ano, mes - 1, 1);
+        const offsetInicio = (primerDia.getDay() + 6) % 7; // Lun: 0, Mar: 1, ..., Dom: 6
+
+        const balance = calcularBalanceAusencias();
+        const domingosAfectadosSet = new Set();
+        if (descontarDominicalModal) {
+            balance.semanasMap.forEach(info => {
+                domingosAfectadosSet.add(info.sunday);
+            });
+        }
+
+        // Celdas vacías previas al día 1
+        for (let i = 0; i < offsetInicio; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendario-dia-vacio';
+            emptyCell.style.cssText = 'min-height: 52px; border-radius: 10px; background-color: #f8fafc; border: 1px dashed #e2e8f0; width: 100%; box-sizing: border-box;';
+            grid.appendChild(emptyCell);
+        }
+
+        // Celdas de los días del mes
+        for (let dia = 1; dia <= diasEnMes; dia++) {
+            const fechaObj = new Date(ano, mes - 1, dia);
+            const fechaStr = formatDateISO(fechaObj);
+            const esDomingo = fechaObj.getDay() === 0;
+            const esFalta = fechasSeleccionadasModal.has(fechaStr);
+            const esDomingoPenalizado = domingosAfectadosSet.has(fechaStr);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.fecha = fechaStr;
+            btn.onclick = () => toggleFechaModal(fechaStr);
+            btn.className = 'calendario-dia-celda';
+
+            if (esFalta) {
+                // Día marcado como falta injustificada
+                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #e11d48 !important; color: #ffffff !important; border: 2px solid #be123c !important; cursor: pointer; box-shadow: 0 2px 4px rgba(225, 29, 72, 0.3);';
+                btn.innerHTML = `
+                    <span style="font-size: 13px; font-weight: 800; line-height: 1;">${dia}</span>
+                    <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; background-color: rgba(0,0,0,0.25); color: #fff; padding: 2px 4px; border-radius: 4px; letter-spacing: 0.05em;">✕ Falta</span>
+                `;
+            } else if (esDomingo && esDomingoPenalizado) {
+                // Domingo que se pierde según Art. 173 CST
+                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #fef3c7 !important; color: #78350f !important; border: 2px solid #f59e0b !important; cursor: pointer;';
+                btn.title = 'Este descanso dominical se descontará por la falta injustificada ocurrida en la semana (Art. 173 CST)';
+                btn.innerHTML = `
+                    <span style="font-size: 13px; font-weight: 800; line-height: 1; color: #b91c1c;">${dia}</span>
+                    <span style="font-size: 8px; font-weight: 900; text-transform: uppercase; background-color: #f59e0b; color: #0f172a; padding: 2px 3px; border-radius: 4px;">⚠️ Dcto Dom</span>
+                `;
+            } else if (esDomingo) {
+                // Domingo regular de descanso
+                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; cursor: pointer;';
+                btn.title = 'Domingo (Descanso legal)';
+                btn.innerHTML = `
+                    <span style="font-size: 13px; font-weight: 700; line-height: 1;">${dia}</span>
+                    <span style="font-size: 8px; font-weight: 600; color: #94a3b8;">Descanso</span>
+                `;
+            } else {
+                // Día hábil estándar
+                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; cursor: pointer;';
+                btn.innerHTML = `
+                    <span style="font-size: 13px; font-weight: 700; line-height: 1;">${dia}</span>
+                    <span style="font-size: 8px; font-weight: 500; color: #94a3b8;">Laborable</span>
+                `;
+            }
+
+            grid.appendChild(btn);
+        }
+    }
+
+    function actualizarResumenModal() {
+        const balance = calcularBalanceAusencias();
+
+        const elSemanas = document.getElementById('resumen-semanas-afectadas');
+        const elFaltas = document.getElementById('resumen-dias-falta');
+        const elDomingos = document.getElementById('resumen-domingos-perdidos');
+        const elTotalDesc = document.getElementById('resumen-total-descuento');
+        const elDiasPagar = document.getElementById('resumen-dias-pagar');
+        const elTransDias = document.getElementById('resumen-transporte-dias');
+        const elFechasLista = document.getElementById('resumen-fechas-lista');
+
+        if (elSemanas) elSemanas.textContent = `${balance.numSemanas} semana(s) afectada(s)`;
+        if (elFaltas) elFaltas.textContent = `${balance.faltas} día(s)`;
+        if (elDomingos) elDomingos.textContent = `${balance.domingosPerdidos} domingo(s)`;
+        if (elTotalDesc) elTotalDesc.textContent = `${balance.totalDiasDescontados} día(s)`;
+        if (elDiasPagar) elDiasPagar.textContent = `${balance.diasLaboradosLiquidados} día(s)`;
+        if (elTransDias) elTransDias.textContent = `${balance.diasTransporteLiquidados}`;
+
+        if (elFechasLista) {
+            if (balance.faltas === 0) {
+                elFechasLista.innerHTML = '<span class="text-slate-400 italic">No hay ausencias seleccionadas. La liquidación se realizará sobre 30 días plenos.</span>';
+            } else {
+                const fechasOrdenadas = Array.from(fechasSeleccionadasModal).sort();
+                let desgloseHTML = `<strong>Faltas registradas (${fechasOrdenadas.length}):</strong> ${fechasOrdenadas.join(', ')}`;
+                if (balance.domingosPerdidos > 0) {
+                    const domingosList = [];
+                    balance.semanasMap.forEach(info => domingosList.push(info.sunday));
+                    desgloseHTML += `<br><strong class="text-amber-300">Domingos descontados por ley (${balance.domingosPerdidos}):</strong> ${domingosList.join(', ')}`;
+                }
+                elFechasLista.innerHTML = desgloseHTML;
+            }
+        }
+    }
+
+    function aplicarAusenciasModal() {
+        if (!empleadoActualModal) return;
+
+        const balance = calcularBalanceAusencias();
+        const fechasOrdenadas = Array.from(fechasSeleccionadasModal).sort();
+
+        empleadoActualModal.fechas_faltas_json = fechasOrdenadas;
+        empleadoActualModal.dias_faltas_injustificadas = balance.faltas;
+        empleadoActualModal.domingos_descontados = balance.domingosPerdidos;
+        empleadoActualModal.descontar_dominical = descontarDominicalModal;
+        empleadoActualModal.dias_laborados = balance.diasLaboradosLiquidados;
+
+        // Si hay ausencias y el campo de notas está vacío o solo tenía la nota previa, sugerir nota informativa
+        if (balance.faltas > 0) {
+            if (!empleadoActualModal.observaciones || empleadoActualModal.observaciones.includes('Ausencia:')) {
+                empleadoActualModal.observaciones = `Ausencia: ${balance.faltas}d + ${balance.domingosPerdidos} dom. desc. (Art. 173 CST)`;
+            }
+        }
+
+        recalcularFila(empleadoActualModal);
+        actualizarTotalesGenerales();
+        marcarCambiosPendientes();
+        cerrarModalAusencias();
+    }
+
     // Modales de agregar colaborador
     function abrirModalAgregarEmpleado() {
         const modal = document.getElementById('modalAgregarEmpleado');
@@ -379,11 +704,18 @@
         }
     }
 
-    // Exponer funciones necesarias globalmente para llamadas desde atributos HTML inline
+    // Exponer funciones necesarias globalmente
     window.guardarCambiosEnServidor = guardarCambiosEnServidor;
     window.abrirModalAgregarEmpleado = abrirModalAgregarEmpleado;
     window.cerrarModalAgregarEmpleado = cerrarModalAgregarEmpleado;
     window.autocompletarDesdeSelect = autocompletarDesdeSelect;
     window.actualizarCelda = actualizarCelda;
     window.formatoDinero = formatoDinero;
+
+    // Exponer funciones del modal de ausencias
+    window.abrirModalAusencias = abrirModalAusencias;
+    window.cerrarModalAusencias = cerrarModalAusencias;
+    window.alCambiarToggleDominical = alCambiarToggleDominical;
+    window.limpiarAusenciasModal = limpiarAusenciasModal;
+    window.aplicarAusenciasModal = aplicarAusenciasModal;
 })();

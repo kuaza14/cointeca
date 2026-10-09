@@ -1749,6 +1749,10 @@ class DetalleNominaEmpleado(models.Model):
     dias_laborados = models.DecimalField(max_digits=5, decimal_places=2, default=30, verbose_name="Días Laborados")
     dias_incapacidad = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Días Incapacidad")
     dias_no_remunerados = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Días No Remunerados")
+    dias_faltas_injustificadas = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Días Faltas Injustificadas")
+    domingos_descontados = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Domingos Descontados (Art. 173 CST)")
+    fechas_faltas_json = models.JSONField(default=list, blank=True, verbose_name="Fechas de Ausencias")
+    descontar_dominical = models.BooleanField(default=True, verbose_name="Aplica Descuento de Dominical")
     
     # Devengados
     basico_devengado = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Básico Devengado")
@@ -1792,7 +1796,11 @@ class DetalleNominaEmpleado(models.Model):
         # Auxilio transporte: Solo si salario <= 2 SMMLV y no es aprendiz SENA
         if not self.es_aprendiz_sena and salario <= (smmlv * Decimal('2')) and salario > Decimal('0'):
             self.auxilio_transporte_pactado = aux_trans
-            self.auxilio_transporte_devengado = (aux_trans / dias_mes) * dias
+            # Si hay domingos descontados por falta (Art. 173 CST), el auxilio de transporte
+            # solo se descuenta por los días de falta física reales (el domingo es día de descanso)
+            dom_desc = Decimal(str(self.domingos_descontados or 0))
+            dias_transporte = max(Decimal('0'), min(dias_mes, dias + dom_desc))
+            self.auxilio_transporte_devengado = (aux_trans / dias_mes) * dias_transporte
         else:
             self.auxilio_transporte_pactado = Decimal('0')
             self.auxilio_transporte_devengado = Decimal('0')

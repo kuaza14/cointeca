@@ -110,6 +110,7 @@
                         <th class="py-2.5 px-3 min-w-[130px] border-r border-slate-700">Cargo</th>
                         <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700 bg-slate-800">Básico Pactado</th>
                         <th class="py-2.5 px-2 w-16 text-center border-r border-slate-700 bg-blue-900/60" title="Días trabajados del mes (por defecto 30)">Días</th>
+                        <th class="py-2.5 px-2 w-28 text-center border-r border-slate-700 bg-amber-950/70 text-amber-300 font-extrabold" title="Gestión de ausencias injustificadas y deducción dominical (Art. 173 CST)">Ausencias (173)</th>
                         <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700">Básico Dev.</th>
                         <th class="py-2.5 px-3 w-28 text-right border-r border-slate-700">Aux. Transp.</th>
                         <th class="py-2.5 px-2 w-24 text-right border-r border-slate-700" title="Horas extras, recargos o bonificaciones salariales">Extras / Bonos</th>
@@ -228,12 +229,132 @@
     </div>
 </div>
 
+<!-- MODAL: CALENDARIO DE AUSENCIAS Y DESCUENTO DOMINICAL (ART. 173 CST) -->
+<div id="modalCalendarioAusencias" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-fade-in my-auto max-h-[95vh] flex flex-col">
+        <!-- Header -->
+        <div class="px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between shrink-0">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-base font-black">📅 Registro de Ausencias Injustificadas</span>
+                    <span class="text-[10px] font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider">Art. 173 C.S.T.</span>
+                </div>
+                <p id="modal-ausencias-empleado" class="text-xs text-slate-300 mt-0.5 font-medium">Colaborador: -</p>
+            </div>
+            <button type="button" onclick="cerrarModalAusencias()" class="text-slate-400 hover:text-white font-bold text-xl leading-none cursor-pointer p-1">✕</button>
+        </div>
+
+        <!-- Body con scroll -->
+        <div class="p-5 space-y-4 overflow-y-auto flex-1 text-slate-800">
+            <!-- Explicación normativa -->
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2.5">
+                <span class="text-base shrink-0">⚖️</span>
+                <div class="space-y-1">
+                    <p class="font-bold">Norma Laboral Colombiana (Código Sustantivo del Trabajo - Art. 173):</p>
+                    <p class="text-[11px] leading-relaxed text-amber-800">
+                        El trabajador que falte sin justa causa a su jornada laboral durante la semana <strong>pierde el derecho a la remuneración del descanso dominical</strong>. 
+                        Marca abajo los días que faltó; el sistema detectará automáticamente las semanas correspondientes y los domingos a descontar.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Toggle de Dominical -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                <div class="space-y-0.5">
+                    <label for="toggle-descontar-dominical" class="text-xs font-bold text-slate-900 cursor-pointer flex items-center gap-1.5">
+                        <span>Descontar descansos dominicales (Art. 173 CST)</span>
+                    </label>
+                    <p class="text-[11px] text-slate-500">Desmarca esta opción si la empresa decide condonar o no aplicar la sanción del dominical.</p>
+                </div>
+                <label class="switch-toggle-custom" title="Activar/Desactivar descuento del dominical">
+                    <input type="checkbox" id="toggle-descontar-dominical" checked onchange="alCambiarToggleDominical()">
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+
+            <!-- Calendario Mensual -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h4 id="calendario-titulo-mes" class="text-xs font-bold uppercase tracking-wider text-slate-700">Mes del Período</h4>
+                    <span class="text-[11px] text-slate-400">Haz clic en un día para marcarlo/desmarcarlo</span>
+                </div>
+
+                <!-- Cabecera de días de la semana (Lunes a Domingo) -->
+                <div class="calendario-grid-7 text-center font-bold text-[11px] text-slate-600 mb-1.5" style="display: grid !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 6px !important; width: 100% !important;">
+                    <div class="py-1.5 bg-slate-100 rounded-lg">Lun</div>
+                    <div class="py-1.5 bg-slate-100 rounded-lg">Mar</div>
+                    <div class="py-1.5 bg-slate-100 rounded-lg">Mié</div>
+                    <div class="py-1.5 bg-slate-100 rounded-lg">Jue</div>
+                    <div class="py-1.5 bg-slate-100 rounded-lg">Vie</div>
+                    <div class="py-1.5 bg-slate-100 rounded-lg">Sáb</div>
+                    <div class="py-1.5 bg-rose-100 text-rose-800 rounded-lg">Dom</div>
+                </div>
+
+                <!-- Grid de días del mes -->
+                <div id="calendario-grid-dias" class="calendario-grid-7 text-xs" style="display: grid !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 6px !important; width: 100% !important;">
+                    <!-- Días inyectados dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Resumen de liquidación -->
+            <div class="bg-slate-900 text-white rounded-xl p-3.5 space-y-2.5">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                    <span class="text-xs font-extrabold uppercase tracking-wide text-amber-300">📊 Balance de Liquidación del Período</span>
+                    <span id="resumen-semanas-afectadas" class="text-[11px] font-mono text-slate-300 bg-slate-800 px-2 py-0.5 rounded">0 semanas afectadas</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                    <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Faltas Físicas</span>
+                        <span id="resumen-dias-falta" class="text-sm font-black text-rose-400 font-mono">0 días</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Domingos Pérdida</span>
+                        <span id="resumen-domingos-perdidos" class="text-sm font-black text-amber-400 font-mono">0 días</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Total a Descontar</span>
+                        <span id="resumen-total-descuento" class="text-sm font-black text-rose-300 font-mono">0 días</span>
+                    </div>
+                    <div class="bg-emerald-950/60 p-2 rounded-lg border border-emerald-700/60">
+                        <span class="block text-[10px] text-emerald-300 font-bold uppercase">Días Salario a Pagar</span>
+                        <span id="resumen-dias-pagar" class="text-sm font-black text-emerald-400 font-mono">30 días</span>
+                    </div>
+                </div>
+
+                <!-- Detalle fechas y subsidio de transporte -->
+                <div id="resumen-detalle-texto" class="text-[11px] text-slate-300 bg-slate-800/60 p-2 rounded-lg border border-slate-700 space-y-1">
+                    <p>• <strong>Transporte:</strong> Se pagará sobre <strong id="resumen-transporte-dias">30</strong> días (el auxilio de transporte no se penaliza por domingos).</p>
+                    <p id="resumen-fechas-lista" class="text-slate-400 italic">No hay ausencias seleccionadas.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2 shrink-0">
+            <button type="button" onclick="limpiarAusenciasModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded transition hover:bg-rose-50 cursor-pointer">
+                🗑️ Limpiar todas
+            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="cerrarModalAusencias()" class="btn btn-secundario text-xs px-4 py-2">Cancelar</button>
+                <button type="button" onclick="aplicarAusenciasModal()" class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-xs px-4 py-2 font-bold text-white shadow-xs cursor-pointer">
+                    ✓ Aplicar a Nómina
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CONFIGURACIÓN Y PAYLOAD SEGURO DE DATOS JSON (DESACOPLADOS DE JAVASCRIPT) -->
 <script id="nomina-config" type="application/json">
 {
     "periodoId": {{ periodo.id }},
     "smmlvBase": {{ smmlv_base|default:"1750905" }},
-    "auxTransporteBase": {{ auxilio_transporte_base|default:"249095" }}
+    "auxTransporteBase": {{ auxilio_transporte_base|default:"249095" }},
+    "periodoFechaInicio": "{{ periodo_fecha_inicio }}",
+    "periodoFechaFin": "{{ periodo_fecha_fin }}",
+    "periodoMes": {{ periodo.mes }},
+    "periodoAno": {{ periodo.ano }}
 }
 </script>
 <script id="datos-detalles-json" type="application/json">

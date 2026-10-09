@@ -68,6 +68,20 @@
                     <span class="label">Modalidad:</span>
                     <span class="val">{% if detalle.es_aprendiz_sena %}<span class="badge bg-warning text-dark">Aprendiz SENA</span>{% else %}Contrato Laboral{% endif %}</span>
                 </div>
+                {% if detalle.dias_faltas_injustificadas > 0 or detalle.domingos_descontados > 0 %}
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="label text-danger">Ausencias (Art. 173 C.S.T.):</span>
+                    <span class="val text-danger fw-bold">
+                        {{ detalle.dias_faltas_injustificadas|floatformat:0 }} día(s) de falta injustificada
+                        {% if detalle.domingos_descontados > 0 %}
+                        + {{ detalle.domingos_descontados|floatformat:0 }} descanso(s) dominical(es) descontado(s) por pérdida legal
+                        {% endif %}
+                        {% if detalle.fechas_faltas_json %}
+                        <span class="text-muted fw-normal">({{ detalle.fechas_faltas_json|join:", " }})</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Tabla Devengados y Deducciones -->

@@ -73,6 +73,10 @@ def detalle_nomina(request, periodo_id):
             'dias_laborados': float(d.dias_laborados),
             'dias_incapacidad': float(d.dias_incapacidad),
             'dias_no_remunerados': float(d.dias_no_remunerados),
+            'dias_faltas_injustificadas': float(d.dias_faltas_injustificadas),
+            'domingos_descontados': float(d.domingos_descontados),
+            'fechas_faltas_json': d.fechas_faltas_json or [],
+            'descontar_dominical': d.descontar_dominical,
             'basico_devengado': float(d.basico_devengado),
             'auxilio_transporte_devengado': float(d.auxilio_transporte_devengado),
             'horas_extras_recargos': float(d.horas_extras_recargos),
@@ -95,6 +99,8 @@ def detalle_nomina(request, periodo_id):
         'detalles_json': json.dumps(detalles_data),
         'smmlv_base': float(periodo.smmlv_base),
         'auxilio_transporte_base': float(periodo.auxilio_transporte_base),
+        'periodo_fecha_inicio': periodo.fecha_inicio.strftime('%Y-%m-%d') if periodo.fecha_inicio else f"{periodo.ano}-{periodo.mes:02d}-01",
+        'periodo_fecha_fin': periodo.fecha_fin.strftime('%Y-%m-%d') if periodo.fecha_fin else f"{periodo.ano}-{periodo.mes:02d}-30",
     }
     return render(request, 'rrhh/nomina/detalle.html', context)
 
@@ -138,6 +144,8 @@ def generar_periodo_nomina(request):
             salario = to_decimal(emp.salario, default=smmlv)
             cargo_upper = (emp.cargo or '').upper()
             es_aprendiz = 'APRENDIZ' in cargo_upper or 'SENA' in cargo_upper
+            if not es_aprendiz and (salario <= Decimal('0') or salario < smmlv):
+                salario = smmlv
 
             detalle = DetalleNominaEmpleado(
                 periodo=periodo,
@@ -188,6 +196,10 @@ def guardar_nomina_ajax(request, periodo_id):
             detalle.dias_laborados = to_decimal(item.get('dias_laborados', 30))
             detalle.dias_incapacidad = to_decimal(item.get('dias_incapacidad', 0))
             detalle.dias_no_remunerados = to_decimal(item.get('dias_no_remunerados', 0))
+            detalle.dias_faltas_injustificadas = to_decimal(item.get('dias_faltas_injustificadas', 0))
+            detalle.domingos_descontados = to_decimal(item.get('domingos_descontados', 0))
+            detalle.fechas_faltas_json = item.get('fechas_faltas_json', [])
+            detalle.descontar_dominical = bool(item.get('descontar_dominical', True))
             detalle.horas_extras_recargos = to_decimal(item.get('horas_extras_recargos', 0))
             detalle.otros_devengados = to_decimal(item.get('otros_devengados', 0))
             detalle.retencion_fuente = to_decimal(item.get('retencion_fuente', 0))

@@ -134,8 +134,8 @@
             tr.className = 'hover:bg-blue-50/50 transition border-b border-slate-100';
 
             tr.innerHTML = `
-                <td class="py-1.5 px-3 text-center text-slate-400 font-mono text-[11px] border-r border-slate-100">${index + 1}</td>
-                <td class="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-100">
+                <td class="py-1.5 px-2 text-center text-slate-400 font-mono text-[11px] border-r border-slate-100 td-sticky-num" style="left: 0;">${index + 1}</td>
+                <td class="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-100 td-sticky-nombre" style="left: 44px;">
                     <span class="block truncate max-w-[220px]" title="${item.nombre_empleado}">${item.nombre_empleado}</span>
                 </td>
                 <td class="py-1.5 px-3 text-slate-500 font-mono text-[11px] border-r border-slate-100">${item.cedula || '-'}</td>

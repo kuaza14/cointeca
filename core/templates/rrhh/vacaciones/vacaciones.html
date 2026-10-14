@@ -3,9 +3,19 @@
 
 {% block content %}
 
-    <h1 class="text-3xl font-bold mb-6">
-        estado de Vacaciones
-    </h1>
+    <!-- ENCABEZADO SUPERIOR -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold">
+                Estado de Vacaciones
+            </h1>
+        </div>
+        <div>
+            <a href="/rrhh/" class="bg-neutral text-white px-4 py-2 rounded-lg hover:bg-neutral-hover font-semibold text-xs sm:text-sm transition shadow-2xs inline-flex items-center gap-1">
+                <span>← Volver a RRHH</span>
+            </a>
+        </div>
+    </div>
 
     <div class="flex flex-wrap gap-2.5 mb-6">
 
@@ -39,12 +49,6 @@
             🎉 Cumplen año
         </a>
 
-    </div>
-
-    <div class="flex justify-end mb-4">
-        <a href="/rrhh/" class="bg-neutral text-white px-4 py-2 rounded-lg hover:bg-neutral-hover font-semibold text-xs sm:text-sm transition shadow-2xs inline-flex items-center gap-1">
-            <span>← Volver a RRHH</span>
-        </a>
     </div>
 
     <!-- BUSCADOR CON CONTADOR DINÁMICO -->

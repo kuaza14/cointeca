@@ -51,6 +51,13 @@
         }
         renderizarTabla();
         actualizarTotalesGenerales();
+
+        const buscadorInput = document.getElementById('buscador-colaborador-nomina');
+        if (buscadorInput) {
+            buscadorInput.addEventListener('input', function () {
+                filtrarColaboradores(this.value);
+            });
+        }
     });
 
     // Formateador de moneda en pesos colombianos
@@ -242,7 +249,70 @@
             `;
             tbody.appendChild(tr);
         });
+
+        // Aplicar filtro si hay búsqueda activa o actualizar contadores
+        const inputBusqueda = document.getElementById('buscador-colaborador-nomina');
+        filtrarColaboradores(inputBusqueda ? inputBusqueda.value : '');
     }
+
+    // Filtrar colaboradores en vivo en la tabla de nómina
+    function filtrarColaboradores(termino) {
+        const q = (termino || '').toLowerCase().trim();
+        const btnLimpiar = document.getElementById('btn-limpiar-buscador-colaborador');
+        if (btnLimpiar) {
+            btnLimpiar.classList.toggle('hidden', !q);
+        }
+
+        let visibles = 0;
+        detallesData.forEach(item => {
+            const fila = document.getElementById(`fila-${item.id}`);
+            if (!fila) return;
+
+            const nombre = (item.nombre_empleado || '').toLowerCase();
+            const cedula = String(item.cedula || '').toLowerCase();
+            const cargo = (item.cargo || '').toLowerCase();
+
+            const coincide = !q || nombre.includes(q) || cedula.includes(q) || cargo.includes(q);
+            if (coincide) {
+                fila.style.display = '';
+                visibles++;
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+
+        const contadorFiltro = document.getElementById('contador-colaboradores-filtro');
+        if (contadorFiltro) contadorFiltro.textContent = visibles;
+
+        const contadorTotal = document.getElementById('contador-colaboradores-total');
+        if (contadorTotal) contadorTotal.textContent = detallesData.length;
+
+        // Fila de aviso si ningún colaborador coincide con la búsqueda
+        let filaVacia = document.getElementById('fila-sin-resultados-busqueda');
+        const tbody = document.getElementById('tbody-nomina');
+        if (visibles === 0 && detallesData.length > 0) {
+            if (!filaVacia && tbody) {
+                filaVacia = document.createElement('tr');
+                filaVacia.id = 'fila-sin-resultados-busqueda';
+                filaVacia.innerHTML = `<td colspan="18" class="py-8 text-center text-slate-400 font-medium">
+                    No se encontraron colaboradores que coincidan con "<strong>${q}</strong>".
+                </td>`;
+                tbody.appendChild(filaVacia);
+            }
+        } else if (filaVacia) {
+            filaVacia.remove();
+        }
+    }
+
+    // Limpiar buscador de colaboradores
+    window.limpiarBuscadorColaborador = function() {
+        const input = document.getElementById('buscador-colaborador-nomina');
+        if (input) {
+            input.value = '';
+            filtrarColaboradores('');
+            input.focus();
+        }
+    };
 
     // Recalcular fila individual en tiempo real en JavaScript
     function recalcularFila(item) {

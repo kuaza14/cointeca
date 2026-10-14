@@ -225,14 +225,18 @@
                                 <span>➕ Salida</span>
                             </a>
 
-                            <!-- AJUSTAR DÍAS HISTÓRICOS -->
+                            <!-- EDITAR ÚLTIMA SALIDA -->
+                            {% if empleado.ultima_vacacion %}
                             <button
                                 type="button"
-                                onclick="abrirAjustarHistorico('{{ empleado.id }}', '{{ empleado.nombre_completo|escapejs }}', {{ empleado.anios_trabajados }}, {{ empleado.dias_acumulados }}, {{ empleado.dias_historicos }}, {{ empleado.dias_tomados_sistema }})"
-                                class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
-                                title="Ajustar días que ya tomó antes de este sistema">
-                                <span>⚙️ Ajustar</span>
+                                onclick="abrirEditarVacacion('{{ empleado.ultima_vacacion.id }}', '{{ empleado.nombre_completo|escapejs }}', '{{ empleado.ultima_vacacion.periodo|default:''|escapejs }}', '{{ empleado.ultima_vacacion.fecha_inicio|date:'Y-m-d' }}', {{ empleado.ultima_vacacion.dias_tomados }}, '{{ empleado.ultima_vacacion.observaciones|default:''|escapejs }}', {{ empleado.total_pendientes }}, {{ empleado.dias_acumulados }})"
+                                class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
+                                title="Editar última salida programada de {{ empleado.nombre_completo }}">
+                                <span>✏️ Editar</span>
                             </button>
+                            {% else %}
+                            <span class="text-slate-300 text-xs px-2.5 py-1.5 select-none font-bold" title="Sin salidas de vacaciones registradas todavía">—</span>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -372,89 +376,181 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR -->
+    <!-- MODAL EDITAR VACACIONES -->
     <div id="modalEditar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
-            <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center border-b border-blue-800">
-                <h2 class="text-base font-bold text-white flex items-center gap-2">
-                    <span>✏️</span> Editar Vacaciones
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="bg-[#1E293B] text-white px-6 py-4 flex justify-between items-center border-b border-slate-700">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>✏️</span> Editar Salida de Vacaciones · <span id="editarNombreEmpleado" class="text-amber-300 font-extrabold truncate max-w-[240px]"></span>
                 </h2>
-                <button type="button" onclick="cerrarEditar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-blue-800 transition">
+                <button type="button" onclick="cerrarEditar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-slate-800 transition">
                     &times;
                 </button>
             </div>
 
-            <form id="formEditar" method="POST" class="p-6 space-y-4 bg-white">
+            <form id="formEditar" method="POST" class="p-6 space-y-4 bg-white text-xs">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" id="editarVacacionId" name="vacacion_id" value="">
 
-                <div>
-                    <label for="periodo" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Periodo</label>
-                    <input id="periodo" name="periodo" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
+                <!-- TARJETA INFORMATIVA DEL COLABORADOR -->
+                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-500 block">Días tomados en esta salida:</span>
+                        <strong id="editarDiasOriginales" class="text-slate-900 text-sm font-bold font-mono">0 d</strong>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] text-slate-500 block">Cupo máximo disponible:</span>
+                        <strong id="editarSaldoMaximo" class="text-blue-700 text-sm font-black font-mono">0 d</strong>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="editarFechaInicio" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                            Fecha de Inicio:
+                        </label>
+                        <input 
+                            type="date" 
+                            id="editarFechaInicio" 
+                            name="fecha_inicio" 
+                            class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white"
+                            required>
+                    </div>
+
+                    <div>
+                        <label for="editarDiasTomados" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                            Días a Tomar (Hábiles):
+                        </label>
+                        <input 
+                            type="number" 
+                            id="editarDiasTomados" 
+                            name="dias_tomados" 
+                            min="1" 
+                            step="1"
+                            class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white font-mono"
+                            required>
+                    </div>
                 </div>
 
                 <div>
-                    <label for="fecha_inicio" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Fecha de Inicio</label>
-                    <input type="date" id="fecha_inicio" name="fecha_inicio" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
+                    <label for="editarPeriodo" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                        Periodo Causado:
+                    </label>
+                    <input 
+                        type="text" 
+                        id="editarPeriodo" 
+                        name="periodo" 
+                        class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white font-mono">
                 </div>
 
                 <div>
-                    <label for="dias_tomados" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Días Tomados</label>
-                    <input type="number" id="dias_tomados" name="dias_tomados" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white">
+                    <label for="editarObservaciones" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                        Observaciones:
+                    </label>
+                    <textarea 
+                        id="editarObservaciones" 
+                        name="observaciones" 
+                        rows="2" 
+                        class="w-full border-2 border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white resize-none"
+                        placeholder="Notas adicionales o motivo de ajuste..."></textarea>
                 </div>
 
-                <div>
-                    <label for="observaciones" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" rows="3" class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white"></textarea>
+                <!-- PREVIEW EN VIVO DE FECHAS SEGÚN REGLA COINTECA (LUNES A SÁBADO) -->
+                <div id="boxPreviewEditar" class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center justify-between text-slate-600 text-[11px]">
+                        <span>Inicio efectivo:</span>
+                        <strong id="previewFechaInicio" class="text-slate-900 font-bold">—</strong>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-600 text-[11px]">
+                        <span>Último día de descanso:</span>
+                        <strong id="previewFechaFin" class="text-slate-900 font-bold">—</strong>
+                    </div>
+                    <div class="flex items-center justify-between text-blue-900 text-xs font-semibold pt-1 border-t border-slate-200">
+                        <span>🗓️ Regreso a laborar:</span>
+                        <strong id="previewFechaRegreso" class="text-blue-700 font-extrabold text-sm font-mono">—</strong>
+                    </div>
+                    <div class="flex items-center justify-between text-emerald-900 text-xs font-semibold pt-1 border-t border-slate-200">
+                        <span>💼 Nuevo saldo que le quedará:</span>
+                        <strong id="previewSaldoResultante" class="text-emerald-700 font-extrabold text-sm font-mono">—</strong>
+                    </div>
+                    <p class="text-[10px] text-muted-foreground pt-1 italic">
+                        * Jornada oficial Cointeca: Lunes a Sábado. Solo se descuentan festivos y domingos.
+                    </p>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-3 border-t border-gray-200">
-                    <button type="button" onclick="cerrarEditar()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm border border-slate-300 rounded-lg transition">
-                        Cancelar
+                <div id="alertaExcesoDias" class="hidden bg-rose-50 border border-rose-300 text-rose-800 p-2.5 rounded-lg text-xs font-semibold">
+                    ⚠️ La cantidad de días ingresada supera el cupo máximo disponible para este colaborador.
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                    <button 
+                        type="button" 
+                        id="btnEliminarDesdeEditar"
+                        onclick="abrirEliminarDesdeEditar()" 
+                        class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-lg transition inline-flex items-center gap-1 cursor-pointer">
+                        <span>🗑️ Eliminar salida</span>
                     </button>
-                    <button type="submit" class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm rounded-lg shadow-sm transition">
-                        Guardar Cambios
-                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="cerrarEditar()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="btnGuardarEditar" class="px-5 py-2 bg-[#1E63F0] hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition">
+                            Guardar Cambios
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL ELIMINAR -->
+    <!-- MODAL ELIMINAR / ANULAR VACACIONES -->
     <div id="modalEliminar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
-            <div class="bg-red-700 text-white px-6 py-4 flex justify-between items-center border-b border-red-800">
-                <h2 class="text-base font-bold text-white flex items-center gap-2">
-                    <span>⚠️</span> ¿Eliminar Vacaciones?
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="bg-rose-700 text-white px-6 py-4 flex justify-between items-center border-b border-rose-800">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>⚠️</span> ¿Anular Salida de Vacaciones?
                 </h2>
-                <button type="button" onclick="cerrarEliminar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-red-800 transition">
+                <button type="button" onclick="cerrarEliminar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-rose-800 transition">
                     &times;
                 </button>
             </div>
 
-            <form id="formEliminar" method="POST" class="p-6 space-y-4 bg-white">
+            <form id="formEliminar" method="POST" class="p-6 space-y-4 bg-white text-xs">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
-                <p class="text-sm text-gray-800">
-                    ¿Estás seguro de que deseas eliminar este registro de vacaciones? Esta acción no se puede deshacer.
-                </p>
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-2">
+                    <p class="text-slate-800 text-xs leading-relaxed">
+                        ¿Estás seguro de que deseas eliminar la salida de vacaciones de <strong id="eliminarNombreEmpleado" class="text-rose-900">el colaborador</strong>?
+                    </p>
+                    <div class="bg-white p-2.5 rounded-lg border border-rose-200 text-emerald-800 font-semibold text-[11px] flex items-center gap-2">
+                        <span class="text-base">🔄</span>
+                        <span>
+                            Los <strong id="eliminarDiasReintegro" class="font-mono text-emerald-900 font-extrabold">0</strong> días se <strong>reintegrarán automáticamente</strong> a su saldo disponible.
+                        </span>
+                    </div>
+                </div>
 
-                <div class="flex justify-end gap-3 pt-3 border-t border-gray-200">
-                    <button type="button" onclick="cerrarEliminar()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm border border-slate-300 rounded-lg transition">
-                        Cancelar
+                <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+                    <button type="button" onclick="cerrarEliminar()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">
+                        No, cancelar
                     </button>
-                    <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-sm transition">
-                        Sí, eliminar
+                    <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-sm transition">
+                        Sí, eliminar y reintegrar días
                     </button>
                 </div>
             </form>
         </div>
     </div>
-
-    
 
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    const FESTIVOS_COLOMBIA = {{ festivos_colombia_json|safe }};
+</script>
 <script src="{% static 'js/rrhh/vacaciones.js' %}?v={% now 'U' %}"></script>
 {% endblock %}
 

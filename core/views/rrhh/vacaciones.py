@@ -246,8 +246,12 @@ def vacaciones(request):
             )
         ]
 
+    anio_act = hoy.year
+    festivos = holidays.Colombia(years=[anio_act - 1, anio_act, anio_act + 1, anio_act + 2])
+    festivos_colombia_json = json.dumps([d.isoformat() for d in sorted(festivos.keys())])
+
     total_registros = len(lista)
-    paginator = Paginator(lista, 10)
+    paginator = Paginator(lista, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -260,6 +264,7 @@ def vacaciones(request):
             "total_registros": total_registros,
             "tipo": tipo,
             "q": q,
+            "festivos_colombia_json": festivos_colombia_json,
         }
     )
 
@@ -546,40 +551,45 @@ def vacaciones_empleado(request, id):
     empleado.total_tomados = dias_tomados_total
     empleado.total_pendientes = dias_disponibles
 
+    anio_act = date.today().year
+    festivos = holidays.Colombia(years=[anio_act - 1, anio_act, anio_act + 1, anio_act + 2])
+    festivos_colombia_json = json.dumps([d.isoformat() for d in sorted(festivos.keys())])
+
     return render(
         request,
         'rrhh/vacaciones/vacaciones_empleado.html',
         {
             'empleado': empleado,
             'vacaciones': registros,
-            'dias_disponibles': dias_disponibles
+            'dias_disponibles': dias_disponibles,
+            'festivos_colombia_json': festivos_colombia_json,
         }
     )
 
 @login_required
 def editar_vacacion(request, id):
-
     vacacion = get_object_or_404(
         Vacacion,
         id=id
     )
 
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/rrhh/vacaciones/'
+
     if request.method == 'POST':
+        periodo = request.POST.get('periodo', '').strip() or vacacion.periodo
 
-        periodo = request.POST['periodo']
+        try:
+            fecha_inicio = date.fromisoformat(request.POST['fecha_inicio'])
+            dias_tomados = int(request.POST['dias_tomados'])
+        except (KeyError, ValueError):
+            messages.error(request, 'Datos de fecha o días de vacaciones no válidos.')
+            return redirect(next_url)
 
-        fecha_inicio = date.fromisoformat(
-            request.POST['fecha_inicio']
-        )
+        if dias_tomados <= 0:
+            messages.error(request, 'La cantidad de días de vacaciones debe ser mayor a 0.')
+            return redirect(next_url)
 
-        dias_tomados = int(
-            request.POST['dias_tomados']
-        )
-
-        observaciones = request.POST.get(
-            'observaciones',
-            ''
-        )
+        observaciones = request.POST.get('observaciones', '').strip()
 
         fecha_inicio_efectiva, fecha_fin, fecha_regreso = calcular_fechas_habiles_vacacion(
             fecha_inicio, dias_tomados
@@ -587,21 +597,13 @@ def editar_vacacion(request, id):
 
         anios_trabajados = (
             date.today() - vacacion.empleado.fecha_ingreso
-        ).days // 365
-
-        if anios_trabajados == 0:
-
-            messages.error(
-                request,
-                'El empleado aún no cumple un año de servicio.'
-            )
-
-            return redirect('vacaciones')
+        ).days // 365 if vacacion.empleado.fecha_ingreso else 0
 
         dias_acumulados = anios_trabajados * 15
-
         dias_historicos = getattr(vacacion.empleado, 'dias_vacaciones_tomados_historico', 0) or 0
-        dias_tomados_sistema = (
+
+        # Días tomados en el sistema excluyendo esta vacación que se está editando
+        dias_tomados_sistema_otros = (
             Vacacion.objects.filter(
                 empleado=vacacion.empleado
             ).exclude(
@@ -611,53 +613,52 @@ def editar_vacacion(request, id):
             )['total']
             or 0
         )
-        dias_tomados_total = dias_historicos + dias_tomados_sistema
-        dias_disponibles = max(0, dias_acumulados - dias_tomados_total)
 
-        if dias_tomados > dias_disponibles:
+        dias_disponibles_con_esta = max(0, dias_acumulados - (dias_historicos + dias_tomados_sistema_otros))
 
+        if dias_tomados > dias_disponibles_con_esta:
             messages.error(
                 request,
-                f'El empleado solo tiene {dias_disponibles} días disponibles.'
+                f'El colaborador {vacacion.empleado.nombre_completo} solo tiene {dias_disponibles_con_esta} días disponibles para asignar. No es posible asignar {dias_tomados} días.'
             )
+            return redirect(next_url)
 
-            return redirect('vacaciones')
-
-        dias_pendientes = dias_disponibles - dias_tomados
+        dias_pendientes = dias_disponibles_con_esta - dias_tomados
 
         vacacion.periodo = periodo
-        vacacion.fecha_inicio = fecha_inicio
+        vacacion.fecha_inicio = fecha_inicio_efectiva
         vacacion.fecha_fin = fecha_fin
         vacacion.fecha_regreso = fecha_regreso
         vacacion.dias_tomados = dias_tomados
         vacacion.dias_pendientes = dias_pendientes
         vacacion.observaciones = observaciones
-
         vacacion.save()
 
         messages.success(
             request,
-            'Las vacaciones fueron actualizadas correctamente.'
+            f'Salida de vacaciones de {vacacion.empleado.nombre_completo} ({periodo}) actualizada correctamente: {dias_tomados} días del {fecha_inicio_efectiva.strftime("%d/%m/%Y")} al {fecha_fin.strftime("%d/%m/%Y")}. Regreso: {fecha_regreso.strftime("%d/%m/%Y")}.'
         )
+        return redirect(next_url)
 
     return redirect('vacaciones')
 
 @login_required
 def eliminar_vacacion(request, id):
-
     vacacion = get_object_or_404(
         Vacacion,
         id=id
     )
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/rrhh/vacaciones/'
 
     if request.method == 'POST':
-
+        colaborador = vacacion.empleado.nombre_completo
+        dias = vacacion.dias_tomados
         vacacion.delete()
         messages.success(
             request,
-            'Las vacaciones fueron eliminadas correctamente.'
+            f'Salida de vacaciones de {colaborador} eliminada correctamente. Se reintegraron {dias} días a su saldo disponible.'
         )
 
-    return redirect('vacaciones')
+    return redirect(next_url)
 
 

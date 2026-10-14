@@ -3,6 +3,7 @@
 
 {% block content %}
 
+    <!-- ENCABEZADO Y BREADCRUMB -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <nav class="flex items-center gap-2 text-xs text-[#64748B] mb-1 font-medium" aria-label="Breadcrumb">
@@ -16,162 +17,348 @@
                 <span>/</span>
                 <span class="text-[#1F2937] font-semibold">Vacaciones</span>
             </nav>
-            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
-                Vacaciones · {{ empleado.nombre_completo }}
+            <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2">
+                <span>🏖️</span>
+                <span>Historial de Vacaciones · {{ empleado.nombre_completo }}</span>
             </h1>
+            <p class="text-xs text-muted-foreground mt-0.5">
+                {{ empleado.cargo|default:"Colaborador" }} · C.C. {{ empleado.documento|default:"—" }}
+            </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5 shrink-0 sm:justify-end">
             <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
-               class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+               class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                <span>Registrar Vacaciones</span>
+                <span>➕ Nueva Salida</span>
             </a>
             <a href="{% url 'detalle_empleado' empleado.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+               class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-2xs">
                 <span>← Volver al Empleado</span>
             </a>
             <a href="/rrhh/vacaciones/"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
+               class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-2xs">
                 <span>← Volver a Vacaciones</span>
             </a>
         </div>
     </div>
 
-<div class="bg-card shadow rounded p-5 mb-6">
+    <!-- TARJETA RESUMEN DE SALDOS -->
+    <div class="bg-card shadow-xs rounded-2xl border border-border p-5 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 text-xs">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <span class="text-[11px] text-muted-foreground block font-medium">Fecha de Ingreso</span>
+                <span class="text-sm font-bold text-slate-800 font-mono">{{ empleado.fecha_ingreso|date:"d/m/Y"|default:"—" }}</span>
+                <span class="text-[10px] text-slate-500 block mt-0.5">{{ empleado.anios_trabajados }} años cumplidos</span>
+            </div>
 
-    <h2 class="text-2xl font-bold mb-4">
-        {{ empleado.nombre_completo }}
-    </h2>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <span class="text-[11px] text-muted-foreground block font-medium">Días Causados (Ley)</span>
+                <span class="text-sm font-bold text-slate-800 font-mono">{{ empleado.dias_acumulados }} días</span>
+                <span class="text-[10px] text-slate-500 block mt-0.5">15 d / año servido</span>
+            </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <span class="text-[11px] text-muted-foreground block font-medium">Días Históricos</span>
+                <span class="text-sm font-bold text-slate-800 font-mono">{{ empleado.dias_historicos }} días</span>
+                <span class="text-[10px] text-slate-500 block mt-0.5">Pre-software</span>
+            </div>
 
-        <div class="bg-muted p-3 rounded">
-            <strong>Fecha ingreso</strong><br>
-            {{ empleado.fecha_ingreso }}
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                <span class="text-[11px] text-blue-800 block font-medium">Tomados en Sistema</span>
+                <span class="text-sm font-bold text-blue-900 font-mono">{{ empleado.dias_tomados_sistema }} días</span>
+                <span class="text-[10px] text-blue-600 block mt-0.5">Total tomados: {{ empleado.total_tomados }} d</span>
+            </div>
+
+            <div class="col-span-2 sm:col-span-1 {% if dias_disponibles > 0 %}bg-amber-50 border border-amber-300{% else %}bg-emerald-50 border border-emerald-300{% endif %} rounded-xl p-3">
+                <span class="text-[11px] {% if dias_disponibles > 0 %}text-amber-800{% else %}text-emerald-800{% endif %} block font-bold">Saldo Pendiente Actual</span>
+                <span class="text-base font-black font-mono {% if dias_disponibles > 0 %}text-amber-900{% else %}text-emerald-900{% endif %}">
+                    {{ dias_disponibles }} días
+                </span>
+                <span class="text-[10px] {% if dias_disponibles > 0 %}text-amber-700{% else %}text-emerald-700{% endif %} block mt-0.5">
+                    {% if dias_disponibles > 0 %}Por disfrutar{% else %}Al día{% endif %}
+                </span>
+            </div>
         </div>
-
-        <div class="bg-primary-soft p-3 rounded">
-            <strong>Años trabajados</strong><br>
-            {{ empleado.anios_trabajados }}
-        </div>
-
-        <div class="bg-green-100 p-3 rounded">
-            <strong>Días acumulados</strong><br>
-            {{ empleado.dias_acumulados }}
-        </div>
-
-        <div class="bg-yellow-100 p-3 rounded">
-            <strong>Días tomados</strong><br>
-            {{ empleado.total_tomados }}
-        </div>
-
-        <div class="bg-red-100 p-3 rounded">
-            <strong>Días pendientes</strong><br>
-            {{ empleado.total_pendientes }}
-        </div>
-
     </div>
 
-</div>
+    <!-- TABLA DE SALIDAS DE VACACIONES -->
+    <div class="overflow-x-auto shadow-xs rounded-xl border border-border bg-card mb-6">
+        <table class="w-full border-collapse text-xs select-none">
+            <thead class="thead-vacaciones font-bold text-[11px] uppercase tracking-wider" style="background-color: #0f172a !important; color: #ffffff !important;">
+                <tr>
+                    <th class="py-3 px-3 text-left font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Periodo Causado
+                    </th>
+                    <th class="py-3 px-3 text-center font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Inicio
+                    </th>
+                    <th class="py-3 px-3 text-center font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Fin Descanso
+                    </th>
+                    <th class="py-3 px-3 text-center font-bold text-amber-300" style="background-color: #1e3a8a !important; color: #fbbf24 !important;">
+                        Regreso a Laborar
+                    </th>
+                    <th class="py-3 px-3 text-center font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Días Tomados
+                    </th>
+                    <th class="py-3 px-3 text-left font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Observaciones
+                    </th>
+                    <th class="py-3 px-3 text-center font-bold min-w-[190px]" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Acciones
+                    </th>
+                </tr>
+            </thead>
 
+            <tbody class="divide-y divide-border">
+                {% for v in vacaciones %}
+                <tr class="hover:bg-muted/60 transition">
+                    <td class="p-3 font-semibold text-slate-800">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded text-slate-700 font-mono text-[11px]">
+                            📅 {{ v.periodo|default:"—" }}
+                        </span>
+                    </td>
 
+                    <td class="p-3 text-center font-mono font-medium text-slate-700">
+                        {{ v.fecha_inicio|date:"d/m/Y" }}
+                    </td>
 
-<div class="overflow-x-auto">
-<table class="w-full border shadow">
+                    <td class="p-3 text-center font-mono font-medium text-slate-700">
+                        {{ v.fecha_fin|date:"d/m/Y" }}
+                    </td>
 
-    <thead class="bg-neutral text-white">
+                    <td class="p-3 text-center font-mono font-bold text-blue-700 bg-blue-50/50">
+                        {{ v.fecha_regreso|date:"d/m/Y"|default:"—" }}
+                    </td>
 
-        <tr>
-            <th class="p-2">Periodo</th>
-            <th class="p-2">Inicio</th>
-            <th class="p-2">Fin</th>
-            <th class="p-2">Regreso</th>
-            <th class="p-2">Días</th>
-            <th class="p-2">Acciones</th>
-        </tr>
+                    <td class="p-3 text-center">
+                        <span class="px-2.5 py-1 rounded font-black text-xs font-mono bg-blue-100 text-blue-900 border border-blue-200">
+                            {{ v.dias_tomados }} d
+                        </span>
+                    </td>
 
-    </thead>
+                    <td class="p-3 text-slate-600 max-w-xs truncate" title="{{ v.observaciones|default:'' }}">
+                        {{ v.observaciones|default:"—" }}
+                    </td>
 
-    <tbody>
+                    <td class="p-3 text-center whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                            <!-- EDITAR -->
+                            <button
+                                type="button"
+                                onclick="abrirEditarVacacion('{{ v.id }}', '{{ empleado.nombre_completo|escapejs }}', '{{ v.periodo|default:''|escapejs }}', '{{ v.fecha_inicio|date:'Y-m-d' }}', {{ v.dias_tomados }}, '{{ v.observaciones|default:''|escapejs }}', {{ dias_disponibles }}, {{ empleado.dias_acumulados }})"
+                                class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
+                                title="Editar esta salida">
+                                <span>✏️ Editar</span>
+                            </button>
 
-        {% for v in vacaciones %}
+                            <!-- ELIMINAR / ANULAR -->
+                            <button
+                                type="button"
+                                onclick="abrirEliminarVacacion('{{ v.id }}', '{{ empleado.nombre_completo|escapejs }}', {{ v.dias_tomados }})"
+                                class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
+                                title="Eliminar salida y reintegrar días">
+                                <span>🗑️ Anular</span>
+                            </button>
 
-        <tr class="border-b">
+                            <!-- DESCARGAR DOCUMENTO -->
+                            <a
+                                href="/rrhh/vacaciones/{{ empleado.id }}/solicitud/"
+                                class="bg-slate-700 hover:bg-slate-800 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1"
+                                title="Descargar documento Word de solicitud de vacaciones">
+                                <span>📄 Word</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center p-8 text-muted-foreground text-sm">
+                        Este colaborador no tiene salidas de vacaciones registradas todavía.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-            <td class="p-2">
-                {{ v.periodo }}
-            </td>
-
-            <td class="p-2">
-                {{ v.fecha_inicio }}
-            </td>
-
-            <td class="p-2">
-                {{ v.fecha_fin }}
-            </td>
-
-            <td class="p-2">
-                {{ v.fecha_regreso }}
-            </td>
-
-            <td class="p-2 text-center">
-                {{ v.dias_tomados }}
-            </td>
-
-            <td class="p-2">
-
-                <button
-                    onclick="abrirEditar(
-                        '{{ v.id }}',
-                        '{{ v.periodo }}',
-                        '{{ v.fecha_inicio|date:"Y-m-d" }}',
-                        '{{ v.dias_tomados }}',
-                        '{{ v.observaciones }}'
-                    )"
-                    class="bg-primary text-white px-3 py-1 rounded hover:bg-primary-hover">
-                    Editar
+    <!-- MODAL EDITAR VACACIONES -->
+    <div id="modalEditar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="bg-[#1E293B] text-white px-6 py-4 flex justify-between items-center border-b border-slate-700">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>✏️</span> Editar Salida de Vacaciones · <span id="editarNombreEmpleado" class="text-amber-300 font-extrabold truncate max-w-[240px]"></span>
+                </h2>
+                <button type="button" onclick="cerrarEditar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-slate-800 transition">
+                    &times;
                 </button>
+            </div>
 
-                <button
-                    onclick="abrirEliminar('{{ v.id }}')"
-                    class="bg-destructive text-white px-3 py-1 rounded hover:bg-destructive-hover">
-                    Eliminar
+            <form id="formEditar" method="POST" class="p-6 space-y-4 bg-white text-xs">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" id="editarVacacionId" name="vacacion_id" value="">
+
+                <!-- TARJETA INFORMATIVA DEL COLABORADOR -->
+                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-500 block">Días tomados en esta salida:</span>
+                        <strong id="editarDiasOriginales" class="text-slate-900 text-sm font-bold font-mono">0 d</strong>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] text-slate-500 block">Cupo máximo disponible:</span>
+                        <strong id="editarSaldoMaximo" class="text-blue-700 text-sm font-black font-mono">0 d</strong>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="editarFechaInicio" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                            Fecha de Inicio:
+                        </label>
+                        <input 
+                            type="date" 
+                            id="editarFechaInicio" 
+                            name="fecha_inicio" 
+                            class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white"
+                            required>
+                    </div>
+
+                    <div>
+                        <label for="editarDiasTomados" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                            Días a Tomar (Hábiles):
+                        </label>
+                        <input 
+                            type="number" 
+                            id="editarDiasTomados" 
+                            name="dias_tomados" 
+                            min="1" 
+                            step="1"
+                            class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white font-mono"
+                            required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editarPeriodo" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                        Periodo Causado:
+                    </label>
+                    <input 
+                        type="text" 
+                        id="editarPeriodo" 
+                        name="periodo" 
+                        class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white font-mono">
+                </div>
+
+                <div>
+                    <label for="editarObservaciones" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                        Observaciones:
+                    </label>
+                    <textarea 
+                        id="editarObservaciones" 
+                        name="observaciones" 
+                        rows="2" 
+                        class="w-full border-2 border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white resize-none"
+                        placeholder="Notas adicionales o motivo de ajuste..."></textarea>
+                </div>
+
+                <!-- PREVIEW EN VIVO DE FECHAS SEGÚN REGLA COINTECA (LUNES A SÁBADO) -->
+                <div id="boxPreviewEditar" class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center justify-between text-slate-600 text-[11px]">
+                        <span>Inicio efectivo:</span>
+                        <strong id="previewFechaInicio" class="text-slate-900 font-bold">—</strong>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-600 text-[11px]">
+                        <span>Último día de descanso:</span>
+                        <strong id="previewFechaFin" class="text-slate-900 font-bold">—</strong>
+                    </div>
+                    <div class="flex items-center justify-between text-blue-900 text-xs font-semibold pt-1 border-t border-slate-200">
+                        <span>🗓️ Regreso a laborar:</span>
+                        <strong id="previewFechaRegreso" class="text-blue-700 font-extrabold text-sm font-mono">—</strong>
+                    </div>
+                    <div class="flex items-center justify-between text-emerald-900 text-xs font-semibold pt-1 border-t border-slate-200">
+                        <span>💼 Nuevo saldo que le quedará:</span>
+                        <strong id="previewSaldoResultante" class="text-emerald-700 font-extrabold text-sm font-mono">—</strong>
+                    </div>
+                    <p class="text-[10px] text-muted-foreground pt-1 italic">
+                        * Jornada oficial Cointeca: Lunes a Sábado. Solo se descuentan festivos y domingos.
+                    </p>
+                </div>
+
+                <div id="alertaExcesoDias" class="hidden bg-rose-50 border border-rose-300 text-rose-800 p-2.5 rounded-lg text-xs font-semibold">
+                    ⚠️ La cantidad de días ingresada supera el cupo máximo disponible para este colaborador.
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                    <button 
+                        type="button" 
+                        id="btnEliminarDesdeEditar"
+                        onclick="abrirEliminarDesdeEditar()" 
+                        class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-lg transition inline-flex items-center gap-1 cursor-pointer">
+                        <span>🗑️ Eliminar salida</span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="cerrarEditar()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="btnGuardarEditar" class="px-5 py-2 bg-[#1E63F0] hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR / ANULAR VACACIONES -->
+    <div id="modalEliminar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="bg-rose-700 text-white px-6 py-4 flex justify-between items-center border-b border-rose-800">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>⚠️</span> ¿Anular Salida de Vacaciones?
+                </h2>
+                <button type="button" onclick="cerrarEliminar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-rose-800 transition">
+                    &times;
                 </button>
+            </div>
 
-                <a
-                    href="/rrhh/vacaciones/{{ empleado.id }}/solicitud/"
-                    class="bg-success text-white px-3 py-1 rounded hover:bg-success-hover">
-                    Solicitud
-                </a>
+            <form id="formEliminar" method="POST" class="p-6 space-y-4 bg-white text-xs">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
-            </td>
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-2">
+                    <p class="text-slate-800 text-xs leading-relaxed">
+                        ¿Estás seguro de que deseas eliminar la salida de vacaciones de <strong id="eliminarNombreEmpleado" class="text-rose-900">el colaborador</strong>?
+                    </p>
+                    <div class="bg-white p-2.5 rounded-lg border border-rose-200 text-emerald-800 font-semibold text-[11px] flex items-center gap-2">
+                        <span class="text-base">🔄</span>
+                        <span>
+                            Los <strong id="eliminarDiasReintegro" class="font-mono text-emerald-900 font-extrabold">0</strong> días se <strong>reintegrarán automáticamente</strong> a su saldo disponible.
+                        </span>
+                    </div>
+                </div>
 
-        </tr>
-
-        {% empty %}
-
-        <tr>
-
-            <td colspan="6" class="text-center p-4">
-                No hay vacaciones registradas
-            </td>
-
-        </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-</table>
-</div>
-
-
+                <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+                    <button type="button" onclick="cerrarEliminar()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">
+                        No, cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-sm transition">
+                        Sí, eliminar y reintegrar días
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/rrhh/vacaciones_empleado.js' %}?v={% now 'U' %}"></script>
+<script>
+    const FESTIVOS_COLOMBIA = {{ festivos_colombia_json|safe }};
+</script>
+<script src="{% static 'js/rrhh/vacaciones.js' %}?v={% now 'U' %}"></script>
 {% endblock %}
 
 

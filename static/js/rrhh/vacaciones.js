@@ -76,23 +76,165 @@ function cerrarAjustarHistorico() {
     }
 }
 
-// EDITAR
-function abrirEditar(id, periodo, fecha_inicio, dias, observaciones){
+// ==========================================
+// EDICIÓN DE VACACIONES
+// ==========================================
+let currentEditarId = null;
+let currentEditarNombre = "";
+let currentEditarDiasOriginales = 0;
+let currentEditarMaxDisponibles = 0;
+
+function esFestivoOFinDeSemana(dStr) {
+    if (typeof FESTIVOS_COLOMBIA !== "undefined" && Array.isArray(FESTIVOS_COLOMBIA)) {
+        if (FESTIVOS_COLOMBIA.includes(dStr)) return true;
+    }
+    const parts = dStr.split("-").map(Number);
+    const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+    return dt.getDay() === 0; // 0 = Domingo. Sábado (6) sí se labora en Cointeca.
+}
+
+function formatearFechaISO(dt) {
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, "0");
+    const d = String(dt.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function formatearFechaLegible(dt) {
+    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const d = String(dt.getDate()).padStart(2, "0");
+    const m = meses[dt.getMonth()];
+    const y = dt.getFullYear();
+    return `${d} ${m} ${y}`;
+}
+
+function calcularFechasHabiles(fechaInicioStr, diasTomados) {
+    if (!fechaInicioStr || diasTomados <= 0) return null;
+    const parts = fechaInicioStr.split("-").map(Number);
+    let cur = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    // Si fecha de inicio cae en domingo o festivo, avanzar al primer día hábil
+    while (esFestivoOFinDeSemana(formatearFechaISO(cur))) {
+        cur.setDate(cur.getDate() + 1);
+    }
+    const fechaInicioEfectiva = new Date(cur);
+
+    let contados = 0;
+    while (contados < diasTomados) {
+        if (!esFestivoOFinDeSemana(formatearFechaISO(cur))) {
+            contados++;
+        }
+        if (contados < diasTomados) {
+            cur.setDate(cur.getDate() + 1);
+        }
+    }
+    const fechaFin = new Date(cur);
+
+    let regreso = new Date(fechaFin);
+    regreso.setDate(regreso.getDate() + 1);
+    while (esFestivoOFinDeSemana(formatearFechaISO(regreso))) {
+        regreso.setDate(regreso.getDate() + 1);
+    }
+
+    return {
+        inicio: fechaInicioEfectiva,
+        fin: fechaFin,
+        regreso: regreso
+    };
+}
+
+function actualizarCalculosEditar() {
+    const inputFecha = document.getElementById("editarFechaInicio");
+    const inputDias = document.getElementById("editarDiasTomados");
+    const elInicio = document.getElementById("previewFechaInicio");
+    const elFin = document.getElementById("previewFechaFin");
+    const elRegreso = document.getElementById("previewFechaRegreso");
+    const elSaldo = document.getElementById("previewSaldoResultante");
+    const alertaExceso = document.getElementById("alertaExcesoDias");
+    const btnGuardar = document.getElementById("btnGuardarEditar");
+
+    if (!inputFecha || !inputDias) return;
+
+    const fechaStr = inputFecha.value;
+    const dias = parseInt(inputDias.value, 10);
+
+    if (!fechaStr || isNaN(dias) || dias <= 0) {
+        if (elInicio) elInicio.textContent = "—";
+        if (elFin) elFin.textContent = "—";
+        if (elRegreso) elRegreso.textContent = "—";
+        if (elSaldo) elSaldo.textContent = "—";
+        if (btnGuardar) btnGuardar.disabled = true;
+        return;
+    }
+
+    // Validar tope de días
+    if (dias > currentEditarMaxDisponibles) {
+        if (alertaExceso) alertaExceso.classList.remove("hidden");
+        if (btnGuardar) btnGuardar.disabled = true;
+    } else {
+        if (alertaExceso) alertaExceso.classList.add("hidden");
+        if (btnGuardar) btnGuardar.disabled = false;
+    }
+
+    const calc = calcularFechasHabiles(fechaStr, dias);
+    if (calc) {
+        if (elInicio) elInicio.textContent = formatearFechaLegible(calc.inicio);
+        if (elFin) elFin.textContent = formatearFechaLegible(calc.fin);
+        if (elRegreso) elRegreso.textContent = formatearFechaLegible(calc.regreso);
+    }
+
+    const saldoRestante = Math.max(0, currentEditarMaxDisponibles - dias);
+    if (elSaldo) {
+        elSaldo.textContent = saldoRestante + (saldoRestante === 1 ? " día" : " días");
+    }
+}
+
+function abrirEditarVacacion(id, nombre, periodo, fechaInicio, diasTomados, observaciones, pendientesActuales, acumulados) {
     const modal = document.getElementById("modalEditar");
     if (!modal) return;
 
+    currentEditarId = id;
+    currentEditarNombre = nombre || "el colaborador";
+    currentEditarDiasOriginales = Number(diasTomados) || 0;
+    currentEditarMaxDisponibles = (Number(pendientesActuales) || 0) + currentEditarDiasOriginales;
+
+    const elNombre = document.getElementById("editarNombreEmpleado");
+    if (elNombre) elNombre.textContent = nombre || "el colaborador";
+
+    const elOriginales = document.getElementById("editarDiasOriginales");
+    if (elOriginales) elOriginales.textContent = currentEditarDiasOriginales + " d";
+
+    const elMaximo = document.getElementById("editarSaldoMaximo");
+    if (elMaximo) elMaximo.textContent = currentEditarMaxDisponibles + " d";
+
+    const inputId = document.getElementById("editarVacacionId");
+    if (inputId) inputId.value = id;
+
+    const form = document.getElementById("formEditar");
+    if (form) form.action = "/rrhh/vacaciones/" + id + "/editar/";
+
+    const inputPeriodo = document.getElementById("editarPeriodo");
+    if (inputPeriodo) inputPeriodo.value = periodo || "";
+
+    const inputFecha = document.getElementById("editarFechaInicio");
+    if (inputFecha) inputFecha.value = fechaInicio || "";
+
+    const inputDias = document.getElementById("editarDiasTomados");
+    if (inputDias) {
+        inputDias.value = currentEditarDiasOriginales;
+        inputDias.max = currentEditarMaxDisponibles;
+    }
+
+    const inputObs = document.getElementById("editarObservaciones");
+    if (inputObs) inputObs.value = observaciones || "";
+
+    actualizarCalculosEditar();
+
     modal.classList.remove("hidden");
     modal.classList.add("flex");
-
-    document.getElementById("periodo").value = periodo;
-    document.getElementById("fecha_inicio").value = fecha_inicio;
-    document.getElementById("dias_tomados").value = dias;
-    document.getElementById("observaciones").value = observaciones;
-
-    document.getElementById("formEditar").action = "/rrhh/vacaciones/" + id + "/editar/";
 }
 
-function cerrarEditar(){
+function cerrarEditar() {
     const modal = document.getElementById("modalEditar");
     if (modal) {
         modal.classList.add("hidden");
@@ -100,23 +242,48 @@ function cerrarEditar(){
     }
 }
 
-// ELIMINAR
-function abrirEliminar(id){
+// Abrir eliminación directamente desde el modal de edición
+function abrirEliminarDesdeEditar() {
+    if (!currentEditarId) return;
+    cerrarEditar();
+    abrirEliminarVacacion(currentEditarId, currentEditarNombre, currentEditarDiasOriginales);
+}
+
+// Alias para compatibilidad
+function abrirEditar(id, periodo, fecha_inicio, dias, observaciones) {
+    abrirEditarVacacion(id, "Colaborador", periodo, fecha_inicio, dias, observaciones, 0, 0);
+}
+
+// ==========================================
+// ELIMINACIÓN DE VACACIONES
+// ==========================================
+function abrirEliminarVacacion(id, nombre, dias) {
     const modal = document.getElementById("modalEliminar");
     if (!modal) return;
 
+    const form = document.getElementById("formEliminar");
+    if (form) form.action = "/rrhh/vacaciones/" + id + "/eliminar/";
+
+    const elNombre = document.getElementById("eliminarNombreEmpleado");
+    if (elNombre) elNombre.textContent = nombre || "el colaborador";
+
+    const elDias = document.getElementById("eliminarDiasReintegro");
+    if (elDias) elDias.textContent = dias || 0;
+
     modal.classList.remove("hidden");
     modal.classList.add("flex");
-
-    document.getElementById("formEliminar").action = "/rrhh/vacaciones/" + id + "/eliminar/";
 }
 
-function cerrarEliminar(){
+function cerrarEliminar() {
     const modal = document.getElementById("modalEliminar");
     if (modal) {
         modal.classList.add("hidden");
         modal.classList.remove("flex");
     }
+}
+
+function abrirEliminar(id) {
+    abrirEliminarVacacion(id, "Colaborador", 0);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -152,6 +319,19 @@ document.addEventListener("DOMContentLoaded", function() {
         inputHist.addEventListener("input", actualizarPreviewPendientes);
         inputHist.addEventListener("keyup", actualizarPreviewPendientes);
         inputHist.addEventListener("change", actualizarPreviewPendientes);
+    }
+
+    // Inputs reactivos en modal de edición de vacaciones
+    const inputEditFecha = document.getElementById("editarFechaInicio");
+    const inputEditDias = document.getElementById("editarDiasTomados");
+    if (inputEditFecha) {
+        inputEditFecha.addEventListener("change", actualizarCalculosEditar);
+        inputEditFecha.addEventListener("input", actualizarCalculosEditar);
+    }
+    if (inputEditDias) {
+        inputEditDias.addEventListener("input", actualizarCalculosEditar);
+        inputEditDias.addEventListener("keyup", actualizarCalculosEditar);
+        inputEditDias.addEventListener("change", actualizarCalculosEditar);
     }
 
     // Cierre al hacer click en el backdrop oscuro

@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .alertas import obtener_alertas_vacaciones
-from core.models import Vacacion, Empleado, Proyecto, Material, Inventario
+from core.models import Vacacion, Empleado, Proyecto, Macroproyecto, Material, Inventario
 
 
 def logout_view(request):
@@ -48,6 +48,11 @@ def dashboard(request):
     hora_hoy = ahora.strftime("%I:%M %p").lower()
 
     try:
+        macroproyectos_count = Macroproyecto.objects.count()
+    except Exception:
+        macroproyectos_count = 0
+
+    try:
         proyectos_count = Proyecto.objects.count()
     except Exception:
         proyectos_count = 0
@@ -65,19 +70,21 @@ def dashboard(request):
         inventario_count = 0
 
     try:
-        proyectos_recientes = list(
-            Proyecto.objects.select_related("macroproyecto").order_by("-id")[:5]
+        macroproyectos_recientes = list(
+            Macroproyecto.objects.prefetch_related("proyectos").order_by("-id")[:5]
         )
     except Exception:
-        proyectos_recientes = []
+        macroproyectos_recientes = []
 
     contexto = {
         "alertas_vacaciones": alertas_vacaciones,
+        "macroproyectos_count": macroproyectos_count,
         "proyectos_count": proyectos_count,
         "empleados_count": empleados_count,
         "materiales_count": materiales_count,
         "inventario_count": inventario_count,
-        "proyectos_recientes": proyectos_recientes,
+        "macroproyectos_recientes": macroproyectos_recientes,
+        "proyectos_recientes": macroproyectos_recientes,
         "fecha_hoy": fecha_hoy,
         "hora_hoy": hora_hoy,
     }

@@ -82,7 +82,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
 
         {% if puede_ver_ingenieria %}
-        <!-- 1. Proyectos activos -->
+        <!-- 1. Macroproyectos y Circuitos activos -->
         <a href="{% url 'lista_macroproyectos' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E63F0]/50 transition-all flex flex-col justify-between group">
             <div class="flex items-start justify-between">
                 <div class="size-9 rounded-lg bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center">
@@ -95,9 +95,9 @@
                 <span class="text-[11px] font-bold text-[#1E63F0] group-hover:translate-x-0.5 transition-transform">Ver lista →</span>
             </div>
             <div class="mt-3">
-                <p class="text-[11px] font-semibold text-[#64748B]">Proyectos activos</p>
+                <p class="text-[11px] font-semibold text-[#64748B]">Macroproyectos & Circuitos</p>
                 <div class="flex items-baseline gap-1.5 mt-0.5">
-                    <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">{{ proyectos_count }}</span>
+                    <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">{{ macroproyectos_count }}</span>
                     <span class="text-[11px] text-slate-400 font-medium">registrados</span>
                 </div>
             </div>
@@ -194,7 +194,7 @@
          SECCIÓN PRINCIPAL SEGÚN ROL
          ================================================================== -->
     {% if puede_ver_ingenieria or puede_ver_logistica %}
-    <!-- Proyectos recientes para Ingeniería, Logística y Gerencia -->
+    <!-- Macroproyectos y Circuitos recientes para Ingeniería, Logística y Gerencia -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div class="p-4 sm:px-5 flex items-center justify-between border-b border-slate-100">
             <div class="flex items-center gap-2">
@@ -203,56 +203,72 @@
                     <polyline points="2 17 12 22 22 17"/>
                     <polyline points="2 12 12 17 22 12"/>
                 </svg>
-                <h2 class="font-bold text-sm text-[#1F2937]">Proyectos recientes</h2>
+                <h2 class="font-bold text-sm text-[#1F2937]">Macroproyectos & Circuitos recientes</h2>
             </div>
             <a href="{% url 'lista_macroproyectos' %}" class="text-[11px] font-semibold text-[#1E63F0] hover:underline flex items-center gap-0.5">
                 Ver todos <span>→</span>
             </a>
         </div>
 
-        {% if proyectos_recientes %}
+        {% if macroproyectos_recientes %}
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-slate-100">
                         <tr>
-                            <th class="py-2.5 px-4">Código / Nombre</th>
                             <th class="py-2.5 px-4">Macroproyecto / Circuito</th>
                             <th class="py-2.5 px-4">Tipo</th>
                             <th class="py-2.5 px-4">Estado</th>
+                            <th class="py-2.5 px-4">Obras / Maniobras</th>
                             <th class="py-2.5 px-3 text-right"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        {% for p in proyectos_recientes %}
-                            <tr onclick="window.location.href='{% url 'detalle_proyecto' p.id %}';" class="hover:bg-[#E6F1FF]/40 transition-colors group cursor-pointer">
+                        {% for m in macroproyectos_recientes %}
+                            <tr onclick="window.location.href='{% url 'proyectos_por_macroproyecto' m.id %}';" class="hover:bg-[#E6F1FF]/40 transition-colors group cursor-pointer">
                                 <td class="py-3 px-4 font-bold text-[#1F2937]">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>{{ p.numero_emcali }}</span>
-                                        {% if p.es_mt %}
-                                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-100 text-purple-900 border border-purple-200">Maniobra</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-bold text-[#1F2937] group-hover:text-[#1E63F0] transition-colors capitalize">{{ m.nombre }}</span>
+                                        {% if m.es_mt %}
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200">Circuito MT</span>
+                                        {% else %}
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">Macroproyecto AP</span>
                                         {% endif %}
                                     </div>
-                                </td>
-                                <td class="py-3 px-4 text-[#64748B]">
-                                    {% if p.macroproyecto %}
-                                        <span>{{ p.macroproyecto.nombre }}</span>
-                                        <span class="block text-[10px] text-slate-400">({{ p.etiqueta_padre }})</span>
-                                    {% else %}
-                                        -
+                                    {% if m.descripcion %}
+                                        <p class="text-[11px] text-slate-400 font-normal line-clamp-1 mt-0.5">{{ m.descripcion }}</p>
                                     {% endif %}
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700">
-                                        {{ p.get_tipo_display|default:p.tipo }}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold {% if m.es_mt %}bg-purple-50 text-purple-700{% else %}bg-blue-50 text-blue-700{% endif %}">
+                                        {% if m.es_mt %}Media Tensión (MT){% else %}Alumbrado Público (AP){% endif %}
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
-                                        {{ p.estado|default:"Planeación" }}
+                                    {% if m.estado == "En ejecución" %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            En ejecución
+                                        </span>
+                                    {% elif m.estado == "Planeación" %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                            Planeación
+                                        </span>
+                                    {% elif m.estado == "Finalizado" %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                            Finalizado
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                            {{ m.estado|default:"Planeación" }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                        {{ m.proyectos.count }} {% if m.es_mt %}maniobra{{ m.proyectos.count|pluralize }}{% else %}obra{{ m.proyectos.count|pluralize }}{% endif %}
                                     </span>
                                 </td>
                                 <td class="py-3 px-3 text-right">
-                                    <a href="{% url 'detalle_proyecto' p.id %}" class="text-slate-400 group-hover:text-[#1E63F0] transition-colors">
+                                    <a href="{% url 'proyectos_por_macroproyecto' m.id %}" class="text-slate-400 group-hover:text-[#1E63F0] transition-colors" title="Ver {{ m.etiqueta_hijo_plural|lower }}">
                                         <svg class="size-4 inline-block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"></polyline>
                                         </svg>
@@ -266,15 +282,15 @@
         {% else %}
             <div class="p-6 sm:p-7 text-center flex flex-col items-center justify-center my-auto">
                 <div class="size-11 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center text-xl mb-2.5 shadow-xs">
-                    🏗️
+                    ⚡
                 </div>
-                <h3 class="text-sm font-bold text-[#1F2937]">No hay proyectos registrados aún</h3>
+                <h3 class="text-sm font-bold text-[#1F2937]">No hay macroproyectos ni circuitos registrados aún</h3>
                 <p class="text-xs text-[#64748B] max-w-sm mt-1 leading-relaxed">
-                    Los proyectos que comiences a gestionar en el módulo de Ingeniería aparecerán resumidos aquí en tiempo real con su avance y estado.
+                    Los macroproyectos y circuitos que gestiones en el módulo de Ingeniería aparecerán centralizados aquí en tiempo real.
                 </p>
                 <div class="mt-4 flex items-center gap-2.5">
-                    <a href="{% url 'crear_proyecto' %}" class="px-3.5 py-2 rounded-xl bg-[#1E63F0] hover:bg-[#1651C7] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
-                        <span>+ Crear nuevo proyecto</span>
+                    <a href="{% url 'lista_macroproyectos' %}" class="px-3.5 py-2 rounded-xl bg-[#1E63F0] hover:bg-[#1651C7] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
+                        <span>+ Gestionar Macroproyectos / Circuitos</span>
                     </a>
                     <a href="{% url 'ingenieria_inicio' %}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all">
                         Ir a Ingeniería

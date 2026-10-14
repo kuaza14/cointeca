@@ -12,11 +12,11 @@ def contratos_aprendiz_empleado(request, id):
     empleado = get_object_or_404(
         Empleado,
         id=id
-    )
+)
 
     contratos = ContratoAprendizaje.objects.filter(
         empleado=empleado
-    ).order_by('-fecha_inicio')
+).order_by('-fecha_inicio')
 
     return render(
         request,
@@ -25,7 +25,7 @@ def contratos_aprendiz_empleado(request, id):
             'empleado': empleado,
             'contratos': contratos
         }
-    )
+)
 
 
 @login_required
@@ -34,7 +34,7 @@ def crear_contrato_aprendiz(request, id):
     empleado = get_object_or_404(
         Empleado,
         id=id
-    )
+)
 
     if request.method == 'POST':
         
@@ -70,16 +70,16 @@ def crear_contrato_aprendiz(request, id):
 
             centro_formacion=request.POST.get('centro_formacion', ''),
 
-        )
+)
 
         messages.success(
             request,
-            '✅ Contrato de aprendizaje registrado correctamente.'
-        )
+            ' Contrato de aprendizaje registrado correctamente.'
+)
 
         return redirect(
             f'/rrhh/empleados/{id}/contrato_aprendiz/'
-        )
+)
 
     return render(
         request,
@@ -87,7 +87,7 @@ def crear_contrato_aprendiz(request, id):
         {
             'empleado': empleado
         }
-    )
+)
 
 
 @login_required
@@ -96,7 +96,7 @@ def editar_contrato_aprendiz(request, id):
     contrato = get_object_or_404(
         ContratoAprendizaje,
         id=id
-    )
+)
 
     if request.method == 'POST':
 
@@ -105,27 +105,27 @@ def editar_contrato_aprendiz(request, id):
         contrato.especialidad = request.POST.get(
             'especialidad',
             ''
-        )
+)
 
         contrato.numero_grupo = request.POST.get(
             'numero_grupo',
             ''
-        )
+)
 
         contrato.modalidad = request.POST.get(
             'modalidad',
             ''
-        )
+)
 
         contrato.nit_institucion = request.POST.get(
             'nit_institucion',
             ''
-        )
+)
 
         contrato.centro_formacion = request.POST.get(
             'centro_formacion',
             ''
-        )
+)
 
         contrato.fecha_inicio = request.POST['fecha_inicio']
 
@@ -146,12 +146,12 @@ def editar_contrato_aprendiz(request, id):
 
         messages.success(
             request,
-            '✅ Contrato de aprendizaje actualizado correctamente.'
-        )
+            ' Contrato de aprendizaje actualizado correctamente.'
+)
 
         return redirect(
             f'/rrhh/empleados/{contrato.empleado.id}/contrato_aprendiz/'
-        )
+)
 
     return render(
         request,
@@ -160,7 +160,7 @@ def editar_contrato_aprendiz(request, id):
             'empleado': contrato.empleado,
             'contrato': contrato
         }
-    )
+)
 
 
 @login_required
@@ -169,20 +169,22 @@ def eliminar_contrato_aprendiz(request, id):
     contrato = get_object_or_404(
         ContratoAprendizaje,
         id=id
-    )
+)
 
     empleado_id = contrato.empleado.id
 
-    contrato.delete()
+    if request.method == 'POST':
 
-    messages.success(
-        request,
-        '✅ Contrato de aprendizaje eliminado correctamente.'
-    )
+        contrato.delete()
+
+        messages.success(
+            request,
+            ' Contrato de aprendizaje eliminado correctamente.'
+)
 
     return redirect(
         f'/rrhh/empleados/{empleado_id}/contrato_aprendiz/'
-    )
+)
 
 
 @login_required
@@ -191,7 +193,7 @@ def generar_contrato_aprendiz(request, id):
     contrato = get_object_or_404(
         ContratoAprendizaje,
         id=id
-    )
+)
 
     empleado = contrato.empleado
 
@@ -202,7 +204,7 @@ def generar_contrato_aprendiz(request, id):
         (contrato.fecha_fin.year - contrato.fecha_inicio.year) * 12
         + contrato.fecha_fin.month
         - contrato.fecha_inicio.month
-    )
+)
 
     context = {
 
@@ -211,11 +213,11 @@ def generar_contrato_aprendiz(request, id):
         # ==========================================
         'empresa': 'COMERCIALIZADORA DE INGENIERIA & TECNOLOGIAS APLICADAS SAS – COINTECA SAS',
         'nit_empresa': '900.768.648',
-        'direccion_empresa': '',  # Completar dato real
-        'telefono_empresa': '',   # Completar dato real
-        'representante_legal': '',  # Completar dato real
+        'direccion_empresa': '', # Completar dato real
+        'telefono_empresa': '', # Completar dato real
+        'representante_legal': '', # Completar dato real
         'cargo_representante': 'Representante Legal',
-        'documento_representante': '',  # Completar dato real
+        'documento_representante': '', # Completar dato real
         'ciudad_expedicion_representante': '',
 
         # ==========================================
@@ -224,7 +226,7 @@ def generar_contrato_aprendiz(request, id):
         'nombre_aprendiz': empleado.nombre_completo,
         'documento_aprendiz': empleado.documento,
         'ciudad_expedicion_aprendiz': empleado.ciudad_expedicion,
-        'fecha_nacimiento': empleado.fecha_nacimiento.strftime('%d/%m/%Y'),
+        'fecha_nacimiento': empleado.fecha_nacimiento.strftime('%d/%m/%Y') if empleado.fecha_nacimiento else '—',
 
         'direccion_aprendiz': empleado.direccion,
         'barrio_aprendiz': empleado.barrio,
@@ -290,6 +292,6 @@ def generar_contrato_aprendiz(request, id):
         nombre_plantilla='contrato_aprendiz.docx',
         nombre_archivo=limpiar_nombre_archivo(
             f'Contrato_Aprendizaje_{empleado.nombre_completo}.docx'
-        ),
+),
         contexto=context
-    )
+)

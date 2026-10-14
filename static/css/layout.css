@@ -35,6 +35,20 @@
     display: flex !important;
     flex-direction: column !important;
     background-color: #f8fafc !important;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* El scroll vive SOLO en el contenido, debajo del header fijo */
+#contenido {
+    flex: 1 1 0%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
 }
 
 /* En pantallas de escritorio (>= 1024px) */
@@ -70,6 +84,117 @@
     }
     .app-main-content {
         width: 100% !important;
+    }
+}
+
+/* =========================================================================
+   BOTON "VOLVER" - DISENO UNIFICADO
+   ========================================================================= */
+.btn-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #334155;
+    background: #ffffff;
+    border: 1px solid #CBD5E1;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    text-decoration: none;
+}
+.btn-volver:hover {
+    background: #F1F5F9;
+    border-color: #94A3B8;
+}
+.btn-volver .chev-volver {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    border: 1.5px solid currentColor;
+    flex-shrink: 0;
+}
+.btn-volver .chev-volver svg {
+    width: 10px;
+    height: 10px;
+}
+
+/* =========================================================================
+   SIDEBAR COLAPSABLE (MODO SOLO ICONOS) - SOLO ESCRITORIO
+   ========================================================================= */
+.btn-colapsar {
+    display: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #bfdbfe;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.btn-colapsar:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+@media (min-width: 1024px) {
+    .btn-colapsar { display: flex !important; }
+
+    #barraLateral {
+        transition: width 0.25s ease-in-out, min-width 0.25s ease-in-out, max-width 0.25s ease-in-out !important;
+    }
+    .app-main-content {
+        transition: width 0.25s ease-in-out !important;
+    }
+    html.sidebar-colapsada #barraLateral {
+        width: 4.5rem !important;
+        min-width: 4.5rem !important;
+        max-width: 4.5rem !important;
+        overflow-x: hidden !important;
+    }
+    html.sidebar-colapsada .app-main-content {
+        width: calc(100% - 4.5rem) !important;
+    }
+
+    /* Logo: solo emblema apilado con el botón */
+    html.sidebar-colapsada #barraLateral .logo-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 2px !important;
+    }
+
+    /* Ocultar textos */
+    html.sidebar-colapsada #barraLateral .label-sidebar {
+        display: none !important;
+    }
+
+    /* Centrar iconos del menú */
+    html.sidebar-colapsada #barraLateral nav a {
+        justify-content: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        gap: 0 !important;
+    }
+    html.sidebar-colapsada #barraLateral nav a .icono-nav svg {
+        width: 22px !important;
+        height: 22px !important;
+    }
+
+    /* Chevron del botón rota a "expandir" */
+    html.sidebar-colapsada #barraLateral #btnColapsar svg {
+        transform: rotate(180deg) !important;
+    }
+    #barraLateral #btnColapsar svg {
+        transition: transform 0.25s ease-in-out;
     }
 }
 

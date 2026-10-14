@@ -1,9 +1,8 @@
-from datetime import date, timedelta, datetime
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .alertas import obtener_alertas_vacaciones
-from core.models import Vacacion, Empleado, Proyecto, Macroproyecto, Material, Inventario
+from core.models import Empleado, Macroproyecto, Material, Inventario
 
 
 def logout_view(request):
@@ -37,56 +36,22 @@ def login_view(request):
 
 @login_required
 def dashboard(request):
-    alertas_vacaciones = obtener_alertas_vacaciones()
-
     ahora = datetime.now()
     meses_es = [
         "ene", "feb", "mar", "abr", "may", "jun",
         "jul", "ago", "sep", "oct", "nov", "dic",
     ]
     fecha_hoy = f"{ahora.day} {meses_es[ahora.month - 1]}. {ahora.year}"
-    hora_hoy = ahora.strftime("%I:%M %p").lower()
-
-    try:
-        macroproyectos_count = Macroproyecto.objects.count()
-    except Exception:
-        macroproyectos_count = 0
-
-    try:
-        proyectos_count = Proyecto.objects.count()
-    except Exception:
-        proyectos_count = 0
-
-    try:
-        empleados_count = Empleado.objects.count()
-    except Exception:
-        empleados_count = 0
-
-    try:
-        materiales_count = Material.objects.count()
-        inventario_count = Inventario.objects.count()
-    except Exception:
-        materiales_count = 0
-        inventario_count = 0
-
-    try:
-        macroproyectos_recientes = list(
-            Macroproyecto.objects.prefetch_related("proyectos").order_by("-id")[:5]
-        )
-    except Exception:
-        macroproyectos_recientes = []
 
     contexto = {
-        "alertas_vacaciones": alertas_vacaciones,
-        "macroproyectos_count": macroproyectos_count,
-        "proyectos_count": proyectos_count,
-        "empleados_count": empleados_count,
-        "materiales_count": materiales_count,
-        "inventario_count": inventario_count,
-        "macroproyectos_recientes": macroproyectos_recientes,
-        "proyectos_recientes": macroproyectos_recientes,
+        "macroproyectos_count": Macroproyecto.objects.count(),
+        "empleados_count": Empleado.objects.filter(estado="activo").count(),
+        "materiales_count": Material.objects.count(),
+        "inventario_count": Inventario.objects.filter(cantidad__gt=0).count(),
+        "macroproyectos_recientes": list(
+            Macroproyecto.objects.prefetch_related("proyectos").order_by("-id")[:5]
+        ),
         "fecha_hoy": fecha_hoy,
-        "hora_hoy": hora_hoy,
     }
 
     return render(request, "dashboard.html", contexto)

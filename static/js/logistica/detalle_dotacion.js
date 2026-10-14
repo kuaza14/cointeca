@@ -3,6 +3,24 @@
  * detalle_dotacion.js - Gestión de entregas de dotación a personal y validaciones.
  */
 
+function nuevaDotacion(){
+
+    document.getElementById("registro_id").value = "";
+    document.getElementById("eliminar_id").value = "";
+    document.getElementById("accion").value = "registrar";
+
+    const campoFecha = document.getElementsByName("fecha_entrega")[0];
+    if (campoFecha && !campoFecha.value) {
+        campoFecha.value = new Date().toISOString().split("T")[0];
+    }
+
+    const campoObs = document.getElementsByName("observacion")[0];
+    if (campoObs) campoObs.value = "";
+
+    abrirModalDotacion();
+
+}
+
 function abrirModalDotacion(){
 
     const modal = document.getElementById("modalDotacion");
@@ -45,6 +63,6 @@ function eliminarRegistro(id){
 
     document.getElementById("eliminar_id").value = id;
 
-    document.querySelector("form").submit();
+    document.querySelector("#modalDotacion form").submit();
 
 }

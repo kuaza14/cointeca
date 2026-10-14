@@ -51,6 +51,10 @@ def crear_induccion(request, id):
                 'fecha'
             ),
 
+            tipo_evento=request.POST.get(
+                'tipo_evento'
+            ),
+
             tema_capacitacion=request.POST.get(
                 'tema_capacitacion'
             ) or None,
@@ -199,7 +203,7 @@ def generar_induccion(request, id):
 
         'fecha_ingreso': empleado.fecha_ingreso.strftime(
             '%d/%m/%Y'
-        ),
+        ) if empleado.fecha_ingreso else '—',
 
         'tema_capacitacion': (
             induccion.tema_capacitacion

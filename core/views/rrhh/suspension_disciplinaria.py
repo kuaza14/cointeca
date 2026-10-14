@@ -14,7 +14,7 @@ def suspensiones_disciplinarias_empleado(request, id):
 
     suspensiones = SuspensionDisciplinaria.objects.filter(
         empleado=empleado
-    ).order_by('-fecha_creacion')
+).order_by('-fecha_creacion')
 
     return render(
         request,
@@ -23,7 +23,7 @@ def suspensiones_disciplinarias_empleado(request, id):
             'empleado': empleado,
             'suspensiones': suspensiones
         }
-    )
+)
 
     
 @login_required
@@ -32,7 +32,7 @@ def detalle_suspension_disciplinaria(request, id):
     suspension = get_object_or_404(
         SuspensionDisciplinaria,
         id=id
-    )
+)
 
     return render(
         request,
@@ -40,7 +40,7 @@ def detalle_suspension_disciplinaria(request, id):
         {
             'suspension': suspension
         }
-    )
+)
 
 
 @login_required
@@ -48,17 +48,18 @@ def eliminar_suspension_disciplinaria(request, id):
     suspension = get_object_or_404(
         SuspensionDisciplinaria,
         id=id
-    )
+)
     empleado_id = suspension.empleado.id
-    suspension.delete()
-    messages.success(
-        request,
-        '✅ Suspensión disciplinaria eliminada correctamente.'
-    )
+    if request.method == 'POST':
+        suspension.delete()
+        messages.success(
+            request,
+            ' Suspensión disciplinaria eliminada correctamente.'
+)
     return redirect(
         'suspensiones_disciplinarias_empleado',
         id=empleado_id
-    )
+)
 
 
 @login_required
@@ -74,28 +75,28 @@ def crear_suspension_disciplinaria(request, id):
             fecha_falta=request.POST.get('fecha_falta'),
             articulos_infringidos=request.POST.get(
                 'articulos_infringidos', ''
-            ),
+),
             fecha_inicio_suspension=request.POST.get(
                 'fecha_inicio_suspension'
-            ),
+),
             fecha_fin_suspension=request.POST.get(
                 'fecha_fin_suspension'
-            ),
+),
             fecha_reincorporacion=request.POST.get(
                 'fecha_reincorporacion'
-            ),
+),
             responsabilidad_pecuniaria=request.POST.get(
                 'responsabilidad_pecuniaria', ''
-            ),
+),
             consecuencia_reincidencia=request.POST.get(
                 'consecuencia_reincidencia', ''
-            ),
-        )
+),
+)
 
         return redirect(
             'detalle_suspension_disciplinaria',
             id=suspension.id
-        )
+)
 
     return render(
         request,
@@ -103,7 +104,7 @@ def crear_suspension_disciplinaria(request, id):
         {
             'empleado': empleado
         }
-    )
+)
 
 @login_required
 def generar_suspension_disciplinaria(request, id):
@@ -111,7 +112,7 @@ def generar_suspension_disciplinaria(request, id):
     suspension = get_object_or_404(
         SuspensionDisciplinaria,
         id=id
-    )
+)
 
     empleado = suspension.empleado
     hoy = date.today()
@@ -152,7 +153,7 @@ def generar_suspension_disciplinaria(request, id):
     return generar_word(
         'suspension_disciplinaria.docx',
         limpiar_nombre_archivo(
-            f'Suspension_Disciplinaria_{empleado.nombre_completo}.docx'
-        ),
+            f'Suspension_Disciplinaria_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx'
+),
         context
-    )
+)

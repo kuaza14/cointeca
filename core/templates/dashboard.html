@@ -9,20 +9,43 @@
     <!-- ==================================================================
          ENCABEZADO DE BIENVENIDA Y PERFIL
          ================================================================== -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div>
-            <h1 class="text-xl sm:text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2">
-                Hola, {{ request.user.get_full_name|default:request.user.username|capfirst }} <span class="inline-block animate-bounce">👋</span>
-            </h1>
-            <p class="text-xs text-[#64748B] mt-0.5">
-                Panel de control asignado para tu rol: <strong class="text-[#1E63F0]">{{ rol_principal|default:"Colaborador" }}</strong> · {{ fecha_hoy }}
-            </p>
-        </div>
-        <div class="shrink-0 flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                <span class="size-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span>{{ rol_principal|default:"Usuario Activo" }}</span>
-            </span>
+    <div class="relative overflow-hidden rounded-2xl shadow-md" style="background: linear-gradient(120deg, #0B2D6B 0%, #1448A8 55%, #1E63F0 100%);">
+        <!-- Decoración -->
+        <div class="absolute rounded-full" style="top:-80px;right:-40px;width:220px;height:220px;background:rgba(255,255,255,0.07);"></div>
+        <div class="absolute rounded-full" style="bottom:-96px;width:260px;height:260px;right:30%;background:rgba(255,255,255,0.05);"></div>
+        <div class="absolute top-4 rounded-full" style="width:56px;height:56px;right:230px;background:rgba(250,204,21,0.18);"></div>
+
+        <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 sm:p-6">
+            <div class="flex items-center gap-4">
+                <!-- Avatar con iniciales -->
+                <div class="shrink-0 flex items-center justify-center font-extrabold tracking-wider text-white"
+                     style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);font-size:16px;">
+                    {{ request.user.get_full_name|default:request.user.username|slice:":2"|upper }}
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold uppercase mb-0.5" style="letter-spacing:0.2em;color:#ffffff;">
+                        Panel de control
+                    </p>
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                        Hola, {{ request.user.get_full_name|default:request.user.username|capfirst }}
+                    </h1>
+                    <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.8);">
+                        Tu rol asignado: <strong class="text-white">{{ rol_principal|default:"Colaborador" }}</strong>
+                    </p>
+                </div>
+            </div>
+            <div class="shrink-0 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white"
+                      style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);">
+                    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                    <span>{{ fecha_hoy }}</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white"
+                      style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);">
+                    <span style="width:8px;height:8px;border-radius:9999px;background:#34d399;" class="animate-pulse"></span>
+                    <span>{{ rol_principal|default:"Usuario Activo" }}</span>
+                </span>
+            </div>
         </div>
     </div>
 
@@ -36,7 +59,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {% if puede_ver_ingenieria %}
             <a href="{% url 'ingenieria_inicio' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-2xl block mb-1">🏗️</span>
+                <span class="block mb-1"><svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg></span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Ingeniería</span>
                 <span class="text-[10px] text-slate-400 block mt-0.5">Proyectos y Obra</span>
             </a>
@@ -44,7 +67,7 @@
 
             {% if puede_ver_logistica %}
             <a href="{% url 'logistica_home' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-2xl block mb-1">📦</span>
+                <span class="block mb-1"><svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg></span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Logística</span>
                 <span class="text-[10px] text-slate-400 block mt-0.5">Stock e Inventario</span>
             </a>
@@ -52,7 +75,7 @@
 
             {% if puede_ver_rrhh %}
             <a href="{% url 'rrhh' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-2xl block mb-1">👥</span>
+                <span class="block mb-1"><svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">RRHH</span>
                 <span class="text-[10px] text-slate-400 block mt-0.5">Talento y Contratos</span>
             </a>
@@ -60,7 +83,7 @@
 
             {% if puede_ver_gerencia %}
             <a href="{% url 'gerencia_home' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-2xl block mb-1">🏛️</span>
+                <span class="block mb-1"><svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12v-.008z"/></svg></span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Gerencia</span>
                 <span class="text-[10px] text-slate-400 block mt-0.5">Gobernanza y Actas</span>
             </a>
@@ -68,7 +91,7 @@
 
             {% if puede_ver_contabilidad %}
             <a href="{% url 'caja_menor' %}" class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:border-[#1E63F0] hover:shadow-md transition-all text-center group">
-                <span class="text-2xl block mb-1">💵</span>
+                <span class="block mb-1"><svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg></span>
                 <span class="text-xs font-bold text-[#1F2937] group-hover:text-[#1E63F0] block">Contabilidad</span>
                 <span class="text-[10px] text-slate-400 block mt-0.5">Caja Menor y Arqueos</span>
             </a>
@@ -83,22 +106,22 @@
 
         {% if puede_ver_ingenieria %}
         <!-- 1. Macroproyectos y Circuitos activos -->
-        <a href="{% url 'lista_macroproyectos' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E63F0]/50 transition-all flex flex-col justify-between group">
-            <div class="flex items-start justify-between">
-                <div class="size-9 rounded-lg bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="{% url 'lista_macroproyectos' %}" class="group bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md transition-all block" style="border-top-width:3px;border-top-color:#1E63F0;">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Macroproyectos & Circuitos</p>
+                <span class="text-[11px] font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1" style="color:#1E63F0;">Ver lista <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
+            </div>
+            <div class="flex items-center gap-3.5">
+                <div class="size-12 rounded-xl flex items-center justify-center shrink-0 bg-[#E6F1FF] text-[#1E63F0]">
+                    <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="12 2 2 7 12 12 22 7 12 2"/>
                         <polyline points="2 17 12 22 22 17"/>
                         <polyline points="2 12 12 17 22 12"/>
                     </svg>
                 </div>
-                <span class="text-[11px] font-bold text-[#1E63F0] group-hover:translate-x-0.5 transition-transform">Ver lista →</span>
-            </div>
-            <div class="mt-3">
-                <p class="text-[11px] font-semibold text-[#64748B]">Macroproyectos & Circuitos</p>
-                <div class="flex items-baseline gap-1.5 mt-0.5">
-                    <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">{{ macroproyectos_count }}</span>
-                    <span class="text-[11px] text-slate-400 font-medium">registrados</span>
+                <div class="min-w-0">
+                    <p class="text-3xl font-extrabold text-[#1F2937] tracking-tight leading-none">{{ macroproyectos_count }}</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1">registrados</p>
                 </div>
             </div>
         </a>
@@ -106,23 +129,23 @@
 
         {% if puede_ver_rrhh %}
         <!-- 2. Personal / RRHH -->
-        <a href="{% url 'empleados' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#8B5CF6]/50 transition-all flex flex-col justify-between group">
-            <div class="flex items-start justify-between">
-                <div class="size-9 rounded-lg bg-[#F3E8FF] text-[#8B5CF6] flex items-center justify-center">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="{% url 'empleados' %}" class="group bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md transition-all block" style="border-top-width:3px;border-top-color:#8B5CF6;">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Personal registrado</p>
+                <span class="text-[11px] font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1" style="color:#8B5CF6;">Ver personal <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
+            </div>
+            <div class="flex items-center gap-3.5">
+                <div class="size-12 rounded-xl flex items-center justify-center shrink-0 bg-[#F3E8FF] text-[#8B5CF6]">
+                    <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                         <circle cx="9" cy="7" r="4"/>
                         <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                     </svg>
                 </div>
-                <span class="text-[11px] font-bold text-[#8B5CF6] group-hover:translate-x-0.5 transition-transform">Ver personal →</span>
-            </div>
-            <div class="mt-3">
-                <p class="text-[11px] font-semibold text-[#64748B]">Personal registrado</p>
-                <div class="flex items-baseline gap-1.5 mt-0.5">
-                    <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">{{ empleados_count }}</span>
-                    <span class="text-[11px] text-slate-400 font-medium">colaboradores</span>
+                <div class="min-w-0">
+                    <p class="text-3xl font-extrabold text-[#1F2937] tracking-tight leading-none">{{ empleados_count }}</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1">activos</p>
                 </div>
             </div>
         </a>
@@ -130,41 +153,41 @@
 
         {% if puede_ver_logistica %}
         <!-- 3. Catálogo de Materiales -->
-        <a href="{% url 'materiales_home' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#F59E0B]/50 transition-all flex flex-col justify-between group">
-            <div class="flex items-start justify-between">
-                <div class="size-9 rounded-lg bg-[#FEF3C7] text-[#F59E0B] flex items-center justify-center">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="{% url 'materiales_home' %}" class="group bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md transition-all block" style="border-top-width:3px;border-top-color:#F59E0B;">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Materiales en catálogo</p>
+                <span class="text-[11px] font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1" style="color:#F59E0B;">Ver catálogo <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
+            </div>
+            <div class="flex items-center gap-3.5">
+                <div class="size-12 rounded-xl flex items-center justify-center shrink-0 bg-[#FEF3C7] text-[#F59E0B]">
+                    <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                         <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
                         <line x1="12" y1="22.08" x2="12" y2="12"/>
                     </svg>
                 </div>
-                <span class="text-[11px] font-bold text-[#F59E0B] group-hover:translate-x-0.5 transition-transform">Ver catálogo →</span>
-            </div>
-            <div class="mt-3">
-                <p class="text-[11px] font-semibold text-[#64748B]">Materiales en catálogo</p>
-                <div class="flex items-baseline gap-1.5 mt-0.5">
-                    <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">{{ materiales_count }}</span>
-                    <span class="text-[11px] text-slate-400 font-medium">referencias</span>
+                <div class="min-w-0">
+                    <p class="text-3xl font-extrabold text-[#1F2937] tracking-tight leading-none">{{ materiales_count }}</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1">referencias</p>
                 </div>
             </div>
         </a>
 
         <!-- 4. Ítems en Inventario -->
-        <a href="{% url 'logistica_home' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#14B8A6]/50 transition-all flex flex-col justify-between group">
-            <div class="flex items-start justify-between">
-                <div class="size-9 rounded-lg bg-[#CCFBF1] text-[#14B8A6] flex items-center justify-center">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="{% url 'logistica_home' %}" class="group bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md transition-all block" style="border-top-width:3px;border-top-color:#14B8A6;">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Inventario activo</p>
+                <span class="text-[11px] font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1" style="color:#14B8A6;">Ver stock <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
+            </div>
+            <div class="flex items-center gap-3.5">
+                <div class="size-12 rounded-xl flex items-center justify-center shrink-0 bg-[#CCFBF1] text-[#14B8A6]">
+                    <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                     </svg>
                 </div>
-                <span class="text-[11px] font-bold text-[#14B8A6] group-hover:translate-x-0.5 transition-transform">Ver stock →</span>
-            </div>
-            <div class="mt-3">
-                <p class="text-[11px] font-semibold text-[#64748B]">Inventario activo</p>
-                <div class="flex items-baseline gap-1.5 mt-0.5">
-                    <span class="text-2xl font-extrabold text-[#1F2937] tracking-tight">{{ inventario_count }}</span>
-                    <span class="text-[11px] text-slate-400 font-medium">en almacén</span>
+                <div class="min-w-0">
+                    <p class="text-3xl font-extrabold text-[#1F2937] tracking-tight leading-none">{{ inventario_count }}</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1">con stock</p>
                 </div>
             </div>
         </a>
@@ -172,17 +195,20 @@
 
         {% if puede_ver_contabilidad and not puede_ver_ingenieria and not puede_ver_logistica %}
         <!-- Tarjeta especial Contabilidad cuando es rol exclusivo -->
-        <a href="{% url 'caja_menor' %}" class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-emerald-500/50 transition-all flex flex-col justify-between group">
-            <div class="flex items-start justify-between">
-                <div class="size-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
-                    💵
-                </div>
-                <span class="text-[11px] font-bold text-emerald-600 group-hover:translate-x-0.5 transition-transform">Ir a Caja →</span>
+        <a href="{% url 'caja_menor' %}" class="group bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md transition-all block" style="border-top-width:3px;border-top-color:#059669;">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Caja Menor</p>
+                <span class="text-[11px] font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1" style="color:#059669;">Ir a Caja <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
             </div>
-            <div class="mt-3">
-                <p class="text-[11px] font-semibold text-[#64748B]">Caja Menor</p>
-                <div class="flex items-baseline gap-1.5 mt-0.5">
-                    <span class="text-sm font-extrabold text-[#1F2937] tracking-tight">Gestión Activa</span>
+            <div class="flex items-center gap-3.5">
+                <div class="size-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-600">
+                    <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-lg font-extrabold text-[#1F2937] tracking-tight leading-none">Gestión Activa</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1">fondos y legalizaciones</p>
                 </div>
             </div>
         </a>
@@ -198,7 +224,7 @@
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div class="p-4 sm:px-5 flex items-center justify-between border-b border-slate-100">
             <div class="flex items-center gap-2">
-                <svg class="size-4.5 text-[#1E63F0]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="text-[#1E63F0]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 2 7 12 12 22 7 12 2"/>
                     <polyline points="2 17 12 22 22 17"/>
                     <polyline points="2 12 12 17 22 12"/>
@@ -206,7 +232,7 @@
                 <h2 class="font-bold text-sm text-[#1F2937]">Macroproyectos & Circuitos recientes</h2>
             </div>
             <a href="{% url 'lista_macroproyectos' %}" class="text-[11px] font-semibold text-[#1E63F0] hover:underline flex items-center gap-0.5">
-                Ver todos <span>→</span>
+                Ver todos <span><span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
             </a>
         </div>
 
@@ -282,7 +308,7 @@
         {% else %}
             <div class="p-6 sm:p-7 text-center flex flex-col items-center justify-center my-auto">
                 <div class="size-11 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center text-xl mb-2.5 shadow-xs">
-                    ⚡
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
                 </div>
                 <h3 class="text-sm font-bold text-[#1F2937]">No hay macroproyectos ni circuitos registrados aún</h3>
                 <p class="text-xs text-[#64748B] max-w-sm mt-1 leading-relaxed">
@@ -290,7 +316,7 @@
                 </p>
                 <div class="mt-4 flex items-center gap-2.5">
                     <a href="{% url 'lista_macroproyectos' %}" class="px-3.5 py-2 rounded-xl bg-[#1E63F0] hover:bg-[#1651C7] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
-                        <span>+ Gestionar Macroproyectos / Circuitos</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Gestionar Macroproyectos / Circuitos</span>
                     </a>
                     <a href="{% url 'ingenieria_inicio' %}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all">
                         Ir a Ingeniería
@@ -300,11 +326,11 @@
         {% endif %}
     </div>
 
-    {% elif puede_ver_rrhh and not puede_ver_ingenieria %}
+    {% elif puede_ver_rrhh %}
     <!-- Panel específico de Recursos Humanos -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
         <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">👥</span>
+            <span class="text-2xl"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></span>
             <div>
                 <h2 class="text-base font-extrabold text-[#1F2937]">Gestión Integral de Talento Humano</h2>
                 <p class="text-xs text-muted-foreground">Accesos directos principales del departamento de Recursos Humanos</p>
@@ -312,33 +338,33 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <a href="{% url 'empleados' %}" class="p-4 rounded-xl border border-slate-200 hover:border-[#1E63F0] hover:bg-blue-50/30 transition group">
-                <span class="text-xl block mb-2">📋</span>
+                <span class="text-xl block mb-2"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></span>
                 <p class="font-bold text-sm text-[#1F2937] group-hover:text-[#1E63F0]">Fichas de Empleados</p>
                 <p class="text-xs text-muted-foreground mt-0.5">Consultar historial y fichas técnicas</p>
             </a>
             <a href="{% url 'crear_empleado' %}" class="p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 transition group">
-                <span class="text-xl block mb-2">➕</span>
+                <span class="text-xl block mb-2"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></span>
                 <p class="font-bold text-sm text-[#1F2937] group-hover:text-emerald-600">Registrar Colaborador</p>
                 <p class="text-xs text-muted-foreground mt-0.5">Ingresar nuevo empleado al sistema</p>
             </a>
             <a href="{% url 'vacaciones' %}" class="p-4 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/30 transition group">
-                <span class="text-xl block mb-2">🌴</span>
+                <span class="text-xl block mb-2"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg></span>
                 <p class="font-bold text-sm text-[#1F2937] group-hover:text-amber-600">Control de Vacaciones</p>
                 <p class="text-xs text-muted-foreground mt-0.5">Programación y seguimiento</p>
             </a>
             <a href="{% url 'documentos_rrhh' %}" class="p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/30 transition group">
-                <span class="text-xl block mb-2">📄</span>
+                <span class="text-xl block mb-2"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></span>
                 <p class="font-bold text-sm text-[#1F2937] group-hover:text-purple-600">Documentos y Actas</p>
                 <p class="text-xs text-muted-foreground mt-0.5">Generación de formatos y certificaciones</p>
             </a>
         </div>
     </div>
 
-    {% elif puede_ver_contabilidad and not puede_ver_ingenieria and not puede_ver_rrhh %}
+    {% elif puede_ver_contabilidad %}
     <!-- Panel específico de Contabilidad -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
         <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">💵</span>
+            <span class="text-2xl"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg></span>
             <div>
                 <h2 class="text-base font-extrabold text-[#1F2937]">Módulo Financiero y Caja Menor</h2>
                 <p class="text-xs text-muted-foreground">Accesos directos para control de egresos y movimientos de caja</p>
@@ -346,12 +372,12 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             <a href="{% url 'caja_menor' %}" class="p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 transition group">
-                <span class="text-xl block mb-2">📊</span>
+                <span class="text-xl block mb-2"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span>
                 <p class="font-bold text-sm text-[#1F2937] group-hover:text-emerald-600">Libro de Caja Menor</p>
                 <p class="text-xs text-muted-foreground mt-0.5">Ver saldos, ingresos y egresos registrados</p>
             </a>
             <a href="{% url 'crear_caja' %}" class="p-4 rounded-xl border border-slate-200 hover:border-[#1E63F0] hover:bg-blue-50/30 transition group">
-                <span class="text-xl block mb-2">➕</span>
+                <span class="text-xl block mb-2"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></span>
                 <p class="font-bold text-sm text-[#1F2937] group-hover:text-[#1E63F0]">Aperturar Nueva Caja</p>
                 <p class="text-xs text-muted-foreground mt-0.5">Configurar un nuevo periodo de caja menor</p>
             </a>

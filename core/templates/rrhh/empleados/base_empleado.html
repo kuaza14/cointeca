@@ -42,11 +42,11 @@
                 <div class="mt-2">
                     {% if empleado.estado == 'retirado' %}
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40">
-                            🔴 Retirado
+                            <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#ef4444"></span> Retirado
                         </span>
                     {% else %}
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            🟢 Activo
+                            <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#10b981"></span> Activo
                         </span>
                     {% endif %}
                 </div>
@@ -57,10 +57,7 @@
                 Información General
             </a>
 
-            <a href="/rrhh/empleados/"
-               class="block px-4 py-1.5 rounded bg-neutral-hover hover:bg-slate-700 text-gray-200 text-center text-xs mb-3 transition">
-                ← Volver a Directorio
-            </a>
+            <a href="/rrhh/empleados/" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Directorio</span></a>
 
             <hr class="my-3 border-gray-600">
 

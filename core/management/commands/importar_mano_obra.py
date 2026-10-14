@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 ItemManoObra.TiposCalculo.AUTOMATICO
                 if code in automatic_codes
                 else ItemManoObra.TiposCalculo.MANUAL
-            )
+)
 
             obj, created = ItemManoObra.objects.update_or_create(
                 codigo=code,
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                     'categoria': categoria,
                     'tipo_calculo': tipo_calculo,
                 }
-            )
+)
 
             if created:
                 created_count += 1
@@ -111,6 +111,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"✅ Catálogo de Mano de Obra sincronizado: {created_count} creados, {updated_count} actualizados (Total: {ItemManoObra.objects.count()} actividades)."
-            )
-        )
+                f" Catálogo de Mano de Obra sincronizado: {created_count} creados, {updated_count} actualizados (Total: {ItemManoObra.objects.count()} actividades)."
+)
+)

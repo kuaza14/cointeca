@@ -17,16 +17,14 @@
             <span>/</span>
             <span class="text-[#1F2937] font-semibold">Editar Periodo</span>
         </nav>
-        <a href="{% url 'facturacion' %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 text-slate-600 shadow-2xs">
-            ← Volver a Facturación
-        </a>
+        <a href="{% url 'facturacion' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Facturación</span></a>
     </div>
 
     <!-- FORMULARIO -->
     <div class="tarjeta p-6 sm:p-8">
         <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
             <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
-                ✏️
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             </div>
             <div>
                 <h1 class="text-lg font-bold text-[#1F2937]">Editar Registro de Facturación</h1>
@@ -93,7 +91,7 @@
                             data-url="{% url 'api_liquidacion_ingenieria' %}"
                             title="Consulta el valor liquidado en los postes/apoyos de ingeniería y lo ingresa automáticamente"
                             class="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-lg transition cursor-pointer shadow-2xs">
-                        <span>⚡ Importar Liquidación Mano de Obra</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Importar Liquidación Mano de Obra</span>
                     </button>
                 </div>
                 <input id="campo-facturacion_real" type="text" name="facturacion_real" 
@@ -101,7 +99,7 @@
                        class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-[#1F2937] focus:border-[#1E63F0] focus:ring-2 focus:ring-[#1E63F0]/20 transition outline-none font-mono">
                 <div id="info-importacion" class="hidden mt-1.5 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-[11px] text-emerald-800 flex items-center justify-between">
                     <span id="texto-importacion"></span>
-                    <button type="button" onclick="document.getElementById('info-importacion').classList.add('hidden')" class="text-emerald-700 font-bold ml-2">✕</button>
+                    <button type="button" onclick="document.getElementById('info-importacion').classList.add('hidden')" class="text-emerald-700 font-bold ml-2"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
                 </div>
                 <p class="text-[10px] text-slate-400 mt-1">Valor efectivamente facturado y radicado o importado de liquidaciones de ingeniería</p>
             </div>

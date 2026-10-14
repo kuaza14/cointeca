@@ -60,7 +60,7 @@ def obtener_permisos_usuario(user):
         user.is_superuser
         or 'gerencia' in roles
         or username_norm in ('gerente', 'admin', 'admin_test')
-    )
+)
     es_rrhh = 'rrhh' in roles or username_norm == 'rrhh'
     es_ingenieria = 'ingenieria' in roles or username_norm == 'ingenieria'
     es_logistica = 'logistica' in roles or username_norm == 'logistica'
@@ -196,8 +196,8 @@ def requiere_modulo(clave_modulo):
                     return JsonResponse({'error': 'Acceso no autorizado.'}, status=403)
                 messages.warning(
                     request,
-                    f"⛔ Acceso denegado: No tienes permisos para acceder al módulo de {clave_modulo.capitalize()}."
-                )
+                    f" Acceso denegado: No tienes permisos para acceder al módulo de {clave_modulo.capitalize()}."
+)
                 return redirect('dashboard')
             return view_func(request, *args, **kwargs)
         return wrapper

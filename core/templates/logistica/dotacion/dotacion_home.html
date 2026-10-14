@@ -19,17 +19,13 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% url 'logistica_home' %}" 
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a Logística</span>
-                </a>
+                <a href="{% url 'logistica_home' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Logística</span></a>
             </div>
         </div>
 
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
-                <span>🦺</span> Entrega de Dotación & EPP
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></span> Entrega de Dotación & EPP
             </h1>
             <p class="text-sm text-muted-foreground mt-1">
                 Control de indumentaria, elementos de protección personal y registro de entregas por colaborador.
@@ -101,7 +97,7 @@
                             <a href="{% url 'detalle_dotacion' empleado.id %}"
                                class="btn btn-primario text-xs font-bold px-3 py-1.5 rounded-lg shadow-xs transition hover:opacity-90 inline-flex items-center gap-1"
                                style="background-color: #1e63f0 !important; color: #ffffff !important;">
-                                <span>🦺</span> <span>Gestionar</span>
+                                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></span> <span>Gestionar</span>
                             </a>
                         </td>
                     </tr>
@@ -114,7 +110,7 @@
                     {% endfor %}
                     <tr id="sinResultadosDotacion" class="hidden">
                         <td colspan="5" class="text-center py-8 text-muted-foreground text-sm">
-                            🔍 No se encontraron empleados que coincidan con la búsqueda.
+                            <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg> No se encontraron empleados que coincidan con la búsqueda.
                         </td>
                     </tr>
                 </tbody>

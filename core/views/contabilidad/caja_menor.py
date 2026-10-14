@@ -8,6 +8,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from decimal import Decimal
 
+from core.utils import parse_monto_cop
 from core.models import (
     CajaMenor,
     MovimientoCajaMenor
@@ -15,7 +16,7 @@ from core.models import (
 
 
 # =========================================================================
-# 💵 VISTAS DE CAJA MENOR (CONTABILIDAD & GESTIÓN DOCUMENTAL RRHH-FOR-12)
+# VISTAS DE CAJA MENOR (CONTABILIDAD & GESTIÓN DOCUMENTAL RRHH-FOR-12)
 # =========================================================================
 
 @login_required 
@@ -45,8 +46,7 @@ def crear_caja(request):
     if request.method == 'POST':
         fecha_tramite = request.POST.get('fecha_tramite')
         fecha_cierre = request.POST.get('fecha_cierre') or None
-        valor_raw = request.POST.get('valor_inicial', '0').replace('$', '').replace('.', '').replace(',', '').strip()
-        valor_inicial = Decimal(valor_raw) if valor_raw else Decimal('0')
+        valor_inicial = parse_monto_cop(request.POST.get('valor_inicial'), default=Decimal('0'))
 
         caja = CajaMenor.objects.create(
             fecha_tramite=fecha_tramite,
@@ -54,7 +54,7 @@ def crear_caja(request):
             valor_inicial=valor_inicial,
             total_gastado=Decimal('0'),
             valor_restante=valor_inicial
-        )
+)
         return redirect('detalle_caja', id=caja.id)
 
     return render(request, 'contabilidad/crear_caja.html')
@@ -70,8 +70,7 @@ def editar_caja(request, id):
     if request.method == 'POST':
         caja.fecha_tramite = request.POST.get('fecha_tramite')
         caja.fecha_cierre = request.POST.get('fecha_cierre') or None
-        valor_raw = request.POST.get('valor_inicial', '0').replace('$', '').replace('.', '').replace(',', '').strip()
-        caja.valor_inicial = Decimal(valor_raw) if valor_raw else Decimal('0')
+        caja.valor_inicial = parse_monto_cop(request.POST.get('valor_inicial'), default=Decimal('0'))
         caja.save()
         caja.calcular_totales()
         return redirect('detalle_caja', id=caja.id)
@@ -83,9 +82,11 @@ def editar_caja(request, id):
 def eliminar_caja(request, id):
     """
     Elimina un trámite de caja menor completo y sus movimientos.
+    Solo vía POST (con confirmación) para evitar borrados accidentales.
     """
-    caja = get_object_or_404(CajaMenor, id=id)
-    caja.delete()
+    if request.method == 'POST':
+        caja = get_object_or_404(CajaMenor, id=id)
+        caja.delete()
     return redirect('caja_menor')
 
 
@@ -135,8 +136,7 @@ def agregar_movimiento(request, id):
     caja = get_object_or_404(CajaMenor, id=id)
 
     if request.method == 'POST':
-        valor_raw = request.POST.get('valor', '0').replace('$', '').replace('.', '').replace(',', '').strip()
-        valor = Decimal(valor_raw) if valor_raw else Decimal('0')
+        valor = parse_monto_cop(request.POST.get('valor'), default=Decimal('0'))
         soporte = request.FILES.get('soporte')
 
         MovimientoCajaMenor.objects.create(
@@ -149,7 +149,7 @@ def agregar_movimiento(request, id):
             categoria=request.POST.get('categoria', 'otros'),
             valor=valor,
             soporte=soporte,
-        )
+)
         return redirect('detalle_caja', id=caja.id)
 
     return render(request, 'contabilidad/agregar_movimiento.html', {
@@ -166,8 +166,7 @@ def editar_movimiento(request, id):
     movimiento = get_object_or_404(MovimientoCajaMenor, id=id)
 
     if request.method == 'POST':
-        valor_raw = request.POST.get('valor', '0').replace('$', '').replace('.', '').replace(',', '').strip()
-        valor = Decimal(valor_raw) if valor_raw else Decimal('0')
+        valor = parse_monto_cop(request.POST.get('valor'), default=Decimal('0'))
 
         movimiento.fecha = request.POST.get('fecha')
         movimiento.numero_factura = request.POST.get('numero_factura', '').strip()
@@ -203,14 +202,15 @@ def eliminar_movimiento(request, id):
     caja = movimiento.caja
     caja_id = caja.id
 
-    movimiento.delete()
-    caja.calcular_totales()
+    if request.method == 'POST':
+        movimiento.delete()
+        caja.calcular_totales()
 
     return redirect('detalle_caja', id=caja_id)
 
 
 # =========================================================================
-# 📥 EXPORTACIÓN A EXCEL OFICIAL: FORMATO RRHH-FOR-12
+# EXPORTACIÓN A EXCEL OFICIAL: FORMATO RRHH-FOR-12
 # =========================================================================
 
 @login_required
@@ -248,7 +248,7 @@ def exportar_caja_menor_excel(request, id):
         right=Side(style='thin', color='D1D5DB'),
         top=Side(style='thin', color='D1D5DB'),
         bottom=Side(style='thin', color='D1D5DB')
-    )
+)
 
     for i, m in enumerate(movimientos):
         fila_actual = fila_inicio + i
@@ -275,7 +275,7 @@ def exportar_caja_menor_excel(request, id):
     # Configurar respuesta HTTP para descarga directa
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     nombre_archivo = f"RRHH-FOR-12_Caja_Menor_{caja.fecha_tramite}.xlsx"
     response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
 

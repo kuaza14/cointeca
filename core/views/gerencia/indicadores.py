@@ -33,11 +33,11 @@ def indicadores(request):
 def crear_indicador(request):
     if request.method == 'POST':
         IndicadorEstrategico.objects.create(
-            perspectiva=request.POST['perspectiva'],
-            nombre=request.POST['nombre'],
-            definicion=request.POST['definicion'],
-            meta_anual=request.POST['meta_anual'],
-            frecuencia=request.POST['frecuencia'],
+            perspectiva=request.POST.get('perspectiva', ''),
+            nombre=request.POST.get('nombre', ''),
+            definicion=request.POST.get('definicion', ''),
+            meta_anual=request.POST.get('meta_anual', 0),
+            frecuencia=request.POST.get('frecuencia', ''),
         )
         return redirect('/indicadores/')
     return render(request, 'gerencia/indicadores/crear_indicador.html')
@@ -57,19 +57,23 @@ def detalle_indicador(request, id):
 def agregar_seguimiento(request, id):
     indicador = get_object_or_404(IndicadorEstrategico, id=id)
     if request.method == 'POST':
-        SeguimientoIndicador.objects.create(
-            indicador=indicador,
-            fecha=request.POST['fecha'],
-            valor_obtenido=request.POST['valor_obtenido'],
-            observaciones=request.POST.get('observaciones', '')
-        )
+        fecha = request.POST.get('fecha')
+        valor_obtenido = request.POST.get('valor_obtenido')
+        if fecha and valor_obtenido:
+            SeguimientoIndicador.objects.create(
+                indicador=indicador,
+                fecha=fecha,
+                valor_obtenido=valor_obtenido,
+                observaciones=request.POST.get('observaciones', '')
+            )
         return redirect(f'/indicadores/{id}/')
     return render(request, 'gerencia/indicadores/agregar_seguimiento.html', {'indicador': indicador})
 
 @login_required
 def eliminar_indicador(request, id):
-    indicador = get_object_or_404(IndicadorEstrategico, id=id)
-    indicador.delete()
+    if request.method == 'POST':
+        indicador = get_object_or_404(IndicadorEstrategico, id=id)
+        indicador.delete()
     return redirect('/indicadores/')
 
 @login_required
@@ -77,11 +81,11 @@ def editar_indicador(request, id):
     indicador = get_object_or_404(IndicadorEstrategico, id=id)
 
     if request.method == 'POST':
-        indicador.perspectiva = request.POST['perspectiva']
-        indicador.nombre = request.POST['nombre']
-        indicador.definicion = request.POST['definicion']
-        indicador.meta_anual = request.POST['meta_anual']
-        indicador.frecuencia = request.POST['frecuencia']
+        indicador.perspectiva = request.POST.get('perspectiva') or indicador.perspectiva
+        indicador.nombre = request.POST.get('nombre') or indicador.nombre
+        indicador.definicion = request.POST.get('definicion') or indicador.definicion
+        indicador.meta_anual = request.POST.get('meta_anual') or indicador.meta_anual
+        indicador.frecuencia = request.POST.get('frecuencia') or indicador.frecuencia
         indicador.save()
         return redirect(f'/indicadores/{id}/')
 
@@ -92,7 +96,8 @@ def editar_indicador(request, id):
 def eliminar_seguimiento(request, id):
     seguimiento = get_object_or_404(SeguimientoIndicador, id=id)
     indicador_id = seguimiento.indicador.id
-    seguimiento.delete()
+    if request.method == 'POST':
+        seguimiento.delete()
     return redirect(f'/indicadores/{indicador_id}/')
 
 @login_required
@@ -100,8 +105,8 @@ def editar_seguimiento(request, id):
     seguimiento = get_object_or_404(SeguimientoIndicador, id=id)
 
     if request.method == 'POST':
-        seguimiento.fecha = request.POST['fecha']
-        seguimiento.valor_obtenido = request.POST['valor_obtenido']
+        seguimiento.fecha = request.POST.get('fecha') or seguimiento.fecha
+        seguimiento.valor_obtenido = request.POST.get('valor_obtenido') or seguimiento.valor_obtenido
         seguimiento.observaciones = request.POST.get('observaciones', '')
         seguimiento.save()
         return redirect(f'/indicadores/{seguimiento.indicador.id}/')
@@ -122,7 +127,9 @@ def exportar_indicadores_excel(request):
         wb = openpyxl.Workbook()
         wb.active.title = "INDICADORES ESTRATEGICOS"
 
-    ws = wb[' INDICADORES ESTRATEGICOS'] if ' INDICADORES ESTRATEGICOS' in wb.sheetnames else wb.active
+    # El nombre de la hoja puede venir con espacio inicial en la plantilla
+    nombres_limpios = {n.strip(): n for n in wb.sheetnames}
+    ws = wb[nombres_limpios['INDICADORES ESTRATEGICOS']] if 'INDICADORES ESTRATEGICOS' in nombres_limpios else wb.active
 
     # Encabezados de auditoría
     ws.cell(row=7, column=7, value="Último Seguimiento")

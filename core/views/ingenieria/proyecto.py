@@ -57,10 +57,10 @@ def ingenieria_inicio(request):
     return render(
         request,
         "ingenieria/ingenieria_inicio.html"
-    )
+)
 
 # ==============================================================================
-# 🏢 GESTIÓN DE MACROPROYECTOS (INGENIERÍA)
+# GESTIÓN DE MACROPROYECTOS (INGENIERÍA)
 # ==============================================================================
 
 @login_required
@@ -75,7 +75,7 @@ def lista_macroproyectos(request):
             Q(numero_maniobra_cointeca__icontains=query) |
             Q(descripcion__icontains=query) |
             Q(estado__icontains=query)
-        )
+)
 
     resumen_macros = []
     for macro in macroproyectos:
@@ -99,7 +99,7 @@ def lista_macroproyectos(request):
             "total_macros": Macroproyecto.objects.count(),
             "total_filtrados": len(resumen_macros),
         }
-    )
+)
 
 @login_required
 def crear_macroproyecto(request):
@@ -129,7 +129,7 @@ def crear_macroproyecto(request):
             numero_maniobra_cointeca=numero_maniobra_cointeca,
             descripcion=descripcion,
             estado=estado if estado in Macroproyecto.Estados.values else Macroproyecto.Estados.PLANEACION
-        )
+)
         messages.success(request, f"{macro.etiqueta} '{macro.nombre}' creado exitosamente.")
         return redirect("lista_macroproyectos")
     return redirect("lista_macroproyectos")
@@ -157,7 +157,7 @@ def editar_macroproyecto(request, id):
 
         macro.nombre = nombre
         if tipo in Macroproyecto.Tipos.values:
-            if tipo != tipo_actual:
+            if tipo!= tipo_actual:
                 if tipo == Macroproyecto.Tipos.MT and macro.proyectos.exclude(tipo=Proyecto.Tipos.MT).exists():
                     messages.error(request, f"No se puede cambiar a Circuito (MT) porque ya contiene proyectos de Alumbrado Público (AP).")
                     return redirect("lista_macroproyectos")
@@ -195,7 +195,7 @@ def eliminar_macroproyecto(request, id):
     return redirect("lista_macroproyectos")
 
 # ==============================================================================
-# 📑 GESTIÓN DE PROYECTOS / MICROPROYECTOS
+# GESTIÓN DE PROYECTOS / MICROPROYECTOS
 # ==============================================================================
 
 @login_required
@@ -225,7 +225,7 @@ def lista_proyectos(request, macroproyecto_id=None):
             Q(numero_cointeca__icontains=query) |
             Q(tipo__icontains=query) |
             Q(estado__icontains=query)
-        )
+)
 
     proyectos = proyectos.select_related("macroproyecto").order_by("-id")
     todos_macroproyectos = Macroproyecto.objects.all().order_by("nombre")
@@ -244,7 +244,7 @@ def lista_proyectos(request, macroproyecto_id=None):
             "total_proyectos": total_proy,
             "total_filtrados": proyectos.count(),
         }
-    )
+)
 
 @login_required
 def crear_proyecto(request, macroproyecto_id=None):
@@ -275,24 +275,24 @@ def crear_proyecto(request, macroproyecto_id=None):
 
         # Validar coherencia entre Macroproyecto (AP) y Circuito (MT)
         if macroproyecto:
-            if macroproyecto.es_mt and tipo != Proyecto.Tipos.MT:
+            if macroproyecto.es_mt and tipo!= Proyecto.Tipos.MT:
                 messages.error(
                     request,
                     f"El contenedor '{macroproyecto.nombre}' es un Circuito de Media Tensión. Solo se pueden crear maniobras de tipo Media Tensión (MT)."
-                )
+)
                 return _volver()
             elif macroproyecto.es_ap and tipo == Proyecto.Tipos.MT:
                 messages.error(
                     request,
                     f"El contenedor '{macroproyecto.nombre}' es un Macroproyecto de Alumbrado Público. Solo se pueden crear proyectos de Alumbrado Público (AP), no maniobras de Media Tensión."
-                )
+)
                 return _volver()
 
         # Validar si ya existe en el MISMO Macroproyecto o Circuito
         filtro_existente = Proyecto.objects.filter(
             numero_emcali__iexact=numero_emcali,
             macroproyecto=macroproyecto
-        )
+)
         if filtro_existente.exists():
             etiqueta_padre = macroproyecto.etiqueta if macroproyecto else "Macroproyecto"
             etiqueta_hijo = macroproyecto.etiqueta_hijo if macroproyecto else "Proyecto"
@@ -308,7 +308,7 @@ def crear_proyecto(request, macroproyecto_id=None):
             numero_cointeca=numero_cointeca if tipo == Proyecto.Tipos.MT else "",
             tipo=tipo,
             estado=estado if estado in Proyecto.Estados.values else Proyecto.Estados.PLANEACION
-        )
+)
         messages.success(request, f"{proyecto.etiqueta} '{proyecto.numero_emcali}' creado exitosamente.")
         return _volver()
 
@@ -343,24 +343,24 @@ def editar_proyecto(request, id):
 
         # Validar coherencia entre Macroproyecto (AP) y Circuito (MT)
         if proyecto.macroproyecto:
-            if proyecto.macroproyecto.es_mt and tipo != Proyecto.Tipos.MT:
+            if proyecto.macroproyecto.es_mt and tipo!= Proyecto.Tipos.MT:
                 messages.error(
                     request,
                     f"El contenedor '{proyecto.macroproyecto.nombre}' es un Circuito de Media Tensión. Solo se permiten maniobras de tipo Media Tensión (MT)."
-                )
+)
                 return _volver()
             elif proyecto.macroproyecto.es_ap and tipo == Proyecto.Tipos.MT:
                 messages.error(
                     request,
                     f"El contenedor '{proyecto.macroproyecto.nombre}' es un Macroproyecto de Alumbrado Público. Solo se permiten proyectos de Alumbrado Público (AP), no maniobras de Media Tensión."
-                )
+)
                 return _volver()
 
         # Validar si ya existe en el MISMO Macroproyecto o Circuito
         filtro_existente = Proyecto.objects.filter(
             numero_emcali__iexact=numero_emcali,
             macroproyecto=proyecto.macroproyecto
-        ).exclude(id=proyecto.id)
+).exclude(id=proyecto.id)
         if filtro_existente.exists():
             etiqueta_padre = proyecto.macroproyecto.etiqueta if proyecto.macroproyecto else "Macroproyecto"
             etiqueta_hijo = proyecto.macroproyecto.etiqueta_hijo if proyecto.macroproyecto else "Proyecto"
@@ -413,11 +413,11 @@ def detalle_proyecto(request, id):
     # 1. Cargar apoyos con sus relaciones principales en 1 sola consulta
     apoyos = list(
         Apoyo.objects
-        .filter(proyecto=proyecto)
-        .select_related("quien_ejecuta")
-        .prefetch_related("luminarias")
-        .order_by("numero_apoyo", "id")
-    )
+.filter(proyecto=proyecto)
+.select_related("quien_ejecuta")
+.prefetch_related("luminarias")
+.order_by("numero_apoyo", "id")
+)
 
     tab_activa = request.GET.get("tab", "materiales").strip().lower()
 
@@ -425,8 +425,8 @@ def detalle_proyecto(request, id):
     apoyo_materiales = list(
         ApoyoMaterial.objects.filter(
             apoyo__proyecto=proyecto
-        ).select_related("material", "material__inventario").order_by("material__descripcion")
-    )
+).select_related("material", "material__inventario").order_by("material__descripcion")
+)
 
     materiales_dict = {}
     cantidades_inst_map = {}
@@ -496,8 +496,8 @@ def detalle_proyecto(request, id):
     apoyos_mo = list(
         ApoyoManoObra.objects.filter(
             apoyo__proyecto=proyecto
-        ).select_related("item_mano_obra")
-    )
+).select_related("item_mano_obra")
+)
 
     mo_dict = {}
     mo_cant_map = {}
@@ -572,7 +572,7 @@ def detalle_proyecto(request, id):
             })
 
     presupuesto, _ = Presupuesto.objects.get_or_create(proyecto=proyecto)
-    if presupuesto.valor_mano_obra != gran_total_mo_pesos:
+    if presupuesto.valor_mano_obra!= gran_total_mo_pesos:
         presupuesto.valor_mano_obra = gran_total_mo_pesos
         presupuesto.valor_total = presupuesto.valor_materiales + presupuesto.valor_mano_obra + presupuesto.otros_costos
         presupuesto.save(update_fields=['valor_mano_obra', 'valor_total'])
@@ -587,7 +587,7 @@ def detalle_proyecto(request, id):
     mat_cable_obj = (
         Material.objects.filter(item="43").first()
         or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-    )
+)
     mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
 
     # Serializar apoyosData y apoyosMOData en JSON nativo y seguro
@@ -668,7 +668,7 @@ def detalle_proyecto(request, id):
             "catalogo_mo_todos": catalogo_mo_todos,
             "presupuesto": presupuesto,
         }
-    )
+)
 
 
 def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
@@ -679,7 +679,7 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
     mat_cable = (
         Material.objects.filter(item="43").first()
         or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-    )
+)
     if not mat_cable:
         return
 
@@ -691,10 +691,11 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
     metros = max(Decimal("0"), metros)
     ap_mat = ApoyoMaterial.objects.filter(apoyo=apoyo, material=mat_cable).first()
     inventario, _ = Inventario.objects.get_or_create(material=mat_cable)
+    inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
 
     if ap_mat:
         diferencia = metros - ap_mat.cantidad_requerida
-        if diferencia != 0:
+        if diferencia!= 0:
             inventario.cantidad -= diferencia
         inventario.save()
 
@@ -712,7 +713,7 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
             material=mat_cable,
             cantidad_requerida=metros,
             cantidad_retirada=Decimal("0"),
-        )
+)
 
 def sincronizar_luminarias_desde_post(apoyo, request, materiales_ids=None, potencias_mat=None, codigos_mat=None):
     """
@@ -774,7 +775,7 @@ def sincronizar_luminarias_desde_post(apoyo, request, materiales_ids=None, poten
             apoyo=apoyo,
             potencia=p,
             codigo=c
-        )
+)
 
     # 4. Fallback final: Si no vino ningún input pero hay materiales instalados de tipo luminaria
     if not sub_luminarias_a_crear:
@@ -798,7 +799,7 @@ def crear_apoyo(request, proyecto_id):
     proyecto = get_object_or_404(
         Proyecto,
         id=proyecto_id
-    )
+)
 
     if request.method == "POST":
         import time
@@ -866,13 +867,13 @@ def crear_apoyo(request, proyecto_id):
             brazo=brazo,
             observacion=observacion,
             estado=estado
-        )
+)
 
         # Material cable retenida para no duplicarlo si se ingresa manualmente
         mat_cable_obj = (
             Material.objects.filter(item="43").first()
             or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-        )
+)
         mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
 
         # Guardar materiales asignados (múltiples)
@@ -898,8 +899,8 @@ def crear_apoyo(request, proyecto_id):
                 c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
                 c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
 
-                c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
-                c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+                c_inst = Decimal(c_inst_str) if c_inst_str!= "" else Decimal("0")
+                c_ret = Decimal(c_ret_str) if c_ret_str!= "" else Decimal("0")
 
                 if c_inst <= 0 and c_ret <= 0:
                     continue
@@ -908,6 +909,7 @@ def crear_apoyo(request, proyecto_id):
                 cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
 
                 inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
+                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
                 if c_inst > 0:
                     inventario.cantidad -= c_inst
 
@@ -923,7 +925,7 @@ def crear_apoyo(request, proyecto_id):
                     cantidad_retirada=max(Decimal("0"), c_ret),
                     potencia=pot_val,
                     codigo_luminaria=cod_val,
-                )
+)
                 materiales_creados += 1
             except (ValueError, TypeError, ArithmeticError):
                 continue
@@ -941,7 +943,7 @@ def crear_apoyo(request, proyecto_id):
         messages.success(
             request,
             f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' creado correctamente con {materiales_creados} material(es) asignado(s)."
-        )
+)
 
         tab = request.POST.get("tab", "materiales").strip()
         url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})
@@ -952,7 +954,7 @@ def crear_apoyo(request, proyecto_id):
     return redirect(
         "detalle_proyecto",
         id=proyecto.id        
-    )
+)
 
 
 @login_required
@@ -961,7 +963,7 @@ def editar_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(
         Apoyo.objects.select_related("proyecto"),
         id=apoyo_id
-    )
+)
     proyecto = apoyo.proyecto
 
     if request.method == "POST":
@@ -1006,7 +1008,7 @@ def editar_apoyo(request, apoyo_id):
         mat_cable_obj = (
             Material.objects.filter(item="43").first()
             or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-        )
+)
         mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
 
         # Sincronizar Materiales
@@ -1035,8 +1037,8 @@ def editar_apoyo(request, apoyo_id):
                 c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
                 c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
 
-                c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
-                c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+                c_inst = Decimal(c_inst_str) if c_inst_str!= "" else Decimal("0")
+                c_ret = Decimal(c_ret_str) if c_ret_str!= "" else Decimal("0")
 
                 if c_inst <= 0 and c_ret <= 0:
                     continue
@@ -1045,15 +1047,16 @@ def editar_apoyo(request, apoyo_id):
                 cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
 
                 inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
+                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
 
                 if mat_id_int in materiales_actuales:
                     am = materiales_actuales[mat_id_int]
                     diferencia = c_inst - am.cantidad_requerida
-                    if diferencia != 0:
+                    if diferencia!= 0:
                         inventario.cantidad -= diferencia
 
                     diferencia_ret = c_ret - am.cantidad_retirada
-                    if diferencia_ret != 0:
+                    if diferencia_ret!= 0:
                         inventario.cantidad += diferencia_ret
 
                     inventario.save()
@@ -1079,7 +1082,7 @@ def editar_apoyo(request, apoyo_id):
                         cantidad_retirada=max(Decimal("0"), c_ret),
                         potencia=pot_val,
                         codigo_luminaria=cod_val,
-                    )
+)
 
                 materiales_nuevos_procesados.add(mat_id_int)
             except (ValueError, TypeError, ArithmeticError):
@@ -1091,6 +1094,7 @@ def editar_apoyo(request, apoyo_id):
                 continue
             if mat_id_antiguo not in materiales_nuevos_procesados:
                 inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
+                inv_del = Inventario.objects.select_for_update().get(pk=inv_del.pk)
                 if am.cantidad_requerida > 0:
                     inv_del.cantidad += am.cantidad_requerida
                 if am.cantidad_retirada > 0:
@@ -1111,7 +1115,7 @@ def editar_apoyo(request, apoyo_id):
         messages.success(
             request,
             f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' actualizado correctamente."
-        )
+)
 
         tab = request.POST.get("tab", "materiales").strip()
         url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})
@@ -1128,14 +1132,14 @@ def despachar_bodega_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(
         Apoyo.objects.select_related("proyecto", "quien_ejecuta"),
         id=apoyo_id
-    )
+)
     proyecto = apoyo.proyecto
 
     is_ajax = (
         request.headers.get("x-requested-with") == "XMLHttpRequest"
         or request.POST.get("ajax") == "1"
         or "application/json" in request.headers.get("Accept", "")
-    )
+)
 
     if request.method == "POST":
         material_id = request.POST.get("material_id")
@@ -1159,6 +1163,7 @@ def despachar_bodega_apoyo(request, apoyo_id):
 
         material = get_object_or_404(Material, id=material_id)
         inventario, _ = Inventario.objects.get_or_create(material=material)
+        inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
         stock_previo = inventario.cantidad or Decimal("0")
         unidad_str = material.unidad or "UN"
 
@@ -1168,7 +1173,7 @@ def despachar_bodega_apoyo(request, apoyo_id):
 
         warning_msg = None
         if inventario.cantidad < 0:
-            warning_msg = f"⚠️ Advertencia: Stock en déficit en Bodega Central para '{material.descripcion}'. Quedó en {float(inventario.cantidad):g} {unidad_str} (se despacharon {float(cant):g} {unidad_str} al poste)."
+            warning_msg = f" Advertencia: Stock en déficit en Bodega Central para '{material.descripcion}'. Quedó en {float(inventario.cantidad):g} {unidad_str} (se despacharon {float(cant):g} {unidad_str} al poste)."
             if not is_ajax:
                 messages.warning(request, warning_msg)
         else:
@@ -1176,7 +1181,7 @@ def despachar_bodega_apoyo(request, apoyo_id):
                 messages.success(
                     request,
                     f"Se despacharon exitosamente {float(cant):g} {unidad_str} de '{material.descripcion}' desde Bodega Central al poste (Stock restante en bodega: {float(inventario.cantidad):g} {unidad_str})."
-                )
+)
 
         # Registrar en Historial / Kardex de Bodega Central
         nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
@@ -1192,14 +1197,14 @@ def despachar_bodega_apoyo(request, apoyo_id):
             apoyo=apoyo,
             detalle_origen_destino=f"Proyecto {proyecto.numero_emcali} • Poste/Nodo {nodo_str}",
             observacion=obs_user or f"Despacho directo desde Bodega al poste/nodo {nodo_str}"
-        )
+)
 
         # Asignar / sumar el material a este apoyo en la obra
         apoyo_mat, created = ApoyoMaterial.objects.get_or_create(
             apoyo=apoyo,
             material=material,
             defaults={"cantidad_requerida": cant}
-        )
+)
         if not created:
             apoyo_mat.cantidad_requerida += cant
             apoyo_mat.save()
@@ -1241,7 +1246,7 @@ def detalle_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(
         Apoyo.objects.select_related("proyecto"),
         id=apoyo_id
-    )
+)
     url = reverse("detalle_proyecto", kwargs={"id": apoyo.proyecto.id})
     return redirect(f"{url}?tab=materiales&editar_apoyo={apoyo.id}")
 
@@ -1262,6 +1267,7 @@ def eliminar_apoyo(request, apoyo_id):
         for am in apoyo.materiales.all():
             if am.cantidad_requerida > 0:
                 inventario, _ = Inventario.objects.get_or_create(material=am.material)
+                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
                 inventario.cantidad += am.cantidad_requerida
                 inventario.save()
 
@@ -1297,6 +1303,7 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
             if material_id and (cant_inst > 0 or cant_ret > 0):
                 material = get_object_or_404(Material, id=material_id)
                 inventario, _ = Inventario.objects.get_or_create(material=material)
+                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
                 stock_previo = inventario.cantidad or Decimal("0")
                 nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
                 proy_emcali = apoyo.proyecto.numero_emcali if apoyo.proyecto else ""
@@ -1306,8 +1313,8 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
                     if inventario.cantidad < 0:
                         messages.warning(
                             request,
-                            f"⚠️ Advertencia: Stock en déficit en bodega para '{material.descripcion}' (Stock actual: {float(inventario.cantidad):g} {material.unidad or 'UN'}). Se asignaron {float(cant_inst):g} al poste."
-                        )
+                            f" Advertencia: Stock en déficit en bodega para '{material.descripcion}' (Stock actual: {float(inventario.cantidad):g} {material.unidad or 'UN'}). Se asignaron {float(cant_inst):g} al poste."
+)
                     registrar_movimiento_inventario(
                         material=material,
                         tipo_movimiento=MovimientoInventario.Tipos.DESPACHO,
@@ -1319,7 +1326,7 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
                         apoyo=apoyo,
                         detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
                         observacion=f"Asignación rápida al poste {nodo_str}"
-                    )
+)
 
                 if cant_ret > 0:
                     stock_antes_ret = inventario.cantidad
@@ -1335,7 +1342,7 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
                         apoyo=apoyo,
                         detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
                         observacion=f"Material retirado/desmontado en poste {nodo_str}"
-                    )
+)
 
                 inventario.save()
 
@@ -1343,7 +1350,7 @@ def agregar_material_apoyo_rapido(request, apoyo_id):
                     apoyo=apoyo,
                     material=material,
                     defaults={"cantidad_requerida": cant_inst, "cantidad_retirada": cant_ret}
-                )
+)
                 if not created:
                     apoyo_mat.cantidad_requerida += cant_inst
                     apoyo_mat.cantidad_retirada += cant_ret
@@ -1379,12 +1386,13 @@ def editar_material_apoyo_rapido(request, apoyo_id):
 
             apoyo_mat = get_object_or_404(ApoyoMaterial, id=am_id, apoyo=apoyo)
             inventario, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+            inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
             stock_ant = inventario.cantidad or Decimal("0")
             nodo_str = apoyo.nodo or str(apoyo.numero_apoyo or "Poste")
             proy_emcali = apoyo.proyecto.numero_emcali if apoyo.proyecto else ""
 
             diferencia = cant_inst - apoyo_mat.cantidad_requerida
-            if diferencia != 0:
+            if diferencia!= 0:
                 inventario.cantidad -= diferencia
                 registrar_movimiento_inventario(
                     material=apoyo_mat.material,
@@ -1397,11 +1405,11 @@ def editar_material_apoyo_rapido(request, apoyo_id):
                     apoyo=apoyo,
                     detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
                     observacion=f"Ajuste en poste {nodo_str}: variación de {'instalado' if diferencia > 0 else 'reintegrado'} {abs(float(diferencia)):g} {apoyo_mat.material.unidad or 'UN'}"
-                )
+)
                 stock_ant = inventario.cantidad
 
             diferencia_ret = cant_ret - apoyo_mat.cantidad_retirada
-            if diferencia_ret != 0:
+            if diferencia_ret!= 0:
                 inventario.cantidad += diferencia_ret
                 registrar_movimiento_inventario(
                     material=apoyo_mat.material,
@@ -1414,7 +1422,7 @@ def editar_material_apoyo_rapido(request, apoyo_id):
                     apoyo=apoyo,
                     detalle_origen_destino=f"Proyecto {proy_emcali} • Poste {nodo_str}",
                     observacion=f"Ajuste de retiro en poste {nodo_str}: {abs(float(diferencia_ret)):g} {apoyo_mat.material.unidad or 'UN'}"
-                )
+)
 
             inventario.save()
 
@@ -1450,6 +1458,7 @@ def eliminar_material_apoyo_rapido(request, apoyo_material_id):
         nombre_mat = apoyo_mat.material.descripcion if apoyo_mat.material else "Material"
         if apoyo_mat.material:
             inv_del, _ = Inventario.objects.get_or_create(material=apoyo_mat.material)
+            inv_del = Inventario.objects.select_for_update().get(pk=inv_del.pk)
             stock_ant = inv_del.cantidad or Decimal("0")
             if apoyo_mat.cantidad_requerida > 0:
                 inv_del.cantidad += apoyo_mat.cantidad_requerida
@@ -1471,7 +1480,7 @@ def eliminar_material_apoyo_rapido(request, apoyo_material_id):
                     apoyo=apoyo,
                     detalle_origen_destino=f"Proyecto {proy_str} • Poste {nodo_str}",
                     observacion=f"Material removido del poste {nodo_str}: se devolvió a bodega"
-                )
+)
 
         apoyo_mat.delete()
         if apoyo:
@@ -1506,7 +1515,7 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
     proyecto = get_object_or_404(
         Proyecto.objects.select_related("macroproyecto"),
         id=proyecto_id
-    )
+)
     apoyos = Apoyo.objects.filter(proyecto=proyecto).prefetch_related("luminarias").order_by("numero_apoyo", "id")
 
     es_mt = (proyecto.tipo == Proyecto.Tipos.MT)
@@ -1531,7 +1540,7 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
 
         # Ajuste de impresión MT: encajar en 1 sola hoja Oficio / Legal
         sheet.page_setup.orientation = sheet.ORIENTATION_PORTRAIT
-        sheet.page_setup.paperSize = 5  # Papel Oficio / Legal
+        sheet.page_setup.paperSize = 5 # Papel Oficio / Legal
         sheet.sheet_properties.pageSetUpPr.fitToPage = True
         sheet.page_setup.fitToWidth = 1
         sheet.page_setup.fitToHeight = 1
@@ -1561,7 +1570,7 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
             right=Side(style='thin', color='A0A0A0'),
             top=Side(style='thin', color='A0A0A0'),
             bottom=Side(style='thin', color='A0A0A0')
-        )
+)
         font_consecutivo = Font(name="Arial", size=11, bold=False)
         font_nodo = Font(name="Arial", size=14, bold=True)
         font_potencia = Font(name="Arial", size=11, bold=True)
@@ -1639,7 +1648,7 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
 
         # Ajuste de impresión para que encaje exactamente en 1 sola hoja de oficio (Legal) apaisada
         sheet.page_setup.orientation = sheet.ORIENTATION_LANDSCAPE
-        sheet.page_setup.paperSize = 5  # Oficio / Legal (8.5 x 14 pulg)
+        sheet.page_setup.paperSize = 5 # Oficio / Legal (8.5 x 14 pulg)
         sheet.sheet_properties.pageSetUpPr.fitToPage = True
         sheet.page_setup.fitToWidth = 1
         sheet.page_setup.fitToHeight = 1
@@ -1664,7 +1673,7 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
     response = HttpResponse(
         output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
@@ -1672,7 +1681,7 @@ def imprimir_formato_poste_a_poste(request, proyecto_id):
 
 
 # ==============================================================================
-# 🛠️ VISTAS DE MANO DE OBRA Y LIQUIDACIÓN AUTOMÁTICA (INGENIERÍA)
+# VISTAS DE MANO DE OBRA Y LIQUIDACIÓN AUTOMÁTICA (INGENIERÍA)
 # ==============================================================================
 
 @login_required
@@ -1689,8 +1698,8 @@ def ejecutar_calculo_mano_obra(request, proyecto_id):
         total_creados = calcular_mano_obra_proyecto_completo(proyecto, preservar_manuales=True)
         messages.success(
             request,
-            f"⚡ Mano de Obra calculada exitosamente para el Proyecto {proyecto.numero_emcali}. Se actualizaron {total_creados} asignaciones de actividades."
-        )
+            f" Mano de Obra calculada exitosamente para el Proyecto {proyecto.numero_emcali}. Se actualizaron {total_creados} asignaciones de actividades."
+)
     return redirect(f"/ingenieria/proyectos/{proyecto.id}/?tab=mano_obra")
 
 
@@ -1751,7 +1760,7 @@ def guardar_mano_obra_manual(request, apoyo_id):
                         apoyo=apoyo,
                         item_mano_obra=item,
                         defaults={"cantidad": cantidad, "origen": ApoyoManoObra.Origen.MANUAL, "observacion": obs}
-                    )
+)
                     amo.cantidad = cantidad
                     amo.origen = ApoyoManoObra.Origen.MANUAL
                     amo.observacion = obs
@@ -1768,8 +1777,8 @@ def guardar_mano_obra_manual(request, apoyo_id):
                     msg_part += f" y se removieron {removidos_count}"
                 messages.success(
                     request,
-                    f"✅ {msg_part} en el poste {apoyo.nodo or apoyo.numero_apoyo}."
-                )
+                    f" {msg_part} en el poste {apoyo.nodo or apoyo.numero_apoyo}."
+)
             else:
                 messages.info(request, "No se registraron cambios en los servicios manuales.")
 
@@ -1820,7 +1829,7 @@ def catalogo_mano_obra(request):
         items = items.filter(
             Q(codigo__icontains=query) |
             Q(descripcion__icontains=query)
-        )
+)
     if categoria_sel:
         items = items.filter(categoria=categoria_sel)
 
@@ -1838,7 +1847,7 @@ def catalogo_mano_obra(request):
             "total_items": ItemManoObra.objects.count(),
             "total_filtrados": items.count(),
         }
-    )
+)
 
 
 @login_required
@@ -1886,7 +1895,7 @@ def exportar_liquidacion_proyecto_excel(request, proyecto_id):
         right=Side(style='thin', color='D1D5DB'),
         top=Side(style='thin', color='D1D5DB'),
         bottom=Side(style='thin', color='D1D5DB')
-    )
+)
 
     ws_resumen.append(["", proyecto.etiqueta.upper(), proyecto.numero_emcali, "", "FECHA", timezone.now().strftime("%d/%m/%Y")])
     ws_resumen.append([])
@@ -1983,7 +1992,7 @@ def exportar_liquidacion_proyecto_excel(request, proyecto_id):
     response = HttpResponse(
         output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
@@ -2013,13 +2022,13 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
         right=Side(style='thin', color='D1D5DB'),
         top=Side(style='thin', color='D1D5DB'),
         bottom=Side(style='thin', color='D1D5DB')
-    )
+)
     border_double = Border(
         left=Side(style='thin', color='D1D5DB'),
         right=Side(style='thin', color='D1D5DB'),
         top=Side(style='thin', color='D1D5DB'),
         bottom=Side(style='double', color='1E3A8A')
-    )
+)
 
     # 1. BANNER PRINCIPAL
     ws_macro.merge_cells("A1:G1")
@@ -2149,7 +2158,7 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
     actividades_ordenadas = sorted(
         [v for v in totales_globales_actividades.values() if v["cantidad"] > 0],
         key=lambda x: x["item"].codigo
-    )
+)
 
     tot_acum_mo = Decimal("0")
     for a_idx, act in enumerate(actividades_ordenadas, 1):
@@ -2229,7 +2238,7 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
         items_proy_ordenados = sorted(
             [it for it in totales_item_proy.keys() if totales_item_proy[it] > 0],
             key=lambda x: x.codigo
-        )
+)
 
         for item in items_proy_ordenados:
             tot = totales_item_proy.get(item, Decimal("0"))
@@ -2286,6 +2295,6 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
     response = HttpResponse(
         output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
     return response

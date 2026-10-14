@@ -1,27 +1,29 @@
-from django.shortcuts import render, redirect
-from core.models import Empleado
-from django.shortcuts import get_object_or_404
-from core.models import DotacionEmpleado, Empleado
 import os
+
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from openpyxl import load_workbook
 
+from core.models import Empleado, DotacionEmpleado
 
 
+@login_required
 def dotacion_home(request):
 
     empleados = Empleado.objects.all().order_by("nombre_completo")
-    
-    return render(
-    request,
-    "logistica/dotacion/dotacion_home.html",
-    {
-        "lista_empleados": empleados,
-        "prueba": "ESTOY EN EL HTML CORRECTO"
-    }
-)
 
+    return render(
+        request,
+        "logistica/dotacion/dotacion_home.html",
+        {
+            "lista_empleados": empleados,
+        }
+    )
+
+
+@login_required
 def detalle_dotacion(request, id):
 
     empleado = get_object_or_404(
@@ -90,6 +92,8 @@ def detalle_dotacion(request, id):
         }
     )
 
+
+@login_required
 def generar_dotacion(request, id):
 
     empleado = get_object_or_404(
@@ -124,4 +128,3 @@ def generar_dotacion(request, id):
     libro.save(response)
 
     return response
-

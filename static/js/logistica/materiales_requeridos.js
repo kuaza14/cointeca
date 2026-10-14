@@ -76,14 +76,14 @@ function abrirModalAgregar() {
         const btnGuardar = document.getElementById('btnGuardarModal');
 
         tbody.innerHTML = '';
-        contador.textContent = itemsAgregados.length + (itemsAgregados.length === 1 ? ' material' : ' materiales');
+        contador.textContent = itemsAgregados.length + (itemsAgregados.length === 1? ' material': ' materiales');
 
         if (itemsAgregados.length === 0) {
             tbody.innerHTML = `
                 <tr id="filaVaciaModal">
                     <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-xs">
                         Aún no has agregado materiales a la lista.<br>
-                        <span class="text-gray-500 font-medium">Elige arriba y presiona "➕ Agregar a la Lista".</span>
+                        <span class="text-gray-500 font-medium">Elige arriba y presiona " Agregar a la Lista".</span>
                     </td>
                 </tr>
             `;
@@ -115,7 +115,7 @@ function abrirModalAgregar() {
                     <button type="button" onclick="eliminarItemModal(${idx})"
                             class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition"
                             title="Quitar de la lista">
-                        🗑️
+                        
                     </button>
                 </td>
             `;
@@ -131,7 +131,7 @@ function abrirModalAgregar() {
         const filas = document.querySelectorAll(".fila-requerido-tabla");
 
         function filtrarRequeridos() {
-            const q = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+            const q = inputBuscador? inputBuscador.value.toLowerCase().trim(): "";
 
             if (btnLimpiar) {
                 if (q.length > 0) {
@@ -147,7 +147,7 @@ function abrirModalAgregar() {
             filas.forEach(function (fila) {
                 const texto = fila.textContent.toLowerCase();
                 const match = (q === "" || texto.includes(q));
-                fila.style.display = match ? "" : "none";
+                fila.style.display = match? "": "none";
                 if (match) visibles++;
             });
 

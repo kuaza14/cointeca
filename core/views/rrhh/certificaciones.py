@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
-from core.utils import formatear_pesos
+from core.utils import formatear_pesos, limpiar_nombre_archivo
 
 from datetime import date
 
@@ -27,7 +27,7 @@ def certificacion_laboral(request, id):
 
             "salario": formatear_pesos(empleado.salario),
 
-            "fecha_ingreso": empleado.fecha_ingreso.strftime("%d/%m/%Y"),
+            "fecha_ingreso": empleado.fecha_ingreso.strftime("%d/%m/%Y") if empleado.fecha_ingreso else "—",
             "fecha_finalizacion": (
                 empleado.fecha_finalizacion.strftime("%d/%m/%Y")
                 if empleado.fecha_finalizacion else ""
@@ -45,7 +45,7 @@ def certificacion_laboral(request, id):
 
         "certificacion_laboral.docx",
 
-        f"certificacion_{empleado.nombre_completo}.docx",
+        f"certificacion_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx",
 
         contexto
 

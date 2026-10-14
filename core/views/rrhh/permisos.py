@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
-from core.helpers.word import generar_word
+from core.helpers.word import generar_word, limpiar_nombre_archivo
 from datetime import date
 from core.models import Empleado
 
@@ -22,6 +22,6 @@ def permiso_laboral(request, id):
 
     return generar_word(
         "permiso_laboral.docx",
-        f"permiso_laboral_{empleado.nombre_completo}.docx",
+        limpiar_nombre_archivo(f"permiso_laboral_{empleado.nombre_completo}.docx"),
         contexto
     )

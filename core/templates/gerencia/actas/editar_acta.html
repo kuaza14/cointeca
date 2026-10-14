@@ -18,16 +18,14 @@
             <span>/</span>
             <span class="text-[#1F2937] font-semibold">Editar</span>
         </nav>
-        <a href="{% url 'detalle_acta' acta.id %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 text-slate-600 shadow-2xs">
-            ← Volver al Acta
-        </a>
+        <a href="{% url 'detalle_acta' acta.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Acta</span></a>
     </div>
 
     <!-- FORMULARIO -->
     <div class="tarjeta p-6 sm:p-8">
         <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
             <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
-                ✏️
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             </div>
             <div>
                 <h1 class="text-lg font-bold text-[#1F2937]">Editar Acta de Junta Directiva #{{ acta.numero_acta }}</h1>
@@ -131,7 +129,7 @@
                 {% if acta.archivo_firmado %}
                 <div class="mt-2 flex items-center justify-between text-xs bg-white p-2.5 rounded-lg border border-slate-200">
                     <a href="{{ acta.archivo_firmado.url }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1 font-medium truncate max-w-sm">
-                        📎 Ver Archivo Firmado Actual
+                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg> Ver Archivo Firmado Actual
                     </a>
                     <label class="flex items-center gap-1.5 text-red-600 cursor-pointer font-medium text-[11px]">
                         <input type="checkbox" name="eliminar_archivo_firmado" value="1" class="rounded text-red-600">

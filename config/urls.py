@@ -194,6 +194,8 @@ from core.views.logistica import(
     exportar_informe_consolidado_excel,
     registrar_retiro_material,
     eliminar_retiro_material,
+    registrar_consumo_material,
+    eliminar_consumo_material,
     vista_global_logistica,
     exportar_vista_global_excel,
 )
@@ -346,7 +348,7 @@ urlpatterns = [
     path('rrhh/empleados/<int:id>/descargo/', empleado_descargo, name='empleado_descargo'),
     path('rrhh/empleados/<int:id>/crear-descargo/', crear_descargo, name='crear_descargo'),
     path('rrhh/empleados/<int:id>/descargos/', descargos_empleado, name='descargos_empleado'),
-    path('rrhh/empleados/<int:id>/diligencia_descargos/', empleado_descargo, name='empleado_descargo'),
+    path('rrhh/empleados/<int:id>/diligencia_descargos/', empleado_descargo, name='empleado_diligencia_descargos'),
     path('rrhh/empleados/<int:id>/crear_citacion_descargo/', crear_citacion_descargo, name='crear_citacion_descargo'),
     path('rrhh/citacion_descargo/<int:id>/', generar_citacion_descargo, name='generar_citacion_descargo'),
     path('rrhh/empleados/citacion/<int:id>/eliminar/', eliminar_citacion_descargo, name='eliminar_citacion_descargo'),
@@ -442,6 +444,8 @@ urlpatterns = [
     path("logistica/proyectos/<int:proyecto_id>/", detalle_proyecto_logistica, name="detalle_proyecto_logistica"),
     path("logistica/proyectos/<int:proyecto_id>/entradas/crear/", registrar_entrada_material, name="registrar_entrada_material"),
     path("logistica/entradas/<int:entrada_id>/eliminar/", eliminar_entrada_material, name="eliminar_entrada_material"),
+    path("logistica/proyectos/<int:proyecto_id>/consumos/crear/", registrar_consumo_material, name="registrar_consumo_material"),
+    path("logistica/consumos/<int:consumo_id>/eliminar/", eliminar_consumo_material, name="eliminar_consumo_material"),
     path("logistica/proyectos/<int:proyecto_id>/retiros/crear/", registrar_retiro_material, name="registrar_retiro_material"),
     path("logistica/retiros/<int:retiro_id>/eliminar/", eliminar_retiro_material, name="eliminar_retiro_material"),
     path("logistica/proyectos/<int:proyecto_id>/requeridos/", materiales_requeridos_proyecto, name="materiales_requeridos_proyecto"),
@@ -458,7 +462,7 @@ urlpatterns = [
     path("rrhh/documentos/procedimiento_nomina_prestaciones/", generar_procedimiento_nomina_prestaciones, name="generar_procedimiento_nomina_prestaciones"),
     path("rrhh/documentos/procedimiento_disciplinario_interno/", generar_procedimiento_disciplinario_interno, name="generar_procedimiento_disciplinario_interno"),
     path("rrhh/documentos/procedimiento_custodia_historia_clinicas_datos_sensibles/", generar_procedimiento_custodia_historia_clinicas_datos_sensibles, name="generar_procedimiento_custodia_historia_clinicas_datos_sensibles"),
-    path("rrhh/documentos/procedimiento_reglamento_trabajo_cointeca_sas", generar_reglamento_trabajo_cointeca_sas, name="generar_reglamento_trabajo_cointeca_sas"),
+    path("rrhh/documentos/procedimiento_reglamento_trabajo_cointeca_sas/", generar_reglamento_trabajo_cointeca_sas, name="generar_reglamento_trabajo_cointeca_sas"),
 
     #Ingenieria
     path("ingenieria/", ingenieria_inicio, name="ingenieria_inicio"),
@@ -479,7 +483,7 @@ urlpatterns = [
     path("ingenieria/apoyo/<int:apoyo_id>/despachar-bodega/", despachar_bodega_apoyo, name="despachar_bodega_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/", detalle_apoyo, name="detalle_apoyo"),
     path("ingenieria/apoyo/<int:apoyo_id>/eliminar/", eliminar_apoyo, name="eliminar_apoyo"),
-    path("ingenieria/proyectos/<int:proyecto_id>/exportar_excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel"),
+    path("ingenieria/proyectos/<int:proyecto_id>/exportar_excel/", exportar_materiales_proyecto_excel, name="exportar_materiales_proyecto_excel_ing"),
     path("ingenieria/proyectos/<int:proyecto_id>/calcular-mano-obra/", ejecutar_calculo_mano_obra, name="ejecutar_calculo_mano_obra"),
     path("ingenieria/proyectos/<int:proyecto_id>/exportar-liquidacion/", exportar_liquidacion_proyecto_excel, name="exportar_liquidacion_proyecto_excel"),
     path("ingenieria/apoyos/<int:apoyo_id>/mano-obra-manual/", guardar_mano_obra_manual, name="guardar_mano_obra_manual"),
@@ -498,11 +502,6 @@ urlpatterns = [
 # =========================
 # 📁 MEDIA FILES
 # =========================
-urlpatterns += static(
-    settings.MEDIA_URL,
-    document_root=settings.MEDIA_ROOT
-)
-
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL,

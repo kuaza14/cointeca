@@ -82,12 +82,12 @@
 
     function actualizarLabelsCrearMacro(tipo) {
         if (tipo === "MT") {
-            if (tituloModalMacro) tituloModalMacro.innerHTML = "<span>⚡</span> Nuevo Circuito (Media Tensión)";
+            if (tituloModalMacro) tituloModalMacro.innerHTML = "<span></span> Nuevo Circuito (Media Tensión)";
             if (lblNombreMacro) lblNombreMacro.innerHTML = 'Nombre del Circuito <span class="text-red-600">*</span>';
             if (inputNombreMacro) inputNombreMacro.placeholder = "Ej: Circuito San Nicolás, Circuito Aguablanca...";
             if (btnSubmitCrearMacro) btnSubmitCrearMacro.textContent = "Crear Circuito";
         } else {
-            if (tituloModalMacro) tituloModalMacro.innerHTML = "<span>🏢</span> Nuevo Macroproyecto (Alumbrado Público)";
+            if (tituloModalMacro) tituloModalMacro.innerHTML = "<span></span> Nuevo Macroproyecto (Alumbrado Público)";
             if (lblNombreMacro) lblNombreMacro.innerHTML = 'Nombre del Macroproyecto <span class="text-red-600">*</span>';
             if (inputNombreMacro) inputNombreMacro.placeholder = "Ej: Macroproyecto Ciudad Córdoba...";
             if (btnSubmitCrearMacro) btnSubmitCrearMacro.textContent = "Crear Macroproyecto";
@@ -221,7 +221,7 @@
         deleteProyectosCount.textContent = proyectosCount;
 
         if (deleteTextoTipoMacro) {
-            deleteTextoTipoMacro.textContent = (etiqueta.toLowerCase().includes("circuito") ? "el circuito" : "el macroproyecto");
+            deleteTextoTipoMacro.textContent = (etiqueta.toLowerCase().includes("circuito")? "el circuito": "el macroproyecto");
         }
         if (deleteTextoHijosPlural) {
             deleteTextoHijosPlural.textContent = hijosPlural;
@@ -334,7 +334,7 @@
                 // Abrir la primera coincidencia visible
                 for (let i = 0; i < itemsProyectos.length; i++) {
                     const item = itemsProyectos[i];
-                    if (item.style.display !== "none") {
+                    if (item.style.display!== "none") {
                         const link = item.querySelector(".btn-imprimir-accion");
                         if (link) {
                             window.open(link.href, "_blank");
@@ -363,10 +363,10 @@
     // Cerrar con Escape cualquier modal
     document.addEventListener("keydown", function (evento) {
         if (evento.key === "Escape") {
-            if (modalMacro && !modalMacro.classList.contains("hidden")) cerrarMacro();
-            if (modalEditar && !modalEditar.classList.contains("hidden")) cerrarEditar();
-            if (modalEliminar && !modalEliminar.classList.contains("hidden")) cerrarEliminar();
-            if (modalImprimir && !modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
+            if (modalMacro &&!modalMacro.classList.contains("hidden")) cerrarMacro();
+            if (modalEditar &&!modalEditar.classList.contains("hidden")) cerrarEditar();
+            if (modalEliminar &&!modalEliminar.classList.contains("hidden")) cerrarEliminar();
+            if (modalImprimir &&!modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
         }
     });
 })();

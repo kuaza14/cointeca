@@ -26,17 +26,13 @@
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0 print:hidden">
-                    <a href="{% if macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'macroproyectos_logistica' %}{% endif %}"
-                       class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                       style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                        <span>←</span> <span>Volver a {% if macroproyecto %}{{ macroproyecto.nombre }}{% else %}Macroproyectos & Circuitos{% endif %}</span>
-                    </a>
+                    <a href="{% if macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' macroproyecto.id %}{% else %}{% url 'macroproyectos_logistica' %}{% endif %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a {% if macroproyecto %}{{ macroproyecto.nombre }}{% else %}Macroproyectos & Circuitos{% endif %}</span></a>
                 </div>
             </div>
 
             <div>
                 <h1 class="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
-                    <span>📊</span> Informe Consolidado de Materiales y Retiros
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span> Informe Consolidado de Materiales y Retiros
                 </h1>
                 <p class="text-sm text-muted-foreground mt-1">
                     Liquidación multi-proyecto: Entradas de material, instalaciones en postes y retiros/desmontes de campo.
@@ -48,14 +44,14 @@
                 <button type="button" onclick="window.print()"
                         class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
                         style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;">
-                    <span>🖨️</span> <span>Imprimir Informe</span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg></span> <span>Imprimir Informe</span>
                 </button>
 
                 <a href="{% url 'exportar_informe_consolidado_excel' %}?ids={{ ids_string }}"
                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
                    style="background-color: #047857 !important; color: #ffffff !important; border: 1px solid #065f46 !important;"
                    title="Descargar este consolidado en Excel">
-                    <span>📊</span> <span>Descargar en Excel</span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span> <span>Descargar en Excel</span>
                 </a>
             </div>
         </div>
@@ -114,13 +110,13 @@
         <div class="flex border-b border-border bg-card rounded-t-xl px-4 pt-2 print:hidden shadow-sm">
             <button type="button" onclick="cambiarPestanaInforme('consolidado')" id="tabBtnInformeConsolidado"
                     class="py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-blue-600 text-primary font-bold tab-btn-informe">
-                📋 Matriz Consolidada General
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg> Matriz Consolidada General
                 <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ tabla_consolidada|length }} materiales</span>
             </button>
 
             <button type="button" onclick="cambiarPestanaInforme('desglose')" id="tabBtnInformeDesglose"
                     class="py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe">
-                📑 Desglose por Proyecto Individual
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg> Desglose por Proyecto Individual
                 <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold">{{ total_proyectos_sel }} proyectos</span>
             </button>
         </div>
@@ -213,11 +209,11 @@
                             <td class="px-4 py-3 text-right font-black text-sm bg-amber-50/40">
                                 {% if fila.devolucion > 0 %}
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-200 text-amber-950 border border-amber-300">
-                                        <span>↩️</span> {{ fila.devolucion|floatformat }}
+                                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span> {{ fila.devolucion|floatformat }}
                                     </span>
                                 {% elif fila.devolucion_realizada > 0 %}
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300" title="Reintegrado en su totalidad a Bodega Central ({{ fila.devolucion_realizada|floatformat }} devueltos)">
-                                        ✓ Devuelto ({{ fila.devolucion_realizada|floatformat }})
+                                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Devuelto ({{ fila.devolucion_realizada|floatformat }})
                                     </span>
                                 {% else %}
                                     0
@@ -255,7 +251,7 @@
                                 {{ total_retirado_general|floatformat }}
                             </td>
                             <td class="px-4 py-3.5 text-right text-amber-100 font-black text-sm bg-amber-950">
-                                ↩️ {{ total_devolucion_general|floatformat }}
+                                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg> {{ total_devolucion_general|floatformat }}
                             </td>
                             <td class="px-4 py-3.5 text-right text-gray-400 font-normal text-xs">
                                 —
@@ -286,9 +282,9 @@
                     </div>
 
                     <div class="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
-                        <span>📦 {{ dp.num_entradas }} Entradas</span>
-                        <span>⚡ {{ dp.num_apoyos }} Postes</span>
-                        <span>🛠️ {{ dp.num_retiros }} Retiros</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg> {{ dp.num_entradas }} Entradas</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> {{ dp.num_apoyos }} Postes</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg> {{ dp.num_retiros }} Retiros</span>
                     </div>
                 </div>
 
@@ -323,11 +319,11 @@
                                 <td class="px-4 py-2.5 text-right font-black">
                                     {% if item.devolucion > 0 %}
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300 text-xs">
-                                            <span>↩️</span> {{ item.devolucion|floatformat }}
+                                            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span> {{ item.devolucion|floatformat }}
                                         </span>
                                     {% elif item.devolucion_realizada > 0 %}
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300" title="Reintegrado en su totalidad a Bodega Central ({{ item.devolucion_realizada|floatformat }} devueltos)">
-                                            ✓ Devuelto ({{ item.devolucion_realizada|floatformat }})
+                                            <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Devuelto ({{ item.devolucion_realizada|floatformat }})
                                         </span>
                                     {% else %}
                                         0
@@ -349,7 +345,7 @@
                                 <td class="px-4 py-2.5 text-right text-emerald-800 font-black">{{ dp.total_entrado|floatformat }}</td>
                                 <td class="px-4 py-2.5 text-right text-indigo-800 font-black">{{ dp.total_instalado|floatformat }}</td>
                                 <td class="px-4 py-2.5 text-right text-amber-800 font-black">{{ dp.total_retirado|floatformat }}</td>
-                                <td class="px-4 py-2.5 text-right text-amber-900 font-black">↩️ {{ dp.total_devolucion|floatformat }}</td>
+                                <td class="px-4 py-2.5 text-right text-amber-900 font-black"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg> {{ dp.total_devolucion|floatformat }}</td>
                             </tr>
                         </tfoot>
                         {% endif %}

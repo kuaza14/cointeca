@@ -26,11 +26,7 @@
 
             <!-- Botón Volver arriba a la derecha en gris sólido (no blanco) -->
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'proyectos_logistica' %}{% endif %}"
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}</span>
-                </a>
+                <a href="{% if proyecto.macroproyecto %}{% url 'proyectos_logistica_por_macroproyecto' proyecto.macroproyecto.id %}{% else %}{% url 'proyectos_logistica' %}{% endif %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a {% if proyecto.macroproyecto %}{{ proyecto.etiqueta_padre|lower }}{% else %}{{ proyecto.etiqueta_plural|lower }}{% endif %}</span></a>
             </div>
         </div>
 
@@ -84,18 +80,25 @@
                 <span>+</span> <span>Entrada Material</span>
             </a>
 
+            <a href="{% url 'registrar_consumo_material' proyecto.id %}"
+               class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+               style="background-color: #d97706 !important; color: #ffffff !important; border: 1px solid #b45309 !important;"
+               title="Registrar planilla de consumo real reportada por el supervisor">
+                <span>+</span> <span>Consumo (Planilla)</span>
+            </a>
+
             <a href="{% url 'detalle_proyecto' proyecto.id %}"
                class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
                style="background-color: #4338ca !important; color: #ffffff !important; border: 1px solid #3730a3 !important;"
                title="Ir a matriz poste a poste y liquidación de apoyos en Ingeniería">
-                <span>📍</span> <span>Apoyos & Retiros (Ing.)</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg></span> <span>Apoyos & Retiros (Ing.)</span>
             </a>
 
             <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
                class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
                style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b !important;"
                title="Descargar libro Excel con Matriz de Balance, Requeridos, Devoluciones y Nodos">
-                <span>📊</span> <span>Descargar Excel Balance</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span> <span>Descargar Excel Balance</span>
             </a>
         </div>
     </div>
@@ -238,11 +241,11 @@
                             <td class="px-4 py-3.5 text-right bg-orange-50/30 font-bold">
                                 {% if fila.devolucion > 0 %}
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs" title="Pendiente por devolver a bodega central: {{ fila.devolucion|floatformat }}{% if fila.devolucion_realizada > 0 %} (Ya se reintegraron {{ fila.devolucion_realizada|floatformat }} previamente){% endif %}">
-                                        <span>↩️</span> {{ fila.devolucion|floatformat }}
+                                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span> {{ fila.devolucion|floatformat }}
                                     </span>
                                 {% elif fila.devolucion_realizada > 0 %}
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300" title="Reintegrado en su totalidad a Bodega Central ({{ fila.devolucion_realizada|floatformat }} devueltos)">
-                                        ✓ Devuelto ({{ fila.devolucion_realizada|floatformat }})
+                                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Devuelto ({{ fila.devolucion_realizada|floatformat }})
                                     </span>
                                 {% else %}
                                     0
@@ -274,7 +277,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
                 <div>
                     <h3 class="font-bold text-foreground text-base flex items-center gap-2">
-                        <span>↩️</span> Materiales de Devolución
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span> Materiales de Devolución
                     </h3>
                     <p class="text-xs text-muted-foreground">
                         Materiales suministrados a la obra que sobraron (<span class="font-semibold">Suministrado &gt; Instalado</span>) y/o materiales retirados en terreno que deben ser devueltos a EMCALI / Cliente (se descuentan de Bodega Central al formalizar la devolución).
@@ -286,14 +289,14 @@
                             class="inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
                             style="background-color: #d97706; color: #ffffff !important;"
                             title="Registrar devolución de materiales y descontar de Bodega Central">
-                        <span>↩️</span> Devolver a Bodega ({{ materiales_devolucion|length }})
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span> Devolver a Bodega ({{ materiales_devolucion|length }})
                     </button>
                     {% endif %}
                     <a href="{% url 'exportar_materiales_devolucion_excel' proyecto.id %}"
                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
                        style="background-color: #b45309; color: #ffffff !important;"
                        title="Descargar relación oficial de Materiales a Devolver en Excel">
-                        <span>📑</span> Descargar Excel a Devolver
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></span> Descargar Excel a Devolver
                     </a>
                 </div>
             </div>
@@ -343,7 +346,7 @@
                                 {% if fila.potencia %}
                                 <div class="mt-1">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                        ⚡ Potencia/Voltaje: {{ fila.potencia }}
+                                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Potencia/Voltaje: {{ fila.potencia }}
                                     </span>
                                 </div>
                                 {% endif %}
@@ -363,7 +366,7 @@
                             </td>
                             <td class="px-4 py-3 text-right font-black text-amber-900 bg-amber-100/70 text-sm">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-300 font-extrabold text-amber-950">
-                                    ↩️ {{ fila.devolucion|floatformat }}
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg> {{ fila.devolucion|floatformat }}
                                 </span>
                             </td>
                         </tr>
@@ -374,7 +377,7 @@
             {% else %}
             <div class="text-center py-10 text-muted-foreground bg-muted/40 rounded-lg border border-dashed border-border">
                 <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl font-bold">
-                    ✓
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <p class="text-sm font-semibold text-foreground">No hay sobrantes de material ni materiales desinstalados pendientes de devolución</p>
                 <p class="text-xs text-muted-foreground mt-1">
@@ -388,7 +391,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h4 class="font-bold text-foreground text-sm flex items-center gap-2">
-                            <span>📦</span> Historial de Reintegros Recibidos en Bodega Central
+                            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg></span> Historial de Reintegros Recibidos en Bodega Central
                         </h4>
                         <p class="text-xs text-muted-foreground">Registro de actas y devoluciones que ya ingresaron formalmente al stock de bodega.</p>
                     </div>
@@ -404,7 +407,7 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-2">
                             <div class="flex flex-wrap items-center gap-3">
                                 <span class="px-2.5 py-0.5 rounded-md text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
-                                    📅 {{ dev.fecha|date:"d/m/Y" }}
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg> {{ dev.fecha|date:"d/m/Y" }}
                                 </span>
                                 {% if dev.numero_acta %}
                                 <span class="text-xs font-bold text-foreground">
@@ -422,7 +425,7 @@
                                 <input type="hidden" name="accion" value="eliminar_devolucion">
                                 <input type="hidden" name="devolucion_id" value="{{ dev.id }}">
                                 <button type="submit" class="text-xs text-destructive hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded transition cursor-pointer">
-                                    ✕ Anular Reintegro
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Anular Reintegro
                                 </button>
                             </form>
                         </div>
@@ -475,12 +478,11 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.remove('hidden'); document.getElementById('modalPedirRequerido').classList.add('flex');"
-                            class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
-                        + Pedir / Agregar Material
+                            class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Pedir / Agregar Material
                     </button>
                     <a href="{% url 'exportar_materiales_proyecto_excel' proyecto.id %}"
                        class="px-3.5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg shadow-sm transition">
-                        📊 Exportar a Excel
+                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg> Exportar a Excel
                     </a>
                 </div>
             </div>
@@ -548,8 +550,7 @@
                 <p class="text-xs text-muted-foreground mt-1">Usa «+ Pedir / Agregar Material» para solicitar materiales específicos para la obra.</p>
                 <div class="mt-3">
                     <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.remove('hidden'); document.getElementById('modalPedirRequerido').classList.add('flex');"
-                            class="btn btn-primario text-xs">
-                        + Pedir Material Requerido
+                            class="btn btn-primario text-xs"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Pedir Material Requerido
                     </button>
                 </div>
             </div>
@@ -575,7 +576,7 @@
             <!-- Barra de estado de filtros activos -->
             <div id="barraFiltrosInstalados" class="hidden items-center justify-between bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-lg text-xs">
                 <div class="flex items-center gap-2 text-indigo-900 font-medium">
-                    <span>🔍 Filtros activos:</span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg> Filtros activos:</span>
                     <span id="textoFiltrosInstalados" class="font-bold"></span>
                 </div>
                 <button type="button" onclick="limpiarTodosLosFiltrosExcel('tablaDetalleInstalados')" class="text-xs text-indigo-700 hover:text-indigo-900 font-bold underline cursor-pointer">
@@ -682,7 +683,7 @@
             <!-- Barra de estado de filtros activos -->
             <div id="barraFiltrosRetiros" class="hidden items-center justify-between bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg text-xs">
                 <div class="flex items-center gap-2 text-amber-900 font-medium">
-                    <span>🔍 Filtros activos:</span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg> Filtros activos:</span>
                     <span id="textoFiltrosRetiros" class="font-bold"></span>
                 </div>
                 <button type="button" onclick="limpiarTodosLosFiltrosExcel('tablaDetalleRetiros')" class="text-xs text-amber-700 hover:text-amber-900 font-bold underline cursor-pointer">
@@ -744,12 +745,12 @@
                                 <div class="flex items-center gap-1.5 mt-1">
                                     {% if ret.potencia %}
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                        ⚡ Potencia/Voltaje: {{ ret.potencia }}
+                                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Potencia/Voltaje: {{ ret.potencia }}
                                     </span>
                                     {% endif %}
                                     {% if ret.codigo_luminaria %}
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
-                                        🏷️ {{ ret.codigo_luminaria }}
+                                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3zM6 6h.008v.008H6V6z"/></svg> {{ ret.codigo_luminaria }}
                                     </span>
                                     {% endif %}
                                 </div>
@@ -789,8 +790,7 @@
                     <p class="text-xs text-muted-foreground">Historial de materiales recibidos de proveedores o despachados de bodega</p>
                 </div>
                 <a href="{% url 'registrar_entrada_material' proyecto.id %}"
-                   class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm">
-                    + Nueva Entrada
+                   class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Nueva Entrada
                 </a>
             </div>
 
@@ -879,7 +879,7 @@
         <div class="flex items-center justify-between border-b border-blue-950 px-6 py-4 bg-blue-900 text-white">
             <div>
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <span>📋</span> Pedir / Agregar Materiales Requeridos
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></span> Pedir / Agregar Materiales Requeridos
                 </h2>
                 <p class="text-xs text-blue-100 mt-0.5">
                     Puedes agregar uno o varios materiales y sus cantidades requeridas para {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}.
@@ -887,7 +887,7 @@
             </div>
             <button type="button" onclick="document.getElementById('modalPedirRequerido').classList.add('hidden'); document.getElementById('modalPedirRequerido').classList.remove('flex');"
                     class="flex size-8 items-center justify-center rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition text-xl font-bold">
-                ✕
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -900,7 +900,7 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Listado de Materiales a Solicitar</span>
                     <button type="button" id="btnAgregarFilaRequerido"
                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
-                        <span>+ Agregar otra fila</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Agregar otra fila</span>
                     </button>
                 </div>
 
@@ -949,7 +949,7 @@
                 </button>
                 <button type="submit"
                         class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer">
-                    <span>💾</span> Guardar Requerimientos
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></span> Guardar Requerimientos
                 </button>
             </div>
         </form>
@@ -963,7 +963,7 @@
         <div class="flex items-center justify-between border-b border-amber-950 px-6 py-4 bg-amber-900 text-white">
             <div>
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <span>↩️</span> Registrar Devolución de Materiales (Descontar de Bodega)
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span> Registrar Devolución de Materiales (Descontar de Bodega)
                 </h2>
                 <p class="text-xs text-amber-100 mt-0.5">
                     {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }} — Al confirmar, estas cantidades se descontarán de Bodega Central al formalizarse la devolución a EMCALI / Cliente.
@@ -971,7 +971,7 @@
             </div>
             <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
                     class="flex size-8 items-center justify-center rounded-lg text-amber-200 hover:text-white hover:bg-white/10 transition text-xl font-bold cursor-pointer">
-                ✕
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -981,7 +981,7 @@
 
             <div class="p-6 overflow-y-auto space-y-4 flex-1 bg-slate-50">
                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
-                    <p class="font-bold mb-0.5">ℹ️ Información de Devolución:</p>
+                    <p class="font-bold mb-0.5">ℹ Información de Devolución:</p>
                     <p>Los materiales a continuación corresponden al <strong>Sobrante de Obra + Materiales Desmontados en Apoyos</strong>. Al confirmar la devolución, estas cantidades se <strong>descontarán de Bodega Central</strong> y quedará registrada el acta oficial.</p>
                 </div>
 
@@ -1031,7 +1031,7 @@
                                     <span class="font-semibold text-xs text-gray-900">{{ fila.material.descripcion }}</span>
                                     {% if fila.potencia %}
                                     <span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                                        ⚡ {{ fila.potencia }}
+                                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> {{ fila.potencia }}
                                     </span>
                                     {% endif %}
                                     <div class="text-[10px] text-gray-500 mt-0.5">
@@ -1068,7 +1068,7 @@
                    class="px-3.5 py-2 text-white text-xs font-bold rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer"
                    style="background-color: #b45309; color: #ffffff !important;"
                    title="Descargar relación de Materiales a Devolver en Excel">
-                    <span>📑</span> Descargar Excel a Devolver
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></span> Descargar Excel a Devolver
                 </a>
                 <div class="flex items-center gap-3">
                     <button type="button" onclick="document.getElementById('modalRegistrarDevolucion').classList.add('hidden'); document.getElementById('modalRegistrarDevolucion').classList.remove('flex');"
@@ -1078,7 +1078,7 @@
                     <button type="submit" {% if not materiales_devolucion %}disabled{% endif %}
                             class="px-5 py-2 disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer"
                             style="background-color: #d97706; color: #ffffff !important;">
-                        <span>✅</span> Confirmar Devolución (Descontar de Bodega)
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span> Confirmar Devolución (Descontar de Bodega)
                     </button>
                 </div>
             </div>
@@ -1096,10 +1096,10 @@
     <!-- Encabezado del Popover -->
     <div class="flex items-center justify-between border-b border-border pb-2">
         <div class="flex items-center gap-1.5 font-bold text-foreground truncate">
-            <span>🔍</span> <span id="popoverColName">Filtrar Columna</span>
+            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg></span> <span id="popoverColName">Filtrar Columna</span>
         </div>
         <button type="button" onclick="cerrarFiltroExcel()" class="text-muted-foreground hover:text-foreground text-sm font-bold px-1.5 py-0.5 rounded hover:bg-muted transition">
-            ✕
+            <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
     </div>
 
@@ -1107,18 +1107,18 @@
     <div class="grid grid-cols-2 gap-1.5 border-b border-border pb-2">
         <button type="button" id="btnSortAsc" onclick="ejecutarSortExcel(true)"
                 class="flex items-center justify-center gap-1 px-2 py-1.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg transition text-[11px]">
-            <span>🔼</span> Ordenar A-Z
+            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg></span> Ordenar A-Z
         </button>
         <button type="button" id="btnSortDesc" onclick="ejecutarSortExcel(false)"
                 class="flex items-center justify-center gap-1 px-2 py-1.5 bg-muted hover:bg-gray-200 text-foreground font-semibold rounded-lg transition text-[11px]">
-            <span>🔽</span> Ordenar Z-A
+            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg></span> Ordenar Z-A
         </button>
     </div>
 
     <!-- Botón Borrar Filtro de esta Columna -->
     <button type="button" id="btnClearThisCol" onclick="borrarFiltroColumnaActual()"
             class="w-full flex items-center justify-center gap-1 px-2 py-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-bold rounded-lg transition text-[11px]">
-        <span>🗑️</span> Borrar filtro de esta columna
+        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></span> Borrar filtro de esta columna
     </button>
 
     <!-- Buscador en Tiempo Real dentro del Dropdown -->
@@ -1127,7 +1127,7 @@
                autocomplete="off"
                class="w-full border border-border-strong rounded-lg pl-7 pr-2.5 py-1.5 text-xs bg-card text-foreground focus:ring-2 focus:ring-blue-500 focus:outline-none">
         <span class="absolute inset-y-0 left-0 flex items-center pl-2 text-muted-foreground pointer-events-none">
-            🔍
+            <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
         </span>
     </div>
 

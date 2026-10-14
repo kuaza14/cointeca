@@ -16,15 +16,15 @@ function cambiarPestana(tabName) {
             btn.className = 'pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer bg-primary text-white shadow-sm';
             if (badge) {
                 badge.className = (t === 'resumen')
-                    ? 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-amber-300 text-amber-900 font-extrabold'
-                    : 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-white/20 text-white';
+? 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-amber-300 text-amber-900 font-extrabold'
+: 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-white/20 text-white';
             }
         } else {
             btn.className = 'pestana-btn flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer text-muted-foreground hover:bg-muted hover:text-foreground';
             if (badge) {
                 badge.className = (t === 'resumen')
-                    ? 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-bold'
-                    : 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-muted text-foreground';
+? 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-bold'
+: 'badge-pestana px-2 py-0.5 rounded-full text-[10px] bg-muted text-foreground';
             }
         }
     });
@@ -38,7 +38,7 @@ function cambiarPestana(tabName) {
 
 // Configuración desacoplada leída desde ingenieria-config
 const ingCfgEl = document.getElementById("ingenieria-config");
-const ingCfg = ingCfgEl ? JSON.parse(ingCfgEl.textContent) : {};
+const ingCfg = ingCfgEl? JSON.parse(ingCfgEl.textContent): {};
 const MAT_CABLE_ID = ingCfg.matCableId || "";
 const URL_CREAR_APOYO = ingCfg.urlCrearApoyo || "";
 const FECHA_HOY = ingCfg.fechaHoy || new Date().toISOString().split("T")[0];
@@ -54,7 +54,7 @@ function crearFilaMO(itemId = '', cantidad = '1', observacion = '') {
     let optionsHtml = '';
     if (templateSelect) {
         Array.from(templateSelect.options).forEach(opt => {
-            const selected = (itemId && String(opt.value) === String(itemId)) ? 'selected' : '';
+            const selected = (itemId && String(opt.value) === String(itemId))? 'selected': '';
             optionsHtml += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
         });
     }
@@ -88,13 +88,13 @@ function crearSubFilaLuminaria(potencia = '', codigo = '') {
     div.className = 'fila-sub-lum flex flex-wrap sm:flex-nowrap items-center gap-2 bg-white/80 p-1.5 rounded border border-amber-200';
     div.innerHTML = `
         <div class="flex items-center gap-1 flex-1 min-w-[120px]">
-            <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">⚡ Potencia:</span>
+            <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap"> Potencia:</span>
             <input type="text" value="${potencia}" placeholder="Ej: 70W, 190W..."
                    class="input-sub-potencia w-full bg-white border border-amber-300 rounded px-2 py-1 text-xs font-bold text-amber-900 focus:ring-1 focus:ring-amber-500 focus:outline-none"
                    title="Potencia en vatios de la luminaria (W)">
         </div>
         <div class="flex items-center gap-1 flex-1 min-w-[130px]">
-            <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap">🏷️ Código:</span>
+            <span class="text-[10px] font-extrabold text-amber-900 uppercase whitespace-nowrap"> Código:</span>
             <input type="text" value="${codigo}" placeholder="Ej: 6T0698, 9U7940..."
                    class="input-sub-codigo w-full bg-white border border-blue-300 rounded px-2 py-1 text-xs font-bold font-mono text-blue-900 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                    title="Código serial o placa de la luminaria">
@@ -110,7 +110,7 @@ function actualizarSerializacionLuminarias(td) {
     const btnQuitarList = td.querySelectorAll('.btnQuitarSubLum');
 
     btnQuitarList.forEach(btn => {
-        btn.style.display = (subFilas.length > 1) ? '' : 'none';
+        btn.style.display = (subFilas.length > 1)? '': 'none';
     });
 
     const lista = [];
@@ -120,8 +120,8 @@ function actualizarSerializacionLuminarias(td) {
     subFilas.forEach(f => {
         const inPot = f.querySelector('.input-sub-potencia');
         const inCod = f.querySelector('.input-sub-codigo');
-        const pot = inPot ? inPot.value.trim() : '';
-        const cod = inCod ? inCod.value.trim() : '';
+        const pot = inPot? inPot.value.trim(): '';
+        const cod = inCod? inCod.value.trim(): '';
         if (pot || cod) {
             lista.push({ potencia: pot, codigo: cod });
             if (pot) potencias.push(pot);
@@ -133,7 +133,7 @@ function actualizarSerializacionLuminarias(td) {
     const inputPot = td.querySelector('.input-potencia-serializada');
     const inputCod = td.querySelector('.input-codigo-serializado');
 
-    if (inputJson) inputJson.value = lista.length > 0 ? JSON.stringify(lista) : '';
+    if (inputJson) inputJson.value = lista.length > 0? JSON.stringify(lista): '';
     if (inputPot) inputPot.value = potencias.join(', ');
     if (inputCod) inputCod.value = codigos.join(', ');
 
@@ -169,7 +169,7 @@ function onSelectMaterialNodo(selectEl) {
     if (!contenedor) return;
 
     const esLuminaria = opt && (opt.dataset.esLuminaria === '1' || esLuminariaTexto(opt.text));
-    const potenciaSugerida = opt ? (opt.dataset.potencia || extraerPotenciaDeTexto(opt.text)) : '';
+    const potenciaSugerida = opt? (opt.dataset.potencia || extraerPotenciaDeTexto(opt.text)): '';
 
     if (esLuminaria) {
         contenedor.classList.remove('hidden');
@@ -180,7 +180,7 @@ function onSelectMaterialNodo(selectEl) {
                 contSub.appendChild(crearSubFilaLuminaria(potenciaSugerida, ''));
             } else if (subFilas.length === 1) {
                 const inPot = subFilas[0].querySelector('.input-sub-potencia');
-                if (inPot && !inPot.value && potenciaSugerida) {
+                if (inPot &&!inPot.value && potenciaSugerida) {
                     inPot.value = potenciaSugerida;
                 }
             }
@@ -210,7 +210,7 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
     if (templateSelect) {
         Array.from(templateSelect.options).forEach(opt => {
             const isSel = (materialId && String(opt.value) === String(materialId));
-            const selected = isSel ? 'selected' : '';
+            const selected = isSel? 'selected': '';
             const esLumOpt = opt.dataset.esLuminaria === '1' || esLuminariaTexto(opt.text);
             const potOpt = opt.dataset.potencia || extraerPotenciaDeTexto(opt.text);
             if (isSel) {
@@ -219,7 +219,7 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
                     selectedPotencia = potOpt;
                 }
             }
-            optionsHtml += `<option value="${opt.value}" data-es-luminaria="${esLumOpt ? '1' : '0'}" data-potencia="${potOpt}" ${selected}>${opt.text}</option>`;
+            optionsHtml += `<option value="${opt.value}" data-es-luminaria="${esLumOpt? '1': '0'}" data-potencia="${potOpt}" ${selected}>${opt.text}</option>`;
         });
     }
 
@@ -232,14 +232,14 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
                     class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none select-material-nodo">
                 ${optionsHtml}
             </select>
-            <div class="contenedor-potencia-mat mt-1.5 ${mostrarPotencia ? '' : 'hidden'}">
+            <div class="contenedor-potencia-mat mt-1.5 ${mostrarPotencia? '': 'hidden'}">
                 <div class="bg-amber-50/90 border border-amber-300 rounded-lg p-2.5 shadow-2xs space-y-2">
                     <div class="flex items-center justify-between border-b border-amber-200/80 pb-1.5">
                         <span class="text-[10px] font-black text-amber-900 uppercase flex items-center gap-1">
-                            <span>⚡</span> Potencia y Código de Luminaria
+                            <span></span> Potencia y Código de Luminaria
                         </span>
                         <button type="button" class="btnAgregarSubLum inline-flex items-center gap-1 px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold rounded shadow-2xs cursor-pointer" title="Agregar otra potencia y código a este poste">
-                            <span>➕</span> Agregar otra potencia / código
+                            <span></span> Agregar otra potencia / código
                         </button>
                     </div>
 
@@ -274,8 +274,8 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
     if (contSub && esLuminariaReal) {
         let items = [];
         if (selectedCodigo || selectedPotencia) {
-            const cods = selectedCodigo ? selectedCodigo.split(',').map(s => s.trim()) : [];
-            const pots = selectedPotencia ? selectedPotencia.split(',').map(s => s.trim()) : [];
+            const cods = selectedCodigo? selectedCodigo.split(',').map(s => s.trim()): [];
+            const pots = selectedPotencia? selectedPotencia.split(',').map(s => s.trim()): [];
             const maxLen = Math.max(cods.length, pots.length, 1);
             for (let i = 0; i < maxLen; i++) {
                 const p = pots[i] || (pots[0] || '');
@@ -304,13 +304,13 @@ let huboDespachoEnModal = false;
 function actualizarStockEnTodosLosSelects(materialId, stockRestante, item, descripcion, unidad) {
     let stockLabel = '';
     const numStock = parseFloat(stockRestante);
-    const stockLimpio = Number.isInteger(numStock) ? numStock : parseFloat(numStock.toFixed(2));
+    const stockLimpio = Number.isInteger(numStock)? numStock: parseFloat(numStock.toFixed(2));
     if (numStock > 0) {
         stockLabel = `[Stock: ${stockLimpio} ${unidad}]`;
     } else if (numStock < 0) {
-        stockLabel = `[⚠️ Déficit: ${stockLimpio} ${unidad}]`;
+        stockLabel = `[ Déficit: ${stockLimpio} ${unidad}]`;
     } else {
-        stockLabel = `[⚠️ Sin stock: 0 ${unidad}]`;
+        stockLabel = `[ Sin stock: 0 ${unidad}]`;
     }
     const nuevoTexto = `[${item}] ${descripcion} ${stockLabel}`;
 
@@ -337,10 +337,10 @@ function abrirModalNuevoApoyo() {
     huboDespachoEnModal = false;
     const modal = document.getElementById('modalNuevoApoyo');
     const form = document.getElementById('formModalApoyo');
-    if (!modal || !form) return;
+    if (!modal ||!form) return;
 
     form.action = URL_CREAR_APOYO || form.action;
-    document.getElementById('modalApoyoIcono').textContent = '📍';
+    document.getElementById('modalApoyoIcono').textContent = '';
     document.getElementById('modalApoyoTitulo').textContent = 'Nuevo Nodo / Apoyo — Formato Poste a Poste';
     delete form.dataset.submitting;
     const btnSubmit = document.getElementById('btnSubmitModalApoyo');
@@ -391,26 +391,26 @@ function recalcularMetrosRetenidaModal() {
     const selectAlt = document.getElementById('modalApoyo_altura_retenida');
     const inputMet = document.getElementById('modalApoyo_metros_retenido');
     const info = document.getElementById('modalApoyo_retenida_info');
-    if (!inputCant || !selectAlt || !inputMet) return;
+    if (!inputCant ||!selectAlt ||!inputMet) return;
 
     const cant = parseFloat(inputCant.value) || 0;
     const tipo = selectAlt.value;
 
     if (tipo === '12') {
-        const total = cant > 0 ? (cant * 14) : 0;
-        inputMet.value = total > 0 ? parseFloat(total.toFixed(2)) : (cant === 0 ? '0' : '');
+        const total = cant > 0? (cant * 14): 0;
+        inputMet.value = total > 0? parseFloat(total.toFixed(2)): (cant === 0? '0': '');
         if (info) {
             info.innerHTML = cant > 0
-                ? `<span class="text-blue-600 font-bold">⚡ ${cant} × 14m = ${parseFloat(total.toFixed(2))}m Cable EAR 3/8" a descontar</span>`
-                : `<span class="text-blue-600 font-semibold">Poste 12: 14 mts por retenida (Cable EAR 3/8")</span>`;
+? `<span class="text-blue-600 font-bold"> ${cant} × 14m = ${parseFloat(total.toFixed(2))}m Cable EAR 3/8" a descontar</span>`
+: `<span class="text-blue-600 font-semibold">Poste 12: 14 mts por retenida (Cable EAR 3/8")</span>`;
         }
     } else if (tipo === '14') {
-        const total = cant > 0 ? (cant * 16) : 0;
-        inputMet.value = total > 0 ? parseFloat(total.toFixed(2)) : (cant === 0 ? '0' : '');
+        const total = cant > 0? (cant * 16): 0;
+        inputMet.value = total > 0? parseFloat(total.toFixed(2)): (cant === 0? '0': '');
         if (info) {
             info.innerHTML = cant > 0
-                ? `<span class="text-blue-600 font-bold">⚡ ${cant} × 16m = ${parseFloat(total.toFixed(2))}m Cable EAR 3/8" a descontar</span>`
-                : `<span class="text-blue-600 font-semibold">Poste 14: 16 mts por retenida (Cable EAR 3/8")</span>`;
+? `<span class="text-blue-600 font-bold"> ${cant} × 16m = ${parseFloat(total.toFixed(2))}m Cable EAR 3/8" a descontar</span>`
+: `<span class="text-blue-600 font-semibold">Poste 14: 16 mts por retenida (Cable EAR 3/8")</span>`;
         }
     } else if (tipo === 'manual') {
         if (info) {
@@ -425,7 +425,7 @@ function recalcularMetrosRetenidaModal() {
 
 function verificarMetrosManualModal() {
     const selectAlt = document.getElementById('modalApoyo_altura_retenida');
-    if (selectAlt && selectAlt.value !== '12' && selectAlt.value !== '14') {
+    if (selectAlt && selectAlt.value!== '12' && selectAlt.value!== '14') {
         selectAlt.value = 'manual';
     }
 }
@@ -438,11 +438,11 @@ function abrirModalEditarApoyo(apoyoId) {
 
     const modal = document.getElementById('modalNuevoApoyo');
     const form = document.getElementById('formModalApoyo');
-    if (!modal || !form) return;
+    if (!modal ||!form) return;
 
     form.action = '/ingenieria/apoyo/' + apoyoId + '/editar/';
-    document.getElementById('modalApoyoIcono').textContent = '✏️';
-    document.getElementById('modalApoyoTitulo').textContent = 'Editar Nodo / Apoyo — ' + (data.nodo ? 'Nodo ' + data.nodo : 'Apoyo #' + (data.numero_apoyo || apoyoId));
+    document.getElementById('modalApoyoIcono').textContent = '';
+    document.getElementById('modalApoyoTitulo').textContent = 'Editar Nodo / Apoyo — ' + (data.nodo? 'Nodo ' + data.nodo: 'Apoyo #' + (data.numero_apoyo || apoyoId));
     delete form.dataset.submitting;
     const btnSubmit = document.getElementById('btnSubmitModalApoyo');
     if (btnSubmit) {
@@ -563,9 +563,9 @@ function onSelectApoyoMOChange(apoyoId) {
     tbody.innerHTML = '';
 
     if (apoyoId && select) {
-        const nodoTexto = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+        const nodoTexto = select.options[select.selectedIndex]? select.options[select.selectedIndex].text: '';
         if (titulo) titulo.textContent = 'Editar Servicios de Mano de Obra — ' + nodoTexto;
-        if (typeof apoyosMOData !== 'undefined' && apoyosMOData[apoyoId] && apoyosMOData[apoyoId].length > 0) {
+        if (typeof apoyosMOData!== 'undefined' && apoyosMOData[apoyoId] && apoyosMOData[apoyoId].length > 0) {
             apoyosMOData[apoyoId].forEach(mo => {
                 tbody.appendChild(crearFilaMO(mo.item_id, mo.cantidad, mo.observacion));
             });
@@ -583,16 +583,16 @@ function abrirModalAsignarMO(apoyoId = null) {
     const select = document.getElementById('selectApoyoMO');
     const titulo = document.getElementById('modalAsignarMOTitulo');
     const tbody = document.getElementById('filasMOMultiple');
-    if (!modal || !tbody) return;
+    if (!modal ||!tbody) return;
 
     tbody.innerHTML = '';
 
     if (apoyoId && select) {
         select.value = apoyoId;
         actualizarActionMO(apoyoId);
-        const nodoTexto = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+        const nodoTexto = select.options[select.selectedIndex]? select.options[select.selectedIndex].text: '';
         if (titulo) titulo.textContent = 'Editar Servicios de Mano de Obra — ' + nodoTexto;
-        if (typeof apoyosMOData !== 'undefined' && apoyosMOData[apoyoId] && apoyosMOData[apoyoId].length > 0) {
+        if (typeof apoyosMOData!== 'undefined' && apoyosMOData[apoyoId] && apoyosMOData[apoyoId].length > 0) {
             apoyosMOData[apoyoId].forEach(mo => {
                 tbody.appendChild(crearFilaMO(mo.item_id, mo.cantidad, mo.observacion));
             });
@@ -635,16 +635,16 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
         const selectMat = document.getElementById('despacho_material_id');
-        const matId = selectMat ? selectMat.value : '';
-        const cant = inputDespachoCantidad ? inputDespachoCantidad.value : '';
+        const matId = selectMat? selectMat.value: '';
+        const cant = inputDespachoCantidad? inputDespachoCantidad.value: '';
 
-        if (!matId || !cant || parseFloat(cant) <= 0) {
+        if (!matId ||!cant || parseFloat(cant) <= 0) {
             alert('Por favor selecciona un material de bodega e ingresa una cantidad válida.');
             return;
         }
 
         const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
-        const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
+        const csrfToken = csrfTokenEl? csrfTokenEl.value: '';
 
         const iconoBtn = document.getElementById('iconoBtnDespacho');
         const textoBtn = document.getElementById('textoBtnDespacho');
@@ -653,7 +653,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Estado cargando
         btnEjecutarDespacho.disabled = true;
-        if (iconoBtn) iconoBtn.textContent = '⏳';
+        if (iconoBtn) iconoBtn.textContent = '';
         if (textoBtn) textoBtn.textContent = 'Despachando...';
 
         const formData = new FormData();
@@ -683,7 +683,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data.material_item,
                     data.material_descripcion,
                     data.unidad
-                );
+);
 
                 // 2. Actualizar o insertar fila en la tabla de materiales del nodo
                 const tbodyMat = document.getElementById('filasMaterialesNodo');
@@ -712,7 +712,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             const sel = filas[0].querySelector('select[name="material_id[]"]');
                             const inpInst = filas[0].querySelector('input[name="cantidad_instalada[]"]');
                             const inpRet = filas[0].querySelector('input[name="cantidad_retirada[]"]');
-                            if (sel && (!sel.value || sel.value === '') && (!inpInst || !inpInst.value) && (!inpRet || !inpRet.value)) {
+                            if (sel && (!sel.value || sel.value === '') && (!inpInst ||!inpInst.value) && (!inpRet ||!inpRet.value)) {
                                 filaVacia = filas[0];
                             }
                         }
@@ -756,9 +756,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         textoAlerta.innerHTML = data.warning;
                     } else {
                         alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-emerald-100 text-emerald-900 border border-emerald-300 transition-all';
-                        const cantDespFmt = Number.isInteger(data.cantidad_despachada) ? data.cantidad_despachada : parseFloat(data.cantidad_despachada.toFixed(2));
-                        const stockRestFmt = Number.isInteger(data.stock_restante) ? data.stock_restante : parseFloat(data.stock_restante.toFixed(2));
-                        textoAlerta.innerHTML = `✅ <strong>¡Despacho Exitoso!</strong> Se despacharon <strong>${cantDespFmt} ${data.unidad}</strong> de <em>${data.material_descripcion}</em> al poste. (Stock restante en bodega: <strong>${stockRestFmt} ${data.unidad}</strong>). ¡Puedes despachar otro material!`;
+                        const cantDespFmt = Number.isInteger(data.cantidad_despachada)? data.cantidad_despachada: parseFloat(data.cantidad_despachada.toFixed(2));
+                        const stockRestFmt = Number.isInteger(data.stock_restante)? data.stock_restante: parseFloat(data.stock_restante.toFixed(2));
+                        textoAlerta.innerHTML = ` <strong>¡Despacho Exitoso!</strong> Se despacharon <strong>${cantDespFmt} ${data.unidad}</strong> de <em>${data.material_descripcion}</em> al poste. (Stock restante en bodega: <strong>${stockRestFmt} ${data.unidad}</strong>). ¡Puedes despachar otro material!`;
                     }
                     alertaDespacho.classList.remove('hidden');
                 }
@@ -774,7 +774,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const errMsg = data.error || 'Ocurrió un error al despachar el material.';
                 if (alertaDespacho && textoAlerta) {
                     alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-red-100 text-red-900 border border-red-300 transition-all';
-                    textoAlerta.innerHTML = `❌ <strong>Error:</strong> ${errMsg}`;
+                    textoAlerta.innerHTML = ` <strong>Error:</strong> ${errMsg}`;
                     alertaDespacho.classList.remove('hidden');
                 } else {
                     alert(errMsg);
@@ -784,14 +784,14 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Error en despacho AJAX:', err);
             if (alertaDespacho && textoAlerta) {
                 alertaDespacho.className = 'p-3 rounded-lg text-xs font-semibold flex items-center justify-between bg-red-100 text-red-900 border border-red-300 transition-all';
-                textoAlerta.innerHTML = `❌ <strong>Error de conexión:</strong> No se pudo completar el despacho. Intenta de nuevo.`;
+                textoAlerta.innerHTML = ` <strong>Error de conexión:</strong> No se pudo completar el despacho. Intenta de nuevo.`;
                 alertaDespacho.classList.remove('hidden');
             } else {
                 alert('No se pudo conectar con el servidor para despachar.');
             }
         } finally {
             btnEjecutarDespacho.disabled = false;
-            if (iconoBtn) iconoBtn.textContent = '⚡';
+            if (iconoBtn) iconoBtn.textContent = '';
             if (textoBtn) textoBtn.textContent = 'Despachar al Poste';
         }
     }
@@ -823,10 +823,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const btnAddSub = e.target.closest(".btnAgregarSubLum");
             if (btnAddSub) {
                 const td = btnAddSub.closest("td");
-                const contSub = td ? td.querySelector(".contenedor-sub-lums") : null;
+                const contSub = td? td.querySelector(".contenedor-sub-lums"): null;
                 if (contSub) {
-                    const ultPot = contSub.querySelector(".fila-sub-lum:last-child .input-sub-potencia");
-                    const potSug = ultPot ? ultPot.value : "";
+                    const ultPot = contSub.querySelector(".fila-sub-lum:last-child.input-sub-potencia");
+                    const potSug = ultPot? ultPot.value: "";
                     const nuevaSub = crearSubFilaLuminaria(potSug, "");
                     contSub.appendChild(nuevaSub);
                     actualizarSerializacionLuminarias(td);
@@ -871,7 +871,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Sincronización en tiempo real al escribir potencia o código
         filasMaterialesNodo.addEventListener("input", function (e) {
-            if (e.target.matches(".input-sub-potencia, .input-sub-codigo")) {
+            if (e.target.matches(".input-sub-potencia,.input-sub-codigo")) {
                 const td = e.target.closest("td");
                 actualizarSerializacionLuminarias(td);
             }
@@ -911,7 +911,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formModalApoyo = document.getElementById("formModalApoyo");
     if (formModalApoyo) {
         formModalApoyo.addEventListener("submit", function () {
-            document.querySelectorAll("#filasMaterialesNodo .fila-material-nodo td:first-child").forEach(td => {
+            document.querySelectorAll("#filasMaterialesNodo.fila-material-nodo td:first-child").forEach(td => {
                 actualizarSerializacionLuminarias(td);
             });
         });
@@ -925,11 +925,11 @@ document.addEventListener("DOMContentLoaded", function () {
         filasMOMultiple.appendChild(crearFilaMO());
     }
 
-    // Auto-abrir modal si la URL contiene ?editar_apoyo=ID o ?apoyo_id=ID
+    // Auto-abrir modal si la URL contiene?editar_apoyo=ID o?apoyo_id=ID
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const editarApoyoId = urlParams.get('editar_apoyo') || urlParams.get('apoyo_id');
-        if (editarApoyoId && typeof apoyosData !== 'undefined' && apoyosData[editarApoyoId]) {
+        if (editarApoyoId && typeof apoyosData!== 'undefined' && apoyosData[editarApoyoId]) {
             cambiarPestana('materiales');
             abrirModalEditarApoyo(editarApoyoId);
             const elFila = document.getElementById('fila-apoyo-' + editarApoyoId);

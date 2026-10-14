@@ -31,11 +31,7 @@
         </p>
     </div>
 
-    <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}"
-       class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-       style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-        <span>←</span> <span>Cancelar y Volver</span>
-    </a>
+    <a href="{% url 'detalle_proyecto_logistica' proyecto.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Cancelar y Volver</span></a>
 </div>
         <!-- ENTRADAS ANTERIORES -->
         <div class="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
@@ -210,8 +206,7 @@
 
             <button type="button"
                     id="btnAgregarFila"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-semibold rounded-lg transition">
-                + Agregar material
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-semibold rounded-lg transition"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Agregar material
             </button>
 
         </div>

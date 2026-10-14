@@ -18,7 +18,7 @@
                 <span class="text-[#1F2937] font-semibold">Acta #{{ acta.numero_acta }}</span>
             </nav>
             <div class="flex items-center gap-2.5">
-                <span class="text-2xl">📋</span>
+                <span class="text-2xl"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></span>
                 <div>
                     <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight">
                         Acta de Junta Directiva Nº {{ acta.numero_acta }}
@@ -40,7 +40,7 @@
                title="Ver vista oficial imprimible y generar PDF"
                class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.667-2.03-1.282-2.859M17.28 13.829c.24-1.076.667-2.03 1.282-2.859M6 18h12m-6-10V4m-4 4h8M4 14h16v6H4v-6z"/></svg>
-                <span>🖨️ Imprimir Acta (PDF)</span>
+                <span>Imprimir Acta (PDF)</span>
             </a>
             <a href="{% url 'exportar_acta_word' acta.id %}" 
                class="btn btn-secundario bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
@@ -57,10 +57,7 @@
                class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 transition">
                 <span>Eliminar</span>
             </a>
-            <a href="{% url 'actas' %}" 
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
-                <span>← Volver</span>
-            </a>
+            <a href="{% url 'actas' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver</span></a>
         </div>
     </div>
 
@@ -69,7 +66,7 @@
     <div class="tarjeta p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-center justify-between flex-wrap gap-3">
         <div class="flex items-center gap-3">
             <div class="size-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
-                ✓
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
                 <h3 class="text-xs font-bold text-emerald-900 uppercase tracking-wide">
@@ -90,7 +87,7 @@
     <div class="tarjeta p-4 bg-amber-50/60 border border-amber-200 rounded-2xl flex items-center justify-between flex-wrap gap-3">
         <div class="flex items-center gap-3">
             <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
-                ⚠️
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
             </div>
             <div>
                 <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">
@@ -103,7 +100,7 @@
         </div>
         <a href="{% url 'editar_acta' acta.id %}"
            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition">
-            <span>+ Adjuntar Escaneo Firmado</span>
+            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Adjuntar Escaneo Firmado</span>
         </a>
     </div>
     {% endif %}
@@ -130,11 +127,11 @@
             <div class="mt-1">
                 {% if acta.estado == 'aprobada' %}
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                        ✓ Aprobada
+                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Aprobada
                     </span>
                 {% elif acta.estado == 'anulada' %}
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-                        ✕ Anulada
+                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Anulada
                     </span>
                 {% else %}
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
@@ -149,7 +146,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="tarjeta p-4 flex items-center gap-3">
             <div class="size-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-lg">
-                👔
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
             </div>
             <div>
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Presidente de la Junta</span>
@@ -158,7 +155,7 @@
         </div>
         <div class="tarjeta p-4 flex items-center gap-3">
             <div class="size-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-lg">
-                ✍️
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             </div>
             <div>
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Secretario de la Junta</span>
@@ -171,7 +168,7 @@
     <div class="tarjeta p-6 space-y-6">
         <div>
             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <span>📌</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9m0 0l5-5M4 9h10.5a5.5 5.5 0 015.5 5.5v.5"/></svg></span>
                 <span>Orden del Día</span>
             </h3>
             <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-800 leading-relaxed whitespace-pre-line border border-slate-200">
@@ -181,7 +178,7 @@
 
         <div>
             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <span>📝</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg></span>
                 <span>Desarrollo de la Reunión y Deliberaciones</span>
             </h3>
             <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-800 leading-relaxed whitespace-pre-line border border-slate-200">
@@ -192,7 +189,7 @@
         {% if acta.proposiciones %}
         <div>
             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <span>💡</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg></span>
                 <span>Proposiciones y Acuerdos</span>
             </h3>
             <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-800 leading-relaxed whitespace-pre-line border border-slate-200">

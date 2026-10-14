@@ -9,6 +9,7 @@ from datetime import date
 import os
 
 from core.models import Empleado
+from core.utils import limpiar_nombre_archivo
 
 
 @login_required
@@ -22,7 +23,7 @@ def acuerdo_terminacion(request, id):
     ruta_plantilla = os.path.join(
         settings.BASE_DIR,
         "plantillas_word",
-        "acuerdo_terminacion.docx"
+        "terminacion_contrato.docx"
     )
 
     doc = DocxTemplate(ruta_plantilla)
@@ -51,6 +52,11 @@ def acuerdo_terminacion(request, id):
 
         },
 
+        "fecha_retiro": (
+            empleado.fecha_retiro.strftime("%d/%m/%Y")
+            if empleado.fecha_retiro else ""
+        ),
+
         "fecha_actual": date.today().strftime("%d/%m/%Y")
 
     }
@@ -59,7 +65,7 @@ def acuerdo_terminacion(request, id):
 
     ruta_salida = os.path.join(
         settings.MEDIA_ROOT,
-        f"acuerdo_terminacion_{empleado.nombre_completo}.docx"
+        f"acuerdo_terminacion_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx"
     )
 
     doc.save(ruta_salida)
@@ -67,5 +73,5 @@ def acuerdo_terminacion(request, id):
     return FileResponse(
         open(ruta_salida, "rb"),
         as_attachment=True,
-        filename=f"acuerdo_terminacion_{empleado.nombre_completo}.docx"
+        filename=f"acuerdo_terminacion_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx"
     )

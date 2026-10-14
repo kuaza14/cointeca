@@ -19,11 +19,7 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% url 'lista_nominas' %}" 
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a Nóminas</span>
-                </a>
+                <a href="{% url 'lista_nominas' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Nóminas</span></a>
             </div>
         </div>
 
@@ -58,7 +54,7 @@
                 <button type="button" onclick="abrirModalAgregarEmpleado()"
                         class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
                     <svg class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    <span>+ Colaborador</span>
+                    <span>Colaborador</span>
                 </button>
 
                 <a href="{% url 'exportar_nomina_excel' periodo.id %}"
@@ -86,7 +82,7 @@
     <div class="bg-gradient-to-r from-blue-50/70 via-slate-50 to-emerald-50/70 p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700">
         <div class="flex items-center gap-3">
             <span class="font-bold text-slate-900 flex items-center gap-1.5">
-                <span>⚡ Parámetros Legales (2026):</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Parámetros Legales (2026):</span>
             </span>
             <span>SMMLV: <strong class="font-mono text-blue-700">${{ periodo.smmlv_base|floatformat:0 }}</strong></span>
             <span>Aux. Transporte: <strong class="font-mono text-blue-700">${{ periodo.auxilio_transporte_base|floatformat:0 }}</strong></span>
@@ -94,7 +90,7 @@
             <span>Pensión: <strong class="font-mono text-slate-800">4%</strong></span>
         </div>
         <div class="text-[11px] text-slate-500 font-medium">
-            💡 <em>Edita los días o montos directamente en las celdas y la nómina se recalculará automáticamente.</em>
+            <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg> <em>Edita los días o montos directamente en las celdas y la nómina se recalculará automáticamente.</em>
         </div>
     </div>
 
@@ -107,12 +103,12 @@
                     id="buscador-colaborador-nomina" 
                     placeholder="Buscar colaborador por nombre, cédula o cargo..." 
                     class="w-full border border-slate-200 rounded-lg pl-9 pr-8 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white text-slate-800 text-xs sm:text-sm transition">
-                <span class="absolute left-3 top-2 text-slate-400 text-sm">🔍</span>
+                <span class="absolute left-3 top-2 text-slate-400 text-sm"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg></span>
                 <button type="button" 
                         id="btn-limpiar-buscador-colaborador" 
                         onclick="limpiarBuscadorColaborador()" 
                         class="hidden absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600 font-bold cursor-pointer">
-                    ✕
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
@@ -196,9 +192,9 @@
     <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-fade-in">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-slate-900">
-                <span>➕ Agregar Colaborador a la Nómina</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Agregar Colaborador a la Nómina</span>
             </h3>
-            <button type="button" onclick="cerrarModalAgregarEmpleado()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer">✕</button>
+            <button type="button" onclick="cerrarModalAgregarEmpleado()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
 
         <form method="POST" action="{% url 'agregar_empleado_nomina' periodo.id %}" class="p-5 space-y-3.5">
@@ -250,7 +246,7 @@
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button type="button" onclick="cerrarModalAgregarEmpleado()" class="btn btn-secundario text-xs px-4 py-2">Cancelar</button>
-                <button type="submit" class="btn btn-primario bg-[#1E63F0] text-xs px-5 py-2 font-bold text-white">+ Agregar a Nómina</button>
+                <button type="submit" class="btn btn-primario bg-[#1E63F0] text-xs px-5 py-2 font-bold text-white"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Agregar a Nómina</button>
             </div>
         </form>
     </div>
@@ -263,19 +259,19 @@
         <div class="px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between shrink-0">
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="text-base font-black">📅 Registro de Ausencias Injustificadas</span>
+                    <span class="text-base font-black"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg> Registro de Ausencias Injustificadas</span>
                     <span class="text-[10px] font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider">Art. 173 C.S.T.</span>
                 </div>
                 <p id="modal-ausencias-empleado" class="text-xs text-slate-300 mt-0.5 font-medium">Colaborador: -</p>
             </div>
-            <button type="button" onclick="cerrarModalAusencias()" class="text-slate-400 hover:text-white font-bold text-xl leading-none cursor-pointer p-1">✕</button>
+            <button type="button" onclick="cerrarModalAusencias()" class="text-slate-400 hover:text-white font-bold text-xl leading-none cursor-pointer p-1"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
 
         <!-- Body con scroll -->
         <div class="p-5 space-y-4 overflow-y-auto flex-1 text-slate-800">
             <!-- Explicación normativa -->
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2.5">
-                <span class="text-base shrink-0">⚖️</span>
+                <span class="text-base shrink-0"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z"/></svg></span>
                 <div class="space-y-1">
                     <p class="font-bold">Norma Laboral Colombiana (Código Sustantivo del Trabajo - Art. 173):</p>
                     <p class="text-[11px] leading-relaxed text-amber-800">
@@ -326,7 +322,7 @@
             <!-- Resumen de liquidación -->
             <div class="bg-slate-900 text-white rounded-xl p-3.5 space-y-2.5">
                 <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wide text-amber-300">📊 Balance de Liquidación del Período</span>
+                    <span class="text-xs font-extrabold uppercase tracking-wide text-amber-300"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg> Balance de Liquidación del Período</span>
                     <span id="resumen-semanas-afectadas" class="text-[11px] font-mono text-slate-300 bg-slate-800 px-2 py-0.5 rounded">0 semanas afectadas</span>
                 </div>
 
@@ -360,12 +356,12 @@
         <!-- Footer -->
         <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2 shrink-0">
             <button type="button" onclick="limpiarAusenciasModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded transition hover:bg-rose-50 cursor-pointer">
-                🗑️ Limpiar todas
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg> Limpiar todas
             </button>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="cerrarModalAusencias()" class="btn btn-secundario text-xs px-4 py-2">Cancelar</button>
                 <button type="button" onclick="aplicarAusenciasModal()" class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-xs px-4 py-2 font-bold text-white shadow-xs cursor-pointer">
-                    ✓ Aplicar a Nómina
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Aplicar a Nómina
                 </button>
             </div>
         </div>

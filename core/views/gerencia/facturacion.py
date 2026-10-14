@@ -1,12 +1,16 @@
 import os
 import openpyxl
 from django.conf import settings
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.db.models import Sum
-from decimal import Decimal
+from django.utils import timezone
+from decimal import Decimal, InvalidOperation
 
+from core.utils import parse_monto_cop
 from core.models import (
     ProyectoFacturacion,
     SeguimientoFacturacion,
@@ -33,7 +37,28 @@ MESES_ORDEN = [
 @login_required
 def facturacion(request):
     proyectos = ProyectoFacturacion.objects.filter(activo=True)
-    seguimientos = SeguimientoFacturacion.objects.select_related('proyecto').all().order_by('-anio', 'mes')
+
+    # Año seleccionado: por defecto el más reciente con datos (o el actual)
+    anios_disponibles = list(
+        SeguimientoFacturacion.objects
+.values_list('anio', flat=True)
+.distinct()
+.order_by('-anio')
+)
+    anio_sel = request.GET.get('anio')
+    try:
+        anio_sel = int(anio_sel) if anio_sel else (
+            anios_disponibles[0] if anios_disponibles else timezone.now().year
+)
+    except (ValueError, TypeError):
+        anio_sel = timezone.now().year
+
+    seguimientos = (
+        SeguimientoFacturacion.objects
+.select_related('proyecto')
+.filter(anio=anio_sel)
+.order_by('mes')
+)
 
     total_meta = sum([s.meta_facturacion for s in seguimientos]) if seguimientos else 0
     total_real = sum([s.facturacion_real for s in seguimientos]) if seguimientos else 0
@@ -62,6 +87,8 @@ def facturacion(request):
         'total_meta': total_meta,
         'total_real': total_real,
         'porcentaje_global': porcentaje_global,
+        'anio_seleccionado': anio_sel,
+        'anios_disponibles': anios_disponibles,
     })
 
 @login_required
@@ -77,20 +104,37 @@ def crear_proyecto_facturacion(request):
 def registrar_facturacion(request):
     proyectos = ProyectoFacturacion.objects.filter(activo=True)
     if request.method == 'POST':
-        SeguimientoFacturacion.objects.create(
-            mes=request.POST['mes'],
-            anio=request.POST['anio'],
-            meta_facturacion=request.POST['meta_facturacion'].replace(',', '').replace('.', ''),
-            facturacion_real=request.POST['facturacion_real'].replace(',', '').replace('.', ''),
-            proyecto_id=request.POST['proyecto']
-        )
+        try:
+            meta = parse_monto_cop(request.POST.get('meta_facturacion'), default=Decimal('0'))
+            real = parse_monto_cop(request.POST.get('facturacion_real'), default=Decimal('0'))
+        except (InvalidOperation, KeyError):
+            messages.error(request, ' Los valores de facturación deben ser numéricos.')
+            return render(request, 'gerencia/facturacion/registrar_facturacion.html', {'proyectos': proyectos})
+
+        try:
+            SeguimientoFacturacion.objects.create(
+                mes=request.POST['mes'],
+                anio=request.POST['anio'],
+                meta_facturacion=meta,
+                facturacion_real=real,
+                proyecto_id=request.POST['proyecto']
+)
+        except IntegrityError:
+            messages.error(
+                request,
+                ' Ya existe un registro de facturación para ese proyecto en ese mes y año.'
+)
+            return render(request, 'gerencia/facturacion/registrar_facturacion.html', {'proyectos': proyectos})
+
         return redirect('facturacion')
     return render(request, 'gerencia/facturacion/registrar_facturacion.html', {'proyectos': proyectos})
 
 @login_required
 def eliminar_facturacion(request, id):
     seguimiento = get_object_or_404(SeguimientoFacturacion, id=id)
-    seguimiento.delete()
+    if request.method == 'POST':
+        seguimiento.delete()
+        messages.success(request, 'Registro de facturación eliminado.')
     return redirect('facturacion')
 
 @login_required
@@ -98,13 +142,22 @@ def editar_facturacion(request, id):
     seguimiento = get_object_or_404(SeguimientoFacturacion, id=id)
     proyectos = ProyectoFacturacion.objects.filter(activo=True)
     if request.method == 'POST':
-        seguimiento.mes = request.POST['mes']
-        seguimiento.anio = request.POST['anio']
-        seguimiento.meta_facturacion = request.POST['meta_facturacion'].replace(',', '').replace('.', '')
-        seguimiento.facturacion_real = request.POST['facturacion_real'].replace(',', '').replace('.', '')
-        seguimiento.proyecto_id = request.POST['proyecto']
-        seguimiento.save()
-        return redirect('facturacion')
+        try:
+            seguimiento.mes = request.POST['mes']
+            seguimiento.anio = request.POST['anio']
+            seguimiento.meta_facturacion = parse_monto_cop(request.POST.get('meta_facturacion'), default=Decimal('0'))
+            seguimiento.facturacion_real = parse_monto_cop(request.POST.get('facturacion_real'), default=Decimal('0'))
+            seguimiento.proyecto_id = request.POST['proyecto']
+            seguimiento.save()
+        except (InvalidOperation, KeyError):
+            messages.error(request, ' Los valores de facturación deben ser numéricos.')
+        except IntegrityError:
+            messages.error(
+                request,
+                ' Ya existe un registro de facturación para ese proyecto en ese mes y año.'
+)
+        else:
+            return redirect('facturacion')
     return render(request, 'gerencia/facturacion/editar_facturacion.html', {
         'seguimiento': seguimiento,
         'proyectos': proyectos
@@ -124,7 +177,11 @@ def api_liquidacion_ingenieria(request):
     if proyecto_fact_id:
         p_fact = ProyectoFacturacion.objects.filter(id=proyecto_fact_id).first()
         if p_fact:
-            p_ing = Proyecto.objects.filter(nombre__icontains=p_fact.nombre).first()
+            # Match exacto primero; el icontains es el fallback aproximado
+            p_ing = (
+                Proyecto.objects.filter(nombre__iexact=p_fact.nombre).first()
+                or Proyecto.objects.filter(nombre__icontains=p_fact.nombre).first()
+)
             if p_ing:
                 nombre_proyecto = f"Proyecto: {p_ing.nombre}"
                 amos = ApoyoManoObra.objects.filter(apoyo__proyecto=p_ing).select_related('item_mano_obra')
@@ -183,7 +240,7 @@ def exportar_facturacion_excel(request):
 
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = 'attachment; filename="GER-FR-02_Seguimiento_Facturacion.xlsx"'
     wb.save(response)
     return response

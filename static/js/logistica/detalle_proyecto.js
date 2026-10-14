@@ -89,7 +89,7 @@ function filtrarMaterialesActivos() {
         const coincideBuscador = (q === "" || texto.includes(q));
         const ocultoPorExcel = f.dataset.ocultoPorExcel === "true";
 
-        if (coincideBuscador && !ocultoPorExcel) {
+        if (coincideBuscador &&!ocultoPorExcel) {
             f.style.display = "";
             visibles++;
         } else {
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             const q = searchInput.value.toLowerCase().trim();
-            const optionItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item");
+            const optionItems = document.querySelectorAll("#popoverCheckboxList.chk-option-item");
             
             optionItems.forEach(item => {
                 const text = item.getAttribute("data-val-normalized") || "";
@@ -185,12 +185,12 @@ document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
         cerrarFiltroExcel();
         const mReq = document.getElementById("modalPedirRequerido");
-        if (mReq && !mReq.classList.contains("hidden")) {
+        if (mReq &&!mReq.classList.contains("hidden")) {
             mReq.classList.add("hidden");
             mReq.classList.remove("flex");
         }
         const mDev = document.getElementById("modalRegistrarDevolucion");
-        if (mDev && !mDev.classList.contains("hidden")) {
+        if (mDev &&!mDev.classList.contains("hidden")) {
             mDev.classList.add("hidden");
             mDev.classList.remove("flex");
         }
@@ -223,17 +223,17 @@ function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
     event.stopPropagation();
     const btn = event.currentTarget;
     const th = btn.closest("th");
-    const tabla = tablaId ? document.getElementById(tablaId) : btn.closest("table");
+    const tabla = tablaId? document.getElementById(tablaId): btn.closest("table");
     if (!tabla) return;
 
     const idTabla = tabla.id;
     tablaActualFiltro = idTabla;
 
     if (colIdx === undefined || colIdx === null) {
-        colIdx = th ? (th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex) : 0;
+        colIdx = th? (th.hasAttribute("data-col-idx")? parseInt(th.getAttribute("data-col-idx"), 10): th.cellIndex): 0;
     }
     colActualFiltro = colIdx;
-    nombreColActualFiltro = colName || (th ? th.querySelector("span")?.innerText?.trim() : "Columna");
+    nombreColActualFiltro = colName || (th? th.querySelector("span")?.innerText?.trim(): "Columna");
 
     const activeFilters = getActiveFilters(idTabla);
 
@@ -272,7 +272,7 @@ function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
 
     // Estado del botón borrar
     if (btnClearThisCol) {
-        btnClearThisCol.style.display = activeFilters[colIdx] ? "flex" : "none";
+        btnClearThisCol.style.display = activeFilters[colIdx]? "flex": "none";
     }
 
     const currentSelectedSet = activeFilters[colIdx] || null;
@@ -295,7 +295,7 @@ function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
 
                 rowDiv.innerHTML = `
                     <div class="flex items-center gap-2 truncate">
-                        <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked ? "checked" : ""}>
+                        <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked? "checked": ""}>
                         <span class="truncate font-medium text-foreground">${item.val}</span>
                     </div>
                     <span class="text-[10px] px-1.5 py-0.2 bg-muted text-muted-foreground font-mono rounded-full shrink-0">${item.count}</span>
@@ -345,7 +345,7 @@ function cerrarPopupFiltroExcel() {
 
 // Seleccionar todo / Deseleccionar todo
 function toggleSelectAllExcel(checked) {
-    const visibleChkItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item:not(.hidden) .chk-item-filter");
+    const visibleChkItems = document.querySelectorAll("#popoverCheckboxList.chk-option-item:not(.hidden).chk-item-filter");
     visibleChkItems.forEach(chk => {
         chk.checked = checked;
     });
@@ -353,10 +353,10 @@ function toggleSelectAllExcel(checked) {
 
 // Aplicar Filtro de Columna Actual
 function aplicarFiltroColumnaActual() {
-    if (colActualFiltro === null || !tablaActualFiltro) return;
+    if (colActualFiltro === null ||!tablaActualFiltro) return;
 
     const activeFilters = getActiveFilters(tablaActualFiltro);
-    const allChk = document.querySelectorAll("#popoverCheckboxList .chk-item-filter");
+    const allChk = document.querySelectorAll("#popoverCheckboxList.chk-item-filter");
     const allTotal = allChk.length;
     let checkedCount = 0;
     const selectedSet = new Set();
@@ -380,7 +380,7 @@ function aplicarFiltroColumnaActual() {
 
 // Borrar Filtro de Columna Actual
 function borrarFiltroColumnaActual() {
-    if (colActualFiltro !== null && tablaActualFiltro) {
+    if (colActualFiltro!== null && tablaActualFiltro) {
         const activeFilters = getActiveFilters(tablaActualFiltro);
         delete activeFilters[colActualFiltro];
         cerrarFiltroExcel();
@@ -408,7 +408,7 @@ window.limpiarTodosFiltrosTabla = limpiarTodosLosFiltrosExcel;
 
 // Ordenar filas A-Z / Z-A
 function ejecutarSortExcel(ascendente) {
-    if (colActualFiltro === null || !tablaActualFiltro) return;
+    if (colActualFiltro === null ||!tablaActualFiltro) return;
     const colIdx = colActualFiltro;
     const tabla = document.getElementById(tablaActualFiltro);
     if (!tabla) return;
@@ -417,24 +417,24 @@ function ejecutarSortExcel(ascendente) {
     const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
 
     filas.sort((a, b) => {
-        let valA = a.hasAttribute(`data-col-${colIdx}`) ? a.getAttribute(`data-col-${colIdx}`) : (a.children[colIdx] ? a.children[colIdx].innerText : "");
-        let valB = b.hasAttribute(`data-col-${colIdx}`) ? b.getAttribute(`data-col-${colIdx}`) : (b.children[colIdx] ? b.children[colIdx].innerText : "");
+        let valA = a.hasAttribute(`data-col-${colIdx}`)? a.getAttribute(`data-col-${colIdx}`): (a.children[colIdx]? a.children[colIdx].innerText: "");
+        let valB = b.hasAttribute(`data-col-${colIdx}`)? b.getAttribute(`data-col-${colIdx}`): (b.children[colIdx]? b.children[colIdx].innerText: "");
         valA = (valA || "").trim();
         valB = (valB || "").trim();
 
         const dateA = parseFecha(valA);
         const dateB = parseFecha(valB);
         if (dateA && dateB) {
-            return ascendente ? dateA - dateB : dateB - dateA;
+            return ascendente? dateA - dateB: dateB - dateA;
         }
 
         const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
         const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
-        if (!isNaN(numA) && !isNaN(numB) && !valA.includes("/") && !valB.includes("/")) {
-            return ascendente ? numA - numB : numB - numA;
+        if (!isNaN(numA) &&!isNaN(numB) &&!valA.includes("/") &&!valB.includes("/")) {
+            return ascendente? numA - numB: numB - numA;
         }
 
-        return ascendente ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
+        return ascendente? valA.localeCompare(valB, undefined, { numeric: true }): valB.localeCompare(valA, undefined, { numeric: true });
     });
 
     filas.forEach(f => tbody.appendChild(f));
@@ -442,7 +442,7 @@ function ejecutarSortExcel(ascendente) {
 }
 
 function parseFecha(str) {
-    if (!str || !str.includes("/")) return null;
+    if (!str ||!str.includes("/")) return null;
     const parts = str.split("/");
     if (parts.length === 3) {
         const d = parseInt(parts[0], 10);
@@ -498,13 +498,13 @@ function ejecutarFiltradoTabla(tablaId) {
     // Actualizar botones de encabezado para esta tabla
     const ths = tabla.querySelectorAll("th.th-excel-col");
     ths.forEach(th => {
-        const cIdx = th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex;
+        const cIdx = th.hasAttribute("data-col-idx")? parseInt(th.getAttribute("data-col-idx"), 10): th.cellIndex;
         const btn = th.querySelector(".btn-filter-trigger");
         if (btn) {
             if (activeFilters[cIdx]) {
                 th.classList.add("has-active-filter");
                 btn.classList.add("filter-active");
-                btn.innerHTML = '<span class="text-amber-950 font-black text-[10px]">▼✓</span>';
+                btn.innerHTML = '<span class="text-amber-950 font-black text-[10px]">▼</span>';
             } else {
                 th.classList.remove("has-active-filter");
                 btn.classList.remove("filter-active");
@@ -538,8 +538,8 @@ function ejecutarFiltradoTabla(tablaId) {
 // Clic fuera del popover para cerrarlo
 document.addEventListener("click", function (e) {
     const popover = document.getElementById("excelFilterPopover");
-    if (popover && !popover.classList.contains("hidden")) {
-        if (!popover.contains(e.target) && !e.target.closest(".btn-filter-trigger")) {
+    if (popover &&!popover.classList.contains("hidden")) {
+        if (!popover.contains(e.target) &&!e.target.closest(".btn-filter-trigger")) {
             cerrarFiltroExcel();
         }
     }

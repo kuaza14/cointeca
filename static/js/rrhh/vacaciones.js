@@ -12,14 +12,14 @@ let currentEnSistema = 0;
 function actualizarPreviewPendientes() {
     const input = document.getElementById("inputDiasHistoricos");
     const preview = document.getElementById("previewPendientesFinal");
-    if (!input || !preview) return;
+    if (!input ||!preview) return;
 
     let historicosVal = parseInt(input.value, 10);
     if (isNaN(historicosVal) || historicosVal < 0) {
         historicosVal = 0;
     }
     const pendientes = Math.max(0, currentAcumulados - (historicosVal + currentEnSistema));
-    preview.textContent = pendientes + (pendientes === 1 ? " día" : " días");
+    preview.textContent = pendientes + (pendientes === 1? " día": " días");
 }
 
 function abrirAjustarHistorico(id, nombre, anios, acumulados, historicos, enSistema) {
@@ -36,10 +36,10 @@ function abrirAjustarHistorico(id, nombre, anios, acumulados, historicos, enSist
     }
 
     const elNombre = document.getElementById("ajusteNombreEmpleado");
-    if (elNombre) elNombre.textContent = "👤 " + nombre;
+    if (elNombre) elNombre.textContent = " " + nombre;
 
     const elAnios = document.getElementById("ajusteAnios");
-    if (elAnios) elAnios.textContent = anios + (Number(anios) === 1 ? " año" : " años");
+    if (elAnios) elAnios.textContent = anios + (Number(anios) === 1? " año": " años");
 
     const elAcum = document.getElementById("ajusteAcumulados");
     if (elAcum) elAcum.textContent = currentAcumulados + " días";
@@ -85,7 +85,7 @@ let currentEditarDiasOriginales = 0;
 let currentEditarMaxDisponibles = 0;
 
 function esFestivoOFinDeSemana(dStr) {
-    if (typeof FESTIVOS_COLOMBIA !== "undefined" && Array.isArray(FESTIVOS_COLOMBIA)) {
+    if (typeof FESTIVOS_COLOMBIA!== "undefined" && Array.isArray(FESTIVOS_COLOMBIA)) {
         if (FESTIVOS_COLOMBIA.includes(dStr)) return true;
     }
     const parts = dStr.split("-").map(Number);
@@ -153,7 +153,7 @@ function actualizarCalculosEditar() {
     const alertaExceso = document.getElementById("alertaExcesoDias");
     const btnGuardar = document.getElementById("btnGuardarEditar");
 
-    if (!inputFecha || !inputDias) return;
+    if (!inputFecha ||!inputDias) return;
 
     const fechaStr = inputFecha.value;
     const dias = parseInt(inputDias.value, 10);
@@ -185,7 +185,7 @@ function actualizarCalculosEditar() {
 
     const saldoRestante = Math.max(0, currentEditarMaxDisponibles - dias);
     if (elSaldo) {
-        elSaldo.textContent = saldoRestante + (saldoRestante === 1 ? " día" : " días");
+        elSaldo.textContent = saldoRestante + (saldoRestante === 1? " día": " días");
     }
 }
 

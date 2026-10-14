@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from decimal import Decimal
 
+from core.helpers.iconos import icono_svg
+
 from core.models import (
     IndicadorEstrategico,
     ActaJuntaDirectiva,
@@ -119,25 +121,25 @@ def plan_estrategico(request):
         'valores': [
             {
                 'titulo': "Excelencia Técnica",
-                'icono': "⚡",
+                'icono': icono_svg("bolt", "size-8 text-blue-600"),
                 'color': "blue",
                 'descripcion': "Rigor en ingeniería eléctrica, cumplimiento estricto de RETIE, NTC 2050 e ISO 50001 en cada obra."
             },
             {
                 'titulo': "Ética y Transparencia",
-                'icono': "⚖️",
+                'icono': icono_svg("scale", "size-8 text-indigo-600"),
                 'color': "indigo",
                 'descripcion': "Integridad y claridad en contratos, actas de liquidación bilateral y relaciones con clientes y aliados."
             },
             {
                 'titulo': "Responsabilidad",
-                'icono': "🛡️",
+                'icono': icono_svg("shield", "size-8 text-emerald-600"),
                 'color': "emerald",
                 'descripcion': "Compromiso con la seguridad de nuestros colaboradores, bienestar de las comunidades y cuidado del entorno."
             },
             {
                 'titulo': "Orientación al Cliente",
-                'icono': "🎯",
+                'icono': icono_svg("chart_up", "size-8 text-amber-600"),
                 'color': "amber",
                 'descripcion': "Respuestas ágiles, soluciones idóneas y acompañamiento técnico que maximizan la eficiencia energética."
             },

@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block titulo %}Inventario de Equipos | COINTECA S.A.S.{% endblock %}
+
 {% block content %}
 
 <div class="flex justify-between items-center mb-6">
@@ -12,26 +14,21 @@
 
         <a
             href="/rrhh/"
-            class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover"
-        >
-            Volver RRHH
-        </a>
+         class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver RRHH</span></a>
 
-        <a
-            href="/rrhh/inventario/crear/"
-            class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover"
-        >
-            + Agregar Equipo
-        </a>
+        <button type="button" onclick="abrirModalEquipo()"
+            class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover inline-flex items-center gap-1.5"
+        ><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Agregar Equipo
+        </button>
 
     </div>
 
 </div>
 
-<div class="overflow-x-auto">
-<table class="w-full border rounded overflow-hidden shadow">
+<div class="overflow-x-auto rounded-xl shadow" style="border: 1px solid #e2e8f0;">
+<table class="w-full overflow-hidden" style="border-collapse: collapse; border-radius: 0.75rem;">
 
-    <thead class="bg-neutral text-white">
+    <thead class="text-white" style="background-color: #0B2D6B;">
 
         <tr>
             <th class="p-3 text-center">Equipo</th>
@@ -135,12 +132,16 @@
                         Editar
                     </a>
 
-                    <a
-                        href="/rrhh/inventario/{{ e.id }}/eliminar/"
-                        class="bg-destructive text-white px-3 py-1 rounded hover:bg-destructive-hover"
-                    >
-                        Eliminar
-                    </a>
+                    <form method="POST" action="/rrhh/inventario/{{ e.id }}/eliminar/"
+                          onsubmit="return confirm('¿Seguro que deseas eliminar este equipo del inventario?');">
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="bg-destructive text-white px-3 py-1 rounded hover:bg-destructive-hover"
+                        >
+                            Eliminar
+                        </button>
+                    </form>
 
                 </div>
 
@@ -164,5 +165,120 @@
 
 </table>
 </div>
+
+<!-- ==================================================================
+     MODAL: AGREGAR EQUIPO
+     ================================================================== -->
+<div id="modalAgregarEquipo"
+     class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+     onclick="if(event.target === this) cerrarModalEquipo()">
+
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+
+        <!-- Cabecera -->
+        <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-extrabold text-[#1F2937]">Agregar Equipo al Inventario</h2>
+                    <p class="text-[11px] text-[#64748B]">Registra un nuevo computador, celular o herramienta tecnológica</p>
+                </div>
+            </div>
+            <button type="button" onclick="cerrarModalEquipo()"
+                    class="text-slate-400 hover:text-slate-700 hover:bg-slate-200 p-1.5 rounded-lg transition">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Formulario -->
+        <form method="POST" action="/rrhh/inventario/crear/" class="overflow-y-auto p-5">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-equipo">Equipo *</label>
+                    <input id="campo-equipo" type="text" name="equipo" required
+                           placeholder="Ej: Laptop Lenovo"
+                           class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-referencia">Referencia</label>
+                    <input id="campo-referencia" type="text" name="referencia"
+                           placeholder="Ej: ThinkPad T14"
+                           class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-serial">Serial *</label>
+                    <input id="campo-serial" type="text" name="serial" required
+                           placeholder="Ej: 5CG14351QJ"
+                           class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-marca">Marca</label>
+                    <input id="campo-marca" type="text" name="marca"
+                           placeholder="Ej: Lenovo"
+                           class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-fecha_compra">Fecha de compra *</label>
+                    <input id="campo-fecha_compra" type="date" name="fecha_compra" required
+                           class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-estado">Estado</label>
+                    <select id="campo-estado" name="estado"
+                            class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                        <option value="Disponible">Disponible</option>
+                        <option value="Asignado">Asignado</option>
+                        <option value="Dañado">Dañado</option>
+                        <option value="Baja">Baja</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1" for="campo-observaciones">Observaciones</label>
+                <textarea id="campo-observaciones" name="observaciones" rows="3"
+                          placeholder="Observaciones del equipo..."
+                          class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+
+            <!-- Botones -->
+            <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button type="button" onclick="cerrarModalEquipo()"
+                        class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="btn btn-primario bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2 rounded-xl shadow-xs transition inline-flex items-center gap-1.5">
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <span>Guardar Equipo</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+function abrirModalEquipo() {
+    document.getElementById('modalAgregarEquipo').classList.remove('hidden');
+}
+function cerrarModalEquipo() {
+    document.getElementById('modalAgregarEquipo').classList.add('hidden');
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModalEquipo();
+});
+</script>
 
 {% endblock %}

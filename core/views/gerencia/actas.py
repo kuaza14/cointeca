@@ -1,3 +1,5 @@
+from django.contrib import messages
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
@@ -28,20 +30,32 @@ def actas(request):
 def crear_acta(request):
     if request.method == 'POST':
         archivo_firmado = request.FILES.get('archivo_firmado')
-        acta = ActaJuntaDirectiva.objects.create(
-            numero_acta=request.POST['numero_acta'],
-            nombre_entidad=request.POST['nombre_entidad'],
-            nit=request.POST['nit'],
-            fecha=request.POST['fecha'],
-            hora_inicio=request.POST['hora_inicio'],
-            lugar=request.POST['lugar'],
-            presidente=request.POST['presidente'],
-            secretario=request.POST['secretario'],
-            orden_del_dia=request.POST['orden_del_dia'],
-            desarrollo=request.POST['desarrollo'],
-            proposiciones=request.POST.get('proposiciones', ''),
-            archivo_firmado=archivo_firmado,
-        )
+        try:
+            numero_acta = request.POST.get('numero_acta', '').strip()
+            fecha = request.POST.get('fecha')
+            if not numero_acta or not fecha:
+                messages.error(request, ' Debe indicar el número y la fecha del acta.')
+                return render(request, 'gerencia/actas/crear_acta.html')
+            acta = ActaJuntaDirectiva.objects.create(
+                numero_acta=numero_acta,
+                nombre_entidad=request.POST.get('nombre_entidad', ''),
+                nit=request.POST.get('nit', ''),
+                fecha=fecha,
+                hora_inicio=request.POST.get('hora_inicio') or None,
+                lugar=request.POST.get('lugar', ''),
+                presidente=request.POST.get('presidente', ''),
+                secretario=request.POST.get('secretario', ''),
+                orden_del_dia=request.POST.get('orden_del_dia', ''),
+                desarrollo=request.POST.get('desarrollo', ''),
+                proposiciones=request.POST.get('proposiciones', ''),
+                archivo_firmado=archivo_firmado,
+)
+        except IntegrityError:
+            messages.error(
+                request,
+                f" Ya existe un acta con el número {request.POST['numero_acta']}."
+)
+            return render(request, 'gerencia/actas/crear_acta.html')
         return redirect('detalle_acta', id=acta.id)
 
     return render(request, 'gerencia/actas/crear_acta.html')
@@ -56,16 +70,16 @@ def editar_acta(request, id):
     acta = get_object_or_404(ActaJuntaDirectiva, id=id)
 
     if request.method == 'POST':
-        acta.numero_acta = request.POST['numero_acta']
-        acta.nombre_entidad = request.POST['nombre_entidad']
-        acta.nit = request.POST['nit']
-        acta.fecha = request.POST['fecha']
-        acta.hora_inicio = request.POST['hora_inicio']
-        acta.lugar = request.POST['lugar']
-        acta.presidente = request.POST['presidente']
-        acta.secretario = request.POST['secretario']
-        acta.orden_del_dia = request.POST['orden_del_dia']
-        acta.desarrollo = request.POST['desarrollo']
+        acta.numero_acta = request.POST.get('numero_acta') or acta.numero_acta
+        acta.nombre_entidad = request.POST.get('nombre_entidad') or acta.nombre_entidad
+        acta.nit = request.POST.get('nit') or acta.nit
+        acta.fecha = request.POST.get('fecha') or acta.fecha
+        acta.hora_inicio = request.POST.get('hora_inicio') or acta.hora_inicio
+        acta.lugar = request.POST.get('lugar') or acta.lugar
+        acta.presidente = request.POST.get('presidente') or acta.presidente
+        acta.secretario = request.POST.get('secretario') or acta.secretario
+        acta.orden_del_dia = request.POST.get('orden_del_dia') or acta.orden_del_dia
+        acta.desarrollo = request.POST.get('desarrollo') or acta.desarrollo
         acta.proposiciones = request.POST.get('proposiciones', '')
         acta.estado = request.POST.get('estado', acta.estado)
 
@@ -76,7 +90,14 @@ def editar_acta(request, id):
                 acta.archivo_firmado.delete(save=False)
             acta.archivo_firmado = None
 
-        acta.save()
+        try:
+            acta.save()
+        except IntegrityError:
+            messages.error(
+                request,
+                f" Ya existe otra acta con el número {acta.numero_acta}."
+)
+            return render(request, 'gerencia/actas/editar_acta.html', {'acta': acta})
         return redirect('detalle_acta', id=acta.id)
 
     return render(request, 'gerencia/actas/editar_acta.html', {'acta': acta})
@@ -119,4 +140,4 @@ def exportar_acta_word(request, id):
         'desarrollo': acta.desarrollo or "",
         'proposiciones': acta.proposiciones or "Sin proposiciones adicionales.",
     }
-    return generar_word("acta_junta_directiva.docx", nombre_limpio, contexto)
+    return generar_word("acta_junta_directiva.docx", nombre_limpio, contexto)

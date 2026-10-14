@@ -22,11 +22,7 @@
         </div>
 
         <div class="flex items-center gap-2.5 shrink-0">
-            <a href="{% url 'dashboard' %}" 
-               class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-               style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                <span>←</span> <span>Volver al Dashboard</span>
-            </a>
+            <a href="{% url 'dashboard' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Dashboard</span></a>
         </div>
     </div>
 
@@ -37,7 +33,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50/30 to-transparent">
             <div>
                 <div class="size-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 text-2xl">
-                    🌐
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
                 </div>
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[#1F2937]">Vista Global y Nodos</h2>
@@ -50,7 +46,7 @@
             <div class="mt-6">
                 <a href="{% url 'vista_global_logistica' %}" class="btn btn-primario w-full">
                     <span>Abrir Vista Global</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                 </a>
             </div>
         </div>
@@ -59,7 +55,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-blue-600">
             <div>
                 <div class="size-12 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center mb-4 text-2xl">
-                    🏗️
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
                 </div>
                 <h2 class="text-lg font-bold text-[#1F2937]">Materiales por Macroproyecto / Circuito</h2>
                 <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
@@ -69,7 +65,7 @@
             <div class="mt-6">
                 <a href="{% url 'macroproyectos_logistica' %}" class="btn btn-primario w-full">
                     <span>Gestionar Obras</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                 </a>
             </div>
         </div>
@@ -78,7 +74,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between">
             <div>
                 <div class="size-12 rounded-xl bg-[#FEF3C7] text-[#F59E0B] flex items-center justify-center mb-4 text-2xl">
-                    📦
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
                 </div>
                 <h2 class="text-lg font-bold text-[#1F2937]">Catálogo de Materiales</h2>
                 <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
@@ -88,7 +84,7 @@
             <div class="mt-6">
                 <a href="{% url 'materiales_home' %}" class="btn btn-primario w-full">
                     <span>Ver Catálogo</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                 </a>
             </div>
         </div>
@@ -97,7 +93,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between">
             <div>
                 <div class="size-12 rounded-xl bg-[#F3E8FF] text-[#8B5CF6] flex items-center justify-center mb-4 text-2xl">
-                    👕
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
                 </div>
                 <h2 class="text-lg font-bold text-[#1F2937]">Entrega de Dotación</h2>
                 <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
@@ -107,7 +103,7 @@
             <div class="mt-6">
                 <a href="{% url 'dotacion_home' %}" class="btn btn-primario w-full">
                     <span>Gestionar Dotación</span>
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                 </a>
             </div>
         </div>
@@ -116,7 +112,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-75">
             <div>
                 <div class="size-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4 text-2xl">
-                    🔧
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
                 </div>
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[#1F2937]">Herramientas</h2>
@@ -137,7 +133,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-75">
             <div>
                 <div class="size-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4 text-2xl">
-                    🏢
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
                 </div>
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[#1F2937]">Activos Fijos</h2>
@@ -158,7 +154,7 @@
         <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between opacity-75">
             <div>
                 <div class="size-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4 text-2xl">
-                    🚛
+                    <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
                 </div>
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[#1F2937]">Vehículos & Flota</h2>
@@ -178,4 +174,4 @@
     </div>
 
 </div>
-{% endblock %}
+{% endblock %}

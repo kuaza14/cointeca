@@ -27,14 +27,8 @@
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 <span>Nuevo Retiro</span>
             </a>
-            <a href="{% url 'detalle_empleado' empleado.id %}" 
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver al Empleado</span>
-            </a>
-            <a href="{% url 'rrhh' %}" 
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver a RRHH</span>
-            </a>
+            <a href="{% url 'detalle_empleado' empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Empleado</span></a>
+            <a href="{% url 'rrhh' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a RRHH</span></a>
         </div>
     </div>
 
@@ -133,10 +127,10 @@
 
         <div class="bg-yellow-50 border border-yellow-200 rounded p-6 text-center">
             <p class="text-warning text-lg">
-                ℹ️ No hay retiros de cesantías registrados
+                ℹ No hay retiros de cesantías registrados
             </p>
             <a
-                href="/rrhh/cesantias/crear/{{ empleado.id }}/"
+                href="{% url 'crear_retiro_cesantias' empleado.id %}"
                 class="mt-4 inline-block bg-success text-white px-4 py-2 rounded hover:bg-success-hover"
             >
                 Crear primer retiro
@@ -150,7 +144,7 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
             <div class="bg-red-700 text-white px-6 py-4 flex justify-between items-center border-b border-red-800">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
-                    <span>⚠️</span> ¿Eliminar Retiro de Cesantías?
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></span> ¿Eliminar Retiro de Cesantías?
                 </h2>
                 <button type="button" onclick="cerrarModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-red-800 transition">
                     &times;

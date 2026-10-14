@@ -206,12 +206,14 @@ def eliminar_retiro_cesantias(request, id):
 
     empleado_id = retiro.empleado.id
 
-    retiro.delete()
+    if request.method == 'POST':
 
-    messages.success(
-        request,
-        'Retiro eliminado correctamente.'
-    )
+        retiro.delete()
+
+        messages.success(
+            request,
+            'Retiro eliminado correctamente.'
+        )
 
     return redirect(
         'retiros_cesantias_empleado',

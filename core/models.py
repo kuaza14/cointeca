@@ -52,6 +52,11 @@ class MovimientoCajaMenor(models.Model):
         super().save(*args, **kwargs)
         self.caja.calcular_totales()
 
+    def delete(self, *args, **kwargs):
+        caja = self.caja
+        super().delete(*args, **kwargs)
+        caja.calcular_totales()
+
     def __str__(self):
         return f"{self.numero_factura} - {self.valor}"
 
@@ -192,7 +197,6 @@ class Empleado(models.Model):
     )
 
     fecha_nacimiento = models.DateField(
-        max_length=10,
         blank=True,
         null=True
     )
@@ -390,6 +394,18 @@ class DotacionEmpleado(models.Model):
 
     fecha_entrega = models.DateField()
 
+    elemento = models.CharField(
+        max_length=150,
+        blank=True,
+        default=""
+    )
+
+    descripcion = models.CharField(
+        max_length=255,
+        blank=True,
+        default=""
+    )
+
     observacion = models.TextField(
         blank=True,
         null=True
@@ -434,17 +450,20 @@ class InventarioEquipo(models.Model):
     equipo = models.CharField(max_length=100)
     referencia = models.CharField(max_length=100)
     serial = models.CharField(max_length=100)
+    marca = models.CharField(max_length=100, blank=True, default="")
 
     ESTADOS = [
-        ('disponible', 'Disponible'),
-        ('asignado', 'Asignado'),
-        ('mantenimiento', 'Mantenimiento'),
+        ('Disponible', 'Disponible'),
+        ('Asignado', 'Asignado'),
+        ('Mantenimiento', 'Mantenimiento'),
+        ('Dañado', 'Dañado'),
+        ('Baja', 'Baja'),
     ]
 
     estado = models.CharField(
         max_length=20,
         choices=ESTADOS,
-        default='disponible'
+        default='Disponible'
     )
 
     fecha_compra = models.DateField()
@@ -1838,4 +1857,4 @@ class DetalleNominaEmpleado(models.Model):
         self.neto_pagar = self.total_devengado - self.total_deducciones
 
 
-
+

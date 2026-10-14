@@ -39,7 +39,7 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
     - color: 'verde' | 'amarillo' | 'rojo' | 'gris'
     - texto: 'Cumplido' | 'En Seguimiento' | 'En Riesgo' | 'Sin Mediciones'
     - badge_class: clases Tailwind CSS para insignias
-    - icono: emoji representativo
+    - color_hex: color del semáforo para el punto indicador
     - porcentaje_cumplimiento: valor numérico o None
     - porcentaje_str: texto formateado como "95%" o "82.5%"
     - ultimo_valor: valor original registrado
@@ -52,7 +52,7 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
             'color': 'gris',
             'texto': 'Sin Mediciones',
             'badge_class': 'bg-slate-100 text-slate-600 border-slate-200',
-            'icono': '⚪',
+            'color_hex': '#94a3b8',
             'porcentaje_cumplimiento': None,
             'porcentaje_str': 'Sin datos',
             'ultimo_valor': None,
@@ -71,7 +71,7 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
                 'color': 'verde',
                 'texto': 'Cumplido',
                 'badge_class': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'icono': '🟢',
+                'color_hex': '#10b981',
                 'porcentaje_cumplimiento': 100.0,
                 'porcentaje_str': '100%',
                 'ultimo_valor': ultimo_seguimiento.valor_obtenido,
@@ -81,7 +81,7 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
             'color': 'amarillo',
             'texto': 'En Seguimiento',
             'badge_class': 'bg-amber-50 text-amber-700 border-amber-200',
-            'icono': '🟡',
+            'color_hex': '#f59e0b',
             'porcentaje_cumplimiento': None,
             'porcentaje_str': 'Cualitativo',
             'ultimo_valor': ultimo_seguimiento.valor_obtenido,
@@ -98,19 +98,19 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
             color = 'verde'
             texto = 'Cumplido'
             badge_class = 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            icono = '🟢'
+            color_hex = '#10b981'
         elif valor_num <= meta_num * 1.15: # Hasta 15% por encima de la tolerancia
             pct = round((meta_num / valor_num) * 100, 1)
             color = 'amarillo'
             texto = 'En Seguimiento'
             badge_class = 'bg-amber-50 text-amber-700 border-amber-200'
-            icono = '🟡'
+            color_hex = '#f59e0b'
         else:
             pct = round((meta_num / valor_num) * 100, 1)
             color = 'rojo'
             texto = 'En Riesgo'
             badge_class = 'bg-red-50 text-red-700 border-red-200'
-            icono = '🔴'
+            color_hex = '#ef4444'
     else:
         # Mayor o igual es Verde (estándar para ventas, satisfacción, márgenes, etc.)
         pct = round((valor_num / meta_num) * 100, 1)
@@ -118,17 +118,17 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
             color = 'verde'
             texto = 'Cumplido'
             badge_class = 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            icono = '🟢'
+            color_hex = '#10b981'
         elif valor_num >= meta_num * 0.85: # A menos del 15% de alcanzar la meta
             color = 'amarillo'
             texto = 'En Seguimiento'
             badge_class = 'bg-amber-50 text-amber-700 border-amber-200'
-            icono = '🟡'
+            color_hex = '#f59e0b'
         else:
             color = 'rojo'
             texto = 'En Riesgo'
             badge_class = 'bg-red-50 text-red-700 border-red-200'
-            icono = '🔴'
+            color_hex = '#ef4444'
 
     pct_formateado = formatear_decimal(pct) + '%'
 
@@ -136,7 +136,7 @@ def evaluar_semaforo(indicador) -> Dict[str, Any]:
         'color': color,
         'texto': texto,
         'badge_class': badge_class,
-        'icono': icono,
+        'color_hex': color_hex,
         'porcentaje_cumplimiento': pct,
         'porcentaje_str': pct_formateado,
         'ultimo_valor': ultimo_seguimiento.valor_obtenido,

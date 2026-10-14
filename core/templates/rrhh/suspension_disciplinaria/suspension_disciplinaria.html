@@ -26,10 +26,7 @@
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 <span>Nueva Suspensión</span>
             </a>
-            <a href="{% url 'detalle_empleado' empleado.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver al Empleado</span>
-            </a>
+            <a href="{% url 'detalle_empleado' empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Empleado</span></a>
         </div>
     </div>
 

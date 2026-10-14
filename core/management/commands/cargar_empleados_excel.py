@@ -16,12 +16,12 @@ class Command(BaseCommand):
             type=str,
             default='/app/temp_trabajadores.xlsx',
             help='Ruta al archivo Excel de trabajadores'
-        )
+)
         parser.add_argument(
             '--dry-run',
             action='store_true',
             help='Simular la carga sin guardar cambios en la base de datos'
-        )
+)
 
     def parse_fecha(self, val):
         if not val:
@@ -207,7 +207,7 @@ class Command(BaseCommand):
                         jornada='diurna',
                         jefe=jefe,
                         estado='activo'
-                    )
+)
 
                     SaludEmpleado.objects.create(
                         empleado=empleado,
@@ -219,14 +219,14 @@ class Command(BaseCommand):
                         alergias='Ninguna',
                         contacto_emergencia='',
                         telefono_emergencia=''
-                    )
+)
 
                     # Registrar en el conjunto de existentes para evitar duplicados internos
                     docs_existentes.add(doc_clean)
                     nombres_palabras_db.append(palabras_actual)
 
                 creados += 1
-                self.stdout.write(self.style.SUCCESS(f"✅ [{'SIMULADO' if dry_run else 'REGISTRADO'}] {nombre} | C.C. {doc_clean} | Cargo: {cargo} | EPS: {eps} | AFP: {afp}"))
+                self.stdout.write(self.style.SUCCESS(f" [{'SIMULADO' if dry_run else 'REGISTRADO'}] {nombre} | C.C. {doc_clean} | Cargo: {cargo} | EPS: {eps} | AFP: {afp}"))
 
             if dry_run:
                 self.stdout.write(self.style.WARNING(f"\n[MODO SIMULACIÓN] Se habrían registrado {creados} colaboradores. {omitidos} omitidos."))

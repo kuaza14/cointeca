@@ -71,7 +71,7 @@
         const input = document.querySelector('[name=csrfmiddlewaretoken]');
         if (input) return input.value;
         const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
-        return cookie ? cookie.split('=')[1] : '';
+        return cookie? cookie.split('=')[1]: '';
     }
 
     // Utilidades de Fechas y Semanas ISO (Lunes a Domingo)
@@ -89,8 +89,8 @@
 
     function getMondayOfWeek(d) {
         const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const day = copy.getDay(); // 0: Dom, 1: Lun, ..., 6: Sáb
-        const diff = (day === 0 ? -6 : 1 - day);
+        const day = copy.getDay(); // 0: Dom, 1: Lun,..., 6: Sáb
+        const diff = (day === 0? -6: 1 - day);
         copy.setDate(copy.getDate() + diff);
         return copy;
     }
@@ -109,8 +109,8 @@
             return `
                 <button type="button" id="btn-ausencias-${item.id}" onclick="abrirModalAusencias(${item.id})"
                         class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition cursor-pointer flex items-center justify-center gap-1 mx-auto shadow-2xs"
-                        title="Ver / modificar ausencias registradas (${item.fechas_faltas_json ? item.fechas_faltas_json.length : 0} fechas)">
-                    <span>📅 ${Math.round(faltas)}d</span>
+                        title="Ver / modificar ausencias registradas (${item.fechas_faltas_json? item.fechas_faltas_json.length: 0} fechas)">
+                    <span> ${Math.round(faltas)}d</span>
                     <span class="text-[10px] text-rose-700 font-black">(-${Math.round(dom)} dom)</span>
                 </button>
             `;
@@ -119,7 +119,7 @@
             <button type="button" id="btn-ausencias-${item.id}" onclick="abrirModalAusencias(${item.id})"
                     class="px-2 py-0.5 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-blue-700 hover:bg-blue-50 border border-dashed border-slate-300 hover:border-blue-400 transition cursor-pointer flex items-center justify-center gap-1 mx-auto"
                     title="Registrar ausencias y domingos (Art. 173 CST)">
-                <span>📅 0 d</span>
+                <span> 0 d</span>
             </button>
         `;
     }
@@ -252,7 +252,7 @@
 
         // Aplicar filtro si hay búsqueda activa o actualizar contadores
         const inputBusqueda = document.getElementById('buscador-colaborador-nomina');
-        filtrarColaboradores(inputBusqueda ? inputBusqueda.value : '');
+        filtrarColaboradores(inputBusqueda? inputBusqueda.value: '');
     }
 
     // Filtrar colaboradores en vivo en la tabla de nómina
@@ -260,7 +260,7 @@
         const q = (termino || '').toLowerCase().trim();
         const btnLimpiar = document.getElementById('btn-limpiar-buscador-colaborador');
         if (btnLimpiar) {
-            btnLimpiar.classList.toggle('hidden', !q);
+            btnLimpiar.classList.toggle('hidden',!q);
         }
 
         let visibles = 0;
@@ -272,7 +272,7 @@
             const cedula = String(item.cedula || '').toLowerCase();
             const cargo = (item.cargo || '').toLowerCase();
 
-            const coincide = !q || nombre.includes(q) || cedula.includes(q) || cargo.includes(q);
+            const coincide =!q || nombre.includes(q) || cedula.includes(q) || cargo.includes(q);
             if (coincide) {
                 fila.style.display = '';
                 visibles++;
@@ -321,7 +321,7 @@
         const salario = parseFloat(item.salario_basico) || 0;
         const extras = parseFloat(item.horas_extras_recargos) || 0;
         const otrasDctos = parseFloat(item.otras_deducciones) || 0;
-        const esAprendiz = !!item.es_aprendiz_sena;
+        const esAprendiz =!!item.es_aprendiz_sena;
 
         // Básico proporcional a días liquidados (base 30)
         item.basico_devengado = (salario / 30.0) * dias;
@@ -452,7 +452,7 @@
 
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span>⏳ Guardando...</span>';
+            btn.innerHTML = '<span> Guardando...</span>';
         }
 
         const payload = {
@@ -465,7 +465,7 @@
                 dias_faltas_injustificadas: d.dias_faltas_injustificadas || 0,
                 domingos_descontados: d.domingos_descontados || 0,
                 fechas_faltas_json: d.fechas_faltas_json || [],
-                descontar_dominical: d.descontar_dominical !== false,
+                descontar_dominical: d.descontar_dominical!== false,
                 horas_extras_recargos: d.horas_extras_recargos,
                 otros_devengados: d.otros_devengados,
                 retencion_fuente: d.retencion_fuente,
@@ -482,8 +482,8 @@
             },
             body: JSON.stringify(payload)
         })
-        .then(res => res.json())
-        .then(data => {
+.then(res => res.json())
+.then(data => {
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span>Guardar Cambios</span>';
@@ -492,7 +492,7 @@
                 hayCambiosSinGuardar = false;
                 if (ind && txt) {
                     ind.className = 'text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-200';
-                    txt.textContent = '✓ Guardado exitoso';
+                    txt.textContent = ' Guardado exitoso';
                     setTimeout(() => {
                         if (!hayCambiosSinGuardar) ind.classList.add('hidden');
                     }, 3000);
@@ -501,7 +501,7 @@
                 alert('Error al guardar: ' + (data.message || 'Error desconocido'));
             }
         })
-        .catch(err => {
+.catch(err => {
             console.error(err);
             if (btn) {
                 btn.disabled = false;
@@ -520,8 +520,8 @@
         if (!item) return;
 
         empleadoActualModal = item;
-        fechasSeleccionadasModal = new Set(Array.isArray(item.fechas_faltas_json) ? item.fechas_faltas_json : []);
-        descontarDominicalModal = item.descontar_dominical !== false;
+        fechasSeleccionadasModal = new Set(Array.isArray(item.fechas_faltas_json)? item.fechas_faltas_json: []);
+        descontarDominicalModal = item.descontar_dominical!== false;
 
         const infoEl = document.getElementById('modal-ausencias-empleado');
         if (infoEl) {
@@ -553,7 +553,7 @@
 
     function alCambiarToggleDominical() {
         const toggleEl = document.getElementById('toggle-descontar-dominical');
-        descontarDominicalModal = toggleEl ? toggleEl.checked : true;
+        descontarDominicalModal = toggleEl? toggleEl.checked: true;
         renderizarCalendarioModal();
         actualizarResumenModal();
     }
@@ -595,7 +595,7 @@
         });
 
         const numSemanas = semanasMap.size;
-        const domingosPerdidos = descontarDominicalModal ? numSemanas : 0;
+        const domingosPerdidos = descontarDominicalModal? numSemanas: 0;
         const totalDiasDescontados = faltas + domingosPerdidos;
         const diasLaboradosLiquidados = Math.max(0, 30 - totalDiasDescontados);
         const diasTransporteLiquidados = Math.max(0, 30 - faltas);
@@ -615,13 +615,13 @@
         const grid = document.getElementById('calendario-grid-dias');
         if (!grid) return;
         grid.innerHTML = '';
-        grid.style.cssText = 'display: grid !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 6px !important; width: 100% !important; box-sizing: border-box !important;';
+        grid.style.cssText = 'display: grid!important; grid-template-columns: repeat(7, minmax(0, 1fr))!important; gap: 6px!important; width: 100%!important; box-sizing: border-box!important;';
 
         const ano = PERIODO_ANO;
         const mes = PERIODO_MES;
         const diasEnMes = new Date(ano, mes, 0).getDate();
         const primerDia = new Date(ano, mes - 1, 1);
-        const offsetInicio = (primerDia.getDay() + 6) % 7; // Lun: 0, Mar: 1, ..., Dom: 6
+        const offsetInicio = (primerDia.getDay() + 6) % 7; // Lun: 0, Mar: 1,..., Dom: 6
 
         const balance = calcularBalanceAusencias();
         const domingosAfectadosSet = new Set();
@@ -655,18 +655,18 @@
 
             if (esFalta) {
                 // Día marcado como falta injustificada
-                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #e11d48 !important; color: #ffffff !important; border: 2px solid #be123c !important; cursor: pointer; box-shadow: 0 2px 4px rgba(225, 29, 72, 0.3);';
+                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #e11d48!important; color: #ffffff!important; border: 2px solid #be123c!important; cursor: pointer; box-shadow: 0 2px 4px rgba(225, 29, 72, 0.3);';
                 btn.innerHTML = `
                     <span style="font-size: 13px; font-weight: 800; line-height: 1;">${dia}</span>
-                    <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; background-color: rgba(0,0,0,0.25); color: #fff; padding: 2px 4px; border-radius: 4px; letter-spacing: 0.05em;">✕ Falta</span>
+                    <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; background-color: rgba(0,0,0,0.25); color: #fff; padding: 2px 4px; border-radius: 4px; letter-spacing: 0.05em;"> Falta</span>
                 `;
             } else if (esDomingo && esDomingoPenalizado) {
                 // Domingo que se pierde según Art. 173 CST
-                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #fef3c7 !important; color: #78350f !important; border: 2px solid #f59e0b !important; cursor: pointer;';
+                btn.style.cssText = 'min-height: 52px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; border-radius: 10px; background-color: #fef3c7!important; color: #78350f!important; border: 2px solid #f59e0b!important; cursor: pointer;';
                 btn.title = 'Este descanso dominical se descontará por la falta injustificada ocurrida en la semana (Art. 173 CST)';
                 btn.innerHTML = `
                     <span style="font-size: 13px; font-weight: 800; line-height: 1; color: #b91c1c;">${dia}</span>
-                    <span style="font-size: 8px; font-weight: 900; text-transform: uppercase; background-color: #f59e0b; color: #0f172a; padding: 2px 3px; border-radius: 4px;">⚠️ Dcto Dom</span>
+                    <span style="font-size: 8px; font-weight: 900; text-transform: uppercase; background-color: #f59e0b; color: #0f172a; padding: 2px 3px; border-radius: 4px;"> Dcto Dom</span>
                 `;
             } else if (esDomingo) {
                 // Domingo regular de descanso
@@ -761,7 +761,7 @@
 
     function autocompletarDesdeSelect() {
         const sel = document.getElementById('select-empleado-modal');
-        if (!sel || !sel.value) return;
+        if (!sel ||!sel.value) return;
         const opt = sel.options[sel.selectedIndex];
         if (opt) {
             const cedula = opt.getAttribute('data-cedula') || '';

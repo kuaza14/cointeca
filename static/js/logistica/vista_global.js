@@ -68,17 +68,17 @@ function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
     event.stopPropagation();
     const btn = event.currentTarget;
     const th = btn.closest("th");
-    const tabla = tablaId ? document.getElementById(tablaId) : (btn.closest("table") || document.getElementById("tablaNodosGlobal"));
+    const tabla = tablaId? document.getElementById(tablaId): (btn.closest("table") || document.getElementById("tablaNodosGlobal"));
     if (!tabla) return;
 
     const idTabla = tabla.id || "tablaNodosGlobal";
     tablaActualFiltro = idTabla;
 
     if (colIdx === undefined || colIdx === null) {
-        colIdx = th ? (th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex) : 0;
+        colIdx = th? (th.hasAttribute("data-col-idx")? parseInt(th.getAttribute("data-col-idx"), 10): th.cellIndex): 0;
     }
     colActualFiltro = colIdx;
-    nombreColActualFiltro = colName || (th ? th.querySelector("span")?.innerText?.trim() : "Columna");
+    nombreColActualFiltro = colName || (th? th.querySelector("span")?.innerText?.trim(): "Columna");
 
     const activeFilters = getActiveFilters(idTabla);
 
@@ -117,7 +117,7 @@ function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
 
     // Estado del botón borrar
     if (btnClearThisCol) {
-        btnClearThisCol.style.display = activeFilters[colIdx] ? "flex" : "none";
+        btnClearThisCol.style.display = activeFilters[colIdx]? "flex": "none";
     }
 
     const currentSelectedSet = activeFilters[colIdx] || null;
@@ -140,7 +140,7 @@ function abrirFiltroExcel(event, colIdx, colName, tablaId = null) {
 
                 rowDiv.innerHTML = `
                     <div class="flex items-center gap-2 truncate">
-                        <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked ? "checked" : ""}>
+                        <input type="checkbox" value="${encodeURIComponent(item.val)}" class="chk-item-filter size-3.5 rounded text-primary focus:ring-0 cursor-pointer" ${isChecked? "checked": ""}>
                         <span class="truncate font-medium text-foreground">${item.val}</span>
                     </div>
                     <span class="text-[10px] px-1.5 py-0.2 bg-muted text-muted-foreground font-mono rounded-full shrink-0">${item.count}</span>
@@ -187,7 +187,7 @@ function cerrarFiltroExcel() {
 
 // ---------- TOGGLE SELECCIONAR TODO ----------
 function toggleSelectAllExcel(checked) {
-    const visibleChkItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item:not(.hidden) .chk-item-filter");
+    const visibleChkItems = document.querySelectorAll("#popoverCheckboxList.chk-option-item:not(.hidden).chk-item-filter");
     visibleChkItems.forEach(chk => {
         chk.checked = checked;
     });
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             const q = searchInput.value.toLowerCase().trim();
-            const optionItems = document.querySelectorAll("#popoverCheckboxList .chk-option-item");
+            const optionItems = document.querySelectorAll("#popoverCheckboxList.chk-option-item");
             
             optionItems.forEach(item => {
                 const text = item.getAttribute("data-val-normalized") || "";
@@ -215,10 +215,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ---------- APLICAR FILTRO DE LA COLUMNA ACTUAL ----------
 function aplicarFiltroColumnaActual() {
-    if (colActualFiltro === null || !tablaActualFiltro) return;
+    if (colActualFiltro === null ||!tablaActualFiltro) return;
 
     const activeFilters = getActiveFilters(tablaActualFiltro);
-    const allChk = document.querySelectorAll("#popoverCheckboxList .chk-item-filter");
+    const allChk = document.querySelectorAll("#popoverCheckboxList.chk-item-filter");
     const allTotal = allChk.length;
     let checkedCount = 0;
     const selectedSet = new Set();
@@ -242,7 +242,7 @@ function aplicarFiltroColumnaActual() {
 
 // ---------- BORRAR FILTRO DE COLUMNA ACTUAL ----------
 function borrarFiltroColumnaActual() {
-    if (colActualFiltro !== null && tablaActualFiltro) {
+    if (colActualFiltro!== null && tablaActualFiltro) {
         const activeFilters = getActiveFilters(tablaActualFiltro);
         delete activeFilters[colActualFiltro];
         cerrarFiltroExcel();
@@ -266,7 +266,7 @@ function limpiarTodosFiltrosExcel() {
 
 // ---------- ORDENAR FILAS A-Z / Z-A ----------
 function ejecutarSortExcel(ascendente) {
-    if (colActualFiltro === null || !tablaActualFiltro) return;
+    if (colActualFiltro === null ||!tablaActualFiltro) return;
     const colIdx = colActualFiltro;
     const tabla = document.getElementById(tablaActualFiltro);
     if (!tabla) return;
@@ -275,24 +275,24 @@ function ejecutarSortExcel(ascendente) {
     const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
 
     filas.sort((a, b) => {
-        let valA = a.hasAttribute(`data-col-${colIdx}`) ? a.getAttribute(`data-col-${colIdx}`) : (a.children[colIdx] ? a.children[colIdx].innerText : "");
-        let valB = b.hasAttribute(`data-col-${colIdx}`) ? b.getAttribute(`data-col-${colIdx}`) : (b.children[colIdx] ? b.children[colIdx].innerText : "");
+        let valA = a.hasAttribute(`data-col-${colIdx}`)? a.getAttribute(`data-col-${colIdx}`): (a.children[colIdx]? a.children[colIdx].innerText: "");
+        let valB = b.hasAttribute(`data-col-${colIdx}`)? b.getAttribute(`data-col-${colIdx}`): (b.children[colIdx]? b.children[colIdx].innerText: "");
         valA = (valA || "").trim();
         valB = (valB || "").trim();
 
         const dateA = parseFecha(valA);
         const dateB = parseFecha(valB);
         if (dateA && dateB) {
-            return ascendente ? dateA - dateB : dateB - dateA;
+            return ascendente? dateA - dateB: dateB - dateA;
         }
 
         const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
         const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
-        if (!isNaN(numA) && !isNaN(numB) && !valA.includes("/") && !valB.includes("/")) {
-            return ascendente ? numA - numB : numB - numA;
+        if (!isNaN(numA) &&!isNaN(numB) &&!valA.includes("/") &&!valB.includes("/")) {
+            return ascendente? numA - numB: numB - numA;
         }
 
-        return ascendente ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
+        return ascendente? valA.localeCompare(valB, undefined, { numeric: true }): valB.localeCompare(valA, undefined, { numeric: true });
     });
 
     filas.forEach(f => tbody.appendChild(f));
@@ -300,7 +300,7 @@ function ejecutarSortExcel(ascendente) {
 }
 
 function parseFecha(str) {
-    if (!str || !str.includes("/")) return null;
+    if (!str ||!str.includes("/")) return null;
     const parts = str.split("/");
     if (parts.length === 3) {
         const d = parseInt(parts[0], 10);
@@ -324,7 +324,7 @@ function ejecutarFiltradoTabla(tablaId) {
     let qGlobal = "";
     if (tablaId === "tablaNodosGlobal") {
         const inputGlobal = document.getElementById("inputBuscadorGlobal");
-        qGlobal = inputGlobal ? inputGlobal.value.toLowerCase().trim() : "";
+        qGlobal = inputGlobal? inputGlobal.value.toLowerCase().trim(): "";
     }
 
     const filas = Array.from(tbody.querySelectorAll("tr:not(.fila-vacia):not(.fila-no-filtro)"));
@@ -334,7 +334,7 @@ function ejecutarFiltradoTabla(tablaId) {
     filas.forEach(f => {
         let cumple = true;
 
-        if (qGlobal !== "") {
+        if (qGlobal!== "") {
             const txt = f.textContent.toLowerCase();
             if (!txt.includes(qGlobal)) cumple = false;
         }
@@ -375,13 +375,13 @@ function ejecutarFiltradoTabla(tablaId) {
     // Actualizar botones de encabezado para esta tabla
     const ths = tabla.querySelectorAll("th.th-excel-col");
     ths.forEach(th => {
-        const cIdx = th.hasAttribute("data-col-idx") ? parseInt(th.getAttribute("data-col-idx"), 10) : th.cellIndex;
+        const cIdx = th.hasAttribute("data-col-idx")? parseInt(th.getAttribute("data-col-idx"), 10): th.cellIndex;
         const btn = th.querySelector(".btn-filter-trigger");
         if (btn) {
             if (activeFilters[cIdx]) {
                 th.classList.add("has-active-filter");
                 btn.classList.add("filter-active");
-                btn.innerHTML = '<span class="text-amber-950 font-black text-[10px]">▼✓</span>';
+                btn.innerHTML = '<span class="text-amber-950 font-black text-[10px]">▼</span>';
             } else {
                 th.classList.remove("has-active-filter");
                 btn.classList.remove("filter-active");
@@ -401,7 +401,7 @@ function ejecutarFiltradoTabla(tablaId) {
         const btnLimpiar = document.getElementById("btnLimpiarTodosFiltros");
         const spanNumFiltros = document.getElementById("filtrosActivosNum");
         if (btnLimpiar && spanNumFiltros) {
-            const numActivos = activeCols.length + (qGlobal ? 1 : 0);
+            const numActivos = activeCols.length + (qGlobal? 1: 0);
             spanNumFiltros.textContent = numActivos;
             if (numActivos > 0) {
                 btnLimpiar.classList.remove("hidden");
@@ -418,12 +418,12 @@ function ejecutarFiltradoTabla(tablaId) {
             const valRetDiv = tc.querySelector(".tfoot-val-ret");
 
             if (valInstDiv) {
-                valInstDiv.textContent = Number.isInteger(tot.inst) ? tot.inst : tot.inst.toFixed(1);
+                valInstDiv.textContent = Number.isInteger(tot.inst)? tot.inst: tot.inst.toFixed(1);
             }
             if (valRetDiv) {
                 if (tot.ret > 0) {
                     valRetDiv.classList.remove("hidden");
-                    valRetDiv.textContent = `Ret: ${Number.isInteger(tot.ret) ? tot.ret : tot.ret.toFixed(1)}`;
+                    valRetDiv.textContent = `Ret: ${Number.isInteger(tot.ret)? tot.ret: tot.ret.toFixed(1)}`;
                 } else {
                     valRetDiv.classList.add("hidden");
                 }
@@ -439,8 +439,8 @@ function ejecutarFiltradoGeneral() {
 // ---------- EVENTOS DE CLIC FUERA Y TECLADO ----------
 document.addEventListener("click", function (e) {
     const popover = document.getElementById("excelFilterPopover");
-    if (popover && !popover.classList.contains("hidden")) {
-        if (!popover.contains(e.target) && !e.target.closest(".btn-filter-trigger")) {
+    if (popover &&!popover.classList.contains("hidden")) {
+        if (!popover.contains(e.target) &&!e.target.closest(".btn-filter-trigger")) {
             cerrarFiltroExcel();
         }
     }
@@ -464,11 +464,11 @@ document.addEventListener("DOMContentLoaded", function () {
         selectMacro.addEventListener("change", function () {
             const macroId = selectMacro.value;
 
-            selectProy.innerHTML = macroId ?
-                `<option value="todos">🌐 Todos los Proyectos de este Macroproyecto (Consolidado)</option>` :
-                `<option value="todos">🌐 Todos los Macroproyectos y Proyectos (Global)</option>`;
+            selectProy.innerHTML = macroId?
+                `<option value="todos"> Todos los Proyectos de este Macroproyecto (Consolidado)</option>`:
+                `<option value="todos"> Todos los Macroproyectos y Proyectos (Global)</option>`;
 
-            const filtrados = macroId ? todosProyectosData.filter(p => String(p.macro_id) === String(macroId)) : todosProyectosData;
+            const filtrados = macroId? todosProyectosData.filter(p => String(p.macro_id) === String(macroId)): todosProyectosData;
 
             filtrados.forEach(p => {
                 const opt = document.createElement("option");
@@ -497,7 +497,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const filasBalance = document.querySelectorAll(".fila-balance-global");
             filasBalance.forEach(f => {
                 const txt = f.textContent.toLowerCase();
-                f.style.display = txt.includes(q) ? "" : "none";
+                f.style.display = txt.includes(q)? "": "none";
             });
         });
     }

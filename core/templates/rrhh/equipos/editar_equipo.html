@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <h1 class="text-3xl font-bold">
+            Editar Equipo Asignado
+        </h1>
+
+        <a
+            href="/rrhh/empleados/{{ empleado.id }}/"
+         class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver</span></a>
+
+    </div>
+
+    {% if error %}
+    <div class="bg-destructive/10 text-destructive border border-destructive rounded p-3 mb-4 text-sm">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="bg-card p-6 rounded shadow">
+
+        <p class="text-sm text-muted-foreground mb-4">
+            Asignado a: <strong>{{ empleado.nombre_completo }}</strong>
+        </p>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+                    <label class="font-bold block mb-1" for="campo-equipo">
+                        Equipo
+                    </label>
+
+                    <input id="campo-equipo"
+                        type="text"
+                        name="equipo"
+                        value="{{ equipo.equipo_inventario.equipo }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1" for="campo-referencia">
+                        Referencia
+                    </label>
+
+                    <input id="campo-referencia"
+                        type="text"
+                        name="referencia"
+                        value="{{ equipo.equipo_inventario.referencia }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1" for="campo-serial">
+                        Serial
+                    </label>
+
+                    <input id="campo-serial"
+                        type="text"
+                        name="serial"
+                        value="{{ equipo.equipo_inventario.serial }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1" for="campo-marca">
+                        Marca
+                    </label>
+
+                    <input id="campo-marca"
+                        type="text"
+                        name="marca"
+                        value="{{ equipo.equipo_inventario.marca }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+                <div>
+                    <label class="font-bold block mb-1" for="campo-fecha_entrega">
+                        Fecha entrega
+                    </label>
+
+                    <input id="campo-fecha_entrega"
+                        type="date"
+                        name="fecha_entrega"
+                        value="{{ equipo.fecha_entrega|date:'Y-m-d' }}"
+                        class="w-full border p-2 rounded"
+                    >
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+
+                <label class="font-bold block mb-1" for="campo-observaciones">
+                    Observaciones
+                </label>
+
+                <textarea id="campo-observaciones"
+                    name="observaciones"
+                    rows="4"
+                    class="w-full border p-2 rounded"
+                >{{ equipo.observaciones }}</textarea>
+
+            </div>
+
+            <div class="mt-6 flex gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-hover"
+                >
+                    Guardar Cambios
+                </button>
+
+                <a
+                    href="/rrhh/empleados/{{ empleado.id }}/"
+                    class="bg-neutral text-white px-5 py-2 rounded hover:bg-neutral-hover"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

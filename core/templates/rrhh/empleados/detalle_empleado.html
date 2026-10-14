@@ -12,11 +12,11 @@
             <h1 class="text-3xl font-bold text-foreground">Ficha Técnica del Trabajador</h1>
             {% if empleado.estado == 'retirado' %}
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 shadow-sm">
-                    🔴 Retirado
+                    <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#ef4444"></span> Retirado
                 </span>
             {% else %}
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
-                    🟢 Activo
+                    <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#10b981"></span> Activo
                 </span>
             {% endif %}
         </div>
@@ -27,13 +27,13 @@
                     <button type="button" 
                             onclick="abrirModalReintegrar()" 
                             class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow font-semibold text-sm transition flex items-center gap-1.5">
-                        <span>🔄 Reintegrar Colaborador</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Reintegrar Colaborador</span>
                     </button>
                 {% else %}
                     <button type="button" 
                             onclick="abrirModalRetirar()" 
                             class="bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white border border-red-600/30 px-3.5 py-2 rounded-lg shadow-sm font-semibold text-sm transition flex items-center gap-1.5">
-                        <span>🚪 Registrar Retiro</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg> Registrar Retiro</span>
                     </button>
                 {% endif %}
 
@@ -46,9 +46,7 @@
                 </a>
             {% endif %}
 
-            <a href="/rrhh/empleados/" class="bg-neutral hover:bg-neutral-hover text-white px-4 py-2 rounded-lg shadow font-semibold text-sm transition">
-                Volver
-            </a>
+            <a href="/rrhh/empleados/" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver</span></a>
         </div>
     </div>
 
@@ -57,7 +55,7 @@
     <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
         <div class="flex items-start sm:items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center text-xl shrink-0">
-                🚪
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
             </div>
             <div>
                 <p class="font-bold text-sm text-red-600 dark:text-red-400">Colaborador en estado RETIRADO</p>
@@ -71,10 +69,10 @@
             <button type="button" 
                     onclick="abrirModalReintegrar()" 
                     class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-1.5">
-                <span>🔄 Reintegrar Colaborador</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Reintegrar Colaborador</span>
             </button>
             <a href="{% url 'acuerdo_terminacion' empleado.id %}" target="_blank" class="bg-card hover:bg-muted border border-border text-foreground px-3 py-2 rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1">
-                <span>📄 Ver Acuerdo</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg> Ver Acuerdo</span>
             </a>
         </div>
     </div>
@@ -455,8 +453,7 @@
             <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
                 <span class="uppercase tracking-wide">8. Equipos Tecnológicos</span>
                 <div class="flex gap-2">
-                    <a href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
-                        + Asignar Equipo
+                    <a href="/rrhh/empleados/{{ empleado.id }}/asignar-equipo/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Asignar Equipo
                     </a>
                     <a href="/rrhh/empleados/{{ empleado.id }}/acta_equipos/" class="bg-neutral hover:bg-neutral-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
                         Acta Equipos
@@ -495,11 +492,15 @@
                                 {{ e.observaciones|default:"---" }}
                             </td>
                             <td class="p-3 text-center">
-                                <a href="/rrhh/equipos/{{ e.id }}/eliminar/" 
-                                   class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block"
-                                   onclick="return confirm('¿Seguro que quieres eliminar esta asignación?');">
-                                    Eliminar
-                                </a>
+                                <form method="POST" action="/rrhh/equipos/{{ e.id }}/eliminar/"
+                                      onsubmit="return confirm('¿Seguro que quieres eliminar esta asignación?');"
+                                      class="inline-block">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block">
+                                        Eliminar
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         {% empty %}
@@ -518,8 +519,7 @@
         <div class="mt-8">
             <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
                 <span class="uppercase tracking-wide">9. Contratos y Documentos</span>
-                <a href="/rrhh/empleados/{{ empleado.id }}/subir-documento/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
-                    + Subir Documento
+                <a href="/rrhh/empleados/{{ empleado.id }}/subir-documento/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Subir Documento
                 </a>
             </div>
 
@@ -552,11 +552,15 @@
                                 {% endif %}
                             </td>
                             <td class="p-3 text-center">
-                                <a href="/rrhh/documentos/{{ d.id }}/eliminar/" 
-                                   class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block"
-                                   onclick="return confirm('¿Seguro que deseas eliminar este documento?');">
-                                    Eliminar
-                                </a>
+                                <form method="POST" action="/rrhh/documentos/{{ d.id }}/eliminar/"
+                                      onsubmit="return confirm('¿Seguro que deseas eliminar este documento?');"
+                                      class="inline-block">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="bg-destructive hover:bg-destructive-hover text-white px-3 py-1 rounded text-xs shadow transition inline-block">
+                                        Eliminar
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         {% empty %}
@@ -575,8 +579,7 @@
         <div class="mt-8">
             <div class="bg-primary text-white px-4 py-3 rounded-t font-bold flex justify-between items-center text-sm">
                 <span class="uppercase tracking-wide">10. Vacaciones</span>
-                <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium">
-                    + Registrar Vacaciones
+                <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/" class="bg-success hover:bg-success-hover text-white px-3 py-1 rounded text-xs transition shadow font-medium"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Registrar Vacaciones
                 </a>
             </div>
             <div class="p-4 border border-t-0 border-border rounded-b text-sm text-muted-foreground">
@@ -600,16 +603,16 @@
             <!-- CABECERA -->
             <div class="px-6 py-4 bg-red-500/10 border-b border-red-500/20 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-xl">🚪</span>
+                    <span class="text-xl"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg></span>
                     <h3 class="font-bold text-foreground text-base">Registrar Retiro del Colaborador</h3>
                 </div>
-                <button type="button" onclick="cerrarModalRetirar()" class="text-muted-foreground hover:text-foreground p-1 text-lg">✕</button>
+                <button type="button" onclick="cerrarModalRetirar()" class="text-muted-foreground hover:text-foreground p-1 text-lg"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
 
             <!-- CUERPO -->
             <div class="p-6 space-y-4 text-sm">
                 <div class="bg-muted/40 p-3 rounded-lg border border-border flex items-center gap-3">
-                    <span class="text-lg">👤</span>
+                    <span class="text-lg"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg></span>
                     <div>
                         <p class="font-bold text-foreground uppercase text-xs">{{ empleado.nombre_completo }}</p>
                         <p class="text-xs text-muted-foreground font-mono">C.C. {{ empleado.documento }} | {{ empleado.cargo|default:"Sin cargo" }}</p>
@@ -617,7 +620,7 @@
                 </div>
 
                 <div class="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 p-3 rounded-lg text-xs leading-relaxed">
-                    💡 <strong>Nota:</strong> El colaborador no será eliminado. Pasará a la pestaña de <em>Retirados</em> y todo su expediente, historial de dotaciones, documentos y certificados se conservarán intactos.
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg> <strong>Nota:</strong> El colaborador no será eliminado. Pasará a la pestaña de <em>Retirados</em> y todo su expediente, historial de dotaciones, documentos y certificados se conservarán intactos.
                 </div>
 
                 <div>
@@ -671,7 +674,7 @@
                 </button>
                 <button type="submit" 
                         class="px-4 py-2 rounded-lg text-xs font-bold bg-destructive hover:bg-destructive-hover text-white shadow transition flex items-center gap-1.5">
-                    <span>🚪 Confirmar Retiro</span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg> Confirmar Retiro</span>
                 </button>
             </div>
         </form>
@@ -690,16 +693,16 @@
             <!-- CABECERA -->
             <div class="px-6 py-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-xl">🔄</span>
+                    <span class="text-xl"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></span>
                     <h3 class="font-bold text-foreground text-base">Reintegrar Colaborador a la Empresa</h3>
                 </div>
-                <button type="button" onclick="cerrarModalReintegrar()" class="text-muted-foreground hover:text-foreground p-1 text-lg">✕</button>
+                <button type="button" onclick="cerrarModalReintegrar()" class="text-muted-foreground hover:text-foreground p-1 text-lg"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
 
             <!-- CUERPO -->
             <div class="p-6 space-y-4 text-sm max-h-[75vh] overflow-y-auto">
                 <div class="bg-muted/40 p-3 rounded-lg border border-border flex items-center gap-3">
-                    <span class="text-lg">👤</span>
+                    <span class="text-lg"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg></span>
                     <div>
                         <p class="font-bold text-foreground uppercase text-xs">{{ empleado.nombre_completo }}</p>
                         <p class="text-xs text-muted-foreground font-mono">C.C. {{ empleado.documento }}</p>
@@ -707,7 +710,7 @@
                 </div>
 
                 <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 p-3 rounded-lg text-xs leading-relaxed">
-                    ✨ <strong>¡Excelente!</strong> El colaborador volverá al estado <strong>Activo</strong>. Actualiza a continuación las condiciones de su nuevo contrato. Su historial previo se mantendrá vinculado.
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg> <strong>¡Excelente!</strong> El colaborador volverá al estado <strong>Activo</strong>. Actualiza a continuación las condiciones de su nuevo contrato. Su historial previo se mantendrá vinculado.
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -807,7 +810,7 @@
                 </button>
                 <button type="submit" 
                         class="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow transition flex items-center gap-1.5">
-                    <span>🔄 Confirmar Reingreso</span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Confirmar Reingreso</span>
                 </button>
             </div>
         </form>

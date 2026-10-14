@@ -11,9 +11,7 @@
 <div class="container-fluid px-3 py-3">
     <!-- Action buttons (no-print) -->
     <div class="no-print d-flex justify-content-between align-items-center mb-4 max-w-820 mx-auto" style="max-width: 820px;">
-        <a href="{% url 'detalle_nomina' periodo.id %}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Volver a Nómina {{ periodo.get_mes_display }} {{ periodo.ano }}
-        </a>
+        <a href="{% url 'detalle_nomina' periodo.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Nómina {{ periodo.get_mes_display }} {{ periodo.ano }}</span></a>
         <div class="d-flex gap-2">
             <button onclick="window.print()" class="btn btn-primary btn-sm px-3 shadow-sm">
                 <i class="bi bi-printer me-1"></i> Imprimir / Descargar PDF

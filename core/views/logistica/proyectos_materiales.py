@@ -26,7 +26,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Sum, Q
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from core.models import (
     Macroproyecto,
@@ -36,15 +36,24 @@ from core.models import (
     ApoyoMaterial,
     EntradaMaterialProyecto,
     DetalleEntradaMaterial,
+    ConsumoMaterialProyecto,
+    DetalleConsumoMaterial,
     RetiroMaterialProyecto,
     DetalleRetiroMaterial,
     MaterialRequeridoProyecto,
     Inventario,
+    MovimientoInventario,
     DevolucionMaterialProyecto,
     DetalleDevolucionMaterial,
 )
+from core.helpers.inventario_historial import registrar_movimiento_inventario
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+
+
+def _parse_decimal(valor):
+    """Acepta '12.5' o '12,5' (coma decimal es-CO)."""
+    return Decimal(str(valor).strip().replace(",", ".") or "0")
 
 @login_required
 def macroproyectos_logistica(request):
@@ -61,7 +70,7 @@ def macroproyectos_logistica(request):
             Q(tipo__icontains=query) |
             Q(descripcion__icontains=query) |
             Q(estado__icontains=query)
-        )
+)
 
     resumen_macros = []
     for macro in macroproyectos:
@@ -88,7 +97,7 @@ def macroproyectos_logistica(request):
             "total_macros": Macroproyecto.objects.count(),
             "total_filtrados": len(resumen_macros),
         }
-    )
+)
 
 @login_required
 def proyectos_logistica(request, macroproyecto_id=None):
@@ -114,7 +123,7 @@ def proyectos_logistica(request, macroproyecto_id=None):
             Q(numero_emcali__icontains=query) |
             Q(tipo__icontains=query) |
             Q(estado__icontains=query)
-        )
+)
 
     resumen_proyectos = []
     for p in proyectos:
@@ -142,7 +151,7 @@ def proyectos_logistica(request, macroproyecto_id=None):
             "query": query,
             "macroproyectos": todos_macroproyectos,
         }
-    )
+)
 
 
 @login_required
@@ -177,7 +186,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
                             proyecto=proyecto,
                             material_id=int(m_id),
                             defaults={"cantidad_requerida": cant_dec}
-                        )
+)
                         if not created:
                             req_obj.cantidad_requerida += cant_dec
                             req_obj.save()
@@ -224,24 +233,39 @@ def detalle_proyecto_logistica(request, proyecto_id):
                     continue
 
             if items_to_create:
-                dev_obj = DevolucionMaterialProyecto.objects.create(
-                    proyecto=proyecto,
-                    fecha=fecha_dev,
-                    responsable=responsable or "Cuadrilla Terreno",
-                    numero_acta=numero_acta,
-                    observaciones=observaciones
-                )
-                total_unidades = Decimal("0")
-                for mat, cant_dec in items_to_create:
-                    DetalleDevolucionMaterial.objects.create(
-                        devolucion=dev_obj,
-                        material=mat,
-                        cantidad=cant_dec
-                    )
-                    inventario, _ = Inventario.objects.get_or_create(material=mat)
-                    inventario.cantidad = inventario.cantidad - cant_dec
-                    inventario.save()
-                    total_unidades += cant_dec
+                with transaction.atomic():
+                    dev_obj = DevolucionMaterialProyecto.objects.create(
+                        proyecto=proyecto,
+                        fecha=fecha_dev,
+                        responsable=responsable or "Cuadrilla Terreno",
+                        numero_acta=numero_acta,
+                        observaciones=observaciones
+)
+                    total_unidades = Decimal("0")
+                    for mat, cant_dec in items_to_create:
+                        DetalleDevolucionMaterial.objects.create(
+                            devolucion=dev_obj,
+                            material=mat,
+                            cantidad=cant_dec
+)
+                        inventario, _ = Inventario.objects.get_or_create(material=mat)
+                        inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+                        stock_anterior = inventario.cantidad
+                        inventario.cantidad = inventario.cantidad - cant_dec
+                        inventario.save()
+                        total_unidades += cant_dec
+
+                        registrar_movimiento_inventario(
+                            material=mat,
+                            tipo_movimiento=MovimientoInventario.Tipos.DEVOLUCION,
+                            cantidad=cant_dec,
+                            stock_anterior=stock_anterior,
+                            stock_resultante=inventario.cantidad,
+                            usuario=request.user,
+                            proyecto=proyecto,
+                            detalle_origen_destino=f"Devolución a EMCALI - Proyecto {proyecto.numero_emcali or proyecto.id}",
+                            observacion=f"Acta {numero_acta or 's/n'} - {responsable or 'Cuadrilla Terreno'}"
+)
 
                 messages.success(request, f"¡Éxito! Se registró el acta de devolución de {len(items_to_create)} material(es) y se descontaron {total_unidades} unidades de Bodega Central.")
             else:
@@ -253,29 +277,44 @@ def detalle_proyecto_logistica(request, proyecto_id):
             if dev_id:
                 dev_obj = DevolucionMaterialProyecto.objects.filter(id=dev_id, proyecto=proyecto).first()
                 if dev_obj:
-                    for det in dev_obj.detalles.all():
-                        inv = Inventario.objects.filter(material=det.material).first()
-                        if inv:
-                            inv.cantidad += det.cantidad
-                            inv.save()
-                    dev_obj.delete()
+                    with transaction.atomic():
+                        for det in dev_obj.detalles.all():
+                            inv = Inventario.objects.filter(material=det.material).first()
+                            if inv:
+                                inv = Inventario.objects.select_for_update().get(pk=inv.pk)
+                                stock_anterior = inv.cantidad
+                                inv.cantidad += det.cantidad
+                                inv.save()
+
+                                registrar_movimiento_inventario(
+                                    material=det.material,
+                                    tipo_movimiento=MovimientoInventario.Tipos.AJUSTE,
+                                    cantidad=det.cantidad,
+                                    stock_anterior=stock_anterior,
+                                    stock_resultante=inv.cantidad,
+                                    usuario=request.user,
+                                    proyecto=proyecto,
+                                    detalle_origen_destino="Bodega Central (Anulación de Devolución)",
+                                    observacion=f"Eliminación de acta de devolución {dev_obj.numero_acta or dev_obj.id}"
+)
+                        dev_obj.delete()
                     messages.warning(request, "Se eliminó el registro de devolución y se restableció el stock en Bodega Central.")
             return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
 
     # 1. Instalado en Apoyos (Ingeniería)
     apoyo_inst_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     inst_map = {item["material_id"]: item["total"] for item in apoyo_inst_qs}
 
     # 2. Materiales Requeridos directos del Proyecto (MaterialRequeridoProyecto)
     mat_req_extra = (
         MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     req_directo_map = {item["material_id"]: item["total"] for item in mat_req_extra}
 
     # Mapa de requeridos
@@ -284,25 +323,25 @@ def detalle_proyecto_logistica(request, proyecto_id):
     # 3. Entradas Suministradas (compras de proveedor o despachos de bodega)
     ent_qs = (
         DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
     # 4. Retiros / Desmontes del proyecto (desde los apoyos/postes)
     ret_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_retirada"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_retirada"))
+)
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
     # 4.5. Devoluciones ya reintegradas a Bodega Central
     dev_qs = (
         DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
 
     # 5. Obtener todos los materiales involucrados en el proyecto
@@ -376,33 +415,33 @@ def detalle_proyecto_logistica(request, proyecto_id):
 
     entradas = (
         EntradaMaterialProyecto.objects.filter(proyecto=proyecto)
-        .prefetch_related("detalles__material")
-        .order_by("-fecha", "-id")
-    )
+.prefetch_related("detalles__material")
+.order_by("-fecha", "-id")
+)
 
     requeridos_proyecto = (
         MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
-        .select_related("material")
-        .order_by("material__descripcion")
-    )
+.select_related("material")
+.order_by("material__descripcion")
+)
 
     instalados_apoyo = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_requerida__gt=0)
-        .select_related("apoyo", "material")
-        .order_by("apoyo__numero_apoyo", "material__descripcion")
-    )
+.select_related("apoyo", "material")
+.order_by("apoyo__numero_apoyo", "material__descripcion")
+)
 
     retiros_apoyo = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_retirada__gt=0)
-        .select_related("apoyo", "material")
-        .order_by("apoyo__numero_apoyo", "material__descripcion")
-    )
+.select_related("apoyo", "material")
+.order_by("apoyo__numero_apoyo", "material__descripcion")
+)
 
     devoluciones = (
         DevolucionMaterialProyecto.objects.filter(proyecto=proyecto)
-        .prefetch_related("detalles__material")
-        .order_by("-fecha", "-id")
-    )
+.prefetch_related("detalles__material")
+.order_by("-fecha", "-id")
+)
 
     materiales_catalogo = Material.objects.all().order_by("descripcion")
 
@@ -428,7 +467,7 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "total_sobrante_devolucion": total_sobrante_devolucion,
             "total_desinstalado_devolucion": total_desinstalado_devolucion,
         }
-    )
+)
 
 @login_required
 @transaction.atomic
@@ -436,28 +475,28 @@ def registrar_entrada_material(request, proyecto_id):
     proyecto = get_object_or_404(
         Proyecto,
         id=proyecto_id
-    )
+)
     materiales = Material.objects.all().order_by("descripcion")
 
     entradas = (
         EntradaMaterialProyecto.objects
-        .filter(proyecto=proyecto)
-        .prefetch_related("detalles__material")
-    )
+.filter(proyecto=proyecto)
+.prefetch_related("detalles__material")
+)
 
     req_qs = (
         MaterialRequeridoProyecto.objects
-        .filter(proyecto=proyecto)
-        .select_related("material")
-        .order_by("material__descripcion")
-    )
+.filter(proyecto=proyecto)
+.select_related("material")
+.order_by("material__descripcion")
+)
 
     ent_qs = (
         DetalleEntradaMaterial.objects
-        .filter(entrada__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total_entrado=Sum("cantidad"))
-    )
+.filter(entrada__proyecto=proyecto)
+.values("material_id")
+.annotate(total_entrado=Sum("cantidad"))
+)
 
     ent_map = {
         item["material_id"]: item["total_entrado"]
@@ -471,12 +510,12 @@ def registrar_entrada_material(request, proyecto_id):
         ent_val = ent_map.get(
             m_id,
             Decimal("0")
-        )
+)
 
         pendiente = max(
             Decimal("0"),
             req_val - ent_val
-        )
+)
 
         materiales_requeridos.append({
             "material_id": m_id,
@@ -498,99 +537,102 @@ def registrar_entrada_material(request, proyecto_id):
                 proveedor=request.POST.get(
                     "proveedor",
                     ""
-                ).strip(),
+).strip(),
                 numero_remision=request.POST.get(
                     "numero_remision",
                     ""
-                ).strip(),
+).strip(),
                 recibido_por=request.POST.get(
                     "recibido_por",
                     ""
-                ).strip(),
+).strip(),
                 observaciones=request.POST.get(
                     "observaciones",
                     ""
-                ).strip(),
-            )
+).strip(),
+)
 
             material_ids = request.POST.getlist(
                 "material_id[]"
-            )
+)
 
             cantidades = request.POST.getlist(
                 "cantidad[]"
-            )
+)
             detalles = []
 
             for mat_id, cant_str in zip(
                 material_ids,
                 cantidades
-            ):
+):
 
                 try:
 
-                    cant = Decimal(
-                        cant_str.strip()
-                    )
+                    cant = _parse_decimal(cant_str)
                     if cant > 0 and mat_id:
                         detalles.append(
                             DetalleEntradaMaterial(
                                 entrada=entrada,
                                 material_id=mat_id,
                                 cantidad=cant
-                            )
-                        )
+)
+)
 
                 except (
                     ValueError,
                     TypeError,
-                    Decimal.InvalidOperation
-                ):
+                    InvalidOperation
+):
                     continue
 
             if detalles:
                 DetalleEntradaMaterial.objects.bulk_create(
                     detalles
-                )
+)
 
-                for mat_id, cant_str in zip(
-                    material_ids,
-                    cantidades
-                ):
-                    try:
-                        cant = Decimal(
-                            cant_str.strip()
-                        )
-                        if cant > 0 and mat_id:
-                            inventario, creado = (
-                                Inventario.objects.get_or_create(
-                                    material_id=mat_id,
-                                    defaults={
-                                        "cantidad": Decimal("0")
-                                    }
-                                )
-                            )
-                            inventario.cantidad += cant
-                            inventario.save(
-                                update_fields=["cantidad"]
-                            )
+                for detalle in detalles:
+                    inventario, creado = (
+                        Inventario.objects.get_or_create(
+                            material_id=detalle.material_id,
+                            defaults={
+                                "cantidad": Decimal("0")
+                            }
+)
+)
+                    inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+                    stock_anterior = inventario.cantidad
+                    inventario.cantidad += detalle.cantidad
+                    inventario.save(
+                        update_fields=["cantidad"]
+)
 
-                    except (
-                        ValueError,
-                        TypeError,
-                        Decimal.InvalidOperation
-                    ):
-                        continue
+                    registrar_movimiento_inventario(
+                        material=inventario.material,
+                        tipo_movimiento=MovimientoInventario.Tipos.ENTRADA,
+                        cantidad=detalle.cantidad,
+                        stock_anterior=stock_anterior,
+                        stock_resultante=inventario.cantidad,
+                        usuario=request.user,
+                        proyecto=proyecto,
+                        detalle_origen_destino=f"Entrada a Proyecto {proyecto.numero_emcali or proyecto.id}",
+                        observacion=f"Remisión {entrada.numero_remision or entrada.id} - {entrada.proveedor or ''}".strip()
+)
+            else:
+                entrada.delete()
+                messages.warning(
+                    request,
+                    " No se registró la entrada: no se enviaron materiales válidos."
+)
             return redirect(
                 "registrar_entrada_material",
                 proyecto_id=proyecto.id
-            )
+)
     entradas = (
         EntradaMaterialProyecto.objects
-        .filter(proyecto=proyecto)
-        .prefetch_related("detalles__material")
-        .order_by("-fecha", "-id")
-    )
+.filter(proyecto=proyecto)
+.prefetch_related("detalles__material")
+.order_by("-fecha", "-id")
+)
 
     return render(
         request,
@@ -601,128 +643,7 @@ def registrar_entrada_material(request, proyecto_id):
             "materiales_requeridos": materiales_requeridos,
             "entradas": entradas,
         }
-    )
-
-@login_required
-def materiales_requeridos_proyecto(request, proyecto_id):
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-
-    materiales_requeridos = (
-        MaterialRequeridoProyecto.objects
-        .filter(proyecto=proyecto)
-        .select_related("material")
-        .order_by("material__item")
-    )
-
-    materiales = Material.objects.all().order_by("item")
-
-    if request.method == "POST":
-        accion = request.POST.get("accion")
-
-        # ==========================
-        # AGREGAR MATERIAL
-        # ==========================
-        if accion == "agregar":
-            material_id = request.POST.get("material_id")
-            cantidad_str = request.POST.get("cantidad")
-
-            try:
-                cantidad = Decimal(cantidad_str)
-
-                if material_id and cantidad > 0:
-                    material = get_object_or_404(
-                        Material,
-                        id=material_id
-                    )
-
-                    # Evitar duplicados
-                    requerido, creado = (
-                        MaterialRequeridoProyecto.objects.get_or_create(
-                            proyecto=proyecto,
-                            material=material,
-                            defaults={
-                                "cantidad_requerida": cantidad
-                            }
-                        )
-                    )
-
-                    # Si ya existía, no lo duplicamos.
-                    # Más adelante podemos decidir si mostramos
-                    # un mensaje de "ya existe".
-                    if not creado:
-                        requerido.cantidad_requerida = cantidad
-                        requerido.save()
-
-            except (ValueError, TypeError, Decimal.InvalidOperation):
-                pass
-
-            return redirect(
-                "materiales_requeridos_proyecto",
-                proyecto_id=proyecto.id
-            )
-
-        # ==========================
-        # EDITAR CANTIDAD
-        # ==========================
-        elif accion == "editar":
-            requerido_id = request.POST.get("requerido_id")
-            cantidad_str = request.POST.get("cantidad")
-
-            requerido = get_object_or_404(
-                MaterialRequeridoProyecto,
-                id=requerido_id,
-                proyecto=proyecto
-            )
-
-            try:
-                cantidad = Decimal(cantidad_str)
-
-                if cantidad > 0:
-                    requerido.cantidad_requerida = cantidad
-                    requerido.save()
-
-            except (ValueError, TypeError, Decimal.InvalidOperation):
-                pass
-
-            return redirect(
-                "materiales_requeridos_proyecto",
-                proyecto_id=proyecto.id
-            )
-
-        elif accion == "eliminar":
-            requerido_id = request.POST.get("requerido_id")
-
-            requerido = get_object_or_404(
-                MaterialRequeridoProyecto,
-                id=requerido_id,
-                proyecto=proyecto
-            )
-
-            requerido.delete()
-
-            return redirect(
-                "materiales_requeridos_proyecto",
-                proyecto_id=proyecto.id
-            )
-
-    total_requerido = (
-        materiales_requeridos.aggregate(
-            total=Sum("cantidad_requerida")
-        )["total"]
-        or Decimal("0")
-    )
-
-    return render(
-        request,
-        "logistica/proyectos/materiales_requeridos.html",
-        {
-            "proyecto": proyecto,
-            "materiales_catalogo": materiales,
-            "lista_requeridos": materiales_requeridos,
-            "total_items": materiales_requeridos.count(),
-            "total_cantidad": total_requerido,
-        }
-    )
+)
 
 @login_required
 @transaction.atomic
@@ -730,32 +651,46 @@ def eliminar_entrada_material(request, entrada_id):
     entrada = get_object_or_404(
         EntradaMaterialProyecto,
         id=entrada_id
-    )
+)
 
     proyecto_id = entrada.proyecto.id
     if request.method == "POST":
         detalles = entrada.detalles.select_related(
             "material"
-        )
+)
 
         for detalle in detalles:
 
             inventario = Inventario.objects.filter(
                 material=detalle.material
-            ).first()
+).first()
 
             if inventario:
+                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+                stock_anterior = inventario.cantidad
                 inventario.cantidad -= detalle.cantidad
                 inventario.save(
                     update_fields=["cantidad"]
-                )
+)
+
+                registrar_movimiento_inventario(
+                    material=detalle.material,
+                    tipo_movimiento=MovimientoInventario.Tipos.AJUSTE,
+                    cantidad=-detalle.cantidad,
+                    stock_anterior=stock_anterior,
+                    stock_resultante=inventario.cantidad,
+                    usuario=request.user,
+                    proyecto=entrada.proyecto,
+                    detalle_origen_destino="Bodega Central (Anulación de Entrada)",
+                    observacion=f"Eliminación de entrada/remisión {entrada.numero_remision or entrada.id}"
+)
 
         entrada.delete()
 
     return redirect(
         "registrar_entrada_material",
         proyecto_id=proyecto_id
-    )
+)
 
 @login_required
 @transaction.atomic
@@ -764,7 +699,7 @@ def editar_entrada_material(request, entrada_id):
     entrada = get_object_or_404(
         EntradaMaterialProyecto,
         id=entrada_id
-    )
+)
 
     proyecto = entrada.proyecto
 
@@ -779,22 +714,22 @@ def editar_entrada_material(request, entrada_id):
         entrada.numero_remision = request.POST.get(
             "numero_remision",
             ""
-        ).strip()
+).strip()
 
         entrada.proveedor = request.POST.get(
             "proveedor",
             ""
-        ).strip()
+).strip()
 
         entrada.recibido_por = request.POST.get(
             "recibido_por",
             ""
-        ).strip()
+).strip()
 
         entrada.observaciones = request.POST.get(
             "observaciones",
             ""
-        ).strip()
+).strip()
 
         entrada.save()
 
@@ -804,11 +739,11 @@ def editar_entrada_material(request, entrada_id):
 
         material_ids = request.POST.getlist(
             "material_id[]"
-        )
+)
 
         cantidades = request.POST.getlist(
             "cantidad[]"
-        )
+)
 
         # Materiales que quedan después de editar
         nuevos_materiales = {}
@@ -816,20 +751,18 @@ def editar_entrada_material(request, entrada_id):
         for mat_id, cantidad_str in zip(
             material_ids,
             cantidades
-        ):
+):
 
             if not mat_id:
                 continue
 
             try:
-                cantidad = Decimal(
-                    cantidad_str.strip()
-                )
+                cantidad = _parse_decimal(cantidad_str)
             except (
                 ValueError,
                 TypeError,
-                Decimal.InvalidOperation
-            ):
+                InvalidOperation
+):
                 continue
 
             if cantidad <= 0:
@@ -841,9 +774,20 @@ def editar_entrada_material(request, entrada_id):
                 nuevos_materiales.get(
                     mat_id,
                     Decimal("0")
-                )
+)
                 + cantidad
-            )
+)
+
+        if not nuevos_materiales:
+            messages.error(
+                request,
+                " La entrada no puede quedar sin materiales. "
+                "Si deseas anularla, usa la opción Eliminar."
+)
+            return redirect(
+                "editar_entrada_material",
+                entrada_id=entrada.id
+)
 
         # ==========================================
         # CANTIDADES ANTERIORES
@@ -857,15 +801,15 @@ def editar_entrada_material(request, entrada_id):
 
             mat_id = str(
                 detalle.material_id
-            )
+)
 
             materiales_anterior[mat_id] = (
                 materiales_anterior.get(
                     mat_id,
                     Decimal("0")
-                )
+)
                 + detalle.cantidad
-            )
+)
 
         # ==========================================
         # ACTUALIZAR INVENTARIO
@@ -873,26 +817,26 @@ def editar_entrada_material(request, entrada_id):
 
         todos_los_materiales = set(
             materiales_anterior.keys()
-        ) | set(
+) | set(
             nuevos_materiales.keys()
-        )
+)
 
         for mat_id in todos_los_materiales:
 
             cantidad_anterior = materiales_anterior.get(
                 str(mat_id),
                 Decimal("0")
-            )
+)
 
             cantidad_nueva = nuevos_materiales.get(
                 str(mat_id),
                 Decimal("0")
-            )
+)
 
             diferencia = (
                 cantidad_nueva
                 - cantidad_anterior
-            )
+)
 
             if diferencia == 0:
                 continue
@@ -903,13 +847,27 @@ def editar_entrada_material(request, entrada_id):
                     defaults={
                         "cantidad": Decimal("0")
                     }
-                )
-            )
+)
+)
 
+            inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+            stock_anterior = inventario.cantidad
             inventario.cantidad += diferencia
             inventario.save(
                 update_fields=["cantidad"]
-            )
+)
+
+            registrar_movimiento_inventario(
+                material=inventario.material,
+                tipo_movimiento=MovimientoInventario.Tipos.AJUSTE,
+                cantidad=diferencia,
+                stock_anterior=stock_anterior,
+                stock_resultante=inventario.cantidad,
+                usuario=request.user,
+                proyecto=proyecto,
+                detalle_origen_destino=f"Entrada a Proyecto {proyecto.numero_emcali or proyecto.id}",
+                observacion=f"Edición de entrada/remisión {entrada.numero_remision or entrada.id}"
+)
 
         # ==========================================
         # REEMPLAZAR DETALLES
@@ -926,19 +884,19 @@ def editar_entrada_material(request, entrada_id):
                     entrada=entrada,
                     material_id=mat_id,
                     cantidad=cantidad
-                )
-            )
+)
+)
 
         if nuevos_detalles:
 
             DetalleEntradaMaterial.objects.bulk_create(
                 nuevos_detalles
-            )
+)
 
         return redirect(
             "registrar_entrada_material",
             proyecto_id=proyecto.id
-        )
+)
 
     # ==========================================
     # MOSTRAR FORMULARIO DE EDICIÓN
@@ -946,11 +904,11 @@ def editar_entrada_material(request, entrada_id):
 
     detalles = entrada.detalles.select_related(
         "material"
-    ).all()
+).all()
 
     materiales = Material.objects.all().order_by(
         "descripcion"
-    )
+)
 
     return render(
         request,
@@ -961,7 +919,7 @@ def editar_entrada_material(request, entrada_id):
             "detalles": detalles,
             "materiales": materiales,
         }
-    )
+)
 
 
 @login_required
@@ -998,11 +956,11 @@ def materiales_requeridos_proyecto(request, proyecto_id):
                             proyecto=proyecto,
                             material_id=m_id,
                             defaults={"cantidad_requerida": cant}
-                        )
+)
                         if not created:
                             req.cantidad_requerida += cant
                             req.save()
-                except (ValueError, TypeError, Decimal.InvalidOperation):
+                except (ValueError, TypeError, InvalidOperation):
                     continue
 
             return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
@@ -1039,7 +997,7 @@ def materiales_requeridos_proyecto(request, proyecto_id):
             "total_cantidad": total_cantidad,
             "total_items": len(lista_requeridos),
         }
-    )
+)
 
 
 @login_required
@@ -1053,17 +1011,17 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     # 1. Instalado en Apoyos (Ingeniería)
     apoyo_inst_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     inst_map = {item["material_id"]: item["total"] for item in apoyo_inst_qs}
 
     # 2. Materiales Requeridos directos del Proyecto
     mat_req_extra = (
         MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     req_directo_map = {item["material_id"]: item["total"] for item in mat_req_extra}
 
     # Mapa de requeridos directos
@@ -1072,25 +1030,25 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     # 3. Entradas Suministradas (EntradaMaterialProyecto)
     ent_qs = (
         DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
     # 4. Retiros / Desmontes del proyecto (desde ApoyoMaterial)
     ret_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_retirada"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_retirada"))
+)
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
     # 4.5. Devoluciones ya reintegradas a Bodega Central
     dev_qs = (
         DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
 
     # 5. Materiales involucrados
@@ -1118,7 +1076,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
         bottom=Side(border_style="double", color="1E40AF"),
         left=thin_border_side,
         right=thin_border_side
-    )
+)
 
     align_center = Alignment(horizontal="center", vertical="center")
     align_left = Alignment(horizontal="left", vertical="center")
@@ -1150,7 +1108,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     ws1["A1"].alignment = align_left
 
     ws1.merge_cells("A2:K2")
-    ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  FECHA: {fecha_hoy}"
+    ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali} | TIPO: {proyecto.tipo} | ESTADO: {proyecto.estado} | {proyecto.etiqueta_padre.upper()}: {macro_nom} | FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
 
@@ -1282,7 +1240,7 @@ def exportar_materiales_proyecto_excel(request, proyecto_id):
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
@@ -1299,41 +1257,41 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     # 1. Instalado en Apoyos (Ingeniería)
     apoyo_inst_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     inst_map = {item["material_id"]: item["total"] for item in apoyo_inst_qs}
 
     # 2. Materiales Requeridos directos
     mat_req_extra = (
         MaterialRequeridoProyecto.objects.filter(proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     req_map = {item["material_id"]: item["total"] for item in mat_req_extra}
 
     # 3. Entradas Suministradas (EntradaMaterialProyecto)
     ent_qs = (
         DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
     # 4. Retiros / Desmontes del proyecto (desde ApoyoMaterial)
     ret_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_retirada"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_retirada"))
+)
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
     # 5. Devoluciones ya procesadas
     dev_qs = (
         DetalleDevolucionMaterial.objects.filter(devolucion__proyecto=proyecto)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
 
     # Si hay devoluciones procesadas, filtramos ÚNICAMENTE los materiales devueltos (c_dev_proc > 0)
@@ -1350,7 +1308,7 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
 
     materiales_db = list(
         Material.objects.filter(id__in=mat_ids_filtrados).select_related("inventario").order_by("item", "descripcion")
-    )
+)
 
     wb = openpyxl.Workbook()
     ws1 = wb.active
@@ -1373,7 +1331,7 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         bottom=Side(border_style="double", color="B45309"),
         left=thin_border_side,
         right=thin_border_side
-    )
+)
 
     align_center = Alignment(horizontal="center", vertical="center")
     align_left = Alignment(horizontal="left", vertical="center")
@@ -1405,7 +1363,7 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     ws1["A1"].alignment = align_left
 
     ws1.merge_cells("A2:E2")
-    ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  TIPO: {proyecto.tipo}  |  ESTADO: {proyecto.estado}  |  FECHA: {fecha_hoy}"
+    ws1["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali} | {proyecto.etiqueta_padre.upper()}: {macro_nom} | TIPO: {proyecto.tipo} | ESTADO: {proyecto.estado} | FECHA: {fecha_hoy}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
 
@@ -1508,9 +1466,9 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     # HOJA 2: RETIROS DETALLADOS POR POSTE / APOYO (SI EXISTEN RETIROS EN APOYOS)
     retiros_apoyos_db = (
         ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto, cantidad_retirada__gt=0)
-        .select_related("apoyo", "material")
-        .order_by("apoyo__numero_apoyo", "apoyo__nodo", "material__descripcion")
-    )
+.select_related("apoyo", "material")
+.order_by("apoyo__numero_apoyo", "apoyo__nodo", "material__descripcion")
+)
     if retiros_apoyos_db.exists():
         ws_ret = wb.create_sheet(title="Retiros por Poste")
         ws_ret.merge_cells("A1:G1")
@@ -1519,7 +1477,7 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
         ws_ret["A1"].alignment = align_left
 
         ws_ret.merge_cells("A2:G2")
-        ws_ret["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali}  |  {proyecto.etiqueta_padre.upper()}: {macro_nom}  |  FECHA: {fecha_hoy}"
+        ws_ret["A2"] = f"{proyecto.etiqueta.upper()}: {proyecto.numero_emcali} | {proyecto.etiqueta_padre.upper()}: {macro_nom} | FECHA: {fecha_hoy}"
         ws_ret["A2"].font = font_subtitulo
         ws_ret["A2"].alignment = align_left
 
@@ -1684,7 +1642,7 @@ def exportar_materiales_devolucion_excel(request, proyecto_id):
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
@@ -1708,7 +1666,7 @@ def informe_consolidado_proyectos(request):
         or request.GET.getlist("proyectos[]")
         or request.POST.getlist("proyectos")
         or request.POST.getlist("proyectos[]")
-    )
+)
 
     macro_id = request.GET.get("macroproyecto_id") or request.POST.get("macroproyecto_id")
     macroproyecto = None
@@ -1740,41 +1698,41 @@ def informe_consolidado_proyectos(request):
     # 1. Consolidar Entradas
     ent_qs = (
         DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_seleccionados)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
     # 2. Consolidar Instalado en Apoyos (Ingeniería)
     inst_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_seleccionados)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     inst_map = {item["material_id"]: item["total"] for item in inst_qs}
 
     # 3. Consolidar Retiros / Desmontes (desde los apoyos de ingeniería)
     ret_qs = (
         ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_seleccionados)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_retirada"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_retirada"))
+)
     ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
     # 4. Consolidar Requerimientos generales
     req_qs = (
         MaterialRequeridoProyecto.objects.filter(proyecto__in=proyectos_seleccionados)
-        .values("material_id")
-        .annotate(total=Sum("cantidad_requerida"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
     req_map = {item["material_id"]: item["total"] for item in req_qs}
 
     # 4.5. Devoluciones ya reintegradas a Bodega Central
     dev_qs = (
         DetalleDevolucionMaterial.objects.filter(devolucion__proyecto__in=proyectos_seleccionados)
-        .values("material_id")
-        .annotate(total=Sum("cantidad"))
-    )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
     dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
 
     # 5. Todos los materiales involucrados
@@ -1903,7 +1861,7 @@ def informe_consolidado_proyectos(request):
             "desglose_proyectos": desglose_proyectos,
             "ids_string": ids_string,
         }
-    )
+)
 
 
 @login_required
@@ -1980,7 +1938,7 @@ def exportar_informe_consolidado_excel(request):
         lista_nombres += f" y {len(proyectos_seleccionados) - 5} más..."
 
     ws.merge_cells("A2:H2")
-    ws["A2"] = f"PROYECTOS AUDITADOS: {lista_nombres}  |  FECHA: {fecha_hoy}"
+    ws["A2"] = f"PROYECTOS AUDITADOS: {lista_nombres} | FECHA: {fecha_hoy}"
     ws["A2"].font = font_subtitulo
     ws["A2"].alignment = align_left
 
@@ -2002,7 +1960,7 @@ def exportar_informe_consolidado_excel(request):
         cell = ws.cell(row=header_row, column=col_idx)
         cell.font = font_header
         cell.fill = fill_header
-        cell.alignment = align_center if col_idx != 2 else align_left
+        cell.alignment = align_center if col_idx!= 2 else align_left
         cell.border = border_cell
 
     current_row = header_row + 1
@@ -2113,7 +2071,7 @@ def exportar_informe_consolidado_excel(request):
         ws_dev["A1"].alignment = align_left
 
         ws_dev.merge_cells("A2:I2")
-        ws_dev["A2"] = f"MATERIALES SOBRANTES Y DESINSTALADOS CONSOLIDADOS PARA DEVOLUCIÓN  |  FECHA: {fecha_hoy}"
+        ws_dev["A2"] = f"MATERIALES SOBRANTES Y DESINSTALADOS CONSOLIDADOS PARA DEVOLUCIÓN | FECHA: {fecha_hoy}"
         ws_dev_headers = [
             "ÍTEM",
             "DESCRIPCIÓN DEL MATERIAL",
@@ -2132,7 +2090,7 @@ def exportar_informe_consolidado_excel(request):
             c = ws_dev.cell(row=4, column=col)
             c.font = font_header
             c.fill = fill_header
-            c.alignment = align_center if col != 2 else align_left
+            c.alignment = align_center if col!= 2 else align_left
             c.border = border_cell
 
         row_dev_idx = 5
@@ -2216,9 +2174,109 @@ def exportar_informe_consolidado_excel(request):
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+# ==============================================================================
+# REGISTRO DE CONSUMO REAL DE MATERIALES (PLANILLA DEL SUPERVISOR)
+# ==============================================================================
+
+@login_required
+@transaction.atomic
+def registrar_consumo_material(request, proyecto_id):
+    """
+    Digitaliza el reporte de consumo real entregado por el supervisor de obra.
+    Crea un ConsumoMaterialProyecto con sus DetalleConsumoMaterial.
+    No altera el inventario: es un registro comparativo (Requerido vs
+    Suministrado vs Consumido), la salida física de bodega ocurre en el
+    despacho a apoyos desde Ingeniería.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    materiales = Material.objects.all().order_by("descripcion")
+
+    if request.method == "POST":
+        fecha_reporte = request.POST.get("fecha_reporte")
+
+        if not fecha_reporte:
+            messages.error(request, " Debes indicar la fecha del reporte.")
+            return redirect("registrar_consumo_material", proyecto_id=proyecto.id)
+
+        material_ids = request.POST.getlist("material_id[]")
+        cantidades = request.POST.getlist("cantidad[]")
+
+        detalles = []
+        for mat_id, cant_str in zip(material_ids, cantidades):
+            if not mat_id:
+                continue
+            try:
+                cant = _parse_decimal(cant_str)
+            except (ValueError, TypeError, InvalidOperation):
+                continue
+            if cant > 0:
+                detalles.append((mat_id, cant))
+
+        if not detalles:
+            messages.warning(
+                request,
+                " No se registró el consumo: no se enviaron materiales válidos."
+)
+            return redirect("registrar_consumo_material", proyecto_id=proyecto.id)
+
+        consumo = ConsumoMaterialProyecto.objects.create(
+            proyecto=proyecto,
+            fecha_reporte=fecha_reporte,
+            supervisor=request.POST.get("supervisor", "").strip(),
+            numero_planilla=request.POST.get("numero_planilla", "").strip(),
+            observaciones=request.POST.get("observaciones", "").strip(),
+)
+
+        DetalleConsumoMaterial.objects.bulk_create([
+            DetalleConsumoMaterial(
+                consumo=consumo,
+                material_id=mat_id,
+                cantidad=cant
+)
+            for mat_id, cant in detalles
+        ])
+
+        messages.success(
+            request,
+            f" Planilla de consumo #{consumo.id} registrada con {len(detalles)} material(es)."
+)
+        return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
+
+    consumos = (
+        ConsumoMaterialProyecto.objects
+.filter(proyecto=proyecto)
+.prefetch_related("detalles__material")
+)
+
+    return render(
+        request,
+        "logistica/proyectos/crear_consumo.html",
+        {
+            "proyecto": proyecto,
+            "materiales": materiales,
+            "consumos": consumos,
+        }
+)
+
+
+@login_required
+@transaction.atomic
+def eliminar_consumo_material(request, consumo_id):
+    """
+    Elimina una planilla de consumo registrada (registro informativo,
+    no toca el inventario).
+    """
+    consumo = get_object_or_404(ConsumoMaterialProyecto, id=consumo_id)
+    proyecto_id = consumo.proyecto.id
+    if request.method == "POST":
+        consumo.delete()
+        messages.success(request, "Se eliminó la planilla de consumo.")
+    return redirect("detalle_proyecto_logistica", proyecto_id=proyecto_id)
 
 
 # ==============================================================================
@@ -2344,28 +2402,28 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
         if proyecto_seleccionado:
             p = proyecto_seleccionado
             if p.tipo == "MT":
-                nota_tecnica_red = "⚡ En Media Tensión (MT) no se realizan desmontes ni retiros de luminarias. Se audita exclusivamente el suministro e instalación técnica en red primaria."
+                nota_tecnica_red = " En Media Tensión (MT) no se realizan desmontes ni retiros de luminarias. Se audita exclusivamente el suministro e instalación técnica en red primaria."
             elif p.tipo in ["AP_BARRIO", "AP_PARQUE", "AP"]:
-                nota_tecnica_red = "💡 En Alumbrado Público (AP) se audita la instalación de nuevas luminarias y materiales, así como los desmontes y retiros de luminarias y equipos antiguos."
+                nota_tecnica_red = " En Alumbrado Público (AP) se audita la instalación de nuevas luminarias y materiales, así como los desmontes y retiros de luminarias y equipos antiguos."
             elif p.tipo == "BT":
-                nota_tecnica_red = "🔌 En Baja Tensión (BT) se audita el tendido de red, postes técnicos, accesorios y retiros aplicables."
+                nota_tecnica_red = " En Baja Tensión (BT) se audita el tendido de red, postes técnicos, accesorios y retiros aplicables."
             else:
-                nota_tecnica_red = "🔧 Control y conciliación de materiales en obra."
+                nota_tecnica_red = " Control y conciliación de materiales en obra."
         else:
-            nota_tecnica_red = f"🌐 Visualización consolidada de {proyectos_scope.count()} proyecto(s). Usa los filtros tipo Excel en cada columna para segmentar por barrio, tipo de instalación, cuadrilla o fecha con exactitud."
+            nota_tecnica_red = f" Visualización consolidada de {proyectos_scope.count()} proyecto(s). Usa los filtros tipo Excel en cada columna para segmentar por barrio, tipo de instalación, cuadrilla o fecha con exactitud."
 
         # A. Apoyos y Matriz Poste a Poste (Formato Ingeniería con datos técnicos completos)
         apoyos = (
             Apoyo.objects
-            .filter(proyecto__in=proyectos_scope)
-            .select_related("quien_ejecuta", "proyecto", "proyecto__macroproyecto")
-            .prefetch_related("luminarias")
-            .order_by("proyecto__numero_emcali", "numero_apoyo", "id")
-        )
+.filter(proyecto__in=proyectos_scope)
+.select_related("quien_ejecuta", "proyecto", "proyecto__macroproyecto")
+.prefetch_related("luminarias")
+.order_by("proyecto__numero_emcali", "numero_apoyo", "id")
+)
 
         apoyo_materiales = ApoyoMaterial.objects.filter(
             apoyo__proyecto__in=proyectos_scope
-        ).select_related("material")
+).select_related("material")
 
         materiales_ids = apoyo_materiales.values_list('material_id', flat=True).distinct()
         materiales_columnas = list(Material.objects.filter(id__in=materiales_ids).order_by("item", "descripcion"))
@@ -2415,16 +2473,16 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
         # B. Matriz de Liquidación y Balance (Estilo Edson)
         inst_qs = (
             ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope)
-            .values("material_id")
-            .annotate(total=Sum("cantidad_requerida"))
-        )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
         inst_map = {item["material_id"]: item["total"] for item in inst_qs}
 
         req_qs = (
             MaterialRequeridoProyecto.objects.filter(proyecto__in=proyectos_scope)
-            .values("material_id")
-            .annotate(total=Sum("cantidad_requerida"))
-        )
+.values("material_id")
+.annotate(total=Sum("cantidad_requerida"))
+)
         req_map = {item["material_id"]: item["total"] for item in req_qs}
         for m_id, cant in inst_map.items():
             if m_id not in req_map:
@@ -2432,23 +2490,23 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
 
         ent_qs = (
             DetalleEntradaMaterial.objects.filter(entrada__proyecto__in=proyectos_scope)
-            .values("material_id")
-            .annotate(total=Sum("cantidad"))
-        )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
         ent_map = {item["material_id"]: item["total"] for item in ent_qs}
 
         ret_qs = (
             ApoyoMaterial.objects.filter(apoyo__proyecto__in=proyectos_scope)
-            .values("material_id")
-            .annotate(total=Sum("cantidad_retirada"))
-        )
+.values("material_id")
+.annotate(total=Sum("cantidad_retirada"))
+)
         ret_map = {item["material_id"]: item["total"] for item in ret_qs if item["total"] > 0}
 
         dev_qs = (
             DetalleDevolucionMaterial.objects.filter(devolucion__proyecto__in=proyectos_scope)
-            .values("material_id")
-            .annotate(total=Sum("cantidad"))
-        )
+.values("material_id")
+.annotate(total=Sum("cantidad"))
+)
         dev_map = {item["material_id"]: item["total"] for item in dev_qs if item["total"] > 0}
 
         all_mat_ids = set(req_map.keys()) | set(inst_map.keys()) | set(ent_map.keys()) | set(ret_map.keys()) | set(dev_map.keys())
@@ -2458,7 +2516,7 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             materiales_db = materiales_db.filter(
                 Q(descripcion__icontains=query) |
                 Q(item__icontains=query)
-            )
+)
 
         for mat in materiales_db:
             sum_req = req_map.get(mat.id, Decimal("0"))
@@ -2502,14 +2560,14 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
 
         entradas = (
             EntradaMaterialProyecto.objects.filter(proyecto__in=proyectos_scope)
-            .prefetch_related("detalles__material", "proyecto")
-            .order_by("-fecha", "-id")
-        )
+.prefetch_related("detalles__material", "proyecto")
+.order_by("-fecha", "-id")
+)
         retiros_actas = (
             RetiroMaterialProyecto.objects.filter(proyecto__in=proyectos_scope)
-            .prefetch_related("detalles__material", "proyecto")
-            .order_by("-fecha", "-id")
-        )
+.prefetch_related("detalles__material", "proyecto")
+.order_by("-fecha", "-id")
+)
 
         # D. Resumen de Entradas / Suministros por material y por proyecto
         tabla_resumen_entradas = [item for item in balance_materiales if item["entrada"] > 0]
@@ -2520,7 +2578,7 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
                 p_unidades = sum(
                     sum(d.cantidad for d in e.detalles.all())
                     for e in p_ents
-                )
+)
                 entradas_por_proyecto.append({
                     "proyecto": p,
                     "num_remisiones": len(p_ents),
@@ -2583,7 +2641,7 @@ def vista_global_logistica(request, macroproyecto_id=None, proyecto_id=None):
             "query": query,
             "tipo_filtro": tipo_filtro,
         }
-    )
+)
 
 
 @login_required
@@ -2669,7 +2727,7 @@ def exportar_vista_global_excel(request):
     ws1["A1"].alignment = align_left
 
     ws1.merge_cells("A2:H2")
-    ws1["A2"] = f"AUDITORÍA DE MATERIALES SUMINISTRADOS, INSTALADOS Y RETIRADOS  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+    ws1["A2"] = f"AUDITORÍA DE MATERIALES SUMINISTRADOS, INSTALADOS Y RETIRADOS | FECHA: {timezone.now().strftime('%d/%m/%Y')}"
     ws1["A2"].font = font_subtitulo
     ws1["A2"].alignment = align_left
 
@@ -2690,7 +2748,7 @@ def exportar_vista_global_excel(request):
         c = ws1.cell(row=4, column=col)
         c.font = font_header
         c.fill = fill_header
-        c.alignment = align_center if col != 2 else align_left
+        c.alignment = align_center if col!= 2 else align_left
         c.border = border_cell
 
     row_idx = 5
@@ -2809,15 +2867,15 @@ def exportar_vista_global_excel(request):
 
     apoyos = (
         Apoyo.objects
-        .filter(proyecto__in=proyectos_scope)
-        .select_related("quien_ejecuta", "proyecto", "proyecto__macroproyecto")
-        .prefetch_related("luminarias")
-        .order_by("proyecto__numero_emcali", "numero_apoyo", "id")
-    )
+.filter(proyecto__in=proyectos_scope)
+.select_related("quien_ejecuta", "proyecto", "proyecto__macroproyecto")
+.prefetch_related("luminarias")
+.order_by("proyecto__numero_emcali", "numero_apoyo", "id")
+)
 
     apoyo_materiales = ApoyoMaterial.objects.filter(
         apoyo__proyecto__in=proyectos_scope
-    ).select_related("material")
+).select_related("material")
 
     materiales_ids = apoyo_materiales.values_list('material_id', flat=True).distinct()
     mat_cols = list(Material.objects.filter(id__in=materiales_ids).order_by("item", "descripcion"))
@@ -2840,7 +2898,7 @@ def exportar_vista_global_excel(request):
     ws2["A1"].alignment = align_left
 
     ws2.merge_cells(f"A2:{end_col_letter}2")
-    ws2["A2"] = f"REGISTRO TÉCNICO Y AUDITORÍA DE CAMPO POR POSTE  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+    ws2["A2"] = f"REGISTRO TÉCNICO Y AUDITORÍA DE CAMPO POR POSTE | FECHA: {timezone.now().strftime('%d/%m/%Y')}"
     ws2["A2"].font = font_subtitulo
     ws2["A2"].alignment = align_left
 
@@ -2976,7 +3034,7 @@ def exportar_vista_global_excel(request):
         ws3["A1"].alignment = align_left
 
         ws3.merge_cells("A2:J2")
-        ws3["A2"] = f"MATERIALES SOBRANTES Y DESINSTALADOS CONSOLIDADOS PARA DEVOLUCIÓN  |  FECHA: {timezone.now().strftime('%d/%m/%Y')}"
+        ws3["A2"] = f"MATERIALES SOBRANTES Y DESINSTALADOS CONSOLIDADOS PARA DEVOLUCIÓN | FECHA: {timezone.now().strftime('%d/%m/%Y')}"
         ws3.append([])
         ws3_headers = [
             "ÍTEM",
@@ -3086,6 +3144,6 @@ def exportar_vista_global_excel(request):
     response = HttpResponse(
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+)
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response

@@ -39,14 +39,8 @@
                     <span>Eliminar</span>
                 </button>
             </form>
-            <a href="{% url 'suspensiones_disciplinarias_empleado' suspension.empleado.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver a Suspensiones</span>
-            </a>
-            <a href="{% url 'detalle_empleado' suspension.empleado.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver al Empleado</span>
-            </a>
+            <a href="{% url 'suspensiones_disciplinarias_empleado' suspension.empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Suspensiones</span></a>
+            <a href="{% url 'detalle_empleado' suspension.empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Empleado</span></a>
         </div>
     </div>
 
@@ -114,14 +108,8 @@
         {% endif %}
 
         <div class="pt-4 flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 mt-6">
-            <a href="{% url 'suspensiones_disciplinarias_empleado' suspension.empleado.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver a Suspensiones</span>
-            </a>
-            <a href="{% url 'detalle_empleado' suspension.empleado.id %}"
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-2xs">
-                <span>← Volver al Empleado</span>
-            </a>
+            <a href="{% url 'suspensiones_disciplinarias_empleado' suspension.empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Suspensiones</span></a>
+            <a href="{% url 'detalle_empleado' suspension.empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Empleado</span></a>
             <form method="POST"
                   action="{% url 'eliminar_suspension_disciplinaria' suspension.id %}"
                   onsubmit="return confirm('¿Está seguro de que desea eliminar esta suspensión disciplinaria?');"

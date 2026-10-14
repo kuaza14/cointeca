@@ -52,7 +52,7 @@ def run_tests():
             desarrollo="Se verificó quórum y se aprobó por unanimidad la expansión del proyecto.",
             proposiciones="Ninguna adicional.",
             estado="aprobada"
-        )
+)
     url_actas = reverse('actas')
     resp_actas = client.get(url_actas)
     assert resp_actas.status_code == 200, f"Fallo vista actas: {resp_actas.status_code}"
@@ -101,7 +101,7 @@ def run_tests():
     assert "Plan Estratégico" in html_home, "Tarjeta Plan Estratégico no encontrada en gerencia_home"
     print("9. Vista gerencia_home con 4 tarjetas institucionales: OK (HTTP 200)")
 
-    print("\n✅ TODAS LAS PRUEBAS DE GERENCIA & GOBERNANZA PASARON SATISFACTORIAMENTE!")
+    print("\n TODAS LAS PRUEBAS DE GERENCIA & GOBERNANZA PASARON SATISFACTORIAMENTE!")
 
 if __name__ == '__main__':
     run_tests()

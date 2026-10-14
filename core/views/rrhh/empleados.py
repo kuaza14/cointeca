@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from django.db.models import Avg, Count, Q, Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from core.utils import parse_monto_cop
 from core.models import (
     Empleado,
     SaludEmpleado,
@@ -27,9 +28,7 @@ def rrhh_home(request):
 def crear_empleado(request):
     if request.method == 'POST':
         try:
-            salario = request.POST.get('salario', '').replace('.', '').replace(',', '').strip()
-            if not salario:
-                salario = 0
+            salario = parse_monto_cop(request.POST.get('salario'), default=0) or 0
 
             estrato_val = request.POST.get('estrato', '').strip()
             estrato = int(estrato_val) if estrato_val.isdigit() else None
@@ -63,7 +62,7 @@ def crear_empleado(request):
                 jornada=request.POST.get('jornada', 'diurna'),
                 jefe=request.POST.get('jefe', '').strip(),
                 estado='activo'
-            )
+)
 
             SaludEmpleado.objects.create(
                 empleado=empleado,
@@ -75,11 +74,22 @@ def crear_empleado(request):
                 alergias=request.POST.get('alergias', '').strip(),
                 contacto_emergencia=request.POST.get('contacto_emergencia', '').strip(),
                 telefono_emergencia=request.POST.get('telefono_emergencia', '').strip()
-            )
+)
+
+            # Espejar seguridad social en Empleado (lo leen documentos Word)
+            empleado.grupo_sanguineo = request.POST.get('grupo_sanguineo', '').strip() or None
+            empleado.eps = request.POST.get('eps', '').strip() or None
+            empleado.afp = request.POST.get('pension', '').strip() or None
+            empleado.cesantias = request.POST.get('cesantias', '').strip() or None
+            empleado.arl = request.POST.get('arl', '').strip() or None
+            empleado.alergias = request.POST.get('alergias', '').strip()
+            empleado.save(update_fields=[
+                'grupo_sanguineo', 'eps', 'afp', 'cesantias', 'arl', 'alergias'
+            ])
             messages.success(
                 request,
-                f'✅ El empleado {empleado.nombre_completo} fue registrado correctamente.'
-            )
+                f' El empleado {empleado.nombre_completo} fue registrado correctamente.'
+)
 
             return redirect('/rrhh/empleados/')
 
@@ -87,9 +97,9 @@ def crear_empleado(request):
             doc = request.POST.get('documento', '').strip()
             existente = Empleado.objects.filter(documento=doc).first()
             if existente and existente.estado == 'retirado':
-                error_msg = f'⚠️ El colaborador {existente.nombre_completo} (C.C. {doc}) ya estuvo registrado en la empresa y actualmente se encuentra en estado RETIRADO.'
+                error_msg = f' El colaborador {existente.nombre_completo} (C.C. {doc}) ya estuvo registrado en la empresa y actualmente se encuentra en estado RETIRADO.'
             else:
-                error_msg = '⚠️ Ya existe un colaborador activo registrado con ese documento de identidad'
+                error_msg = ' Ya existe un colaborador activo registrado con ese documento de identidad'
 
             return render(request, 'rrhh/empleados/crear_empleado.html', {
                 'error': error_msg,
@@ -122,11 +132,11 @@ def empleados(request):
             Q(documento__icontains=query) |
             Q(nombre_completo__icontains=query) |
             Q(cargo__icontains=query)
-        ).order_by('nombre_completo')
+).order_by('nombre_completo')
     else:
         lista = base_qs.order_by('nombre_completo')
 
-    # 📊 ESTADÍSTICAS (Calculadas sobre los colaboradores ACTIVOS)
+    # ESTADÍSTICAS (Calculadas sobre los colaboradores ACTIVOS)
     activos_qs = Empleado.objects.filter(estado='activo')
     promedio_salario = activos_qs.aggregate(Avg('salario'))['salario__avg']
     total_nomina = activos_qs.aggregate(Sum('salario'))['salario__sum'] or 0
@@ -182,12 +192,12 @@ def retirar_empleado(request, id):
                 'motivo': motivo,
                 'observaciones': observaciones
             }
-        )
+)
 
         messages.success(
             request,
-            f'🚪 Se registró el retiro de {empleado.nombre_completo}. Su historial se conserva intacto.'
-        )
+            f' Se registró el retiro de {empleado.nombre_completo}. Su historial se conserva intacto.'
+)
         return redirect(f'/rrhh/empleados/{id}/')
 
     return redirect(f'/rrhh/empleados/{id}/')
@@ -199,7 +209,7 @@ def reintegrar_empleado(request, id):
         nueva_fecha_ingreso = request.POST.get('fecha_ingreso') or str(date.today())
         nuevo_tipo_contrato = request.POST.get('tipo_contrato', empleado.tipo_contrato)
         nueva_fecha_finalizacion = request.POST.get('fecha_finalizacion') or None
-        salario = request.POST.get('salario', '').replace('.', '').replace(',', '').strip()
+        salario = parse_monto_cop(request.POST.get('salario'), default=None)
         nuevo_cargo = request.POST.get('cargo', empleado.cargo).strip()
         nueva_area = request.POST.get('area', empleado.area).strip()
         nueva_jornada = request.POST.get('jornada', empleado.jornada)
@@ -208,7 +218,7 @@ def reintegrar_empleado(request, id):
         empleado.fecha_ingreso = nueva_fecha_ingreso
         empleado.tipo_contrato = nuevo_tipo_contrato
         empleado.fecha_finalizacion = nueva_fecha_finalizacion
-        if salario:
+        if salario is not None:
             empleado.salario = int(salario)
         if nuevo_cargo:
             empleado.cargo = nuevo_cargo
@@ -224,8 +234,8 @@ def reintegrar_empleado(request, id):
 
         messages.success(
             request,
-            f'🎉 ¡Colaborador {empleado.nombre_completo} reintegrado exitosamente a la empresa!'
-        )
+            f' ¡Colaborador {empleado.nombre_completo} reintegrado exitosamente a la empresa!'
+)
         return redirect(f'/rrhh/empleados/{id}/')
 
     return redirect(f'/rrhh/empleados/{id}/')
@@ -236,19 +246,19 @@ def eliminar_empleado(request, id):
 
     if request.method == 'POST':
         empleado.delete()
-        messages.success(request, f'🗑️ Expediente del colaborador eliminado definitivamente.')
+        messages.success(request, f' Expediente del colaborador eliminado definitivamente.')
         return redirect('/rrhh/empleados/')
 
     return redirect('/rrhh/empleados/')
 
 @login_required
 def detalle_empleado(request, id):
-    empleado = Empleado.objects.get(id=id)
+    empleado = get_object_or_404(Empleado, id=id)
 
     salud = None
     try:
         salud = empleado.saludempleado
-    except:
+    except SaludEmpleado.DoesNotExist:
         pass
 
     dotaciones = DotacionEmpleado.objects.filter(empleado=empleado)
@@ -278,8 +288,8 @@ def detalle_empleado(request, id):
         if campos_faltantes:
             messages.error(
                 request,
-                '⚠️ Debes completar: ' + ', '.join(campos_faltantes)
-            )
+                ' Debes completar: ' + ', '.join(campos_faltantes)
+)
 
             return redirect(f'/rrhh/empleados/{id}/?edit=1')
 
@@ -290,9 +300,9 @@ def detalle_empleado(request, id):
         # VALIDAR DUPLICADO
         existe = Empleado.objects.filter(
             documento=documento
-        ).exclude(id=id).exists()
+).exclude(id=id).exists()
 
-        salario = request.POST['salario'].replace('.', '').replace(',', '')
+        salario = parse_monto_cop(request.POST.get('salario'), default=None)
 
         if existe:
             return render(request, 'rrhh/empleados/detalle_empleado.html', {
@@ -302,20 +312,19 @@ def detalle_empleado(request, id):
                 'equipos': equipos,
                 'documentos': documentos,
                 'editando': True,
-                'error': '⚠️ Esta cédula ya está registrada'
+                'error': ' Esta cédula ya está registrada'
             })
 
         # ACTUALIZAR DATOS
         empleado.nombre_completo = request.POST['nombre_completo']
         empleado.documento = documento
         empleado.ciudad_expedicion = request.POST['ciudad_expedicion']
-        empleado.fecha_nacimiento = request.POST['fecha_nacimiento']
+        empleado.fecha_nacimiento = request.POST.get('fecha_nacimiento') or None
         empleado.nacionalidad = request.POST['nacionalidad']
         empleado.direccion = request.POST['direccion']
         empleado.barrio = request.POST.get('barrio', '')
         estrato = request.POST.get('estrato', '').strip()
-        if estrato:
-            empleado.estrato = int(estrato)
+        empleado.estrato = int(estrato) if estrato.isdigit() else None
         empleado.ciudad_residencia = request.POST['ciudad_residencia']
         empleado.telefono = request.POST['telefono']
         empleado.correo = request.POST['correo']
@@ -327,10 +336,11 @@ def detalle_empleado(request, id):
         empleado.habilidades = request.POST['habilidades']
         empleado.idiomas = request.POST['idiomas']
 
-        empleado.fecha_ingreso = request.POST['fecha_ingreso']
+        empleado.fecha_ingreso = request.POST.get('fecha_ingreso') or None
         empleado.fecha_finalizacion = request.POST.get('fecha_finalizacion') or None
         empleado.tipo_contrato = request.POST['tipo_contrato']
-        empleado.salario = int(salario)
+        if salario is not None:
+            empleado.salario = int(salario)
         empleado.jornada = request.POST['jornada']
         empleado.jefe = request.POST['jefe']
 
@@ -375,7 +385,7 @@ def detalle_empleado(request, id):
             salud.alergias = request.POST.get('salud_alergias', '')
             salud.save()
         else:
-            SaludEmpleado.objects.create(
+            salud = SaludEmpleado.objects.create(
                 empleado=empleado,
                 grupo_sanguineo=request.POST.get('salud_grupo_sanguineo', ''),
                 eps=request.POST.get('salud_eps', ''),
@@ -384,9 +394,21 @@ def detalle_empleado(request, id):
                 alergias=request.POST.get('salud_alergias', ''),
                 contacto_emergencia=request.POST.get('salud_contacto_emergencia', ''),
                 telefono_emergencia=request.POST.get('salud_telefono_emergencia', '')
-            )
+)
 
-        messages.success(request, '✅ Empleado actualizado correctamente')
+        # Espejar la seguridad social en Empleado (documentos como el
+        # contrato de aprendiz leen empleado.eps / empleado.arl / etc.)
+        empleado.grupo_sanguineo = salud.grupo_sanguineo or None
+        empleado.eps = salud.eps or None
+        empleado.afp = salud.pension or None
+        empleado.cesantias = salud.cesantias or None
+        empleado.arl = salud.arl or None
+        empleado.alergias = salud.alergias or ''
+        empleado.save(update_fields=[
+            'grupo_sanguineo', 'eps', 'afp', 'cesantias', 'arl', 'alergias'
+        ])
+
+        messages.success(request, ' Empleado actualizado correctamente')
 
         return redirect(f'/rrhh/empleados/{id}/')
 
@@ -403,7 +425,7 @@ def detalle_empleado(request, id):
 @login_required
 def agregar_dotacion(request, id):
 
-    empleado = Empleado.objects.get(id=id)
+    empleado = get_object_or_404(Empleado, id=id)
 
     if request.method == 'POST':
 
@@ -411,15 +433,20 @@ def agregar_dotacion(request, id):
         descripciones = request.POST.getlist('descripciones[]')
         fecha_entrega = request.POST.get('fecha_entrega')
 
+        if not elementos:
+            messages.warning(request, ' No se agregó ningún elemento a la dotación.')
+            return redirect('detalle_empleado', id=empleado.id)
+
         for i in range(len(elementos)):
 
             DotacionEmpleado.objects.create(
                 empleado=empleado,
                 elemento=elementos[i],
-                descripcion=descripciones[i],
+                descripcion=descripciones[i] if i < len(descripciones) else '',
                 fecha_entrega=fecha_entrega
-            )
+)
 
+        messages.success(request, ' Dotación registrada correctamente.')
         return redirect('detalle_empleado', id=empleado.id)
 
     return render(request, 'rrhh/empleados/agregar_dotacion.html', {'empleado': empleado})
@@ -431,12 +458,14 @@ def editar_dotacion_empleado(request, id):
     if request.method == 'POST':
         dotacion.elemento = request.POST.get('elemento', '')
         dotacion.descripcion = request.POST.get('descripcion', '')
+        dotacion.fecha_entrega = request.POST.get('fecha_entrega') or dotacion.fecha_entrega
+        dotacion.observacion = request.POST.get('observacion', dotacion.observacion)
         dotacion.save()
 
         messages.success(
             request,
-            '✅ Dotación actualizada correctamente.'
-        )
+            ' Dotación actualizada correctamente.'
+)
 
     return redirect(f'/rrhh/empleados/{dotacion.empleado.id}/')
 
@@ -450,24 +479,26 @@ def eliminar_dotacion_empleado(request, id):
         dotacion.delete()
         messages.success(
             request,
-            '✅ Dotación eliminada correctamente.'
-        )
+            ' Dotación eliminada correctamente.'
+)
 
     return redirect(f'/rrhh/empleados/{empleado_id}/')
 @login_required
 def subir_documento(request, id):
 
-    empleado = Empleado.objects.get(id=id)
+    empleado = get_object_or_404(Empleado, id=id)
 
     if request.method == 'POST':
 
-        DocumentoEmpleado.objects.create(
-            empleado=empleado,
-            nombre=request.POST['nombre'],
-            archivo=request.FILES['archivo']
-        )
+        archivo = request.FILES.get('archivo')
+        if archivo:
+            DocumentoEmpleado.objects.create(
+                empleado=empleado,
+                nombre=request.POST.get('nombre', ''),
+                archivo=archivo
+            )
 
-        messages.success(request, '✅ Documento subido correctamente')
+        messages.success(request, ' Documento subido correctamente')
 
         return redirect(f'/rrhh/empleados/{id}/')
 
@@ -478,16 +509,17 @@ def subir_documento(request, id):
 @login_required
 def eliminar_documento(request, id):
 
-    documento = DocumentoEmpleado.objects.get(id=id)
+    documento = get_object_or_404(DocumentoEmpleado, id=id)
 
     empleado_id = documento.empleado.id
 
-    documento.delete()
+    if request.method == 'POST':
+        documento.delete()
 
-    messages.success(
-        request,
-        '🗑️ Documento eliminado correctamente'
-    )
+        messages.success(
+            request,
+            ' Documento eliminado correctamente'
+)
 
     return redirect(f'/rrhh/empleados/{empleado_id}/')
 

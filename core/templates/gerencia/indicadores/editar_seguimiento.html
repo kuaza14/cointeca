@@ -20,16 +20,13 @@
                 <span class="text-[#1F2937] font-semibold">Editar Medición</span>
             </nav>
             <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2">
-                <span>✏️</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg></span>
                 <span>Editar Medición de Seguimiento</span>
             </h1>
         </div>
 
         <div class="flex items-center gap-2.5 shrink-0">
-            <a href="/indicadores/{{ seguimiento.indicador.id }}/" 
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs">
-                <span>← Volver al Indicador</span>
-            </a>
+            <a href="/indicadores/{{ seguimiento.indicador.id }}/" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Indicador</span></a>
         </div>
     </div>
 

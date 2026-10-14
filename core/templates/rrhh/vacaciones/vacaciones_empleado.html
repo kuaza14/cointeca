@@ -18,7 +18,7 @@
                 <span class="text-[#1F2937] font-semibold">Vacaciones</span>
             </nav>
             <h1 class="text-2xl font-extrabold text-[#1F2937] tracking-tight flex items-center gap-2">
-                <span>🏖️</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg></span>
                 <span>Historial de Vacaciones · {{ empleado.nombre_completo }}</span>
             </h1>
             <p class="text-xs text-muted-foreground mt-0.5">
@@ -30,16 +30,10 @@
             <a href="/rrhh/empleados/{{ empleado.id }}/vacaciones/crear/"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                <span>➕ Nueva Salida</span>
+                <span>Nueva Salida</span>
             </a>
-            <a href="{% url 'detalle_empleado' empleado.id %}"
-               class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-2xs">
-                <span>← Volver al Empleado</span>
-            </a>
-            <a href="/rrhh/vacaciones/"
-               class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-2xs">
-                <span>← Volver a Vacaciones</span>
-            </a>
+            <a href="{% url 'detalle_empleado' empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Empleado</span></a>
+            <a href="/rrhh/vacaciones/" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Vacaciones</span></a>
         </div>
     </div>
 
@@ -85,27 +79,27 @@
     <!-- TABLA DE SALIDAS DE VACACIONES -->
     <div class="overflow-x-auto shadow-xs rounded-xl border border-border bg-card mb-6">
         <table class="w-full border-collapse text-xs select-none">
-            <thead class="thead-vacaciones font-bold text-[11px] uppercase tracking-wider" style="background-color: #0f172a !important; color: #ffffff !important;">
+            <thead class="thead-vacaciones font-bold text-[11px] uppercase tracking-wider">
                 <tr>
-                    <th class="py-3 px-3 text-left font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                    <th class="py-3 px-3 text-left font-bold">
                         Periodo Causado
                     </th>
-                    <th class="py-3 px-3 text-center font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                    <th class="py-3 px-3 text-center font-bold">
                         Inicio
                     </th>
-                    <th class="py-3 px-3 text-center font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                    <th class="py-3 px-3 text-center font-bold">
                         Fin Descanso
                     </th>
                     <th class="py-3 px-3 text-center font-bold text-amber-300" style="background-color: #1e3a8a !important; color: #fbbf24 !important;">
                         Regreso a Laborar
                     </th>
-                    <th class="py-3 px-3 text-center font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                    <th class="py-3 px-3 text-center font-bold">
                         Días Tomados
                     </th>
-                    <th class="py-3 px-3 text-left font-bold" style="background-color: #0f172a !important; color: #ffffff !important;">
+                    <th class="py-3 px-3 text-left font-bold">
                         Observaciones
                     </th>
-                    <th class="py-3 px-3 text-center font-bold min-w-[190px]" style="background-color: #0f172a !important; color: #ffffff !important;">
+                    <th class="py-3 px-3 text-center font-bold min-w-[190px]">
                         Acciones
                     </th>
                 </tr>
@@ -116,7 +110,7 @@
                 <tr class="hover:bg-muted/60 transition">
                     <td class="p-3 font-semibold text-slate-800">
                         <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded text-slate-700 font-mono text-[11px]">
-                            📅 {{ v.periodo|default:"—" }}
+                            <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg> {{ v.periodo|default:"—" }}
                         </span>
                     </td>
 
@@ -150,7 +144,7 @@
                                 onclick="abrirEditarVacacion('{{ v.id }}', '{{ empleado.nombre_completo|escapejs }}', '{{ v.periodo|default:''|escapejs }}', '{{ v.fecha_inicio|date:'Y-m-d' }}', {{ v.dias_tomados }}, '{{ v.observaciones|default:''|escapejs }}', {{ dias_disponibles }}, {{ empleado.dias_acumulados }})"
                                 class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
                                 title="Editar esta salida">
-                                <span>✏️ Editar</span>
+                                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg> Editar</span>
                             </button>
 
                             <!-- ELIMINAR / ANULAR -->
@@ -159,7 +153,7 @@
                                 onclick="abrirEliminarVacacion('{{ v.id }}', '{{ empleado.nombre_completo|escapejs }}', {{ v.dias_tomados }})"
                                 class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
                                 title="Eliminar salida y reintegrar días">
-                                <span>🗑️ Anular</span>
+                                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg> Anular</span>
                             </button>
 
                             <!-- DESCARGAR / IMPRIMIR PERMISO -->
@@ -167,7 +161,7 @@
                                 href="/rrhh/vacaciones/{{ empleado.id }}/solicitud/"
                                 class="bg-[#0B2D6B] hover:bg-blue-900 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1"
                                 title="Descargar documento oficial para imprimir el permiso de vacaciones">
-                                <span>🖨️ Imprimir Permiso</span>
+                                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg> Imprimir Permiso</span>
                             </a>
                         </div>
                     </td>
@@ -188,7 +182,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div class="bg-[#1E293B] text-white px-6 py-4 flex justify-between items-center border-b border-slate-700">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2">
-                    <span>✏️</span> Editar Salida de Vacaciones · <span id="editarNombreEmpleado" class="text-amber-300 font-extrabold truncate max-w-[240px]"></span>
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg></span> Editar Salida de Vacaciones · <span id="editarNombreEmpleado" class="text-amber-300 font-extrabold truncate max-w-[240px]"></span>
                 </h2>
                 <button type="button" onclick="cerrarEditar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-slate-800 transition">
                     &times;
@@ -274,11 +268,11 @@
                         <strong id="previewFechaFin" class="text-slate-900 font-bold">—</strong>
                     </div>
                     <div class="flex items-center justify-between text-blue-900 text-xs font-semibold pt-1 border-t border-slate-200">
-                        <span>🗓️ Regreso a laborar:</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg> Regreso a laborar:</span>
                         <strong id="previewFechaRegreso" class="text-blue-700 font-extrabold text-sm font-mono">—</strong>
                     </div>
                     <div class="flex items-center justify-between text-emerald-900 text-xs font-semibold pt-1 border-t border-slate-200">
-                        <span>💼 Nuevo saldo que le quedará:</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z"/></svg> Nuevo saldo que le quedará:</span>
                         <strong id="previewSaldoResultante" class="text-emerald-700 font-extrabold text-sm font-mono">—</strong>
                     </div>
                     <p class="text-[10px] text-muted-foreground pt-1 italic">
@@ -287,7 +281,7 @@
                 </div>
 
                 <div id="alertaExcesoDias" class="hidden bg-rose-50 border border-rose-300 text-rose-800 p-2.5 rounded-lg text-xs font-semibold">
-                    ⚠️ La cantidad de días ingresada supera el cupo máximo disponible para este colaborador.
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg> La cantidad de días ingresada supera el cupo máximo disponible para este colaborador.
                 </div>
 
                 <div class="flex items-center justify-between pt-3 border-t border-slate-200">
@@ -296,7 +290,7 @@
                         id="btnEliminarDesdeEditar"
                         onclick="abrirEliminarDesdeEditar()" 
                         class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-lg transition inline-flex items-center gap-1 cursor-pointer">
-                        <span>🗑️ Eliminar salida</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg> Eliminar salida</span>
                     </button>
 
                     <div class="flex items-center gap-2">
@@ -317,7 +311,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div class="bg-rose-700 text-white px-6 py-4 flex justify-between items-center border-b border-rose-800">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2">
-                    <span>⚠️</span> ¿Anular Salida de Vacaciones?
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></span> ¿Anular Salida de Vacaciones?
                 </h2>
                 <button type="button" onclick="cerrarEliminar()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-rose-800 transition">
                     &times;
@@ -333,7 +327,7 @@
                         ¿Estás seguro de que deseas eliminar la salida de vacaciones de <strong id="eliminarNombreEmpleado" class="text-rose-900">el colaborador</strong>?
                     </p>
                     <div class="bg-white p-2.5 rounded-lg border border-rose-200 text-emerald-800 font-semibold text-[11px] flex items-center gap-2">
-                        <span class="text-base">🔄</span>
+                        <span class="text-base"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></span>
                         <span>
                             Los <strong id="eliminarDiasReintegro" class="font-mono text-emerald-900 font-extrabold">0</strong> días se <strong>reintegrarán automáticamente</strong> a su saldo disponible.
                         </span>

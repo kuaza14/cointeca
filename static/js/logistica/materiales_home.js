@@ -185,6 +185,32 @@
         modal.classList.add('flex');
     }
 
+    function cerrarModalNuevoMaterial() {
+        const modal = document.getElementById('modalNuevoMaterial');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // Cerrar modales con tecla Escape o clic en el fondo oscuro
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            cerrarModalAjuste();
+            cerrarModalNuevoMaterial();
+        }
+    });
+    ['modalAjusteStock', 'modalNuevoMaterial'].forEach(function (id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    if (id === 'modalAjusteStock') cerrarModalAjuste();
+                    else cerrarModalNuevoMaterial();
+                }
+            });
+        }
+    });
+
     function cambiarPestanaBodega(tabName) {
         const panelStock = document.getElementById('panelStockBodega');
         const panelHistorial = document.getElementById('panelHistorialBodega');

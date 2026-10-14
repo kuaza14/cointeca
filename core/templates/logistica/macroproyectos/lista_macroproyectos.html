@@ -19,11 +19,7 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% url 'logistica_home' %}"
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a Logística</span>
-                </a>
+                <a href="{% url 'logistica_home' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Logística</span></a>
             </div>
         </div>
 
@@ -42,7 +38,7 @@
             <a href="{% url 'materiales_home' %}"
                class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
                style="background-color: #1e63f0 !important; color: #ffffff !important; border: 1px solid #1651c7 !important;">
-                <span>📦</span> <span>Catálogo de Materiales</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg></span> <span>Catálogo de Materiales</span>
             </a>
         </div>
     </div>

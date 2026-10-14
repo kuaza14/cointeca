@@ -7,6 +7,7 @@ from docxtpl import DocxTemplate
 
 import os
 
+from core.utils import limpiar_nombre_archivo
 from core.models import (
     Empleado
 )
@@ -34,7 +35,7 @@ def generar_contrato(request, id):
             "telefono": empleado.telefono,
             "cargo": empleado.cargo.upper(),
             "salario": empleado.salario,
-            "fecha_ingreso": empleado.fecha_ingreso.strftime("%d/%m/%Y"),
+            "fecha_ingreso": empleado.fecha_ingreso.strftime("%d/%m/%Y") if empleado.fecha_ingreso else "—",
             "fecha_finalizacion": empleado.fecha_finalizacion.strftime("%d/%m/%Y") if empleado.fecha_finalizacion else None,
             "tipo_contrato": empleado.tipo_contrato.upper(),
             "jornada": empleado.jornada.upper(),
@@ -52,7 +53,7 @@ def generar_contrato(request, id):
     # GUARDAR NUEVO WORD
     ruta_salida = os.path.join(
         settings.MEDIA_ROOT,
-        f"contrato_{empleado.nombre_completo}.docx"
+        f"contrato_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx"
     )
 
     doc.save(ruta_salida)
@@ -61,5 +62,5 @@ def generar_contrato(request, id):
     return FileResponse(
         open(ruta_salida, "rb"),
         as_attachment=True,
-        filename=f"contrato_{empleado.nombre_completo}.docx"
+        filename=f"contrato_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx"
     )

@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function actualizarOpcionesTipoNuevoLogistica(macroOpt) {
         if (!selectTipoLog) return;
-        if (!macroOpt || !macroOpt.value) {
+        if (!macroOpt ||!macroOpt.value) {
             selectTipoLog.innerHTML = `
                 <option value="">(Primero seleccione Macroproyecto o Circuito)</option>
                 <option value="BT">Baja Tensión (BT)</option>
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const esMt = macroOpt.dataset.esMt === "1";
-        const etiquetaHijo = macroOpt.dataset.etiquetaHijo || (esMt ? "Maniobra" : "Proyecto");
+        const etiquetaHijo = macroOpt.dataset.etiquetaHijo || (esMt? "Maniobra": "Proyecto");
 
         if (esMt) {
             selectTipoLog.innerHTML = '<option value="MT" selected>Media Tensión (MT)</option>';
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (textoTituloModalLog) textoTituloModalLog.textContent = "Nueva " + etiquetaHijo;
             if (ayudaTipoLog) {
                 ayudaTipoLog.className = "text-[11px] text-purple-700 font-semibold mt-1";
-                ayudaTipoLog.textContent = "⚡ En un Circuito solo se pueden registrar maniobras de Media Tensión (MT).";
+                ayudaTipoLog.textContent = " En un Circuito solo se pueden registrar maniobras de Media Tensión (MT).";
                 ayudaTipoLog.classList.remove("hidden");
             }
         } else {
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (textoTituloModalLog) textoTituloModalLog.textContent = "Nuevo " + etiquetaHijo;
             if (ayudaTipoLog) {
                 ayudaTipoLog.className = "text-[11px] text-blue-700 font-semibold mt-1";
-                ayudaTipoLog.textContent = "💡 En un Macroproyecto solo se pueden registrar proyectos de Alumbrado Público (AP).";
+                ayudaTipoLog.textContent = " En un Macroproyecto solo se pueden registrar proyectos de Alumbrado Público (AP).";
                 ayudaTipoLog.classList.remove("hidden");
             }
         }
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
         checkTodos.addEventListener("change", function () {
             checksProyectos.forEach(chk => {
                 const fila = chk.closest("tr");
-                if (!fila || fila.style.display !== "none") {
+                if (!fila || fila.style.display!== "none") {
                     chk.checked = checkTodos.checked;
                 }
             });
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
         chk.addEventListener("change", function () {
             const checksVisibles = Array.from(checksProyectos).filter(chk => {
                 const fila = chk.closest("tr");
-                return !fila || fila.style.display !== "none";
+                return!fila || fila.style.display!== "none";
             });
             const todosMarcados = checksVisibles.length > 0 && checksVisibles.every(c => c.checked);
             if (checkTodos) {

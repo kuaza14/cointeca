@@ -17,10 +17,7 @@
         </div>
 
         <div class="flex items-center gap-2.5 shrink-0">
-            <a href="{% url 'dashboard' %}" 
-               class="btn btn-secundario text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs">
-                <span>← Volver al Dashboard</span>
-            </a>
+            <a href="{% url 'dashboard' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver al Dashboard</span></a>
         </div>
     </div>
 
@@ -29,7 +26,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xl font-bold border border-blue-100">
-                    📡
+                    <svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
                 </div>
                 <div>
                     <h2 class="text-base font-extrabold tracking-tight text-[#1F2937] flex items-center gap-2">
@@ -74,7 +71,7 @@
                     </div>
                     <div class="flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700 mt-3 pt-2 border-t border-slate-200/60">
                         <span>Gestionar Facturación</span>
-                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                        <span class="group-hover:translate-x-1 transition-transform"><span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
                     </div>
                 </div>
             </a>
@@ -94,22 +91,22 @@
                     </div>
                     <div class="flex items-center gap-1.5 mt-2.5 flex-wrap text-xs font-mono font-bold">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200" title="Cumplidos">
-                            🟢 {{ salud_kpis.verdes }}
+                            <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#10b981"></span> {{ salud_kpis.verdes }}
                         </span>
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200" title="En Seguimiento">
-                            🟡 {{ salud_kpis.amarillos }}
+                            <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#f59e0b"></span> {{ salud_kpis.amarillos }}
                         </span>
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 border border-rose-200" title="En Riesgo">
-                            🔴 {{ salud_kpis.rojos }}
+                            <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#ef4444"></span> {{ salud_kpis.rojos }}
                         </span>
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200 text-slate-700" title="Sin Mediciones">
-                            ⚪ {{ salud_kpis.sin_medicion }}
+                            <span class="inline-block rounded-full" style="width:0.65em;height:0.65em;background:#cbd5e1"></span> {{ salud_kpis.sin_medicion }}
                         </span>
                     </div>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
                     <span>Ver Tablero Completo</span>
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    <span class="group-hover:translate-x-1 transition-transform"><span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
                 </div>
             </a>
 
@@ -130,7 +127,7 @@
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-amber-800 group-hover:text-amber-900">
                     <span>Gestionar Caja Menor</span>
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    <span class="group-hover:translate-x-1 transition-transform"><span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
                 </div>
             </a>
 
@@ -147,9 +144,9 @@
                         {{ ultima_acta.lugar }}
                     </div>
                     <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
-                        <span>📅 {{ ultima_acta.fecha|date:"d/m/Y" }}</span>
+                        <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg> {{ ultima_acta.fecha|date:"d/m/Y" }}</span>
                         {% if ultima_acta.archivo_firmado %}
-                            <span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200 font-bold text-[10px]">✓ Firmada</span>
+                            <span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200 font-bold text-[10px]"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Firmada</span>
                         {% else %}
                             <span class="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 font-bold text-[10px]">● En borrador</span>
                         {% endif %}
@@ -157,7 +154,7 @@
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-indigo-700 group-hover:text-indigo-800">
                     <span>Ver Acta Directiva</span>
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    <span class="group-hover:translate-x-1 transition-transform"><span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
                 </div>
             </a>
             {% else %}
@@ -176,8 +173,8 @@
                     </div>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-indigo-700 group-hover:text-indigo-800">
-                    <span>+ Crear Primera Acta</span>
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    <span>Crear Primera Acta</span>
+                    <span class="group-hover:translate-x-1 transition-transform"><span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span></span>
                 </div>
             </a>
             {% endif %}
@@ -189,7 +186,7 @@
     <div>
         <div class="mb-3">
             <h2 class="text-sm font-bold text-[#1F2937] uppercase tracking-wider flex items-center gap-2">
-                <span>📁</span> Módulos y Carpetas de Gestión Directiva
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg></span> Módulos y Carpetas de Gestión Directiva
             </h2>
             <p class="text-xs text-[#64748B]">Acceso a los registros formales de gobernanza, estrategia y finanzas</p>
         </div>
@@ -200,7 +197,7 @@
             <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50/20 to-transparent hover:shadow-md transition">
                 <div>
                     <div class="size-12 rounded-xl bg-[#E6F1FF] text-[#1E63F0] flex items-center justify-center mb-4 text-2xl">
-                        📊
+                        <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
                     </div>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-bold text-[#1F2937]">Indicadores Estratégicos</h3>
@@ -215,7 +212,7 @@
                 <div class="mt-6 flex flex-col gap-2">
                     <a href="{% url 'indicadores' %}" class="btn btn-primario w-full">
                         <span>Gestionar Indicadores</span>
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                     </a>
                 </div>
             </div>
@@ -224,7 +221,7 @@
             <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50/20 to-transparent hover:shadow-md transition">
                 <div>
                     <div class="size-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 text-2xl">
-                        📋
+                        <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
                     </div>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-bold text-[#1F2937]">Actas de Junta Directiva</h3>
@@ -239,7 +236,7 @@
                 <div class="mt-6 flex flex-col gap-2">
                     <a href="{% url 'actas' %}" class="btn btn-primario w-full bg-indigo-600 hover:bg-indigo-700">
                         <span>Ver Actas de Junta</span>
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                     </a>
                 </div>
             </div>
@@ -248,7 +245,7 @@
             <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50/20 to-transparent hover:shadow-md transition">
                 <div>
                     <div class="size-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 text-2xl">
-                        💰
+                        <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
                     </div>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-bold text-[#1F2937]">Seguimiento Facturación</h3>
@@ -263,7 +260,7 @@
                 <div class="mt-6 flex flex-col gap-2">
                     <a href="{% url 'facturacion' %}" class="btn btn-primario w-full bg-emerald-600 hover:bg-emerald-700">
                         <span>Gestionar Facturación</span>
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                     </a>
                 </div>
             </div>
@@ -272,7 +269,7 @@
             <div class="tarjeta tarjeta-cuerpo flex flex-col justify-between border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50/20 to-transparent hover:shadow-md transition">
                 <div>
                     <div class="size-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4 text-2xl">
-                        🏛️
+                        <svg class="size-7 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12v-.008z"/></svg>
                     </div>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-bold text-[#1F2937]">Plan Estratégico</h3>
@@ -285,7 +282,7 @@
                 <div class="mt-6 flex flex-col gap-2">
                     <a href="{% url 'plan_estrategico' %}" class="btn btn-primario w-full bg-purple-600 hover:bg-purple-700">
                         <span>Ver Plan Estratégico</span>
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <span class="inline-flex items-center justify-center rounded-full" style="width:18px;height:18px;border:1.5px solid currentColor;"><svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg></span>
                     </a>
                 </div>
             </div>

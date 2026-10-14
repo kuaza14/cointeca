@@ -20,17 +20,13 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% url 'dotacion_home' %}" 
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a Dotación</span>
-                </a>
+                <a href="{% url 'dotacion_home' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Dotación</span></a>
             </div>
         </div>
 
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-2">
-                <span>🦺</span> Ficha de Dotación: {{ empleado.nombre_completo }}
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></span> Ficha de Dotación: {{ empleado.nombre_completo }}
             </h1>
             <p class="text-sm text-muted-foreground mt-1">
                 Historial de indumentaria y dotaciones entregadas al colaborador.
@@ -209,7 +205,7 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl border border-gray-200 overflow-hidden">
             <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center border-b border-blue-800">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
-                    <span>🦺</span> Registrar Nueva Entrega de Dotación
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></span> Registrar Nueva Entrega de Dotación
                 </h2>
                 <button type="button" onclick="cerrarModalDotacion()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-blue-800 transition">
                     &times;

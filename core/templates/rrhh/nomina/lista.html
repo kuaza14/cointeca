@@ -17,11 +17,7 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% url 'rrhh' %}" 
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a RRHH</span>
-                </a>
+                <a href="{% url 'rrhh' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a RRHH</span></a>
             </div>
         </div>
 
@@ -49,7 +45,7 @@
                 <button type="button" onclick="abrirModalNuevoPeriodo()"
                         class="btn btn-primario bg-[#1E63F0] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2 cursor-pointer">
                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    <span>+ Generar Período</span>
+                    <span>Generar Período</span>
                 </button>
             </div>
         </div>
@@ -127,12 +123,12 @@
                     id="buscador-periodos-nomina" 
                     placeholder="Buscar por mes, año o estado..." 
                     class="w-full border border-slate-200 rounded-xl pl-8 pr-7 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white text-slate-800 text-xs transition">
-                <span class="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                <span class="absolute left-2.5 top-2 text-slate-400 text-xs"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg></span>
                 <button type="button" 
                         id="btn-limpiar-periodos" 
                         onclick="limpiarBuscadorPeriodos()" 
                         class="hidden absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-600 font-bold cursor-pointer">
-                    ✕
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
@@ -181,11 +177,11 @@
                         <td class="py-3 px-4 text-center">
                             {% if p.estado == 'PAGADO' %}
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                    ✓ Pagado
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Pagado
                                 </span>
                             {% elif p.estado == 'APROBADO' %}
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
-                                    ✓ Aprobado
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Aprobado
                                 </span>
                             {% else %}
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
@@ -221,8 +217,7 @@
                 Puedes iniciar el primer período precargando a todos los colaboradores de Cointeca en 1 clic o importar tu archivo Excel.
             </p>
             <div class="flex items-center justify-center gap-2 mt-4">
-                <button type="button" onclick="abrirModalNuevoPeriodo()" class="btn btn-primario text-xs px-4 py-2">
-                    + Generar Primer Período
+                <button type="button" onclick="abrirModalNuevoPeriodo()" class="btn btn-primario text-xs px-4 py-2"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Generar Primer Período
                 </button>
                 <button type="button" onclick="abrirModalImportar()" class="btn btn-secundario text-xs px-4 py-2">
                     Importar Excel
@@ -239,15 +234,15 @@
     <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden animate-fade-in">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <span>⚡ Iniciar Período de Nómina</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Iniciar Período de Nómina</span>
             </h3>
-            <button type="button" onclick="cerrarModalNuevoPeriodo()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer">✕</button>
+            <button type="button" onclick="cerrarModalNuevoPeriodo()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
 
         <form method="POST" action="{% url 'generar_periodo_nomina' %}" class="p-5 space-y-4">
             {% csrf_token %}
             <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
-                <p class="font-bold">✨ Precarga Automática en 1 Clic</p>
+                <p class="font-bold"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg> Precarga Automática en 1 Clic</p>
                 <p class="text-[11px] text-blue-700 mt-0.5">El sistema creará la nómina precargando a todos los empleados activos de Cointeca con sus sueldos registrados y 30 días laborados por defecto.</p>
             </div>
 
@@ -304,15 +299,15 @@
     <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden animate-fade-in">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <span>📥 Importar Nómina desde Archivo Excel</span>
+                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg> Importar Nómina desde Archivo Excel</span>
             </h3>
-            <button type="button" onclick="cerrarModalImportar()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer">✕</button>
+            <button type="button" onclick="cerrarModalImportar()" class="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none cursor-pointer"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
 
         <form method="POST" action="{% url 'importar_nomina_excel' %}" enctype="multipart/form-data" class="p-5 space-y-4">
             {% csrf_token %}
             <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900">
-                <p class="font-bold">📊 Compatibilidad Total con Formato Excel</p>
+                <p class="font-bold"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg> Compatibilidad Total con Formato Excel</p>
                 <p class="text-[11px] text-emerald-700 mt-0.5">Puedes subir directamente el archivo <strong>NOMINA 2026.xlsx</strong>. El sistema leerá las columnas, vinculará a los colaboradores con la base de datos y calculará los totales.</p>
             </div>
 

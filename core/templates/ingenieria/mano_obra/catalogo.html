@@ -20,17 +20,13 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{% url 'ingenieria_inicio' %}" 
-                   class="btn font-semibold inline-flex items-center gap-1.5 shadow-xs text-xs sm:text-sm px-3.5 py-2 rounded-lg transition hover:opacity-90"
-                   style="background-color: #475569 !important; color: #ffffff !important; border: 1px solid #334155 !important;">
-                    <span>←</span> <span>Volver a Ingeniería</span>
-                </a>
+                <a href="{% url 'ingenieria_inicio' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Ingeniería</span></a>
             </div>
         </div>
 
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground flex items-center gap-3">
-                🛠️ Tarifario Contractual de Mano de Obra & Actividades
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg> Tarifario Contractual de Mano de Obra & Actividades
             </h1>
             <p class="text-xs sm:text-sm text-muted-foreground mt-1">
                 Gestión de códigos oficiales, unidades de medida y tarifas unitarias para la liquidación de obras.
@@ -78,7 +74,7 @@
                 </button>
                 {% if query or categoria_sel %}
                     <a href="{% url 'catalogo_mano_obra' %}" class="px-3 py-2 bg-muted hover:bg-gray-200 text-muted-foreground text-sm rounded-lg flex items-center justify-center" title="Limpiar todos los filtros">
-                        ✕
+                        <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </a>
                 {% endif %}
             </div>
@@ -128,11 +124,11 @@
                         <td class="px-3 py-2.5 text-center">
                             {% if item.tipo_calculo == "AUTOMATICO" %}
                                 <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                                    ⚡ Automático
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Automático
                                 </span>
                             {% else %}
                                 <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">
-                                    ✍️ Manual
+                                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg> Manual
                                 </span>
                             {% endif %}
                         </td>
@@ -142,7 +138,7 @@
                         <td class="px-4 py-2.5 text-center">
                             <button type="button" onclick="abrirModalPrecio('{{ item.id }}', '{{ item.codigo }}', '{{ item.descripcion|escapejs }}', '{{ item.valor_unitario }}')"
                                     class="px-2.5 py-1 bg-primary-soft text-primary hover:bg-primary hover:text-white rounded text-xs font-bold transition">
-                                ✏️ Tarifa
+                                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg> Tarifa
                             </button>
                         </td>
                     </tr>
@@ -163,8 +159,8 @@
 <div id="modalEditarTarifa" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-card w-full max-w-md rounded-2xl shadow-xl border border-border overflow-hidden">
         <div class="px-6 py-4 bg-muted/40 border-b border-border flex items-center justify-between">
-            <h3 class="font-extrabold text-foreground text-base">✏️ Actualizar Tarifa Contractual</h3>
-            <button type="button" onclick="cerrarModalPrecio()" class="text-muted-foreground hover:text-foreground text-lg">✕</button>
+            <h3 class="font-extrabold text-foreground text-base"><svg class="size-6 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg> Actualizar Tarifa Contractual</h3>
+            <button type="button" onclick="cerrarModalPrecio()" class="text-muted-foreground hover:text-foreground text-lg"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
         <form id="formTarifa" method="POST" action="" class="p-6 space-y-4">
             {% csrf_token %}

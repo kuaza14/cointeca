@@ -44,6 +44,19 @@
         fondo.addEventListener("click", cerrarMenu);
     }
 
+    // =========================================================================
+    // SIDEBAR COLAPSABLE EN ESCRITORIO (solo iconos, persistente en localStorage)
+    // =========================================================================
+    const btnColapsar = document.getElementById("btnColapsar");
+    if (btnColapsar && barra) {
+        btnColapsar.addEventListener("click", function () {
+            const colapsada = document.documentElement.classList.toggle("sidebar-colapsada");
+            try {
+                localStorage.setItem("cointeca_sidebar", colapsada ? "1" : "0");
+            } catch (e) {}
+        });
+    }
+
     // Panel de alertas (Notificaciones)
     if (btnAlertas && panelAlertas) {
         btnAlertas.addEventListener("click", function (e) {
@@ -91,10 +104,10 @@
             setTimeout(function () {
                 btn.disabled = true;
                 btn.classList.add("opacity-70", "cursor-not-allowed");
-                if (btn.tagName === "BUTTON" && !btn.querySelector(".spinner-anti-double")) {
+                if (btn.tagName === "BUTTON" &&!btn.querySelector(".spinner-anti-double")) {
                     const spinner = document.createElement("span");
                     spinner.className = "spinner-anti-double mr-1.5 inline-block animate-spin";
-                    spinner.innerHTML = "⏳";
+                    spinner.innerHTML = "";
                     btn.prepend(spinner);
                 }
             }, 20);

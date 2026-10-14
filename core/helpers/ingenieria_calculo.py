@@ -3,7 +3,7 @@ from django.db import transaction
 from core.models import Apoyo, ApoyoMaterial, ItemManoObra, ApoyoManoObra, Proyecto, Presupuesto
 
 # ==============================================================================
-# ⚙️ MOTOR DE CÁLCULO DE MANO DE OBRA PARA INGENIERÍA (COINTECA)
+# MOTOR DE CÁLCULO DE MANO DE OBRA PARA INGENIERÍA (COINTECA)
 # ==============================================================================
 
 # Reglas de mapeo: Código MO -> Función / Lista de Códigos de Materiales (items)
@@ -31,7 +31,7 @@ def calcular_mano_obra_para_apoyo(apoyo, preservar_manuales=True):
     es_modernizacion = (
         "MODERN" in (apoyo.tipo_instalacion or "").upper() or
         apoyo.tipo_estructura == "Modernización"
-    )
+)
 
     # 2. Diccionario de cantidades calculadas por código de Mano de Obra
     calculados = {}
@@ -144,7 +144,7 @@ def calcular_mano_obra_para_apoyo(apoyo, preservar_manuales=True):
     # Transporte de Cables (Cód 294): Suma de cables con holgura
     tot_cables_transporte = (
         calculados['241'] + calculados['242'] + calculados['323'] + calculados['324'] + calculados['325']
-    )
+)
     calculados['294'] = tot_cables_transporte
 
     # --------------------------------------------------------------------------
@@ -226,7 +226,7 @@ def calcular_mano_obra_para_apoyo(apoyo, preservar_manuales=True):
                 item_mano_obra=item_obj,
                 cantidad=cant,
                 origen=ApoyoManoObra.Origen.CALCULADO
-            )
+)
         guardados += 1
 
     return guardados

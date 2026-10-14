@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.db.models import Sum, Q
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 from docxtpl import DocxTemplate
@@ -14,6 +15,7 @@ from datetime import timedelta, date
 import holidays
 from django.conf import settings
 from core.models import Empleado, Vacacion, SolicitudVacaciones
+from core.utils import limpiar_nombre_archivo
 
 @login_required
 def solicitud_vacaciones(request, id):
@@ -26,27 +28,27 @@ def solicitud_vacaciones(request, id):
     # Obtener la última vacación del empleado
     vacacion = Vacacion.objects.filter(
         empleado=empleado
-    ).order_by('-fecha_inicio').first()  # Usar order_by en lugar de latest
+).order_by('-fecha_inicio').first() # Usar order_by en lugar de latest
 
     # Verificar que existe una vacación registrada
     if not vacacion:
         return HttpResponse(
             "Este empleado no tiene solicitudes de vacaciones registradas."
-        )
+)
 
     # Ruta de la plantilla Word
     ruta_plantilla = os.path.join(
         settings.BASE_DIR,
         'plantillas_word',
         'solicitud_vacaciones.docx'
-    )
+)
 
     # Cargar la plantilla
     doc = DocxTemplate(ruta_plantilla)
 
     anios_trabajados = (
         date.today() - empleado.fecha_ingreso
-    ).days // 365 if empleado.fecha_ingreso else 0
+).days // 365 if empleado.fecha_ingreso else 0
 
     dias_acumulados = anios_trabajados * 15
 
@@ -55,23 +57,23 @@ def solicitud_vacaciones(request, id):
     dias_tomados_total = (
         Vacacion.objects.filter(
             empleado=empleado
-        ).aggregate(
+).aggregate(
             total=Sum('dias_tomados')
-        )['total']
+)['total']
         or 0
-    ) + dias_historicos
+) + dias_historicos
 
     dias_disponibles = max(0, dias_acumulados - dias_tomados_total)
 
     # Preparar el contexto con los datos de la vacación
     contexto = {
-        'empleado': empleado,           # Objeto completo - puedes usar {{ empleado.nombre_completo }}, etc
-        'vacacion': vacacion,           # Objeto completo
+        'empleado': empleado, # Objeto completo - puedes usar {{ empleado.nombre_completo }}, etc
+        'vacacion': vacacion, # Objeto completo
         
         'empleado_area': empleado.area if hasattr(empleado, 'area') else '',
         
         'fecha_solicitud': vacacion.fecha_inicio.strftime('%d/%m/%Y'),
-        'fecha_periodo_servido': empleado.fecha_ingreso.strftime('%d/%m/%Y'),
+        'fecha_periodo_servido': empleado.fecha_ingreso.strftime('%d/%m/%Y') if empleado.fecha_ingreso else '—',
         
         'periodo_desde': vacacion.fecha_inicio.strftime('%d/%m/%Y'),
         'periodo_hasta': vacacion.fecha_fin.strftime('%d/%m/%Y'),
@@ -83,7 +85,7 @@ def solicitud_vacaciones(request, id):
         
         'dias_disponibles': dias_disponibles,
         
-        'nombre_rrhh': 'Gestión RRHH',  # Cambiar según corresponda
+        'nombre_rrhh': 'Gestión RRHH', # Cambiar según corresponda
     }
 
     # Renderizar la plantilla con los datos
@@ -93,7 +95,7 @@ def solicitud_vacaciones(request, id):
     ruta_salida = os.path.join(
         settings.MEDIA_ROOT,
         f'solicitud_vacaciones_{empleado.id}_{vacacion.id}.docx'
-    )
+)
 
     doc.save(ruta_salida)
 
@@ -101,8 +103,8 @@ def solicitud_vacaciones(request, id):
     return FileResponse(
         open(ruta_salida, 'rb'),
         as_attachment=True,
-        filename=f'Solicitud_Vacaciones_{empleado.nombre_completo}.docx'
-    )
+        filename=f'Solicitud_Vacaciones_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx'
+)
 
 
 @login_required
@@ -115,7 +117,7 @@ def vacaciones_home(request):
         {
             'empleados': empleados
         }
-    )
+)
 
 @login_required
 def vacaciones(request):
@@ -130,7 +132,7 @@ def vacaciones(request):
             Q(nombre_completo__icontains=q) |
             Q(documento__icontains=q) |
             Q(cargo__icontains=q)
-        )
+)
 
     lista = []
 
@@ -138,7 +140,7 @@ def vacaciones(request):
 
         anios_trabajados = (
             date.today() - empleado.fecha_ingreso
-        ).days // 365 if empleado.fecha_ingreso else 0
+).days // 365 if empleado.fecha_ingreso else 0
 
         dias_acumulados = anios_trabajados * 15
 
@@ -147,11 +149,11 @@ def vacaciones(request):
         dias_tomados_sistema = (
             Vacacion.objects.filter(
                 empleado=empleado
-            ).aggregate(
+).aggregate(
                 total=Sum('dias_tomados')
-            )['total']
+)['total']
             or 0
-        )
+)
 
         dias_tomados_total = dias_historicos + dias_tomados_sistema
         dias_disponibles = max(0, dias_acumulados - dias_tomados_total)
@@ -167,10 +169,10 @@ def vacaciones(request):
         empleado.ultima_vacacion = (
             Vacacion.objects.filter(
                 empleado=empleado
-            )
-            .order_by('-fecha_inicio')
-            .first()
-        )
+)
+.order_by('-fecha_inicio')
+.first()
+)
 
         # Estado y Badge visual
         hoy = date.today()
@@ -179,29 +181,29 @@ def vacaciones(request):
             and empleado.ultima_vacacion.fecha_inicio <= hoy
             and empleado.ultima_vacacion.fecha_regreso
             and empleado.ultima_vacacion.fecha_regreso > hoy
-        ):
+):
             empleado.estado_vacaciones = "curso"
             empleado.badge_label = "En vacaciones"
             empleado.badge_class = "bg-blue-100 text-blue-800 border border-blue-300"
-            empleado.badge_icon = "🏖️"
+            empleado.badge_icon = ""
         elif (
             empleado.ultima_vacacion
             and hoy < empleado.ultima_vacacion.fecha_inicio <= hoy + timedelta(days=15)
-        ):
+):
             empleado.estado_vacaciones = "proxima"
             empleado.badge_label = "Próximas"
             empleado.badge_class = "bg-purple-100 text-purple-800 border border-purple-300"
-            empleado.badge_icon = "⏳"
+            empleado.badge_icon = ""
         elif dias_disponibles > 0:
             empleado.estado_vacaciones = "pendiente"
             empleado.badge_label = f"{dias_disponibles} d acumulados"
             empleado.badge_class = "bg-amber-100 text-amber-800 border border-amber-300"
-            empleado.badge_icon = "⚠️"
+            empleado.badge_icon = ""
         else:
             empleado.estado_vacaciones = "al_dia"
             empleado.badge_label = "Al día (0 acum.)"
             empleado.badge_class = "bg-emerald-100 text-emerald-800 border border-emerald-300"
-            empleado.badge_icon = "✅"
+            empleado.badge_icon = ""
 
         lista.append(empleado)
 
@@ -232,7 +234,7 @@ def vacaciones(request):
 
         lista = [
             e for e in lista
-            if e.total_pendientes == 0 and e.estado_vacaciones != "curso"
+            if e.total_pendientes == 0 and e.estado_vacaciones!= "curso"
         ]
 
     elif tipo == "aniversario":
@@ -243,7 +245,7 @@ def vacaciones(request):
                 e.fecha_ingreso
                 and e.fecha_ingreso.month == hoy.month
                 and e.fecha_ingreso.day >= hoy.day
-            )
+)
         ]
 
     anio_act = hoy.year
@@ -266,7 +268,7 @@ def vacaciones(request):
             "q": q,
             "festivos_colombia_json": festivos_colombia_json,
         }
-    )
+)
 
 
 @login_required
@@ -285,13 +287,22 @@ def ajustar_vacaciones_historicas(request, id):
             empleado.save()
             messages.success(
                 request,
-                f"Días de vacaciones históricos de {empleado.nombre_completo} actualizados a {dias} días con éxito."
-            )
+                f"Días de vacaciones históricos de {limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id} actualizados a {dias} días con éxito."
+)
         except (ValueError, TypeError):
             messages.error(request, "El número de días ingresado no es válido.")
 
-    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/rrhh/vacaciones/"
-    return redirect(next_url)
+    return redirect(_url_retorno_segura(request))
+
+
+def _url_retorno_segura(request, por_defecto="/rrhh/vacaciones/"):
+    """Devuelve next/HTTP_REFERER solo si es una URL local segura."""
+    candidata = request.POST.get("next") or request.META.get("HTTP_REFERER")
+    if candidata and url_has_allowed_host_and_scheme(
+        candidata, allowed_hosts={request.get_host()}
+    ):
+        return candidata
+    return por_defecto
 
 def calcular_resumen_empleado_vacacion(emp):
     if not emp:
@@ -335,7 +346,7 @@ def calcular_fechas_habiles_vacacion(fecha_inicio, dias_tomados):
     ])
 
     def es_dia_habil(d):
-        if d in festivos_colombia or d.weekday() == 6:  # 6 = Domingo
+        if d in festivos_colombia or d.weekday() == 6: # 6 = Domingo
             return False
         return True
 
@@ -404,7 +415,7 @@ def crear_vacacion(request, id=None):
                     'resumen_seleccionado': resumen_emp,
                     'error': 'Por favor completa una fecha de inicio y una cantidad de días válida.'
                 }
-            )
+)
 
         if dias_tomados <= 0:
             return render(
@@ -418,7 +429,7 @@ def crear_vacacion(request, id=None):
                     'resumen_seleccionado': resumen_emp,
                     'error': 'La cantidad de días de vacaciones debe ser mayor a 0.'
                 }
-            )
+)
 
         dias_disponibles = resumen_emp['disponibles']
         if dias_disponibles == 0:
@@ -433,7 +444,7 @@ def crear_vacacion(request, id=None):
                     'resumen_seleccionado': resumen_emp,
                     'error': f'El colaborador {empleado_actual.nombre_completo} no tiene días acumulados pendientes (Saldo disponible: 0 días).'
                 }
-            )
+)
 
         if dias_tomados > dias_disponibles:
             return render(
@@ -447,12 +458,12 @@ def crear_vacacion(request, id=None):
                     'resumen_seleccionado': resumen_emp,
                     'error': f'El colaborador solo tiene {dias_disponibles} días disponibles. No es posible solicitar {dias_tomados} días.'
                 }
-            )
+)
 
         # Cálculo de fechas hábiles (Lunes a Sábado en Cointeca)
         fecha_inicio_efectiva, fecha_fin, fecha_regreso = calcular_fechas_habiles_vacacion(
             fecha_inicio, dias_tomados
-        )
+)
 
         # Periodo: si viene vacío, usar el autocalculado por el sistema
         periodo = request.POST.get('periodo', '').strip()
@@ -470,12 +481,12 @@ def crear_vacacion(request, id=None):
             dias_tomados=dias_tomados,
             dias_pendientes=dias_pendientes,
             observaciones=request.POST.get('observaciones', '').strip()
-        )
+)
 
         messages.success(
             request,
             f'Vacaciones de {empleado_actual.nombre_completo} ({periodo}) registradas exitosamente del {fecha_inicio_efectiva.strftime("%d/%m/%Y")} al {fecha_fin.strftime("%d/%m/%Y")}. Regreso a laborar: {fecha_regreso.strftime("%d/%m/%Y")}.'
-        )
+)
 
         return redirect('vacaciones')
 
@@ -503,7 +514,7 @@ def crear_vacacion(request, id=None):
             'festivos_colombia_json': festivos_colombia_json,
             'resumen_seleccionado': resumen_sel,
         }
-    )
+)
 
 
 @login_required
@@ -516,17 +527,17 @@ def vacaciones_empleado(request, id):
     empleado = get_object_or_404(
         Empleado,
         id=id
-    )
+)
 
     registros = Vacacion.objects.filter(
         empleado=empleado
-    ).order_by(
+).order_by(
         '-fecha_inicio'
-    )
+)
 
     anios_trabajados = (
         date.today() - empleado.fecha_ingreso
-    ).days // 365 if empleado.fecha_ingreso else 0
+).days // 365 if empleado.fecha_ingreso else 0
 
     dias_acumulados = anios_trabajados * 15
 
@@ -535,11 +546,11 @@ def vacaciones_empleado(request, id):
     dias_tomados_sistema = (
         Vacacion.objects.filter(
             empleado=empleado
-        ).aggregate(
+).aggregate(
             total=Sum('dias_tomados')
-        )['total']
+)['total']
         or 0
-    )
+)
 
     dias_tomados_total = dias_historicos + dias_tomados_sistema
     dias_disponibles = max(0, dias_acumulados - dias_tomados_total)
@@ -564,16 +575,16 @@ def vacaciones_empleado(request, id):
             'dias_disponibles': dias_disponibles,
             'festivos_colombia_json': festivos_colombia_json,
         }
-    )
+)
 
 @login_required
 def editar_vacacion(request, id):
     vacacion = get_object_or_404(
         Vacacion,
         id=id
-    )
+)
 
-    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/rrhh/vacaciones/'
+    next_url = _url_retorno_segura(request)
 
     if request.method == 'POST':
         periodo = request.POST.get('periodo', '').strip() or vacacion.periodo
@@ -593,11 +604,11 @@ def editar_vacacion(request, id):
 
         fecha_inicio_efectiva, fecha_fin, fecha_regreso = calcular_fechas_habiles_vacacion(
             fecha_inicio, dias_tomados
-        )
+)
 
         anios_trabajados = (
             date.today() - vacacion.empleado.fecha_ingreso
-        ).days // 365 if vacacion.empleado.fecha_ingreso else 0
+).days // 365 if vacacion.empleado.fecha_ingreso else 0
 
         dias_acumulados = anios_trabajados * 15
         dias_historicos = getattr(vacacion.empleado, 'dias_vacaciones_tomados_historico', 0) or 0
@@ -606,13 +617,13 @@ def editar_vacacion(request, id):
         dias_tomados_sistema_otros = (
             Vacacion.objects.filter(
                 empleado=vacacion.empleado
-            ).exclude(
+).exclude(
                 id=vacacion.id
-            ).aggregate(
+).aggregate(
                 total=Sum('dias_tomados')
-            )['total']
+)['total']
             or 0
-        )
+)
 
         dias_disponibles_con_esta = max(0, dias_acumulados - (dias_historicos + dias_tomados_sistema_otros))
 
@@ -620,7 +631,7 @@ def editar_vacacion(request, id):
             messages.error(
                 request,
                 f'El colaborador {vacacion.empleado.nombre_completo} solo tiene {dias_disponibles_con_esta} días disponibles para asignar. No es posible asignar {dias_tomados} días.'
-            )
+)
             return redirect(next_url)
 
         dias_pendientes = dias_disponibles_con_esta - dias_tomados
@@ -637,7 +648,7 @@ def editar_vacacion(request, id):
         messages.success(
             request,
             f'Salida de vacaciones de {vacacion.empleado.nombre_completo} ({periodo}) actualizada correctamente: {dias_tomados} días del {fecha_inicio_efectiva.strftime("%d/%m/%Y")} al {fecha_fin.strftime("%d/%m/%Y")}. Regreso: {fecha_regreso.strftime("%d/%m/%Y")}.'
-        )
+)
         return redirect(next_url)
 
     return redirect('vacaciones')
@@ -647,8 +658,8 @@ def eliminar_vacacion(request, id):
     vacacion = get_object_or_404(
         Vacacion,
         id=id
-    )
-    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/rrhh/vacaciones/'
+)
+    next_url = _url_retorno_segura(request)
 
     if request.method == 'POST':
         colaborador = vacacion.empleado.nombre_completo
@@ -657,7 +668,7 @@ def eliminar_vacacion(request, id):
         messages.success(
             request,
             f'Salida de vacaciones de {colaborador} eliminada correctamente. Se reintegraron {dias} días a su saldo disponible.'
-        )
+)
 
     return redirect(next_url)
 

@@ -19,14 +19,12 @@
             <span>/</span>
             <span class="text-[#1F2937] font-semibold">Editar</span>
         </nav>
-        <a href="{% url 'inducciones_empleado' induccion.empleado.id %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 shadow-2xs">
-            ← Volver a Inducciones
-        </a>
+        <a href="{% url 'inducciones_empleado' induccion.empleado.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Inducciones</span></a>
     </div>
 
     <div class="bg-card shadow rounded-2xl border border-border p-6">
         <h1 class="text-2xl font-bold mb-6 text-[#1F2937] flex items-center gap-2">
-            <span>✏️</span> <span>Editar Inducción / Capacitación</span>
+            <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg></span> <span>Editar Inducción / Capacitación</span>
         </h1>
 
         <form method="POST">

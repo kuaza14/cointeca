@@ -33,10 +33,7 @@
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 <span>Descargar Word Oficial (.docx)</span>
             </a>
-            <a href="{% url 'gerencia_home' %}" 
-               class="inline-flex items-center gap-1.5 bg-secondary hover:bg-secondary/80 text-foreground px-4 py-2.5 rounded-xl font-bold text-xs border border-border shadow-xs transition-all">
-                <span>← Volver a Gerencia</span>
-            </a>
+            <a href="{% url 'gerencia_home' %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Gerencia</span></a>
         </div>
     </div>
 
@@ -46,7 +43,7 @@
         <div class="relative bg-gradient-to-br from-blue-500/10 via-card to-card border-2 border-blue-500/30 rounded-2xl p-6 sm:p-8 shadow-sm">
             <div class="flex items-center gap-3 mb-4">
                 <div class="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-2xl shadow-sm">
-                    🧭
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                 </div>
                 <div>
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">Razón de Ser</span>
@@ -62,7 +59,7 @@
         <div class="relative bg-gradient-to-br from-indigo-500/10 via-card to-card border-2 border-indigo-500/30 rounded-2xl p-6 sm:p-8 shadow-sm">
             <div class="flex items-center gap-3 mb-4">
                 <div class="size-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-sm">
-                    🔭
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
                 <div>
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Hacia dónde vamos</span>
@@ -87,7 +84,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {% for v in valores %}
             <div class="bg-card border border-border rounded-xl p-5 shadow-xs hover:shadow-md transition-shadow">
-                <div class="text-3xl mb-3">{{ v.icono }}</div>
+                <div class="text-3xl mb-3">{{ v.icono|safe }}</div>
                 <h4 class="text-base font-bold text-foreground mb-2">{{ v.titulo }}</h4>
                 <p class="text-xs leading-relaxed text-muted-foreground">
                     {{ v.descripcion }}

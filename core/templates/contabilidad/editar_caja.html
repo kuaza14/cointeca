@@ -17,16 +17,14 @@
             <span>/</span>
             <span class="text-[#1F2937] font-semibold">Editar Trámite</span>
         </nav>
-        <a href="{% url 'detalle_caja' caja.id %}" class="btn btn-secundario text-xs font-semibold px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition shrink-0 text-slate-600 shadow-2xs">
-            ← Volver a Caja #{{ caja.id }}
-        </a>
+        <a href="{% url 'detalle_caja' caja.id %}" class="btn-volver"><span class="chev-volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg></span><span>Volver a Caja #{{ caja.id }}</span></a>
     </div>
 
     <!-- FORMULARIO -->
     <div class="tarjeta p-6 sm:p-8">
         <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
             <div class="size-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
-                ✏️
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             </div>
             <div>
                 <h1 class="text-lg font-bold text-[#1F2937]">Editar Trámite de Caja Menor #{{ caja.id }}</h1>

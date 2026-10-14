@@ -100,7 +100,7 @@
         const contenedorCampoCointeca = document.getElementById("contenedorCampoCointeca");
         const inputNumeroCointeca = document.getElementById("numero_cointeca");
 
-        if (!macroOpt || !macroOpt.value) {
+        if (!macroOpt ||!macroOpt.value) {
             selectTipo.innerHTML = `
                 <option value="">(Primero seleccione Macroproyecto o Circuito)</option>
                 <option value="BT">Baja Tensión (BT)</option>
@@ -122,8 +122,8 @@
         }
 
         const esMt = macroOpt.dataset.esMt === "1";
-        const etiquetaHijo = macroOpt.dataset.etiquetaHijo || (esMt ? "Maniobra" : "Proyecto");
-        const etiquetaPadre = macroOpt.dataset.etiqueta || (esMt ? "Circuito" : "Macroproyecto");
+        const etiquetaHijo = macroOpt.dataset.etiquetaHijo || (esMt? "Maniobra": "Proyecto");
+        const etiquetaPadre = macroOpt.dataset.etiqueta || (esMt? "Circuito": "Macroproyecto");
 
         if (esMt) {
             // CIRCUITO -> Solo MT
@@ -135,7 +135,7 @@
             if (textoTituloModal) textoTituloModal.textContent = "Nueva " + etiquetaHijo;
             if (ayudaTipo) {
                 ayudaTipo.className = "text-[11px] text-purple-700 font-semibold mt-1";
-                ayudaTipo.textContent = "⚡ En un Circuito solo se pueden registrar maniobras de Media Tensión (MT).";
+                ayudaTipo.textContent = " En un Circuito solo se pueden registrar maniobras de Media Tensión (MT).";
                 ayudaTipo.classList.remove("hidden");
             }
         } else {
@@ -155,7 +155,7 @@
             if (textoTituloModal) textoTituloModal.textContent = "Nuevo " + etiquetaHijo;
             if (ayudaTipo) {
                 ayudaTipo.className = "text-[11px] text-blue-700 font-semibold mt-1";
-                ayudaTipo.textContent = "💡 En un Macroproyecto solo se pueden registrar proyectos de Alumbrado Público (AP).";
+                ayudaTipo.textContent = " En un Macroproyecto solo se pueden registrar proyectos de Alumbrado Público (AP).";
                 ayudaTipo.classList.remove("hidden");
             }
         }
@@ -233,7 +233,7 @@
             if (editContenedorCampoCointeca) editContenedorCampoCointeca.classList.remove("hidden");
             if (ayudaTipoEditar) {
                 ayudaTipoEditar.className = "text-[11px] text-purple-700 font-semibold mt-1";
-                ayudaTipoEditar.textContent = "⚡ En un Circuito solo se permiten maniobras de Media Tensión (MT).";
+                ayudaTipoEditar.textContent = " En un Circuito solo se permiten maniobras de Media Tensión (MT).";
                 ayudaTipoEditar.classList.remove("hidden");
             }
         } else {
@@ -246,14 +246,14 @@
                 editContenedorCampoCointeca.classList.add("hidden");
                 if (editNumeroCointeca) editNumeroCointeca.value = "";
             }
-            if (valorSeleccionado && valorSeleccionado !== "MT") {
+            if (valorSeleccionado && valorSeleccionado!== "MT") {
                 editTipo.value = valorSeleccionado;
             } else {
                 editTipo.value = "AP_BARRIO";
             }
             if (ayudaTipoEditar) {
                 ayudaTipoEditar.className = "text-[11px] text-blue-700 font-semibold mt-1";
-                ayudaTipoEditar.textContent = "💡 En un Macroproyecto solo se permiten proyectos de Alumbrado Público (AP).";
+                ayudaTipoEditar.textContent = " En un Macroproyecto solo se permiten proyectos de Alumbrado Público (AP).";
                 ayudaTipoEditar.classList.remove("hidden");
             }
         }
@@ -267,8 +267,8 @@
         const estado = btn.dataset.estado || "Planeación";
         const macroId = btn.dataset.macroId || "";
         const esMt = btn.dataset.esMt === "1";
-        const etiqueta = btn.dataset.etiqueta || (esMt ? "Maniobra" : "Proyecto");
-        const etiquetaPadre = btn.dataset.etiquetaPadre || (esMt ? "Circuito" : "Macroproyecto");
+        const etiqueta = btn.dataset.etiqueta || (esMt? "Maniobra": "Proyecto");
+        const etiquetaPadre = btn.dataset.etiquetaPadre || (esMt? "Circuito": "Macroproyecto");
 
         formEditar.action = "/ingenieria/proyectos/" + id + "/editar/";
         editNumero.value = numero;
@@ -280,7 +280,7 @@
         actualizarOpcionesTipoEditar(esMt, tipo);
 
         if (editNumeroCointeca) {
-            editNumeroCointeca.value = esMt ? numeroCointeca : "";
+            editNumeroCointeca.value = esMt? numeroCointeca: "";
         }
         if (editContenedorCampoCointeca) {
             if (esMt) editContenedorCampoCointeca.classList.remove("hidden");
@@ -292,7 +292,7 @@
         const lblMacro = document.getElementById("lblEditMacroproyecto");
         if (lblMacro) lblMacro.textContent = etiquetaPadre;
         const lblNum = document.getElementById("lblEditNumero");
-        if (lblNum) lblNum.innerHTML = "Número " + (esMt ? "Maniobra EMCALI" : "Proyecto EMCALI") + ' <span class="text-red-600">*</span>';
+        if (lblNum) lblNum.innerHTML = "Número " + (esMt? "Maniobra EMCALI": "Proyecto EMCALI") + ' <span class="text-red-600">*</span>';
 
         modalEditar.classList.remove("hidden");
         modalEditar.classList.add("flex");
@@ -302,9 +302,9 @@
     if (editMacroId) {
         editMacroId.addEventListener("change", function() {
             const opt = editMacroId.selectedOptions[0];
-            const esMt = opt ? opt.dataset.esMt === "1" : false;
-            const etiqueta = opt ? opt.dataset.etiquetaHijo || (esMt ? "Maniobra" : "Proyecto") : "Proyecto";
-            const etiquetaPadre = opt ? opt.dataset.etiqueta || (esMt ? "Circuito" : "Macroproyecto") : "Macroproyecto";
+            const esMt = opt? opt.dataset.esMt === "1": false;
+            const etiqueta = opt? opt.dataset.etiquetaHijo || (esMt? "Maniobra": "Proyecto"): "Proyecto";
+            const etiquetaPadre = opt? opt.dataset.etiqueta || (esMt? "Circuito": "Macroproyecto"): "Macroproyecto";
 
             const textoTitulo = document.getElementById("textoTituloModalEditar");
             if (textoTitulo) textoTitulo.textContent = "Editar " + etiqueta;
@@ -463,7 +463,7 @@
                 // Abrir la primera coincidencia visible
                 for (let i = 0; i < itemsProyectos.length; i++) {
                     const item = itemsProyectos[i];
-                    if (item.style.display !== "none") {
+                    if (item.style.display!== "none") {
                         const link = item.querySelector(".btn-imprimir-accion");
                         if (link) {
                             window.open(link.href, "_blank");
@@ -492,10 +492,10 @@
     // Cerrar con Escape cualquier modal abierto
     document.addEventListener("keydown", function (evento) {
         if (evento.key === "Escape") {
-            if (modal && !modal.classList.contains("hidden")) cerrar();
-            if (modalEditar && !modalEditar.classList.contains("hidden")) cerrarEditar();
-            if (modalEliminar && !modalEliminar.classList.contains("hidden")) cerrarEliminar();
-            if (modalImprimir && !modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
+            if (modal &&!modal.classList.contains("hidden")) cerrar();
+            if (modalEditar &&!modalEditar.classList.contains("hidden")) cerrarEditar();
+            if (modalEliminar &&!modalEliminar.classList.contains("hidden")) cerrarEliminar();
+            if (modalImprimir &&!modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
         }
     });
 })();

@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse, Http404
+from django.db import transaction
 from django.db.models import Sum, Count, Q
 
 from core.models import PeriodoNomina, DetalleNominaEmpleado, Empleado
@@ -336,93 +337,94 @@ def importar_nomina_excel(request):
 
             import calendar
             ultimo_dia = calendar.monthrange(ano, mes)[1]
-            periodo = PeriodoNomina.objects.create(
-                ano=ano,
-                mes=mes,
-                tipo='MENSUAL',
-                fecha_inicio=datetime.date(ano, mes, 1),
-                fecha_fin=datetime.date(ano, mes, ultimo_dia),
-                smmlv_base=Decimal('1750905'),
-                auxilio_transporte_base=Decimal('249095'),
-                observaciones=f'Importado de Excel: {archivo.name} ({nombre_hoja})',
-                estado='BORRADOR'
-            )
+            with transaction.atomic():
+                periodo = PeriodoNomina.objects.create(
+                    ano=ano,
+                    mes=mes,
+                    tipo='MENSUAL',
+                    fecha_inicio=datetime.date(ano, mes, 1),
+                    fecha_fin=datetime.date(ano, mes, ultimo_dia),
+                    smmlv_base=Decimal('1750905'),
+                    auxilio_transporte_base=Decimal('249095'),
+                    observaciones=f'Importado de Excel: {archivo.name} ({nombre_hoja})',
+                    estado='BORRADOR'
+                )
 
-            rows = list(hoja_seleccionada.iter_rows(max_col=25, values_only=True))
-            header_idx = -1
-            for idx, r in enumerate(rows[:10]):
-                txt_row = ' '.join([str(x).upper() for x in r if x is not None])
-                if 'NOMBRE' in txt_row or 'EMPLEADO' in txt_row:
-                    header_idx = idx
-                    break
-
-            if header_idx == -1:
-                header_idx = 0
-
-            data_rows = rows[header_idx + 1:]
-            empleados_db = {e.nombre_completo.strip().upper(): e for e in Empleado.objects.all()}
-
-            creados = 0
-            for r in data_rows:
-                if not r or not r[0]:
-                    continue
-                nombre_raw = str(r[0]).strip()
-                if not nombre_raw or nombre_raw.upper().startswith('TOTAL') or nombre_raw.upper().startswith('FIRMA'):
-                    continue
-
-                basico = to_decimal(r[2] if len(r) > 2 else 0)
-                dias = to_decimal(r[4] if len(r) > 4 else 30)
-                devengado = to_decimal(r[7] if len(r) > 7 else 0)
-                salud = to_decimal(r[8] if len(r) > 8 else 0)
-                pension = to_decimal(r[9] if len(r) > 9 else 0)
-                afsp = to_decimal(r[11] if len(r) > 11 else 0)
-                deducciones = to_decimal(r[12] if len(r) > 12 else 0)
-                rte = to_decimal(r[14] if len(r) > 14 else 0)
-                neto = to_decimal(r[21] if len(r) > 21 else (r[15] if len(r) > 15 else 0))
-
-                clean_name = nombre_raw.upper().replace('( NO REMUNERADO )', '').replace('( NO REMUNERADA )', '').replace('( INCAPACIDAD )', '').strip()
-                emp = None
-                for db_name, db_obj in empleados_db.items():
-                    if clean_name in db_name or db_name in clean_name:
-                        emp = db_obj
+                rows = list(hoja_seleccionada.iter_rows(max_col=25, values_only=True))
+                header_idx = -1
+                for idx, r in enumerate(rows[:10]):
+                    txt_row = ' '.join([str(x).upper() for x in r if x is not None])
+                    if 'NOMBRE' in txt_row or 'EMPLEADO' in txt_row:
+                        header_idx = idx
                         break
 
-                cedula = emp.documento if emp else (str(r[1]).strip() if len(r) > 1 and r[1] else '')
-                cargo = emp.cargo if emp else ''
-                es_aprendiz = 'APRENDIZ' in cargo.upper() or 'SENA' in cargo.upper()
+                if header_idx == -1:
+                    header_idx = 0
 
-                novedad = ''
-                if 'NO REMUNERAD' in nombre_raw.upper():
-                    novedad = 'Permiso No Remunerado'
-                elif 'INCAPACIDAD' in nombre_raw.upper():
-                    novedad = 'Incapacidad Médica'
+                data_rows = rows[header_idx + 1:]
+                empleados_db = {e.nombre_completo.strip().upper(): e for e in Empleado.objects.all()}
 
-                detalle = DetalleNominaEmpleado(
-                    periodo=periodo,
-                    empleado=emp,
-                    nombre_empleado=nombre_raw,
-                    cedula=cedula,
-                    cargo=cargo,
-                    salario_basico=basico,
-                    es_aprendiz_sena=es_aprendiz,
-                    dias_laborados=dias,
-                    dias_incapacidad=Decimal('0'),
-                    dias_no_remunerados=Decimal('0'),
-                    basico_devengado=to_decimal(r[5] if len(r) > 5 else 0),
-                    auxilio_transporte_devengado=to_decimal(r[6] if len(r) > 6 else 0),
-                    total_devengado=devengado,
-                    deduccion_salud=salud,
-                    deduccion_pension=pension,
-                    deduccion_afsp=afsp,
-                    retencion_fuente=rte,
-                    total_deducciones=deducciones,
-                    neto_pagar=neto,
-                    observaciones=novedad
-                )
-                detalle.save()
-                creados += 1
+                creados = 0
+                for r in data_rows:
+                    if not r or not r[0]:
+                        continue
+                    nombre_raw = str(r[0]).strip()
+                    if not nombre_raw or nombre_raw.upper().startswith('TOTAL') or nombre_raw.upper().startswith('FIRMA'):
+                        continue
 
-            periodo.recalcular_totales()
+                    basico = to_decimal(r[2] if len(r) > 2 else 0)
+                    dias = to_decimal(r[4] if len(r) > 4 else 30)
+                    devengado = to_decimal(r[7] if len(r) > 7 else 0)
+                    salud = to_decimal(r[8] if len(r) > 8 else 0)
+                    pension = to_decimal(r[9] if len(r) > 9 else 0)
+                    afsp = to_decimal(r[11] if len(r) > 11 else 0)
+                    deducciones = to_decimal(r[12] if len(r) > 12 else 0)
+                    rte = to_decimal(r[14] if len(r) > 14 else 0)
+                    neto = to_decimal(r[21] if len(r) > 21 else (r[15] if len(r) > 15 else 0))
+
+                    clean_name = nombre_raw.upper().replace('( NO REMUNERADO )', '').replace('( NO REMUNERADA )', '').replace('( INCAPACIDAD )', '').strip()
+                    emp = None
+                    for db_name, db_obj in empleados_db.items():
+                        if clean_name in db_name or db_name in clean_name:
+                            emp = db_obj
+                            break
+
+                    cedula = emp.documento if emp else (str(r[1]).strip() if len(r) > 1 and r[1] else '')
+                    cargo = emp.cargo if emp else ''
+                    es_aprendiz = 'APRENDIZ' in cargo.upper() or 'SENA' in cargo.upper()
+
+                    novedad = ''
+                    if 'NO REMUNERAD' in nombre_raw.upper():
+                        novedad = 'Permiso No Remunerado'
+                    elif 'INCAPACIDAD' in nombre_raw.upper():
+                        novedad = 'Incapacidad Médica'
+
+                    detalle = DetalleNominaEmpleado(
+                        periodo=periodo,
+                        empleado=emp,
+                        nombre_empleado=nombre_raw,
+                        cedula=cedula,
+                        cargo=cargo,
+                        salario_basico=basico,
+                        es_aprendiz_sena=es_aprendiz,
+                        dias_laborados=dias,
+                        dias_incapacidad=Decimal('0'),
+                        dias_no_remunerados=Decimal('0'),
+                        basico_devengado=to_decimal(r[5] if len(r) > 5 else 0),
+                        auxilio_transporte_devengado=to_decimal(r[6] if len(r) > 6 else 0),
+                        total_devengado=devengado,
+                        deduccion_salud=salud,
+                        deduccion_pension=pension,
+                        deduccion_afsp=afsp,
+                        retencion_fuente=rte,
+                        total_deducciones=deducciones,
+                        neto_pagar=neto,
+                        observaciones=novedad
+                    )
+                    detalle.save()
+                    creados += 1
+
+                    periodo.recalcular_totales()
             messages.success(request, f'Nómina importada exitosamente con {creados} registros desde {archivo.name}.')
             return redirect('detalle_nomina', periodo_id=periodo.id)
 

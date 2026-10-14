@@ -34,7 +34,7 @@ def generar_historia_clinica_laboral(request, id):
     return generar_word(
         "historial_clinico_laboral.docx",
         limpiar_nombre_archivo(
-            f"Consentimiento_Historia_Clinica_{empleado.nombre_completo}.docx"
+            f"Consentimiento_Historia_Clinica_{limpiar_nombre_archivo(empleado.nombre_completo)}_{empleado.id}.docx"
         ),
         context
     )

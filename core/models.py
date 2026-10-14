@@ -292,6 +292,10 @@ class Empleado(models.Model):
         max_length=20,
         default='activo'
     )
+    dias_vacaciones_tomados_historico = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Días de vacaciones tomados históricos"
+    )
 
     # =========================================================
     # 4. CONTACTO DE EMERGENCIA

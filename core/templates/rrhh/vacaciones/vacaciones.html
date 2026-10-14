@@ -7,142 +7,241 @@
         estado de Vacaciones
     </h1>
 
-    <div class="flex flex-wrap gap-3 mb-6">
+    <div class="flex flex-wrap gap-2.5 mb-6">
 
-        <a href="{% url 'vacaciones' %}"
-        class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-            Todas
+        <a href="{% url 'vacaciones' %}{% if q %}?q={{ q }}{% endif %}"
+        class="{% if not tipo %}bg-neutral-hover ring-2 ring-neutral-400{% else %}bg-neutral{% endif %} text-white px-3.5 py-1.5 rounded-lg font-semibold text-xs hover:bg-neutral-hover transition shadow-2xs">
+            📁 Todas
         </a>
 
-        <a href="{% url 'vacaciones' %}?tipo=curso"
-        class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover">
-            En vacaciones
+        <a href="{% url 'vacaciones' %}?tipo=al_dia{% if q %}&q={{ q }}{% endif %}"
+        class="{% if tipo == 'al_dia' %}bg-emerald-600 ring-2 ring-emerald-400{% else %}bg-emerald-700{% endif %} text-white px-3.5 py-1.5 rounded-lg font-semibold text-xs hover:bg-emerald-600 transition shadow-2xs">
+            ✅ Al día (0 pend.)
         </a>
 
-        <a href="{% url 'vacaciones' %}?tipo=proximas"
-        class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-            Próximas
+        <a href="{% url 'vacaciones' %}?tipo=pendientes{% if q %}&q={{ q }}{% endif %}"
+        class="{% if tipo == 'pendientes' %}bg-amber-600 ring-2 ring-amber-400{% else %}bg-amber-500{% endif %} text-white px-3.5 py-1.5 rounded-lg font-semibold text-xs hover:bg-amber-600 transition shadow-2xs">
+            ⚠️ Días acumulados
         </a>
 
-        <a href="{% url 'vacaciones' %}?tipo=pendientes"
-        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover">
-            Días pendientes
+        <a href="{% url 'vacaciones' %}?tipo=curso{% if q %}&q={{ q }}{% endif %}"
+        class="{% if tipo == 'curso' %}bg-blue-600 ring-2 ring-blue-400{% else %}bg-blue-700{% endif %} text-white px-3.5 py-1.5 rounded-lg font-semibold text-xs hover:bg-blue-600 transition shadow-2xs">
+            🏖️ En vacaciones
         </a>
 
-        <a href="{% url 'vacaciones' %}?tipo=aniversario"
-        class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Cumplen un año
+        <a href="{% url 'vacaciones' %}?tipo=proximas{% if q %}&q={{ q }}{% endif %}"
+        class="{% if tipo == 'proximas' %}bg-purple-600 ring-2 ring-purple-400{% else %}bg-purple-700{% endif %} text-white px-3.5 py-1.5 rounded-lg font-semibold text-xs hover:bg-purple-600 transition shadow-2xs">
+            ⏳ Próximas
+        </a>
+
+        <a href="{% url 'vacaciones' %}?tipo=aniversario{% if q %}&q={{ q }}{% endif %}"
+        class="{% if tipo == 'aniversario' %}bg-slate-700 ring-2 ring-slate-400{% else %}bg-slate-600{% endif %} text-white px-3.5 py-1.5 rounded-lg font-semibold text-xs hover:bg-slate-700 transition shadow-2xs">
+            🎉 Cumplen año
         </a>
 
     </div>
 
-    <div class="flex justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <a
             href="/rrhh/vacaciones/crear/"
-            class="bg-success text-white px-4 py-2 rounded hover:bg-success-hover"
+            class="bg-success text-white px-4 py-2 rounded-lg hover:bg-success-hover font-semibold text-xs sm:text-sm transition shadow-2xs inline-flex items-center gap-1.5 self-start"
         >
-            + Registrar vacaciones
+            <span>+ Registrar vacaciones</span>
         </a>
-        <a href="/rrhh/" class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-            Volver a RRHH
+        <a href="/rrhh/" class="bg-neutral text-white px-4 py-2 rounded-lg hover:bg-neutral-hover font-semibold text-xs sm:text-sm transition shadow-2xs inline-flex items-center gap-1 self-start">
+            <span>← Volver a RRHH</span>
         </a>
     </div>
 
-    <!-- TABLA DE VACACIONES -->
-    <div class="overflow-x-auto shadow rounded">
-        <table class="w-full min-w-max border shadow">
+    <!-- BUSCADOR CON CONTADOR DINÁMICO -->
+    <form method="GET" action="{% url 'vacaciones' %}" class="bg-card p-3.5 rounded-xl border border-border shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <input type="hidden" name="tipo" value="{{ tipo|default:'' }}">
+        <div class="relative flex-1 flex items-center gap-2">
+            <div class="relative w-full">
+                <input 
+                    type="text" 
+                    id="buscarEmpleado" 
+                    name="q" 
+                    placeholder="Buscar colaborador por nombre, cédula o cargo (Enter para buscar en todo el listado)..." 
+                    value="{{ q|default:'' }}"
+                    class="w-full border border-border rounded-lg pl-9 pr-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-background text-foreground text-sm">
+                <span class="absolute left-3 top-2.5 text-muted-foreground text-sm">🔍</span>
+            </div>
+            {% if q %}
+                <a href="{% url 'vacaciones' %}{% if tipo %}?tipo={{ tipo }}{% endif %}" class="text-xs bg-muted hover:bg-muted/80 text-foreground px-3 py-2 rounded-lg border border-border whitespace-nowrap transition">
+                    ✕ Limpiar
+                </a>
+            {% endif %}
+        </div>
+        <div class="text-xs text-muted-foreground font-medium whitespace-nowrap">
+            Resultados: <strong id="contadorResultados" class="text-foreground font-bold">{{ total_registros }}</strong> colaboradores
+        </div>
+    </form>
 
-            <thead class="bg-neutral text-white">
+    <!-- TABLA DE VACACIONES (ESTILO NÓMINA CON COLUMNA FIJA) -->
+    <div class="overflow-x-auto shadow-xs rounded-xl border border-border bg-card">
+        <table class="w-full border-collapse text-xs select-none">
+
+            <thead class="thead-vacaciones font-bold text-[11px] uppercase tracking-wider" style="background-color: #0f172a !important; color: #ffffff !important;">
                 <tr>
-                    <th class="p-2 min-w-[220px]">Empleado</th>
+                    <th class="th-vacaciones-sticky py-3 px-3 text-left font-bold min-w-[200px]" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Colaborador
+                    </th>
 
-                    <th class="p-2 min-w-[110px]">Ingreso</th>
+                    <th class="py-3 px-2 text-center font-bold min-w-[120px]" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Estado
+                    </th>
 
-                    <th class="p-2 w-20">Años</th>
+                    <th class="py-3 px-2 text-center font-bold w-24" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Ingreso
+                    </th>
 
-                    <th class="p-2 w-28">Acumulados</th>
+                    <th class="py-3 px-1 text-center font-bold w-12" style="background-color: #0f172a !important; color: #ffffff !important;" title="Años cumplidos de servicio">
+                        Años
+                    </th>
 
-                    <th class="p-2 w-32">Tomados</th>
+                    <th class="py-3 px-2 text-center font-black w-28" style="background-color: #1e3a8a !important; color: #fbbf24 !important;" title="Días acumulados reales (días por ley menos días ya tomados)">
+                        Días Acumulados
+                    </th>
 
-                    <th class="p-2 w-32">Pendientes</th>
+                    <th class="py-3 px-1 text-center font-bold w-16" style="background-color: #1e293b !important; color: #ffffff !important;" title="Días disfrutados antes de este sistema">
+                        Histór.
+                    </th>
 
-                    <th class="p-2 min-w-[110px]">Inicio</th>
+                    <th class="py-3 px-1 text-center font-bold w-16" style="background-color: #1e293b !important; color: #ffffff !important;" title="Días disfrutados registrados en este sistema">
+                        Sistema
+                    </th>
 
-                    <th class="p-2 min-w-[110px]">Fin</th>
+                    <th class="py-3 px-1 text-center font-bold w-16" style="background-color: #0f172a !important; color: #ffffff !important;" title="Total días que ya tomó">
+                        Total Tomados
+                    </th>
 
-                    <th class="p-2 min-w-[110px]">Regreso</th>
+                    <th class="py-3 px-2 text-center font-bold w-24" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Últ. Salida
+                    </th>
 
-                    <th class="p-2 min-w-[120px]">Periodo</th>
-
-                    <th class="p-2 min-w-[120px]">Acciones</th>
+                    <th class="py-3 px-3 text-center font-bold min-w-[170px]" style="background-color: #0f172a !important; color: #ffffff !important;">
+                        Acciones
+                    </th>
                 </tr>
             </thead>
 
-            <tbody>
+            <tbody class="divide-y divide-border">
 
                 {% for empleado in empleados %}
 
-                <tr class="border-b">
+                <tr class="fila-empleado hover:bg-muted/60 transition group">
 
-                    <td class="p-2 ">{{ empleado.nombre_completo }}</td>
+                    <!-- COLUMNA FIJA: NOMBRE DEL COLABORADOR -->
+                    <td class="td-vacaciones-sticky p-2.5 font-bold text-foreground">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-[#1E293B] leading-tight block">{{ empleado.nombre_completo }}</span>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-[10px] text-muted-foreground font-normal">{{ empleado.cargo|default:"Colaborador" }}</span>
+                                <span class="text-slate-300">•</span>
+                                <button 
+                                    type="button" 
+                                    onclick="abrirAjustarHistorico('{{ empleado.id }}', '{{ empleado.nombre_completo|escapejs }}', {{ empleado.anios_trabajados }}, {{ empleado.dias_acumulados }}, {{ empleado.dias_historicos }}, {{ empleado.dias_tomados_sistema }})"
+                                    class="text-[10px] text-[#1E63F0] hover:text-blue-800 hover:underline font-bold cursor-pointer inline-flex items-center gap-0.5"
+                                    title="Ajustar días que ya tomó antes del software">
+                                    <span>⚙️ Ajustar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </td>
 
-                    <td class="p-2 ">{{ empleado.fecha_ingreso }}</td>
+                    <!-- ESTADO / BADGE -->
+                    <td class="p-2.5 text-center whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold {{ empleado.badge_class }}">
+                            <span>{{ empleado.badge_icon }}</span>
+                            <span>{{ empleado.badge_label }}</span>
+                        </span>
+                    </td>
 
-                    <td class="p-2 text-center">{{ empleado.anios_trabajados }}</td>
+                    <!-- INGRESO -->
+                    <td class="p-2.5 text-center text-muted-foreground whitespace-nowrap text-xs">
+                        {{ empleado.fecha_ingreso|date:"d/m/Y"|default:"—" }}
+                    </td>
 
-                    <td class="p-2 text-center">{{ empleado.dias_acumulados }}</td>
+                    <!-- AÑOS -->
+                    <td class="p-2.5 text-center font-semibold text-slate-700">
+                        {{ empleado.anios_trabajados }}
+                    </td>
 
-                    <td class="p-2 text-center">{{ empleado.total_tomados }}</td>
+                    <!-- DÍAS ACUMULADOS (RESTANDO LO QUE YA TOMÓ) -->
+                    <td class="p-2.5 text-center font-mono font-black">
+                        {% if empleado.total_pendientes > 0 %}
+                            <span class="px-2.5 py-1 rounded font-black text-xs font-mono bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs inline-block" title="{{ empleado.dias_acumulados }} ganados por ley menos {{ empleado.total_tomados }} tomados = {{ empleado.total_pendientes }} días">
+                                {{ empleado.total_pendientes }} d
+                            </span>
+                        {% else %}
+                            <span class="px-2.5 py-1 rounded font-bold text-xs font-mono bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs inline-block" title="Al día. No tiene días acumulados pendientes.">
+                                0 d
+                            </span>
+                        {% endif %}
+                    </td>
 
-                    <td class="p-2 font-semibold text-center">{{ empleado.total_pendientes }}</td>
+                    <!-- HISTÓRICOS (PRE-SISTEMA) -->
+                    <td class="p-2.5 text-center font-mono font-medium text-slate-600 bg-slate-50/70">
+                        {{ empleado.dias_historicos }}
+                    </td>
 
-                    <td class="p-2 text-center">
+                    <!-- EN SISTEMA -->
+                    <td class="p-2.5 text-center font-mono font-medium text-slate-600 bg-slate-50/70">
+                        {{ empleado.dias_tomados_sistema }}
+                    </td>
+
+                    <!-- TOTAL TOMADOS -->
+                    <td class="p-2.5 text-center font-bold text-slate-800 font-mono">
+                        {{ empleado.total_tomados }}
+                    </td>
+
+                    <!-- ÚLTIMA SALIDA -->
+                    <td class="p-2.5 text-center text-slate-600 whitespace-nowrap text-[11px]">
                     {% if empleado.ultima_vacacion %}
-                        {{ empleado.ultima_vacacion.fecha_inicio }}
+                        <span class="block font-semibold text-slate-800">{{ empleado.ultima_vacacion.fecha_inicio|date:"d/m/Y" }}</span>
+                        <span class="block text-[10px] text-muted-foreground">a {{ empleado.ultima_vacacion.fecha_fin|date:"d/m/Y" }}</span>
                     {% else %}
-                        —
+                        <span class="text-slate-400 font-mono">—</span>
                     {% endif %}
                     </td>
 
-                    <td class="p-2 text-center">
-                    {% if empleado.ultima_vacacion %}
-                        {{ empleado.ultima_vacacion.fecha_fin }}
-                    {% else %}
-                        —
-                    {% endif %}
-                    </td>
-
-                    <td class="p-2 text-center">
-                    {% if empleado.ultima_vacacion %}
-                        {{ empleado.ultima_vacacion.fecha_regreso }}
-                    {% else %}
-                        —
-                    {% endif %}
-                    </td>
-
-                    <td class="p-2 text-center">
-                    {% if empleado.ultima_vacacion %}
-                        {{ empleado.ultima_vacacion.periodo }}
-                    {% else %}
-                        —
-                    {% endif %}
-                    </td>
-
-                    <td class="p-2 text-center">
-  
+                    <!-- ACCIONES RÁPIDAS -->
+                    <td class="p-2.5 text-center whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                            <!-- VER HISTORIAL -->
                             <a
                                 href="{% url 'vacaciones_empleado' empleado.id %}"
-                                class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover">
-                                 Ver historial
+                                class="bg-[#1E63F0] hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1"
+                                title="Ver historial de vacaciones de {{ empleado.nombre_completo }}">
+                                <span>👁️ Historial</span>
                             </a>
+
+                            <!-- PROGRAMAR VACACIONES -->
+                            <a
+                                href="{% url 'crear_vacacion_empleado' empleado.id %}"
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1"
+                                title="Programar nuevas vacaciones para {{ empleado.nombre_completo }}">
+                                <span>➕ Salida</span>
+                            </a>
+
+                            <!-- AJUSTAR DÍAS HISTÓRICOS -->
+                            <button
+                                type="button"
+                                onclick="abrirAjustarHistorico('{{ empleado.id }}', '{{ empleado.nombre_completo|escapejs }}', {{ empleado.anios_trabajados }}, {{ empleado.dias_acumulados }}, {{ empleado.dias_historicos }}, {{ empleado.dias_tomados_sistema }})"
+                                class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
+                                title="Ajustar días que ya tomó antes de este sistema">
+                                <span>⚙️ Ajustar</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
 
                 {% empty %}
 
                 <tr>
-                    <td colspan="11" class="text-center p-4">
-                        No hay vacaciones registradas
+                    <td colspan="11" class="text-center p-8 text-muted-foreground text-sm">
+                        No se encontraron colaboradores ni vacaciones con los criterios seleccionados.
                     </td>
                 </tr>
 
@@ -151,6 +250,126 @@
             </tbody>
 
         </table>
+    </div>
+
+    <!-- PAGINACIÓN (10 POR PÁGINA) -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="bg-card p-4 rounded-xl border border-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+        <div class="text-xs text-muted-foreground">
+            Mostrando página <strong class="text-foreground">{{ page_obj.number }}</strong> de <strong class="text-foreground">{{ page_obj.paginator.num_pages }}</strong> 
+            (Colaboradores {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ total_registros }})
+        </div>
+
+        <div class="flex items-center gap-1.5">
+            <!-- BOTÓN ANTERIOR -->
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if tipo %}&tipo={{ tipo }}{% endif %}{% if q %}&q={{ q }}{% endif %}" 
+                   class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-card hover:bg-muted border border-border text-foreground transition shadow-2xs flex items-center gap-1">
+                    ← Anterior
+                </a>
+            {% else %}
+                <span class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-muted/40 border border-border/50 text-muted-foreground/50 cursor-not-allowed flex items-center gap-1">
+                    ← Anterior
+                </span>
+            {% endif %}
+
+            <!-- BOTONES DE PÁGINAS -->
+            <div class="flex items-center gap-1">
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="px-3 py-1.5 text-xs font-bold rounded-lg bg-primary text-white shadow-2xs">
+                            {{ num }}
+                        </span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}{% if tipo %}&tipo={{ tipo }}{% endif %}{% if q %}&q={{ q }}{% endif %}" 
+                           class="px-3 py-1.5 text-xs font-medium rounded-lg bg-card hover:bg-muted border border-border text-foreground transition">
+                            {{ num }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- BOTÓN SIGUIENTE -->
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if tipo %}&tipo={{ tipo }}{% endif %}{% if q %}&q={{ q }}{% endif %}" 
+                   class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-card hover:bg-muted border border-border text-foreground transition shadow-2xs flex items-center gap-1">
+                    Siguiente →
+                </a>
+            {% else %}
+                <span class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-muted/40 border border-border/50 text-muted-foreground/50 cursor-not-allowed flex items-center gap-1">
+                    Siguiente →
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- MODAL AJUSTAR SALDO HISTÓRICO -->
+    <div id="modalAjustarHistorico" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="bg-[#1E293B] text-white px-6 py-4 flex justify-between items-center border-b border-slate-700">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>⚙️</span> Ajuste de Vacaciones Históricas (Pre-Sistema)
+                </h2>
+                <button type="button" onclick="cerrarAjustarHistorico()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 rounded hover:bg-slate-800 transition">
+                    &times;
+                </button>
+            </div>
+
+            <form id="formAjustarHistorico" method="POST" class="p-6 space-y-4 bg-white text-xs">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3.5 space-y-2">
+                    <p class="font-bold text-blue-900 text-sm flex items-center gap-1.5" id="ajusteNombreEmpleado">
+                        Nombre Colaborador
+                    </p>
+                    <p class="text-slate-600 leading-relaxed text-[11px]">
+                        Utiliza este ajuste para colaboradores antiguos que ya disfrutaron vacaciones en años anteriores antes de implementar este software, evitando que se acumulen saldos irreales.
+                    </p>
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-blue-200/80 text-[11px]">
+                        <div>Años trabajados: <strong id="ajusteAnios" class="text-slate-900">0</strong></div>
+                        <div>Días causados por ley (15 d/año): <strong id="ajusteAcumulados" class="text-slate-900">0</strong></div>
+                        <div>Registrados en este sistema: <strong id="ajusteEnSistema" class="text-slate-900">0</strong></div>
+                        <div>Saldo pendiente actual: <strong id="ajustePendientesAntes" class="text-amber-800">0</strong></div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="inputDiasHistoricos" class="block font-bold uppercase tracking-wider text-slate-700 mb-1 text-[11px]">
+                        Días ya disfrutados históricamente (antes del software):
+                    </label>
+                    <input 
+                        type="number" 
+                        min="0"
+                        step="1"
+                        id="inputDiasHistoricos" 
+                        name="dias_historicos" 
+                        class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-base font-bold text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none bg-white font-mono"
+                        required>
+                    <p class="text-[11px] text-muted-foreground mt-1">
+                        Ejemplo: Si lleva 3 años (45 causados) y ya disfrutó todos los días de los años pasados (30 días), ingresa <strong>30</strong>.
+                    </p>
+                </div>
+
+                <!-- PREVIEW DINÁMICO RESULTANTE -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between">
+                    <span class="font-semibold text-emerald-900 text-xs">Saldo pendiente que le quedará por disfrutar:</span>
+                    <span id="previewPendientesFinal" class="text-lg font-black font-mono text-emerald-800 px-2.5 py-0.5 rounded-lg bg-emerald-100 border border-emerald-300">
+                        0 días
+                    </span>
+                </div>
+
+                <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+                    <button type="button" onclick="cerrarAjustarHistorico()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-[#1E63F0] hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition">
+                        Guardar Ajuste
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- MODAL EDITAR -->

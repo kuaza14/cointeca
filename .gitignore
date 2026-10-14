@@ -17,4 +17,5 @@ respaldo-*.sql
 
 # Archivos estáticos generados por collectstatic
 staticfiles/
+scratch/
 

@@ -91,6 +91,7 @@ from core.views.rrhh.vacaciones import (
     crear_vacacion_empleado,
     editar_vacacion,
     eliminar_vacacion,
+    ajustar_vacaciones_historicas,
 )
 
 from core.views.rrhh.descargos import (
@@ -339,6 +340,7 @@ urlpatterns = [
     path('rrhh/vacaciones/<int:id>/solicitud/', solicitud_vacaciones, name='solicitud_vacaciones'),
     path('rrhh/vacaciones/<int:id>/editar/', editar_vacacion, name='editar_vacacion'),
     path('rrhh/vacaciones/<int:id>/eliminar/', eliminar_vacacion, name='eliminar_vacacion'),
+    path('rrhh/vacaciones/<int:id>/ajustar-historico/', ajustar_vacaciones_historicas, name='ajustar_vacaciones_historicas'),
 
     #DESCARGOS
     path('rrhh/empleados/<int:id>/descargo/', empleado_descargo, name='empleado_descargo'),

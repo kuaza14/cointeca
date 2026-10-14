@@ -1,121 +1,566 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+<div style="max-width: 1100px; margin: 0 auto; padding-bottom: 3rem;">
 
-<h1 class="text-3xl font-bold mb-6">
-    Registrar Vacaciones
-</h1>
-
-<div class="flex justify-end mb-6">
-    <a href="/rrhh/vacaciones/" class="bg-neutral text-white px-4 py-2 rounded hover:bg-neutral-hover">
-        Volver a Vacaciones
-    </a>
-</div>
-
-<form method="POST" class="bg-card p-6 rounded shadow space-y-4">
-
-    {% csrf_token %}
+    <!-- BREADCRUMB & HEADER -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <nav style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #64748B; margin-bottom: 0.35rem; font-weight: 500;" aria-label="Breadcrumb">
+                <a href="{% url 'dashboard' %}" style="color: #64748B; text-decoration: none;">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'rrhh' %}" style="color: #64748B; text-decoration: none;">RRHH</a>
+                <span>/</span>
+                <a href="{% url 'vacaciones' %}" style="color: #64748B; text-decoration: none;">Vacaciones</a>
+                <span>/</span>
+                <span style="color: #0F172A; font-weight: 700;">Programar Salida</span>
+            </nav>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem; letter-spacing: -0.02em;">
+                <span>🏖️</span>
+                <span>Programar Salida a Vacaciones</span>
+            </h1>
+            <p style="font-size: 0.813rem; color: #64748B; margin: 0.25rem 0 0 0;">
+                Jornada Cointeca: Lunes a Sábado. El sistema calcula automáticamente el último día de descanso y la fecha exacta de regreso a laborar.
+            </p>
+        </div>
 
         <div>
+            <a href="{% url 'vacaciones' %}"
+               style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.75rem; background: #ffffff; border: 1px solid #CBD5E1; color: #334155; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <span>← Volver a Vacaciones</span>
+            </a>
+        </div>
+    </div>
 
-            <label class="font-bold">
-                Empleado
-            </label>
+    <!-- ALERTA DE ERROR DEL SERVIDOR (SI APLICA) -->
+    {% if error %}
+    <div style="background-color: #FFF1F2; border: 2px solid #FDA4AF; border-radius: 1rem; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <span style="font-size: 1.25rem;">⚠️</span>
+        <div>
+            <h2 style="font-size: 0.75rem; font-weight: 800; color: #881337; text-transform: uppercase; margin: 0;">No se pudo procesar la solicitud</h2>
+            <p style="font-size: 0.75rem; color: #BE123C; margin: 0.25rem 0 0 0;">{{ error }}</p>
+        </div>
+    </div>
+    {% endif %}
 
-            {% if empleado %}
+    <!-- BANNER RESUMEN DEL COLABORADOR -->
+    <div id="cardResumenEmpleado" class="card-banner-empleado" style="background: linear-gradient(135deg, #0B2D6B 0%, #1E293B 100%); color: #ffffff; border-radius: 1rem; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 25px -5px rgba(11, 45, 107, 0.3);">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+                <!-- DATOS PERSONALES -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 1rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                        👤
+                    </div>
+                    <div>
+                        <h2 id="resumenNombre" style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.02em;">
+                            {{ resumen_seleccionado.nombre|default:"Selecciona un Colaborador" }}
+                        </h2>
+                        <p style="font-size: 0.813rem; color: #CBD5E1; margin: 0.25rem 0 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-weight: 500;">
+                            <span id="resumenCargo">{{ resumen_seleccionado.cargo|default:"—" }}</span>
+                            <span style="color: #64748B;">•</span>
+                            <span>C.C. <strong id="resumenDocumento" style="color: #ffffff;">{{ resumen_seleccionado.documento|default:"—" }}</strong></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPIS MÉTRICOS DEL COLABORADOR -->
+                <div style="display: grid; grid-template-columns: repeat(5, minmax(75px, 1fr)); gap: 0.5rem; text-align: center;">
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.5rem 0.5rem; border: 1px solid rgba(255,255,255,0.15);">
+                        <span style="display: block; font-size: 0.6rem; color: #CBD5E1; text-transform: uppercase; font-weight: 700;">Ingreso</span>
+                        <strong id="resumenIngreso" style="font-size: 0.75rem; color: #ffffff; font-family: monospace;">{{ resumen_seleccionado.fecha_ingreso|default:"—" }}</strong>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.5rem 0.5rem; border: 1px solid rgba(255,255,255,0.15);">
+                        <span style="display: block; font-size: 0.6rem; color: #CBD5E1; text-transform: uppercase; font-weight: 700;">Antigüedad</span>
+                        <strong id="resumenAnios" style="font-size: 0.813rem; color: #ffffff;">{{ resumen_seleccionado.anios|default:"0" }} años</strong>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.5rem 0.5rem; border: 1px solid rgba(255,255,255,0.15);">
+                        <span style="display: block; font-size: 0.6rem; color: #CBD5E1; text-transform: uppercase; font-weight: 700;">Causados</span>
+                        <strong id="resumenCausados" style="font-size: 0.813rem; color: #ffffff; font-family: monospace;">{{ resumen_seleccionado.acumulados|default:"0" }} d</strong>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.5rem 0.5rem; border: 1px solid rgba(255,255,255,0.15);">
+                        <span style="display: block; font-size: 0.6rem; color: #CBD5E1; text-transform: uppercase; font-weight: 700;">Ya Tomados</span>
+                        <strong id="resumenTomados" style="font-size: 0.813rem; color: #E2E8F0; font-family: monospace;">{{ resumen_seleccionado.tomados|default:"0" }} d</strong>
+                    </div>
+
+                    <div style="background: rgba(16, 185, 129, 0.25); border-radius: 0.75rem; padding: 0.5rem 0.6rem; border: 1px solid rgba(52, 211, 153, 0.5);">
+                        <span style="display: block; font-size: 0.6rem; color: #6EE7B7; text-transform: uppercase; font-weight: 800;">Pendientes</span>
+                        <strong id="resumenDisponibles" style="font-size: 1rem; color: #6EE7B7; font-weight: 900; font-family: monospace;">{{ resumen_seleccionado.disponibles|default:0 }} d</strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FORMULARIO PRINCIPAL EN GRID DE 2 COLUMNAS -->
+    <form method="POST" id="formCrearVacacion" class="vacaciones-grid-layout" style="display: grid; gap: 1.5rem; width: 100%;">
+        {% csrf_token %}
+
+        <!-- COLUMNA IZQUIERDA: CAMPOS DE REGISTRO (60% ANCHO) -->
+        <div class="card-form-datos" style="background-color: #ffffff; border: 1px solid #E2E8F0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            
+            <div style="border-bottom: 1px solid #E2E8F0; padding-bottom: 0.75rem;">
+                <h3 style="font-size: 0.9rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📝</span>
+                    <span>Datos de la Solicitud</span>
+                </h3>
+                <p style="font-size: 0.75rem; color: #64748B; margin: 0.25rem 0 0 0;">
+                    Selecciona el colaborador, fecha de inicio y los días hábiles a disfrutar.
+                </p>
+            </div>
+
+            <!-- SELECT / INPUT COLABORADOR -->
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 0.4rem;">
+                    Colaborador Beneficiario <span style="color: #EF4444;">*</span>
+                </label>
+
+                {% if empleado %}
+                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 0.75rem;">
+                        <div style="width: 36px; height: 36px; border-radius: 0.5rem; background: #DBEAFE; color: #1D4ED8; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">
+                            👤
+                        </div>
+                        <div style="flex: 1;">
+                            <span style="display: block; font-size: 0.875rem; font-weight: 800; color: #0F172A;">{{ empleado.nombre_completo }}</span>
+                            <span style="display: block; font-size: 0.688rem; color: #64748B;">{{ empleado.cargo|default:"Colaborador" }} • {{ empleado.documento|default:"" }}</span>
+                        </div>
+                        <span style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 800; background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE;">
+                            ✓ Seleccionado
+                        </span>
+                    </div>
+                    <input type="hidden" name="empleado" id="empleadoId" value="{{ empleado.id }}">
+                {% else %}
+                    <select
+                        name="empleado"
+                        id="selectEmpleado"
+                        style="width: 100%; border: 2px solid #CBD5E1; border-radius: 0.75rem; padding: 0.65rem 0.75rem; font-size: 0.875rem; font-weight: 700; color: #0F172A; background: #ffffff; outline: none; transition: border-color 0.15s;"
+                        onchange="cambiarColaborador(this.value)"
+                        required
+                    >
+                        {% for e in empleados %}
+                        <option value="{{ e.id }}" {% if e.id == resumen_seleccionado.id %}selected{% endif %}>
+                            {{ e.nombre_completo }} ({{ e.cargo|default:"Colaborador" }}) — {{ e.resumen_vacaciones.disponibles }} d pendientes
+                        </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </div>
+
+            <!-- PERIODO CAUSADO AUTOMÁTICO (100% TRANSPARENTE) -->
+            <div style="background-color: #EFF6FF; padding: 0.85rem; border-radius: 0.75rem; border: 1px solid #BFDBFE;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.1rem;">📅</span>
+                        <div>
+                            <span style="display: block; font-size: 0.688rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #1E40AF;">Periodo Legal Compensado</span>
+                            <strong id="badgePeriodoTexto" style="font-size: 0.875rem; font-family: monospace; color: #1E3A8A; font-weight: 800;">
+                                {{ resumen_seleccionado.periodo_sugerido|default:"Automático" }}
+                            </strong>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onclick="toggleEditorPeriodo()"
+                        style="font-size: 0.688rem; font-weight: 700; color: #2563EB; background: none; border: none; text-decoration: underline; cursor: pointer;">
+                        ✏️ Editar periodo
+                    </button>
+                </div>
+
+                <!-- CAMPO INPUT OCULTO POR DEFECTO -->
+                <div id="contenedorInputPeriodo" class="hidden" style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #BFDBFE;">
+                    <label for="campo-periodo" style="display: block; font-size: 0.688rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">
+                        Modificar Periodo Manualmente:
+                    </label>
+                    <input
+                        id="campo-periodo"
+                        type="text"
+                        name="periodo"
+                        value="{{ resumen_seleccionado.periodo_sugerido|default:'' }}"
+                        style="width: 100%; border: 2px solid #CBD5E1; border-radius: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.75rem; font-weight: 700; color: #0F172A; background: #ffffff; font-family: monospace;"
+                        placeholder="Ej: 2024 - 2025"
+                    >
+                </div>
+            </div>
+
+            <!-- FECHA DE INICIO -->
+            <div>
+                <label for="campo-fecha_inicio" style="display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 0.4rem;">
+                    Fecha de Inicio de Vacaciones <span style="color: #EF4444;">*</span>
+                </label>
+
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input
+                        id="campo-fecha_inicio"
+                        type="date"
+                        name="fecha_inicio"
+                        style="flex: 1; border: 2px solid #CBD5E1; border-radius: 0.75rem; padding: 0.65rem 0.75rem; font-size: 0.875rem; font-weight: 700; color: #0F172A; background: #ffffff; outline: none;"
+                        required
+                    >
+                    <button
+                        type="button"
+                        onclick="ponerFechaHoy()"
+                        style="padding: 0.65rem 0.85rem; background: #F1F5F9; color: #334155; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 700; border: 1px solid #CBD5E1; cursor: pointer; white-space: nowrap;"
+                        title="Seleccionar fecha de hoy">
+                        📅 Hoy
+                    </button>
+                    <button
+                        type="button"
+                        onclick="ponerFechaProximoLunes()"
+                        style="padding: 0.65rem 0.85rem; background: #F1F5F9; color: #334155; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 700; border: 1px solid #CBD5E1; cursor: pointer; white-space: nowrap;"
+                        title="Seleccionar el próximo lunes">
+                        📅 Próx. Lunes
+                    </button>
+                </div>
+            </div>
+
+            <!-- DÍAS HÁBILES A DISFRUTAR -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <label for="campo-dias_tomados" style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin: 0;">
+                        Días Hábiles a Disfrutar <span style="color: #EF4444;">*</span>
+                    </label>
+                    <span style="font-size: 0.688rem; color: #64748B; font-weight: 600;">
+                        Pendientes a la fecha: <strong id="maxDiasTexto" style="color: #047857; font-weight: 800; font-family: monospace;">{{ resumen_seleccionado.disponibles|default:0 }} d</strong>
+                    </span>
+                </div>
 
                 <input
-                    type="text"
-                    value="{{ empleado.nombre_completo }}"
-                    class="border p-2 rounded w-full bg-muted"
-                    readonly
+                    id="campo-dias_tomados"
+                    type="number"
+                    name="dias_tomados"
+                    min="1"
+                    max="{{ resumen_seleccionado.disponibles|default:15 }}"
+                    value="{% if resumen_seleccionado.disponibles >= 15 %}15{% elif resumen_seleccionado.disponibles > 0 %}{{ resumen_seleccionado.disponibles }}{% else %}0{% endif %}"
+                    style="width: 100%; border: 2px solid #CBD5E1; border-radius: 0.75rem; padding: 0.65rem 0.75rem; font-size: 1rem; font-weight: 800; color: #0F172A; background: #ffffff; outline: none; font-family: monospace;"
+                    required
                 >
 
-                <input
-                    type="hidden"
-                    name="empleado"
-                    value="{{ empleado.id }}"
-                >
+                <!-- BOTONES RÁPIDOS DE SELECCIÓN DE DÍAS -->
+                <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                    <span style="font-size: 0.625rem; color: #94A3B8; text-transform: uppercase; font-weight: 700;">Rápido:</span>
+                    <button type="button" onclick="setDias(7)" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.5rem; background: #F1F5F9; border: 1px solid #CBD5E1; color: #334155; cursor: pointer;">
+                        7 días
+                    </button>
+                    <button type="button" onclick="setDias(15)" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.5rem; background: #F1F5F9; border: 1px solid #CBD5E1; color: #334155; cursor: pointer;">
+                        15 días (completo)
+                    </button>
+                    <button type="button" onclick="setDiasMaximos()" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.5rem; background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; cursor: pointer;">
+                        Todos los pendientes (<span id="btnTodosDiasTexto">{{ resumen_seleccionado.disponibles|default:0 }}</span> d)
+                    </button>
+                </div>
+            </div>
 
-            {% else %}
+            <!-- OBSERVACIONES -->
+            <div>
+                <label for="campo-observaciones" style="display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 0.4rem;">
+                    Observaciones / Notas de RRHH <span style="color: #94A3B8; font-weight: normal;">(Opcional)</span>
+                </label>
 
-                <select
-                    name="empleado"
-                    class="border p-2 rounded w-full"
-                >
-
-                    {% for e in empleados %}
-
-                    <option value="{{ e.id }}">
-                        {{ e.nombre_completo }}
-                    </option>
-
-                    {% endfor %}
-
-                </select>
-
-            {% endif %}
+                <textarea
+                    id="campo-observaciones"
+                    name="observaciones"
+                    rows="3"
+                    style="width: 100%; border: 2px solid #CBD5E1; border-radius: 0.75rem; padding: 0.75rem; font-size: 0.813rem; color: #1E293B; background: #ffffff; outline: none;"
+                    placeholder="Ej: Vacaciones autorizadas según cronograma de obra o solicitud del colaborador..."
+                ></textarea>
+            </div>
 
         </div>
 
-    <div>
-        <label class="font-bold" for="campo-periodo">
-            Periodo
-        </label>
+        <!-- COLUMNA DERECHA: TARJETA PREVISUALIZACIÓN EN VIVO (40% ANCHO) -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <div class="card-preview-vacaciones" style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); color: #ffffff; border-radius: 1rem; padding: 1.5rem; border: 1px solid #334155; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.35); display: flex; flex-direction: column; justify-content: space-between; gap: 1.25rem;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 0.75rem;">
+                        <h3 style="font-size: 0.875rem; font-weight: 800; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🗓️</span>
+                            <span>Cálculo en Vivo de Salida</span>
+                        </h3>
+                        <span style="font-size: 0.625rem; text-transform: uppercase; font-weight: 800; color: #34D399; padding: 0.2rem 0.5rem; border-radius: 0.25rem; background: rgba(6, 78, 59, 0.7); border: 1px solid #065F46;">
+                            Lunes a Sábado
+                        </span>
+                    </div>
 
-        <input id="campo-periodo"
-            type="text"
-            name="periodo"
-            class="border p-2 rounded w-full"
-            placeholder="2025-2026" >
-    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+                        
+                        <!-- FECHA INICIO -->
+                        <div style="background: rgba(255,255,255,0.06); border-radius: 0.75rem; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.75rem; color: #CBD5E1;">Fecha de salida:</span>
+                            <strong id="previewFechaInicio" style="font-size: 0.813rem; font-family: monospace; color: #ffffff; font-weight: 800;">—</strong>
+                        </div>
 
-    <div>
-        <label class="font-bold" for="campo-fecha_inicio">
-            Fecha inicio de vacaciones
-        </label>
+                        <!-- FECHA FIN ESTIMADA -->
+                        <div style="background: rgba(255,255,255,0.06); border-radius: 0.75rem; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="display: block; font-size: 0.75rem; color: #CBD5E1;">Último día de vacaciones:</span>
+                                <span style="display: block; font-size: 0.625rem; color: #94A3B8;">Incluye sábados hábiles</span>
+                            </div>
+                            <strong id="previewFechaFin" style="font-size: 0.813rem; font-family: monospace; color: #FCD34D; font-weight: 800;">—</strong>
+                        </div>
 
-        <input id="campo-fecha_inicio"
-            type="date"
-            name="fecha_inicio"
-            class="border p-2 rounded w-full" >
-    </div>
+                        <!-- FECHA REGRESO ESTIMADA -->
+                        <div style="background: rgba(6, 78, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 0.75rem; padding: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="display: block; font-size: 0.75rem; font-weight: 800; color: #6EE7B7;">Regreso a laborar:</span>
+                                <span style="display: block; font-size: 0.625rem; color: rgba(110, 231, 183, 0.8);">Siguiente día hábil de trabajo</span>
+                            </div>
+                            <strong id="previewFechaRegreso" style="font-size: 0.95rem; font-family: monospace; color: #A7F3D0; font-weight: 900;">—</strong>
+                        </div>
 
-    <div>
-        <label class="font-bold" for="campo-dias_tomados">
-            Días a disfrutar
-        </label>
+                        <!-- RESUMEN DE DÍAS SALTADOS -->
+                        <div style="background: rgba(255,255,255,0.06); border-radius: 0.75rem; padding: 0.6rem 0.75rem; border: 1px solid rgba(255,255,255,0.1); font-size: 0.688rem; color: #CBD5E1; display: flex; align-items: center; justify-content: space-between;">
+                            <span>Domingos y festivos intermedios:</span>
+                            <strong id="previewDiasDescanso" style="font-family: monospace; color: #ffffff;">0 días</strong>
+                        </div>
 
-        <input id="campo-dias_tomados"
-            type="number"
-            name="dias_tomados"
-            class="border p-2 rounded w-full" >
-    </div>
+                        <!-- SALDO RESTANTE -->
+                        <div style="background: rgba(255,255,255,0.06); border-radius: 0.75rem; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.75rem; color: #CBD5E1;">Saldo que le quedará:</span>
+                            <span id="previewSaldoRestante" style="font-size: 0.75rem; font-weight: 800; font-family: monospace; padding: 0.2rem 0.6rem; border-radius: 0.35rem; background: rgba(255,255,255,0.1); color: #ffffff;">
+                                0 días
+                            </span>
+                        </div>
 
-    <div>
-        <label class="font-bold" for="campo-observaciones">
-            Observaciones
-        </label>
+                    </div>
+                </div>
 
-        <textarea id="campo-observaciones"
-            name="observaciones"
-            rows="4"
-            class="border p-2 rounded w-full"
-        ></textarea>
-    </div>
+                <div style="font-size: 0.688rem; color: #94A3B8; background: rgba(255,255,255,0.06); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.1); line-height: 1.4;">
+                    💡 <strong>Cálculo estricto Cointeca:</strong> Se computan los sábados como días laborables. Salta automáticamente los domingos y los días festivos de Colombia.
+                </div>
+            </div>
 
-    <button
-        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
-    >
-        Guardar
-    </button>
+            <!-- BOTONES DE ACCIÓN -->
+            <div style="background-color: #ffffff; border: 1px solid #E2E8F0; border-radius: 1rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 0.75rem;">
+                <a href="{% url 'vacaciones' %}"
+                   style="flex: 1; text-align: center; padding: 0.65rem 1rem; border-radius: 0.75rem; background: #F1F5F9; color: #334155; font-size: 0.75rem; font-weight: 700; text-decoration: none;">
+                    Cancelar
+                </a>
+                
+                <button
+                    type="submit"
+                    id="btnGuardarVacacion"
+                    style="flex: 2; background: #1E63F0; color: #ffffff; font-weight: 800; font-size: 0.813rem; padding: 0.65rem 1.25rem; border-radius: 0.75rem; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(30, 99, 240, 0.3); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span>✓</span>
+                    <span>Guardar Salida a Vacaciones</span>
+                </button>
+            </div>
 
-</form>
+        </div>
 
-{% if error %}
-<div class="bg-red-100 border border-red-400 text-destructive px-4 py-3 rounded mb-4">
-    {{ error }}
+    </form>
+
 </div>
-{% endif %}
 
+<script>
+    // Datos serializados desde Django
+    const festivosList = JSON.parse('{{ festivos_colombia_json|escapejs }}' || '[]');
+    const festivosSet = new Set(festivosList);
+    const empleadosMap = JSON.parse('{{ empleados_json|escapejs }}' || '{}');
+
+    // Referencias a elementos
+    const inputInicio = document.getElementById('campo-fecha_inicio');
+    const inputDias = document.getElementById('campo-dias_tomados');
+    const inputPeriodo = document.getElementById('campo-periodo');
+    const badgePeriodoTexto = document.getElementById('badgePeriodoTexto');
+    const contenedorInputPeriodo = document.getElementById('contenedorInputPeriodo');
+    const selectEmp = document.getElementById('selectEmpleado');
+    const btnGuardar = document.getElementById('btnGuardarVacacion');
+
+    const previewInicio = document.getElementById('previewFechaInicio');
+    const previewFin = document.getElementById('previewFechaFin');
+    const previewRegreso = document.getElementById('previewFechaRegreso');
+    const previewSaldo = document.getElementById('previewSaldoRestante');
+    const previewDiasDescanso = document.getElementById('previewDiasDescanso');
+    const maxDiasTexto = document.getElementById('maxDiasTexto');
+    const btnTodosDiasTexto = document.getElementById('btnTodosDiasTexto');
+
+    const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+    let currentDisponibles = {{ resumen_seleccionado.disponibles|default:0 }};
+
+    function esDiaHabil(d) {
+        // En Cointeca se labora de Lunes a Sábado. Solo Domingos (0) y festivos son no hábiles.
+        if (d.getDay() === 0) return false;
+
+        const anio = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const dia = String(d.getDate()).padStart(2, '0');
+        const iso = `${anio}-${mes}-${dia}`;
+        return !festivosSet.has(iso);
+    }
+
+    function formatearFechaBonita(d) {
+        const nombreDia = DIAS_SEMANA[d.getDay()];
+        const dia = String(d.getDate()).padStart(2, '0');
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const anio = d.getFullYear();
+        return `${nombreDia} ${dia}/${mes}/${anio}`;
+    }
+
+    function recalcularPreview() {
+        const fechaVal = inputInicio.value;
+        const diasVal = parseInt(inputDias.value, 10) || 0;
+
+        // Saldo restante
+        const saldoRestante = Math.max(0, currentDisponibles - diasVal);
+        previewSaldo.textContent = `${saldoRestante} días`;
+        if (diasVal > currentDisponibles && currentDisponibles > 0) {
+            previewSaldo.style.background = '#881337';
+            previewSaldo.style.color = '#FDA4AF';
+            previewSaldo.textContent = `Excede límite (${saldoRestante} d)`;
+        } else {
+            previewSaldo.style.background = 'rgba(255,255,255,0.1)';
+            previewSaldo.style.color = '#ffffff';
+        }
+
+        if (!fechaVal || diasVal <= 0) {
+            previewInicio.textContent = "—";
+            previewFin.textContent = "—";
+            previewRegreso.textContent = "—";
+            previewDiasDescanso.textContent = "0 días";
+            return;
+        }
+
+        const partes = fechaVal.split('-');
+        let actual = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+
+        // Si la fecha de inicio es domingo o festivo, avanzar al primer día hábil
+        while (!esDiaHabil(actual)) {
+            actual.setDate(actual.getDate() + 1);
+        }
+
+        previewInicio.textContent = formatearFechaBonita(actual);
+
+        let contados = 0;
+        let diasNoHabiles = 0;
+
+        while (contados < diasVal) {
+            if (esDiaHabil(actual)) {
+                contados++;
+            } else {
+                diasNoHabiles++;
+            }
+            if (contados < diasVal) {
+                actual.setDate(actual.getDate() + 1);
+            }
+        }
+
+        const fechaFin = new Date(actual);
+        previewFin.textContent = formatearFechaBonita(fechaFin);
+
+        // Calcular regreso: siguiente día hábil (salta domingo o festivo)
+        let regreso = new Date(fechaFin);
+        regreso.setDate(regreso.getDate() + 1);
+        while (!esDiaHabil(regreso)) {
+            diasNoHabiles++;
+            regreso.setDate(regreso.getDate() + 1);
+        }
+        previewRegreso.textContent = formatearFechaBonita(regreso);
+        previewDiasDescanso.textContent = `${diasNoHabiles} días (domingos / festivos)`;
+    }
+
+    function ponerFechaHoy() {
+        const hoy = new Date();
+        const anio = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        inputInicio.value = `${anio}-${mes}-${dia}`;
+        recalcularPreview();
+    }
+
+    function ponerFechaProximoLunes() {
+        const d = new Date();
+        const diaActual = d.getDay(); // 0 = Dom, 1 = Lun ...
+        const diasParaLunes = diaActual === 0 ? 1 : (8 - diaActual);
+        d.setDate(d.getDate() + diasParaLunes);
+
+        const anio = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const dia = String(d.getDate()).padStart(2, '0');
+        inputInicio.value = `${anio}-${mes}-${dia}`;
+        recalcularPreview();
+    }
+
+    function setDias(n) {
+        if (currentDisponibles <= 0) return;
+        inputDias.value = Math.min(n, currentDisponibles);
+        recalcularPreview();
+    }
+
+    function setDiasMaximos() {
+        if (currentDisponibles > 0) {
+            inputDias.value = currentDisponibles;
+        }
+        recalcularPreview();
+    }
+
+    function toggleEditorPeriodo() {
+        if (contenedorInputPeriodo.classList.contains('hidden')) {
+            contenedorInputPeriodo.classList.remove('hidden');
+            inputPeriodo.focus();
+        } else {
+            contenedorInputPeriodo.classList.add('hidden');
+        }
+    }
+
+    function cambiarColaborador(id) {
+        if (!id || !empleadosMap[id]) return;
+        const emp = empleadosMap[id];
+
+        // Actualizar banner
+        document.getElementById('resumenNombre').textContent = emp.nombre;
+        document.getElementById('resumenCargo').textContent = emp.cargo;
+        document.getElementById('resumenDocumento').textContent = emp.documento || '—';
+        document.getElementById('resumenIngreso').textContent = emp.fecha_ingreso;
+        document.getElementById('resumenAnios').textContent = `${emp.anios} años`;
+        if (document.getElementById('resumenCausados')) {
+            document.getElementById('resumenCausados').textContent = `${emp.acumulados} d`;
+        }
+        document.getElementById('resumenTomados').textContent = `${emp.tomados} d`;
+        document.getElementById('resumenDisponibles').textContent = `${emp.disponibles} d`;
+
+        // Periodo
+        if (badgePeriodoTexto) badgePeriodoTexto.textContent = emp.periodo_sugerido;
+        if (inputPeriodo) inputPeriodo.value = emp.periodo_sugerido;
+
+        // Disponibles
+        currentDisponibles = emp.disponibles;
+        maxDiasTexto.textContent = `${emp.disponibles} d`;
+        btnTodosDiasTexto.textContent = emp.disponibles;
+
+        inputDias.max = emp.disponibles > 0 ? emp.disponibles : 15;
+        if (emp.disponibles > 0) {
+            inputDias.value = Math.min(15, emp.disponibles);
+        } else {
+            inputDias.value = 0;
+        }
+
+        recalcularPreview();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (!inputInicio.value) {
+            ponerFechaHoy();
+        }
+
+        inputInicio.addEventListener("change", recalcularPreview);
+        inputInicio.addEventListener("input", recalcularPreview);
+        inputDias.addEventListener("input", recalcularPreview);
+        inputDias.addEventListener("change", recalcularPreview);
+
+        // Sincronizar inmediatamente con el colaborador seleccionado en dropdown
+        if (selectEmp && selectEmp.value) {
+            cambiarColaborador(selectEmp.value);
+        } else {
+            recalcularPreview();
+        }
+    });
+</script>
 {% endblock %}

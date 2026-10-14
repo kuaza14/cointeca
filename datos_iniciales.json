@@ -1,270 +1,5 @@
 [
 {
-  "model": "auth.group",
-  "fields": {
-    "name": "Gerencia",
-    "permissions": []
-  }
-},
-{
-  "model": "auth.group",
-  "fields": {
-    "name": "RRHH",
-    "permissions": []
-  }
-},
-{
-  "model": "auth.group",
-  "fields": {
-    "name": "Logistica",
-    "permissions": []
-  }
-},
-{
-  "model": "auth.group",
-  "fields": {
-    "name": "Contabilidad",
-    "permissions": []
-  }
-},
-{
-  "model": "auth.user",
-  "fields": {
-    "password": "pbkdf2_sha256$1000000$Y9PXtDs9rTlEL2M6zSEyQs$EgGETfFXbBImD1KuVvPh4+qYsJD+modS51KZrOgzDog=",
-    "last_login": "2026-09-18T20:38:46.483Z",
-    "is_superuser": true,
-    "username": "admin",
-    "first_name": "",
-    "last_name": "",
-    "email": "",
-    "is_staff": true,
-    "is_active": true,
-    "date_joined": "2026-04-20T17:19:26Z",
-    "groups": [],
-    "user_permissions": []
-  }
-},
-{
-  "model": "auth.user",
-  "fields": {
-    "password": "pbkdf2_sha256$1200000$6qhLd2YJk8WwwEHeYwn8nL$20PKvGKAVcHGZBOoETvJJF0GD51aHXk2sCIfRlF/oj4=",
-    "last_login": null,
-    "is_superuser": true,
-    "username": "gerente",
-    "first_name": "",
-    "last_name": "",
-    "email": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2026-07-07T17:39:02Z",
-    "groups": [
-      [
-        "Gerencia"
-      ]
-    ],
-    "user_permissions": []
-  }
-},
-{
-  "model": "auth.user",
-  "fields": {
-    "password": "pbkdf2_sha256$1200000$5WeA5MipkBz7EUJIV0M7WR$KfzfqsK+iQxi61zPUkLYuaO+46AqhaE7rf+kCkf5nE0=",
-    "last_login": null,
-    "is_superuser": false,
-    "username": "rrhh",
-    "first_name": "",
-    "last_name": "",
-    "email": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2026-07-07T18:35:15Z",
-    "groups": [
-      [
-        "RRHH"
-      ]
-    ],
-    "user_permissions": []
-  }
-},
-{
-  "model": "auth.user",
-  "fields": {
-    "password": "pbkdf2_sha256$1200000$mW66cZMb1KylzcL4Xe4ZSP$dzNv0os6eUi2I2Kjwi5H6SRX/uDm91ByUDNLfBNTXWw=",
-    "last_login": "2026-07-08T14:46:38.695Z",
-    "is_superuser": false,
-    "username": "contabilidad",
-    "first_name": "",
-    "last_name": "",
-    "email": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2026-07-08T12:41:53Z",
-    "groups": [
-      [
-        "Contabilidad"
-      ]
-    ],
-    "user_permissions": []
-  }
-},
-{
-  "model": "auth.user",
-  "fields": {
-    "password": "pbkdf2_sha256$1200000$PYwvUMNf9kM7NHtg330FNn$3qBobz2udsM+yfv15naPfhEan20TI9dKKLxscMRCiLs=",
-    "last_login": null,
-    "is_superuser": false,
-    "username": "logistica",
-    "first_name": "",
-    "last_name": "",
-    "email": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2026-07-08T12:44:23Z",
-    "groups": [
-      [
-        "Logistica"
-      ]
-    ],
-    "user_permissions": []
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "3zhrubj0ynm6o6fpb36jfpjzbuj25e2c",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wFAiL:b3jTERz3tjl6lLTxJkNYWCMrltjpiw_JBsleRMOx7Qc",
-    "expire_date": "2026-05-05T13:00:29.128Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "585dmyc8edu34cqcoist50wqg3xhnmca",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wLPAU:B_qw1Bs7iABuZfmUoDLrB2vjffNiUUuZwUFhu7KY_mM",
-    "expire_date": "2026-05-22T17:39:18.528Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "6kaflpab555syuamcb4llstct2x94skm",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hCgDoJL9z0DGYZBqgaS0q6Md7dNutDte-__twi4LiWsnecwJXEVWpx-WUR6ct1FemC9N0mtLvMU5Z7Iw3Y5tsSv29H-HRTsZVu7wV_IOQWJyWDOFCll660H0gjKOdLMSmlvIlggw0OMCMPZJGTYuPh8AfbuOCY:1x3dQy:PsIGgHs-3Cpbjc7pIk3eT65z3NJw_RTVupJiLboGfps",
-    "expire_date": "2026-09-21T17:47:08.811Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "79gyfz8u8yt4ae61z42q7inac0ke05s5",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wQ4LP:WnYS1I42oLkVgjDwyzEw2dGSBPyu4Mx70f3m8lTqcUA",
-    "expire_date": "2026-06-04T14:25:51.162Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "81qm1x4kny7zan6hu80d3kruzbzq10px",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wNcxL:u3RjDUx9KwZ9j9RV6IcGi_MDtgc3P3osUE13TRBvLfI",
-    "expire_date": "2026-05-28T20:46:55.551Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "8bisha1k8dfte7iyusp0qmpdbxqiqq7s",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wFBU9:b3x13x1YPg8thuu3FhW7rJ0APTX6Iw-QbNvZmJjOwNU",
-    "expire_date": "2026-05-05T13:49:53.030Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "dl3dfs5s1lopsyq5qkprs3vnn3g1ylwh",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wpsAH:4vHKfhaJqdfFgMXW1e4H_eOJIH9zC1eSYrTaFCBmEVY",
-    "expire_date": "2026-08-14T18:41:01.964Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "i3itl2hla4gj32in9iflhui24bg75nqk",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wShlM:XiUBYcuVhJpHOXNABPSGYEE-b_zphVi4HviWjfqd1ZU",
-    "expire_date": "2026-06-11T20:55:32.392Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "jlnnlxzh6kpn2399hervrwhbf07kgoas",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wNcpU:nUGP8K3iKxrML6qwZNO2Dbz5O-RS6gWEJan2hzDqasQ",
-    "expire_date": "2026-05-28T20:38:48.389Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "l5050wnmuoorhwiqh5os2738rglxv4b4",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wY1Hm:kHksyNvlzcInAPvq4ltRlvLKQorw_G8XiwWL8tnJBIU",
-    "expire_date": "2026-06-26T12:46:58.426Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "o0g1rypoa6deql7x6ecyahg0473cpz6f",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hCgDoJL9z0DGYZBqgaS0q6Md7dNutDte-__twi4LiWsnecwJXEVWpx-WUR6ct1FemC9N0mtLvMU5Z7Iw3Y5tsSv29H-HRTsZVu7wV_IOQWJyWDOFCll660H0gjKOdLMSmlvIlggw0OMCMPZJGTYuPh8AfbuOCY:1x3fGl:T2GklNEtVVB3jXsuWmLrdSkduPIznnE3G7KOnDkqqI0",
-    "expire_date": "2026-09-21T19:44:43.129Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "p04ezk929cef2y7czixvxwovqex1ey6h",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hCgDoJL9z0DGYZBqgaS0q6Md7dNutDte-__twi4LiWsnecwJXEVWpx-WUR6ct1FemC9N0mtLvMU5Z7Iw3Y5tsSv29H-HRTsZVu7wV_IOQWJyWDOFCll660H0gjKOdLMSmlvIlggw0OMCMPZJGTYuPh8AfbuOCY:1x7dYr:t00HEAFFUSP-16lWZEzna1GRPXM--Bn_-DLC8su1Wu4",
-    "expire_date": "2026-10-02T18:43:49.616Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "pff1qwnbmzu6nndq1pkniahhbduwi0fr",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hCgDoJL9z0DGYZBqgaS0q6Md7dNutDte-__twi4LiWsnecwJXEVWpx-WUR6ct1FemC9N0mtLvMU5Z7Iw3Y5tsSv29H-HRTsZVu7wV_IOQWJyWDOFCll660H0gjKOdLMSmlvIlggw0OMCMPZJGTYuPh8AfbuOCY:1x7dZ7:TIE34YnTYAo8bsyOBigjcXjF5ol9SjnH1spxq1J2LFA",
-    "expire_date": "2026-10-02T18:44:05.153Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "tmwqlwpoel9z69gz3b0k0kb2kcdp2f31",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hCgDoJL9z0DGYZBqgaS0q6Md7dNutDte-__twi4LiWsnecwJXEVWpx-WUR6ct1FemC9N0mtLvMU5Z7Iw3Y5tsSv29H-HRTsZVu7wV_IOQWJyWDOFCll660H0gjKOdLMSmlvIlggw0OMCMPZJGTYuPh8AfbuOCY:1x7dYb:AxhMiOktrzwdp7qTcKJ96CHZseRrMpii-W8YYJi2bW4",
-    "expire_date": "2026-10-02T18:43:33.959Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "wliywp8c3s8tx407pkp1hlej5zc0se8c",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wwLGh:xJWepscftfUBmgqNKntiWVtKgvkE2Mr6X3o9qIqaCNY",
-    "expire_date": "2026-09-01T14:58:23.724Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "y934d5xl1i2jm4uiao7hg1r6i53gi9q6",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hCgDoJL9z0DGYZBqgaS0q6Md7dNutDte-__twi4LiWsnecwJXEVWpx-WUR6ct1FemC9N0mtLvMU5Z7Iw3Y5tsSv29H-HRTsZVu7wV_IOQWJyWDOFCll660H0gjKOdLMSmlvIlggw0OMCMPZJGTYuPh8AfbuOCY:1x7fM6:LJXckAEP_j8-GyL7P8DxbVvZrcgm5CIJiuYgd9_ZGT0",
-    "expire_date": "2026-10-02T20:38:46.496Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "zt6lk36lrht5iq8hzk2leublh5gzm2dd",
-  "fields": {
-    "session_data": ".eJxVjDEOgzAMAP_iuYqaxMQJY3fegIwdGtoKJAJT1b9XSAztene6N_S8b6Xfa177SaEFC5dfNrA883wIffB8X4ws87ZOgzkSc9pqukXz63a2f4PCtUAL4h0R2jSmpiGkQJIQOYyeAjkJOihqiIxqfY4YxbINVmJM3l2RleHzBbcKNvo:1wGHYc:Gsz-TiwRZ1aIuBDeD4MNxe8yjyFL-TFJLMwL1UnNCuk",
-    "expire_date": "2026-05-08T14:31:02.905Z"
-  }
-},
-{
   "model": "core.cajamenor",
   "pk": 1,
   "fields": {
@@ -286,7 +21,9 @@
     "nit": "123456789",
     "pagado_a": "combustible",
     "concepto": "compra gasolina",
-    "valor": "100000.00"
+    "categoria": "otros",
+    "valor": "100000.00",
+    "soporte": ""
   }
 },
 {
@@ -299,7 +36,9 @@
     "nit": "1234567898",
     "pagado_a": "combustible",
     "concepto": "compra de herramienta",
-    "valor": "50000.00"
+    "categoria": "otros",
+    "valor": "50000.00",
+    "soporte": ""
   }
 },
 {
@@ -312,7 +51,9 @@
     "nit": "1234567810",
     "pagado_a": "laminas",
     "concepto": "herraminetas",
-    "valor": "70000.00"
+    "categoria": "otros",
+    "valor": "70000.00",
+    "soporte": ""
   }
 },
 {
@@ -325,7 +66,9 @@
     "nit": "123456711",
     "pagado_a": "combustible",
     "concepto": "pagos del combustible",
-    "valor": "120000.00"
+    "categoria": "otros",
+    "valor": "120000.00",
+    "soporte": ""
   }
 },
 {
@@ -338,7 +81,9 @@
     "nit": "12345678911",
     "pagado_a": "combustible",
     "concepto": "consumo de combustible",
-    "valor": "120000.00"
+    "categoria": "otros",
+    "valor": "120000.00",
+    "soporte": ""
   }
 },
 {
@@ -351,7 +96,9 @@
     "nit": "123456789098",
     "pagado_a": "combustible",
     "concepto": "compra de combustible",
-    "valor": "80000.00"
+    "categoria": "otros",
+    "valor": "80000.00",
+    "soporte": ""
   }
 },
 {
@@ -370,6 +117,7 @@
     "desarrollo": "gerhahrf",
     "proposiciones": "dthedtahdeth",
     "estado": "borrador",
+    "archivo_firmado": "",
     "fecha_creacion": "2026-04-22T20:01:00.016Z"
   }
 },
@@ -389,6 +137,7 @@
     "desarrollo": "thadhthryjiyliyrsngfnfs",
     "proposiciones": "wq3ruh2q872t79y5iqwhjfasfd,svsd.vsdñgsk",
     "estado": "aprobada",
+    "archivo_firmado": "",
     "fecha_creacion": "2026-04-22T20:03:41.088Z"
   }
 },
@@ -414,6 +163,18 @@
     "meta_anual": "100%",
     "frecuencia": "mensual",
     "fecha_creacion": "2026-04-23T19:49:49.267Z"
+  }
+},
+{
+  "model": "core.indicadorestrategico",
+  "pk": 3,
+  "fields": {
+    "perspectiva": "operativa",
+    "nombre": "edson yilmar castaño botero ",
+    "definicion": "programador de software",
+    "meta_anual": "10%",
+    "frecuencia": "trimestral",
+    "fecha_creacion": "2026-04-23T19:55:36.206Z"
   }
 },
 {
@@ -475,6 +236,7 @@
     "jornada": "diurna",
     "jefe": "darwin",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "",
     "telefono_emergencia": "",
     "parentesco_emergencia": "",
@@ -493,7 +255,7 @@
   "model": "core.empleado",
   "pk": 8,
   "fields": {
-    "foto": "empleados/fotos/edson_castano.jpeg",
+    "foto": "",
     "nombre_completo": "EDSON YILMAR CASTAÑO BOTERO",
     "documento": "1144179994",
     "ciudad_expedicion": "cali",
@@ -519,6 +281,7 @@
     "jornada": "diurna",
     "jefe": "darwin",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "GERARDO",
     "telefono_emergencia": "3178903855",
     "parentesco_emergencia": "TIO",
@@ -529,6 +292,51 @@
     "cesantias": null,
     "alergias": "",
     "observaciones": "buen trabajador",
+    "fecha_retiro": null,
+    "motivo_retiro": ""
+  }
+},
+{
+  "model": "core.empleado",
+  "pk": 11,
+  "fields": {
+    "foto": "empleados/fotos/jesus_herrera.jpg",
+    "nombre_completo": "JESUS DAVID HERRERA COPETE",
+    "documento": "1144085288",
+    "ciudad_expedicion": "CALI",
+    "fecha_nacimiento": "1995-12-30",
+    "nacionalidad": "Colombiano",
+    "direccion": "la buitrera cali kilmetro 3.5",
+    "ciudad_residencia": "CALI",
+    "barrio": "LA BUITRERA",
+    "estrato": 2,
+    "telefono": "3235270653",
+    "correo": "herreracapote684@gmail.com",
+    "estado_civil": "",
+    "cargo": "liniero",
+    "area": "operativo",
+    "nivel_academico": "bachiller",
+    "profesion": "NA",
+    "habilidades": "NA",
+    "idiomas": "Español",
+    "fecha_ingreso": "2024-01-16",
+    "fecha_finalizacion": "2027-01-16",
+    "tipo_contrato": "fijo",
+    "salario": "2327400.00",
+    "jornada": "diurna",
+    "jefe": "supervisor",
+    "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
+    "contacto_emergencia": "None",
+    "telefono_emergencia": "None",
+    "parentesco_emergencia": "",
+    "grupo_sanguineo": null,
+    "eps": null,
+    "arl": null,
+    "afp": null,
+    "cesantias": null,
+    "alergias": "",
+    "observaciones": "",
     "fecha_retiro": null,
     "motivo_retiro": ""
   }
@@ -563,6 +371,7 @@
     "jornada": "diurna",
     "jefe": "GERENTE",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "ALEXANDRA RESTREPO /MADRE",
     "telefono_emergencia": "3013268699",
     "parentesco_emergencia": "madre",
@@ -594,19 +403,20 @@
     "telefono": "3182315715\t",
     "correo": "angelicaconrado26@hotmail.com",
     "estado_civil": "",
-    "cargo": "AUXILIAR ADMINISTRATIVA",
-    "area": "ADMINISTRATIVA",
+    "cargo": "AUXILIAR ADMINISTRATIVA\t",
+    "area": "ADMINISTRATIVA\t",
     "nivel_academico": "tecnologo ",
     "profesion": "contabilidad",
     "habilidades": "NA",
     "idiomas": "Español",
-    "fecha_ingreso": "2026-09-20",
+    "fecha_ingreso": "2024-01-10",
     "fecha_finalizacion": "2027-01-10",
     "tipo_contrato": "fijo",
     "salario": "2123000.00",
     "jornada": "diurna",
     "jefe": "GERENTE",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "miguel antonio conrado",
     "telefono_emergencia": "3155654618",
     "parentesco_emergencia": "HERMANO",
@@ -651,6 +461,7 @@
     "jornada": "diurna",
     "jefe": "REPRESENTANTE LEGAL\t",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "MAYRA OCORO",
     "telefono_emergencia": "3103704670",
     "parentesco_emergencia": "HERMANA",
@@ -660,7 +471,7 @@
     "afp": null,
     "cesantias": null,
     "alergias": "",
-    "observaciones": "",
+    "observaciones": "JDFJHHJMTKTJRJRJ RJRT TJ R J R J RJRJ\r\nRJRTJM RTJRT J RTJRT\r\nJRYJ RYJ RY\r\nJTYJ TYJTY\r\nJTYJ TYJTYJ\r\n",
     "fecha_retiro": null,
     "motivo_retiro": ""
   }
@@ -695,6 +506,7 @@
     "jornada": "diurna",
     "jefe": "GERENTE",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": null,
     "telefono_emergencia": null,
     "parentesco_emergencia": null,
@@ -739,6 +551,7 @@
     "jornada": "diurna",
     "jefe": "SUPERVISOR",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "YURANY AGUILAR",
     "telefono_emergencia": "3202558621",
     "parentesco_emergencia": "ESPOSA",
@@ -783,6 +596,7 @@
     "jornada": "diurna",
     "jefe": "GERENTE",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "EMMA ANGULO",
     "telefono_emergencia": "3208818000",
     "parentesco_emergencia": "MADRE",
@@ -827,6 +641,7 @@
     "jornada": "diurna",
     "jefe": "GERENTE",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "YOLIMA CARRERÑO",
     "telefono_emergencia": "3197594796",
     "parentesco_emergencia": "ESPOSA",
@@ -871,6 +686,7 @@
     "jornada": "diurna",
     "jefe": "SUPERVISOR",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "CRISTIAN RODRIGUEZ",
     "telefono_emergencia": "3238771246",
     "parentesco_emergencia": "HERMANO",
@@ -915,6 +731,7 @@
     "jornada": "diurna",
     "jefe": "SUPERVISOR",
     "estado": "activo",
+    "dias_vacaciones_tomados_historico": 0,
     "contacto_emergencia": "CLAUDI KATHERIN",
     "telefono_emergencia": "3134942527",
     "parentesco_emergencia": "PRIMA",
@@ -955,6 +772,21 @@
     "cesantias": "porvenir",
     "arl": "AXA colpatria",
     "alergias": "N/A",
+    "contacto_emergencia": "",
+    "telefono_emergencia": ""
+  }
+},
+{
+  "model": "core.saludempleado",
+  "pk": 4,
+  "fields": {
+    "empleado": 11,
+    "grupo_sanguineo": "o+",
+    "eps": "sura",
+    "pension": "porvenir",
+    "cesantias": "porvenir",
+    "arl": "axa colpatria",
+    "alergias": "avispas",
     "contacto_emergencia": "",
     "telefono_emergencia": ""
   }
@@ -1105,6 +937,42 @@
 },
 {
   "model": "core.dotacionempleado",
+  "pk": 3,
+  "fields": {
+    "empleado": 16,
+    "fecha_entrega": "2026-01-16",
+    "observacion": null
+  }
+},
+{
+  "model": "core.dotacionempleado",
+  "pk": 4,
+  "fields": {
+    "empleado": 16,
+    "fecha_entrega": "2026-01-16",
+    "observacion": null
+  }
+},
+{
+  "model": "core.dotacionempleado",
+  "pk": 5,
+  "fields": {
+    "empleado": 16,
+    "fecha_entrega": "2026-01-16",
+    "observacion": null
+  }
+},
+{
+  "model": "core.dotacionempleado",
+  "pk": 6,
+  "fields": {
+    "empleado": 17,
+    "fecha_entrega": "2025-05-12",
+    "observacion": null
+  }
+},
+{
+  "model": "core.dotacionempleado",
   "pk": 9,
   "fields": {
     "empleado": 24,
@@ -1173,6 +1041,51 @@
 },
 {
   "model": "core.vacacion",
+  "pk": 2,
+  "fields": {
+    "empleado": 11,
+    "periodo": "2023-2026",
+    "fecha_inicio": "2026-06-19",
+    "fecha_fin": "2026-07-02",
+    "dias_tomados": 11,
+    "dias_pendientes": 19,
+    "fecha_regreso": "2026-07-03",
+    "observaciones": "",
+    "fecha_registro": "2026-06-05T15:10:38.338Z"
+  }
+},
+{
+  "model": "core.vacacion",
+  "pk": 6,
+  "fields": {
+    "empleado": 11,
+    "periodo": "2023-2026",
+    "fecha_inicio": "2026-07-18",
+    "fecha_fin": "2026-07-24",
+    "dias_tomados": 5,
+    "dias_pendientes": 14,
+    "fecha_regreso": "2026-07-25",
+    "observaciones": "",
+    "fecha_registro": "2026-07-17T15:04:37.408Z"
+  }
+},
+{
+  "model": "core.vacacion",
+  "pk": 10,
+  "fields": {
+    "empleado": 11,
+    "periodo": "2025-2026",
+    "fecha_inicio": "2026-08-20",
+    "fecha_fin": "2026-08-27",
+    "dias_tomados": 7,
+    "dias_pendientes": 7,
+    "fecha_regreso": "2026-08-28",
+    "observaciones": "",
+    "fecha_registro": "2026-07-17T18:02:59.496Z"
+  }
+},
+{
+  "model": "core.vacacion",
   "pk": 11,
   "fields": {
     "empleado": 26,
@@ -1229,6 +1142,70 @@
     "fecha_regreso": "2026-08-01",
     "observaciones": "",
     "fecha_registro": "2026-07-21T17:14:44.294Z"
+  }
+},
+{
+  "model": "core.descargo",
+  "pk": 1,
+  "fields": {
+    "empleado": 11,
+    "representante_rrhh": "Gestión RRHH",
+    "testigo": "edson castaño",
+    "fecha_hechos": "2026-06-12",
+    "descripcion_falta": "llego tarde a las 8 de la mañana llega todos los dias ",
+    "hora_inicio": "09:23:00",
+    "hora_cierre": null,
+    "observaciones_finales": null,
+    "fecha_registro": "2026-06-12T14:31:13.887Z"
+  }
+},
+{
+  "model": "core.descargo",
+  "pk": 2,
+  "fields": {
+    "empleado": 11,
+    "representante_rrhh": "Gestión RRHH",
+    "testigo": "edson castaño",
+    "fecha_hechos": "2026-06-11",
+    "descripcion_falta": "llegada tarde a las instalaciones",
+    "hora_inicio": "07:30:00",
+    "hora_cierre": null,
+    "observaciones_finales": null,
+    "fecha_registro": "2026-06-12T16:02:18.390Z"
+  }
+},
+{
+  "model": "core.citaciondescargo",
+  "pk": 1,
+  "fields": {
+    "empleado": 11,
+    "fecha_diligencia": "2026-06-13",
+    "hora_diligencia": "08:00:00",
+    "lugar_diligencia": "Oficina de RRHH",
+    "descripcion_hechos": "llegada tarde",
+    "clausula_contrato": "111111111",
+    "articulo_reglamento": "2222222",
+    "norma_cst": "llegada de tarde ",
+    "fecha_registro": "2026-06-13T12:32:42.694Z"
+  }
+},
+{
+  "model": "core.retirocesantias",
+  "pk": 1,
+  "fields": {
+    "empleado": 11,
+    "tipo_retiro": "DEFINITIVO",
+    "fecha_solicitud": "2026-06-18",
+    "fondo_cesantias": "Protección",
+    "valor_retiro": "10000000.00",
+    "direccion_vivienda": "",
+    "descripcion_vivienda": "",
+    "institucion_educativa": "",
+    "programa_estudio": "",
+    "beneficiario": "",
+    "fecha_retiro_definitivo": "2026-08-28",
+    "observaciones": "",
+    "fecha_registro": "2026-06-18T17:39:35.272Z"
   }
 },
 {
@@ -1321,17 +1298,6 @@
   }
 },
 {
-  "model": "core.retiroempleado",
-  "pk": 1,
-  "fields": {
-    "empleado": 16,
-    "fecha_retiro": "2026-09-17",
-    "motivo": "Renuncia voluntaria",
-    "observaciones": "",
-    "fecha_registro": "2026-09-17T17:10:44.302Z"
-  }
-},
-{
   "model": "core.suspensioncontrato",
   "pk": 3,
   "fields": {
@@ -1379,87 +1345,60 @@
   }
 },
 {
-  "model": "core.macroproyecto",
+  "model": "core.proyecto",
   "pk": 1,
   "fields": {
-    "nombre": "ciudad cordoba",
-    "numero_maniobra_emcali": "001",
-    "numero_maniobra_cointeca": "1222",
-    "descripcion": "",
-    "estado": "En ejecución",
-    "fecha_creacion": "2026-09-10T18:26:56.086Z"
+    "macroproyecto": null,
+    "numero_emcali": "9901",
+    "numero_cointeca": "",
+    "tipo": "AP",
+    "estado": "Planeación",
+    "fecha_creacion": "2026-08-03T20:35:05.231Z"
   }
 },
 {
-  "model": "core.macroproyecto",
+  "model": "core.proyecto",
+  "pk": 3,
+  "fields": {
+    "macroproyecto": null,
+    "numero_emcali": "9902",
+    "numero_cointeca": "",
+    "tipo": "AP",
+    "estado": "Planeación",
+    "fecha_creacion": "2026-08-03T20:35:34.948Z"
+  }
+},
+{
+  "model": "core.proyecto",
+  "pk": 4,
+  "fields": {
+    "macroproyecto": null,
+    "numero_emcali": "9903",
+    "numero_cointeca": "",
+    "tipo": "BT",
+    "estado": "Planeación",
+    "fecha_creacion": "2026-08-04T13:24:42.406Z"
+  }
+},
+{
+  "model": "core.proyecto",
+  "pk": 5,
+  "fields": {
+    "macroproyecto": null,
+    "numero_emcali": "9904",
+    "numero_cointeca": "",
+    "tipo": "MT",
+    "estado": "Planeación",
+    "fecha_creacion": "2026-08-19T17:50:47.417Z"
+  }
+},
+{
+  "model": "core.apoyo",
   "pk": 2,
   "fields": {
-    "nombre": "vallado",
-    "numero_maniobra_emcali": "",
-    "numero_maniobra_cointeca": "",
-    "descripcion": "",
-    "estado": "En ejecución",
-    "fecha_creacion": "2026-09-10T18:32:20.740Z"
-  }
-},
-{
-  "model": "core.proyecto",
-  "pk": 7,
-  "fields": {
-    "macroproyecto": 1,
-    "numero_emcali": "9901",
-    "tipo": "AP_BARRIO",
-    "estado": "En ejecución",
-    "fecha_creacion": "2026-09-10T18:32:38.140Z"
-  }
-},
-{
-  "model": "core.proyecto",
-  "pk": 8,
-  "fields": {
-    "macroproyecto": 1,
-    "numero_emcali": "9902",
-    "tipo": "BT",
-    "estado": "En ejecución",
-    "fecha_creacion": "2026-09-11T17:56:21.158Z"
-  }
-},
-{
-  "model": "core.proyecto",
-  "pk": 9,
-  "fields": {
-    "macroproyecto": 1,
-    "numero_emcali": "9903",
-    "tipo": "AP_PARQUE",
-    "estado": "En ejecución",
-    "fecha_creacion": "2026-09-14T16:54:58.439Z"
-  }
-},
-{
-  "model": "core.apoyo",
-  "pk": 30,
-  "fields": {
-    "proyecto": 8,
+    "proyecto": 3,
     "quien_ejecuta": null,
-    "nodo": "8877",
-    "numero_apoyo": 1,
-    "fecha": null,
-    "tipo_instalacion": "",
-    "direccion": "",
-    "tipo_estructura": "",
-    "cantidad_retenida": "0.00",
-    "metros_retenido": "0.00",
-    "observacion": "",
-    "estado": "Pendiente"
-  }
-},
-{
-  "model": "core.apoyo",
-  "pk": 31,
-  "fields": {
-    "proyecto": 8,
-    "quien_ejecuta": null,
-    "nodo": "8878",
+    "nodo": "2260832",
     "numero_apoyo": 2,
     "fecha": null,
     "tipo_instalacion": "",
@@ -1467,107 +1406,56 @@
     "tipo_estructura": "",
     "cantidad_retenida": "0.00",
     "metros_retenido": "0.00",
+    "brazo": "2",
     "observacion": "",
     "estado": "Pendiente"
   }
 },
 {
   "model": "core.apoyo",
-  "pk": 32,
+  "pk": 24,
   "fields": {
-    "proyecto": 8,
+    "proyecto": 5,
     "quien_ejecuta": null,
-    "nodo": "8879",
-    "numero_apoyo": 3,
+    "nodo": "",
+    "numero_apoyo": null,
     "fecha": null,
     "tipo_instalacion": "",
     "direccion": "",
     "tipo_estructura": "",
     "cantidad_retenida": "0.00",
     "metros_retenido": "0.00",
+    "brazo": "2",
     "observacion": "",
     "estado": "Pendiente"
   }
 },
 {
   "model": "core.apoyo",
-  "pk": 33,
+  "pk": 26,
   "fields": {
-    "proyecto": 7,
+    "proyecto": 1,
     "quien_ejecuta": null,
-    "nodo": "29925",
-    "numero_apoyo": 1,
+    "nodo": "TEST-NODO-99",
+    "numero_apoyo": 99,
     "fecha": null,
-    "tipo_instalacion": "",
+    "tipo_instalacion": "Nueva",
     "direccion": "",
     "tipo_estructura": "",
     "cantidad_retenida": "0.00",
     "metros_retenido": "0.00",
-    "observacion": "",
-    "estado": "Pendiente"
-  }
-},
-{
-  "model": "core.apoyo",
-  "pk": 34,
-  "fields": {
-    "proyecto": 9,
-    "quien_ejecuta": null,
-    "nodo": "8877",
-    "numero_apoyo": 1,
-    "fecha": "2026-09-14",
-    "tipo_instalacion": "Instalación",
-    "direccion": "calle 55 b #41 e 08",
-    "tipo_estructura": "Corrido en C T de ojo",
-    "cantidad_retenida": "2.00",
-    "metros_retenido": "20.00",
+    "brazo": "2",
     "observacion": "",
     "estado": "Pendiente"
   }
 },
 {
   "model": "core.apoyoluminaria",
-  "pk": 11,
+  "pk": 5,
   "fields": {
-    "apoyo": 30,
-    "potencia": "90w",
+    "apoyo": 24,
+    "potencia": "120w",
     "codigo": "6E0013"
-  }
-},
-{
-  "model": "core.apoyoluminaria",
-  "pk": 12,
-  "fields": {
-    "apoyo": 31,
-    "potencia": "120w",
-    "codigo": "6E0018"
-  }
-},
-{
-  "model": "core.apoyoluminaria",
-  "pk": 13,
-  "fields": {
-    "apoyo": 32,
-    "potencia": "120w",
-    "codigo": "6E0018"
-  }
-},
-{
-  "model": "core.apoyoluminaria",
-  "pk": 14,
-  "fields": {
-    "apoyo": 33,
-    "potencia": "90w",
-    "codigo": "6E0018"
-  }
-},
-{
-  "model": "core.apoyoluminaria",
-  "pk": 15,
-  "fields": {
-    "apoyo": 34,
-    "potencia": "190w",
-    "codigo": "12345"
   }
 },
 {
@@ -1576,7 +1464,7 @@
   "fields": {
     "item": 1,
     "descripcion": "Abrazadera 10 a 11- 250 mm-Trafos",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1585,7 +1473,7 @@
   "fields": {
     "item": 2,
     "descripcion": "Abrazadera 8 a 9- 200 mm-Trafos",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1594,7 +1482,7 @@
   "fields": {
     "item": 3,
     "descripcion": "Abrazadera Ciega 10 a 11- 250 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1603,7 +1491,7 @@
   "fields": {
     "item": 4,
     "descripcion": "Abrazadera Ciega de 4 a 5- 140 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1630,7 +1518,7 @@
   "fields": {
     "item": 7,
     "descripcion": "Abrazadera Ciega de 9 a 10- 220 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1702,7 +1590,7 @@
   "fields": {
     "item": 15,
     "descripcion": "Abrazadera de una salida  de 5 a 6- 140 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1729,7 +1617,7 @@
   "fields": {
     "item": 18,
     "descripcion": "Abrazadera de una salida de 6 a 7- 160 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1738,7 +1626,7 @@
   "fields": {
     "item": 19,
     "descripcion": "Abrazadera de una salida de 7 a 8- 180 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1747,7 +1635,7 @@
   "fields": {
     "item": 20,
     "descripcion": "Abrazadera de una salida de 8 a 9- 200 mm",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -1792,7 +1680,7 @@
   "fields": {
     "item": 25,
     "descripcion": "Alambre de Al - No 4 - THWN- 600V",
-    "unidad": "U"
+    "unidad": "MT"
   }
 },
 {
@@ -2971,7 +2859,7 @@
   "fields": {
     "item": 156,
     "descripcion": "Abrazadera 9 a 10- 220 mm-Trafos",
-    "unidad": "U"
+    "unidad": "UN"
   }
 },
 {
@@ -4775,6 +4663,402 @@
   }
 },
 {
+  "model": "core.material",
+  "pk": 357,
+  "fields": {
+    "item": 161,
+    "descripcion": "Abrazadera para TRAFO 7\" - 180 mm",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 358,
+  "fields": {
+    "item": 162,
+    "descripcion": "Aislador Line Post 15 KV",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 359,
+  "fields": {
+    "item": 163,
+    "descripcion": "Borna terminal tipo pala de ojo - 266.8 MCM",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 360,
+  "fields": {
+    "item": 164,
+    "descripcion": "Brazo antibalanceo polimérico",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 361,
+  "fields": {
+    "item": 165,
+    "descripcion": "Cable ecológico semiaislado 1/0 AWG",
+    "unidad": "MT"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 362,
+  "fields": {
+    "item": 166,
+    "descripcion": "Cable ecológico semiaislado 4/0 AWG",
+    "unidad": "MT"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 363,
+  "fields": {
+    "item": 167,
+    "descripcion": "Cable ecológico semiaislado 266.8 KCM",
+    "unidad": "MT"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 364,
+  "fields": {
+    "item": 168,
+    "descripcion": "Cable monopolar No. 2",
+    "unidad": "MT"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 365,
+  "fields": {
+    "item": 169,
+    "descripcion": "Cinta aislante Super 33",
+    "unidad": "MT"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 366,
+  "fields": {
+    "item": 170,
+    "descripcion": "Cruceta autosoportada 120 cm",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 367,
+  "fields": {
+    "item": 171,
+    "descripcion": "Conector tipo ampar",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 368,
+  "fields": {
+    "item": 172,
+    "descripcion": "Conector AP2",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 369,
+  "fields": {
+    "item": 173,
+    "descripcion": "Varilla roscada 5/8\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 370,
+  "fields": {
+    "item": 174,
+    "descripcion": "Conector perforación 16-35 a 1/0-2",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 371,
+  "fields": {
+    "item": 175,
+    "descripcion": "Cuchilla Chance",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 372,
+  "fields": {
+    "item": 176,
+    "descripcion": "Cuchilla tipo cortacircuito EATON - 600 Amp",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 373,
+  "fields": {
+    "item": 177,
+    "descripcion": "Diagonal angular bandera",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 374,
+  "fields": {
+    "item": 178,
+    "descripcion": "Espárrago con ojo 5/8\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 375,
+  "fields": {
+    "item": 179,
+    "descripcion": "Fusible 9 Amp",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 376,
+  "fields": {
+    "item": 180,
+    "descripcion": "Herraje L para protecciones",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 377,
+  "fields": {
+    "item": 181,
+    "descripcion": "Kit puesta a tierra Hilo Guarda",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 378,
+  "fields": {
+    "item": 182,
+    "descripcion": "Pararrayo 15 KV - DPS",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 379,
+  "fields": {
+    "item": 183,
+    "descripcion": "Platina metálica extensión doble aislador",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 380,
+  "fields": {
+    "item": 184,
+    "descripcion": "Poste metálico galvanizado 16m x 1350 kg",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 381,
+  "fields": {
+    "item": 185,
+    "descripcion": "Riel perfil en I",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 382,
+  "fields": {
+    "item": 186,
+    "descripcion": "Terminal ponchar 2 huecos tipo pala 266.8 MCM",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 383,
+  "fields": {
+    "item": 187,
+    "descripcion": "Terminal ponchar 2 huecos tipo pala 4/0 AWG",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 384,
+  "fields": {
+    "item": 188,
+    "descripcion": "Tornillo bronce 1/2\" x 1-1/2\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 385,
+  "fields": {
+    "item": 189,
+    "descripcion": "Varilla puesta a tierra Copperweld 5/8\" x 2.4 m",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 386,
+  "fields": {
+    "item": 190,
+    "descripcion": "Cañuelas para cortacircuito",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 387,
+  "fields": {
+    "item": 191,
+    "descripcion": "Pie de amigo para cruceta",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 388,
+  "fields": {
+    "item": 192,
+    "descripcion": "Tubo conduit EMT 4\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 389,
+  "fields": {
+    "item": 193,
+    "descripcion": "Tubo conduit EMT 2\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 390,
+  "fields": {
+    "item": 194,
+    "descripcion": "Tubo conduit PVC 2\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 391,
+  "fields": {
+    "item": 195,
+    "descripcion": "Tubo conduit PVC 3\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 392,
+  "fields": {
+    "item": 196,
+    "descripcion": "Curva PVC 6\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 393,
+  "fields": {
+    "item": 197,
+    "descripcion": "Curva PVC 2\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 394,
+  "fields": {
+    "item": 198,
+    "descripcion": "Tubo galvanizado de 1/2\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 395,
+  "fields": {
+    "item": 199,
+    "descripcion": "Tubo galvanizado de 1\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 396,
+  "fields": {
+    "item": 200,
+    "descripcion": "Tubo galvanizado de 3/4\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 397,
+  "fields": {
+    "item": 201,
+    "descripcion": "Tubo galvanizado de 4\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 398,
+  "fields": {
+    "item": 202,
+    "descripcion": "Unión de 6\"",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 399,
+  "fields": {
+    "item": 203,
+    "descripcion": "Luminaria LED",
+    "unidad": "UN"
+  }
+},
+{
+  "model": "core.material",
+  "pk": 400,
+  "fields": {
+    "item": 204,
+    "descripcion": "Soporte para Pin",
+    "unidad": "UN"
+  }
+},
+{
   "model": "core.inventario",
   "pk": 1,
   "fields": {
@@ -4787,7 +5071,7 @@
   "pk": 2,
   "fields": {
     "material": 2,
-    "cantidad": "20.00"
+    "cantidad": "40.00"
   }
 },
 {
@@ -4795,7 +5079,7 @@
   "pk": 3,
   "fields": {
     "material": 3,
-    "cantidad": "0.00"
+    "cantidad": "22.00"
   }
 },
 {
@@ -4803,7 +5087,7 @@
   "pk": 4,
   "fields": {
     "material": 4,
-    "cantidad": "0.00"
+    "cantidad": "50.00"
   }
 },
 {
@@ -4811,7 +5095,7 @@
   "pk": 5,
   "fields": {
     "material": 5,
-    "cantidad": "10.00"
+    "cantidad": "0.00"
   }
 },
 {
@@ -4819,7 +5103,7 @@
   "pk": 6,
   "fields": {
     "material": 6,
-    "cantidad": "20.00"
+    "cantidad": "0.00"
   }
 },
 {
@@ -4939,7 +5223,7 @@
   "pk": 21,
   "fields": {
     "material": 21,
-    "cantidad": "0.00"
+    "cantidad": "29.00"
   }
 },
 {
@@ -4947,7 +5231,7 @@
   "pk": 22,
   "fields": {
     "material": 22,
-    "cantidad": "0.00"
+    "cantidad": "8.00"
   }
 },
 {
@@ -4955,7 +5239,7 @@
   "pk": 23,
   "fields": {
     "material": 23,
-    "cantidad": "0.00"
+    "cantidad": "24.00"
   }
 },
 {
@@ -4971,7 +5255,7 @@
   "pk": 25,
   "fields": {
     "material": 25,
-    "cantidad": "0.00"
+    "cantidad": "20.00"
   }
 },
 {
@@ -4995,7 +5279,7 @@
   "pk": 28,
   "fields": {
     "material": 28,
-    "cantidad": "0.00"
+    "cantidad": "20.00"
   }
 },
 {
@@ -5011,7 +5295,7 @@
   "pk": 30,
   "fields": {
     "material": 30,
-    "cantidad": "0.00"
+    "cantidad": "5.00"
   }
 },
 {
@@ -5019,7 +5303,7 @@
   "pk": 31,
   "fields": {
     "material": 31,
-    "cantidad": "0.00"
+    "cantidad": "24.00"
   }
 },
 {
@@ -5115,7 +5399,7 @@
   "pk": 43,
   "fields": {
     "material": 43,
-    "cantidad": "0.00"
+    "cantidad": "200.00"
   }
 },
 {
@@ -5139,7 +5423,7 @@
   "pk": 46,
   "fields": {
     "material": 46,
-    "cantidad": "0.00"
+    "cantidad": "50.00"
   }
 },
 {
@@ -5147,7 +5431,7 @@
   "pk": 47,
   "fields": {
     "material": 47,
-    "cantidad": "0.00"
+    "cantidad": "15.00"
   }
 },
 {
@@ -5211,7 +5495,7 @@
   "pk": 55,
   "fields": {
     "material": 55,
-    "cantidad": "0.00"
+    "cantidad": "44.00"
   }
 },
 {
@@ -5227,7 +5511,7 @@
   "pk": 57,
   "fields": {
     "material": 57,
-    "cantidad": "0.00"
+    "cantidad": "11.00"
   }
 },
 {
@@ -5235,7 +5519,7 @@
   "pk": 58,
   "fields": {
     "material": 58,
-    "cantidad": "0.00"
+    "cantidad": "72.00"
   }
 },
 {
@@ -5283,7 +5567,7 @@
   "pk": 64,
   "fields": {
     "material": 64,
-    "cantidad": "0.00"
+    "cantidad": "24.00"
   }
 },
 {
@@ -5299,7 +5583,7 @@
   "pk": 66,
   "fields": {
     "material": 66,
-    "cantidad": "0.00"
+    "cantidad": "61.00"
   }
 },
 {
@@ -5307,7 +5591,7 @@
   "pk": 67,
   "fields": {
     "material": 67,
-    "cantidad": "0.00"
+    "cantidad": "6.00"
   }
 },
 {
@@ -5315,7 +5599,7 @@
   "pk": 68,
   "fields": {
     "material": 68,
-    "cantidad": "0.00"
+    "cantidad": "12.00"
   }
 },
 {
@@ -5355,7 +5639,7 @@
   "pk": 73,
   "fields": {
     "material": 73,
-    "cantidad": "0.00"
+    "cantidad": "6.00"
   }
 },
 {
@@ -5379,7 +5663,7 @@
   "pk": 76,
   "fields": {
     "material": 76,
-    "cantidad": "0.00"
+    "cantidad": "82.00"
   }
 },
 {
@@ -5387,7 +5671,7 @@
   "pk": 77,
   "fields": {
     "material": 77,
-    "cantidad": "0.00"
+    "cantidad": "40.00"
   }
 },
 {
@@ -5395,7 +5679,7 @@
   "pk": 78,
   "fields": {
     "material": 78,
-    "cantidad": "0.00"
+    "cantidad": "14.00"
   }
 },
 {
@@ -5411,7 +5695,7 @@
   "pk": 80,
   "fields": {
     "material": 80,
-    "cantidad": "0.00"
+    "cantidad": "20.90"
   }
 },
 {
@@ -5475,7 +5759,7 @@
   "pk": 88,
   "fields": {
     "material": 88,
-    "cantidad": "0.00"
+    "cantidad": "14.00"
   }
 },
 {
@@ -5491,7 +5775,7 @@
   "pk": 90,
   "fields": {
     "material": 90,
-    "cantidad": "0.00"
+    "cantidad": "34.00"
   }
 },
 {
@@ -5507,7 +5791,7 @@
   "pk": 92,
   "fields": {
     "material": 92,
-    "cantidad": "0.00"
+    "cantidad": "61.00"
   }
 },
 {
@@ -5587,7 +5871,7 @@
   "pk": 102,
   "fields": {
     "material": 102,
-    "cantidad": "0.00"
+    "cantidad": "5.00"
   }
 },
 {
@@ -5755,7 +6039,7 @@
   "pk": 123,
   "fields": {
     "material": 123,
-    "cantidad": "0.00"
+    "cantidad": "19.00"
   }
 },
 {
@@ -5763,7 +6047,7 @@
   "pk": 124,
   "fields": {
     "material": 124,
-    "cantidad": "0.00"
+    "cantidad": "9.00"
   }
 },
 {
@@ -5771,7 +6055,7 @@
   "pk": 125,
   "fields": {
     "material": 125,
-    "cantidad": "0.00"
+    "cantidad": "10.00"
   }
 },
 {
@@ -5779,7 +6063,7 @@
   "pk": 126,
   "fields": {
     "material": 126,
-    "cantidad": "0.00"
+    "cantidad": "3.00"
   }
 },
 {
@@ -5787,7 +6071,7 @@
   "pk": 127,
   "fields": {
     "material": 127,
-    "cantidad": "0.00"
+    "cantidad": "9.00"
   }
 },
 {
@@ -5819,7 +6103,7 @@
   "pk": 131,
   "fields": {
     "material": 131,
-    "cantidad": "0.00"
+    "cantidad": "4.00"
   }
 },
 {
@@ -6019,7 +6303,7 @@
   "pk": 156,
   "fields": {
     "material": 156,
-    "cantidad": "0.00"
+    "cantidad": "40.00"
   }
 },
 {
@@ -6035,7 +6319,7 @@
   "pk": 158,
   "fields": {
     "material": 158,
-    "cantidad": "0.00"
+    "cantidad": "16.00"
   }
 },
 {
@@ -7147,7 +7431,7 @@
   "pk": 297,
   "fields": {
     "material": 297,
-    "cantidad": "2.00"
+    "cantidad": "0.00"
   }
 },
 {
@@ -7611,7 +7895,7 @@
   "pk": 355,
   "fields": {
     "material": 355,
-    "cantidad": "0.00"
+    "cantidad": "1.00"
   }
 },
 {
@@ -7623,176 +7907,402 @@
   }
 },
 {
-  "model": "core.apoyomaterial",
-  "pk": 59,
+  "model": "core.inventario",
+  "pk": 357,
   "fields": {
-    "apoyo": 30,
-    "material": 1,
-    "cantidad_requerida": "20.00",
-    "cantidad_retirada": "0.00"
+    "material": 357,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 358,
+  "fields": {
+    "material": 358,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 359,
+  "fields": {
+    "material": 359,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 360,
+  "fields": {
+    "material": 360,
+    "cantidad": "1.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 361,
+  "fields": {
+    "material": 361,
+    "cantidad": "75.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 362,
+  "fields": {
+    "material": 362,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 363,
+  "fields": {
+    "material": 363,
+    "cantidad": "685.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 364,
+  "fields": {
+    "material": 364,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 365,
+  "fields": {
+    "material": 365,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 366,
+  "fields": {
+    "material": 366,
+    "cantidad": "9.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 367,
+  "fields": {
+    "material": 367,
+    "cantidad": "44.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 368,
+  "fields": {
+    "material": 368,
+    "cantidad": "27.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 369,
+  "fields": {
+    "material": 369,
+    "cantidad": "4.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 370,
+  "fields": {
+    "material": 370,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 371,
+  "fields": {
+    "material": 371,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 372,
+  "fields": {
+    "material": 372,
+    "cantidad": "3.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 373,
+  "fields": {
+    "material": 373,
+    "cantidad": "16.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 374,
+  "fields": {
+    "material": 374,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 375,
+  "fields": {
+    "material": 375,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 376,
+  "fields": {
+    "material": 376,
+    "cantidad": "27.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 377,
+  "fields": {
+    "material": 377,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 378,
+  "fields": {
+    "material": 378,
+    "cantidad": "15.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 379,
+  "fields": {
+    "material": 379,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 380,
+  "fields": {
+    "material": 380,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 381,
+  "fields": {
+    "material": 381,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 382,
+  "fields": {
+    "material": 382,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 383,
+  "fields": {
+    "material": 383,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 384,
+  "fields": {
+    "material": 384,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 385,
+  "fields": {
+    "material": 385,
+    "cantidad": "15.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 386,
+  "fields": {
+    "material": 386,
+    "cantidad": "10.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 387,
+  "fields": {
+    "material": 387,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 388,
+  "fields": {
+    "material": 388,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 389,
+  "fields": {
+    "material": 389,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 390,
+  "fields": {
+    "material": 390,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 391,
+  "fields": {
+    "material": 391,
+    "cantidad": "4.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 392,
+  "fields": {
+    "material": 392,
+    "cantidad": "5.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 393,
+  "fields": {
+    "material": 393,
+    "cantidad": "0.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 394,
+  "fields": {
+    "material": 394,
+    "cantidad": "16.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 395,
+  "fields": {
+    "material": 395,
+    "cantidad": "1.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 396,
+  "fields": {
+    "material": 396,
+    "cantidad": "6.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 397,
+  "fields": {
+    "material": 397,
+    "cantidad": "3.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 398,
+  "fields": {
+    "material": 398,
+    "cantidad": "6.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 399,
+  "fields": {
+    "material": 399,
+    "cantidad": "9.00"
+  }
+},
+{
+  "model": "core.inventario",
+  "pk": 400,
+  "fields": {
+    "material": 400,
+    "cantidad": "0.00"
   }
 },
 {
   "model": "core.apoyomaterial",
-  "pk": 60,
+  "pk": 38,
   "fields": {
-    "apoyo": 30,
-    "material": 2,
-    "cantidad_requerida": "10.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 61,
-  "fields": {
-    "apoyo": 30,
-    "material": 156,
-    "cantidad_requerida": "25.00",
-    "cantidad_retirada": "5.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 62,
-  "fields": {
-    "apoyo": 31,
-    "material": 1,
-    "cantidad_requerida": "20.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 63,
-  "fields": {
-    "apoyo": 31,
-    "material": 2,
-    "cantidad_requerida": "10.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 64,
-  "fields": {
-    "apoyo": 31,
-    "material": 156,
-    "cantidad_requerida": "10.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 65,
-  "fields": {
-    "apoyo": 32,
-    "material": 1,
-    "cantidad_requerida": "10.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 66,
-  "fields": {
-    "apoyo": 32,
-    "material": 2,
-    "cantidad_requerida": "20.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 67,
-  "fields": {
-    "apoyo": 32,
-    "material": 156,
-    "cantidad_requerida": "20.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 68,
-  "fields": {
-    "apoyo": 33,
-    "material": 1,
-    "cantidad_requerida": "50.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 69,
-  "fields": {
-    "apoyo": 33,
-    "material": 2,
-    "cantidad_requerida": "30.00",
-    "cantidad_retirada": "5.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 70,
-  "fields": {
-    "apoyo": 33,
-    "material": 156,
-    "cantidad_requerida": "30.00",
-    "cantidad_retirada": "10.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 71,
-  "fields": {
-    "apoyo": 34,
-    "material": 5,
-    "cantidad_requerida": "10.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 72,
-  "fields": {
-    "apoyo": 34,
-    "material": 6,
-    "cantidad_requerida": "20.00",
-    "cantidad_retirada": "0.00"
-  }
-},
-{
-  "model": "core.apoyomaterial",
-  "pk": 73,
-  "fields": {
-    "apoyo": 33,
+    "apoyo": 26,
     "material": 297,
     "cantidad_requerida": "1.00",
-    "cantidad_retirada": "0.00"
+    "cantidad_retirada": "0.00",
+    "potencia": null,
+    "codigo_luminaria": null
+  }
+},
+{
+  "model": "core.apoyomaterial",
+  "pk": 39,
+  "fields": {
+    "apoyo": 26,
+    "material": 233,
+    "cantidad_requerida": "40.00",
+    "cantidad_retirada": "0.00",
+    "potencia": null,
+    "codigo_luminaria": null
+  }
+},
+{
+  "model": "core.apoyomaterial",
+  "pk": 40,
+  "fields": {
+    "apoyo": 26,
+    "material": 338,
+    "cantidad_requerida": "1.00",
+    "cantidad_retirada": "0.00",
+    "potencia": null,
+    "codigo_luminaria": null
   }
 },
 {
   "model": "core.presupuesto",
   "pk": 1,
   "fields": {
-    "proyecto": 8,
+    "proyecto": 1,
     "valor_materiales": "0.00",
-    "valor_mano_obra": "1300940.00",
+    "valor_mano_obra": "219805.00",
     "otros_costos": "0.00",
-    "valor_total": "1300940.00",
-    "fecha": "2026-09-18"
-  }
-},
-{
-  "model": "core.presupuesto",
-  "pk": 2,
-  "fields": {
-    "proyecto": 7,
-    "valor_materiales": "0.00",
-    "valor_mano_obra": "23792.00",
-    "otros_costos": "0.00",
-    "valor_total": "23792.00",
+    "valor_total": "219805.00",
     "fecha": "2026-09-18"
   }
 },
@@ -9336,40 +9846,7 @@
   "model": "core.apoyomanoobra",
   "pk": 1,
   "fields": {
-    "apoyo": 30,
-    "item_mano_obra": 7,
-    "cantidad": "4.00",
-    "origen": "MANUAL",
-    "observacion": ""
-  }
-},
-{
-  "model": "core.apoyomanoobra",
-  "pk": 2,
-  "fields": {
-    "apoyo": 31,
-    "item_mano_obra": 9,
-    "cantidad": "2.00",
-    "origen": "MANUAL",
-    "observacion": ""
-  }
-},
-{
-  "model": "core.apoyomanoobra",
-  "pk": 3,
-  "fields": {
-    "apoyo": 32,
-    "item_mano_obra": 14,
-    "cantidad": "3.00",
-    "origen": "MANUAL",
-    "observacion": ""
-  }
-},
-{
-  "model": "core.apoyomanoobra",
-  "pk": 4,
-  "fields": {
-    "apoyo": 33,
+    "apoyo": 26,
     "item_mano_obra": 3,
     "cantidad": "1.00",
     "origen": "CALCULADO",
@@ -9378,9 +9855,9 @@
 },
 {
   "model": "core.apoyomanoobra",
-  "pk": 5,
+  "pk": 2,
   "fields": {
-    "apoyo": 33,
+    "apoyo": 26,
     "item_mano_obra": 6,
     "cantidad": "1.00",
     "origen": "CALCULADO",
@@ -9389,9 +9866,9 @@
 },
 {
   "model": "core.apoyomanoobra",
-  "pk": 6,
+  "pk": 3,
   "fields": {
-    "apoyo": 33,
+    "apoyo": 26,
     "item_mano_obra": 21,
     "cantidad": "1.00",
     "origen": "CALCULADO",
@@ -9400,9 +9877,9 @@
 },
 {
   "model": "core.apoyomanoobra",
-  "pk": 7,
+  "pk": 4,
   "fields": {
-    "apoyo": 33,
+    "apoyo": 26,
     "item_mano_obra": 48,
     "cantidad": "1.00",
     "origen": "CALCULADO",
@@ -9411,9 +9888,9 @@
 },
 {
   "model": "core.apoyomanoobra",
-  "pk": 8,
+  "pk": 5,
   "fields": {
-    "apoyo": 33,
+    "apoyo": 26,
     "item_mano_obra": 89,
     "cantidad": "1.00",
     "origen": "CALCULADO",
@@ -9422,10 +9899,43 @@
 },
 {
   "model": "core.apoyomanoobra",
+  "pk": 6,
+  "fields": {
+    "apoyo": 26,
+    "item_mano_obra": 99,
+    "cantidad": "1.00",
+    "origen": "CALCULADO",
+    "observacion": ""
+  }
+},
+{
+  "model": "core.apoyomanoobra",
+  "pk": 7,
+  "fields": {
+    "apoyo": 26,
+    "item_mano_obra": 79,
+    "cantidad": "1.00",
+    "origen": "CALCULADO",
+    "observacion": ""
+  }
+},
+{
+  "model": "core.apoyomanoobra",
+  "pk": 8,
+  "fields": {
+    "apoyo": 26,
+    "item_mano_obra": 24,
+    "cantidad": "1.00",
+    "origen": "CALCULADO",
+    "observacion": ""
+  }
+},
+{
+  "model": "core.apoyomanoobra",
   "pk": 9,
   "fields": {
-    "apoyo": 33,
-    "item_mano_obra": 99,
+    "apoyo": 26,
+    "item_mano_obra": 98,
     "cantidad": "1.00",
     "origen": "CALCULADO",
     "observacion": ""
@@ -9435,10 +9945,10 @@
   "model": "core.apoyomanoobra",
   "pk": 10,
   "fields": {
-    "apoyo": 30,
-    "item_mano_obra": 9,
-    "cantidad": "2.00",
-    "origen": "MANUAL",
+    "apoyo": 26,
+    "item_mano_obra": 52,
+    "cantidad": "42.00",
+    "origen": "CALCULADO",
     "observacion": ""
   }
 },
@@ -9446,500 +9956,1348 @@
   "model": "core.apoyomanoobra",
   "pk": 11,
   "fields": {
-    "apoyo": 30,
-    "item_mano_obra": 30,
-    "cantidad": "2.00",
-    "origen": "MANUAL",
+    "apoyo": 26,
+    "item_mano_obra": 105,
+    "cantidad": "42.00",
+    "origen": "CALCULADO",
     "observacion": ""
   }
 },
 {
   "model": "core.entradamaterialproyecto",
-  "pk": 44,
+  "pk": 5,
   "fields": {
-    "proyecto": 7,
-    "fecha": "2026-09-11",
+    "proyecto": 3,
+    "fecha": "2026-08-19",
     "proveedor": "CONSORSIO POWER NETWORKS",
-    "numero_remision": "1",
+    "numero_remision": "995647",
     "recibido_por": "IVERSON POSSU",
     "observaciones": "",
-    "fecha_creacion": "2026-09-11T12:34:34.728Z"
+    "fecha_creacion": "2026-08-18T16:30:21.140Z"
   }
 },
 {
   "model": "core.entradamaterialproyecto",
-  "pk": 45,
+  "pk": 8,
   "fields": {
-    "proyecto": 8,
-    "fecha": "2026-09-11",
+    "proyecto": 1,
+    "fecha": "2026-08-19",
     "proveedor": "",
     "numero_remision": "",
     "recibido_por": "",
     "observaciones": "",
-    "fecha_creacion": "2026-09-11T18:18:00.181Z"
+    "fecha_creacion": "2026-08-19T12:43:42.352Z"
   }
 },
 {
   "model": "core.entradamaterialproyecto",
-  "pk": 47,
+  "pk": 10,
   "fields": {
-    "proyecto": 9,
-    "fecha": "2026-09-14",
+    "proyecto": 5,
+    "fecha": "2026-08-19",
+    "proveedor": "CONSORSIO POWER NETWORKS",
+    "numero_remision": "5",
+    "recibido_por": "IVERSON POSSU",
+    "observaciones": "",
+    "fecha_creacion": "2026-08-19T17:56:39.067Z"
+  }
+},
+{
+  "model": "core.entradamaterialproyecto",
+  "pk": 17,
+  "fields": {
+    "proyecto": 1,
+    "fecha": "2026-08-31",
+    "proveedor": "CONSORSIO POWER NETWORKS",
+    "numero_remision": "15",
+    "recibido_por": "IVERSON POSSU",
+    "observaciones": "",
+    "fecha_creacion": "2026-08-31T13:26:34.908Z"
+  }
+},
+{
+  "model": "core.entradamaterialproyecto",
+  "pk": 36,
+  "fields": {
+    "proyecto": 4,
+    "fecha": "2026-09-03",
     "proveedor": "",
     "numero_remision": "",
     "recibido_por": "",
     "observaciones": "",
-    "fecha_creacion": "2026-09-14T20:25:24.743Z"
+    "fecha_creacion": "2026-09-03T13:41:17.614Z"
   }
 },
 {
   "model": "core.detalleentradamaterial",
-  "pk": 104,
+  "pk": 14,
   "fields": {
-    "entrada": 44,
-    "material": 1,
-    "cantidad": "50.00"
-  }
-},
-{
-  "model": "core.detalleentradamaterial",
-  "pk": 105,
-  "fields": {
-    "entrada": 44,
-    "material": 2,
-    "cantidad": "40.00"
-  }
-},
-{
-  "model": "core.detalleentradamaterial",
-  "pk": 106,
-  "fields": {
-    "entrada": 44,
-    "material": 156,
-    "cantidad": "50.00"
-  }
-},
-{
-  "model": "core.detalleentradamaterial",
-  "pk": 107,
-  "fields": {
-    "entrada": 45,
-    "material": 1,
-    "cantidad": "50.00"
-  }
-},
-{
-  "model": "core.detalleentradamaterial",
-  "pk": 108,
-  "fields": {
-    "entrada": 45,
-    "material": 2,
-    "cantidad": "50.00"
-  }
-},
-{
-  "model": "core.detalleentradamaterial",
-  "pk": 109,
-  "fields": {
-    "entrada": 45,
-    "material": 156,
-    "cantidad": "30.00"
-  }
-},
-{
-  "model": "core.detalleentradamaterial",
-  "pk": 112,
-  "fields": {
-    "entrada": 47,
-    "material": 5,
+    "entrada": 5,
+    "material": 11,
     "cantidad": "10.00"
   }
 },
 {
   "model": "core.detalleentradamaterial",
-  "pk": 113,
+  "pk": 15,
   "fields": {
-    "entrada": 47,
-    "material": 6,
+    "entrada": 5,
+    "material": 23,
+    "cantidad": "23.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 16,
+  "fields": {
+    "entrada": 5,
+    "material": 37,
+    "cantidad": "15.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 19,
+  "fields": {
+    "entrada": 8,
+    "material": 63,
     "cantidad": "20.00"
   }
 },
 {
-  "model": "core.materialrequeridoproyecto",
-  "pk": 17,
+  "model": "core.detalleentradamaterial",
+  "pk": 30,
   "fields": {
-    "proyecto": 7,
-    "material": 1,
-    "cantidad_requerida": "50.00"
-  }
-},
-{
-  "model": "core.materialrequeridoproyecto",
-  "pk": 18,
-  "fields": {
-    "proyecto": 7,
+    "entrada": 17,
     "material": 2,
-    "cantidad_requerida": "50.00"
+    "cantidad": "4.00"
   }
 },
 {
-  "model": "core.materialrequeridoproyecto",
-  "pk": 19,
+  "model": "core.detalleentradamaterial",
+  "pk": 57,
   "fields": {
-    "proyecto": 7,
+    "entrada": 36,
+    "material": 1,
+    "cantidad": "25.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 58,
+  "fields": {
+    "entrada": 36,
+    "material": 2,
+    "cantidad": "20.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 59,
+  "fields": {
+    "entrada": 36,
+    "material": 3,
+    "cantidad": "20.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 60,
+  "fields": {
+    "entrada": 36,
     "material": 156,
-    "cantidad_requerida": "50.00"
+    "cantidad": "40.00"
   }
 },
 {
-  "model": "core.materialrequeridoproyecto",
-  "pk": 20,
+  "model": "core.detalleentradamaterial",
+  "pk": 67,
   "fields": {
-    "proyecto": 8,
-    "material": 1,
-    "cantidad_requerida": "50.00"
-  }
-},
-{
-  "model": "core.materialrequeridoproyecto",
-  "pk": 21,
-  "fields": {
-    "proyecto": 8,
+    "entrada": 10,
     "material": 2,
+    "cantidad": "10.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 68,
+  "fields": {
+    "entrada": 10,
+    "material": 4,
+    "cantidad": "50.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 69,
+  "fields": {
+    "entrada": 10,
+    "material": 23,
+    "cantidad": "20.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 70,
+  "fields": {
+    "entrada": 10,
+    "material": 1,
+    "cantidad": "30.00"
+  }
+},
+{
+  "model": "core.detalleentradamaterial",
+  "pk": 71,
+  "fields": {
+    "entrada": 10,
+    "material": 80,
+    "cantidad": "20.90"
+  }
+},
+{
+  "model": "core.consumomaterialproyecto",
+  "pk": 2,
+  "fields": {
+    "proyecto": 4,
+    "fecha_reporte": "2026-08-18",
+    "supervisor": "alexander angulo garcia",
+    "numero_planilla": "994403",
+    "observaciones": "",
+    "fecha_creacion": "2026-08-18T16:19:54.022Z"
+  }
+},
+{
+  "model": "core.consumomaterialproyecto",
+  "pk": 3,
+  "fields": {
+    "proyecto": 3,
+    "fecha_reporte": "2026-08-18",
+    "supervisor": "alexander angulo garcia",
+    "numero_planilla": "994403",
+    "observaciones": "",
+    "fecha_creacion": "2026-08-18T16:38:30.742Z"
+  }
+},
+{
+  "model": "core.consumomaterialproyecto",
+  "pk": 4,
+  "fields": {
+    "proyecto": 4,
+    "fecha_reporte": "2026-08-19",
+    "supervisor": "alexander angulo garcia",
+    "numero_planilla": "",
+    "observaciones": "",
+    "fecha_creacion": "2026-08-19T12:51:59.664Z"
+  }
+},
+{
+  "model": "core.consumomaterialproyecto",
+  "pk": 5,
+  "fields": {
+    "proyecto": 4,
+    "fecha_reporte": "2026-08-19",
+    "supervisor": "alexander angulo garcia",
+    "numero_planilla": "",
+    "observaciones": "",
+    "fecha_creacion": "2026-08-19T12:53:06.183Z"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 2,
+  "fields": {
+    "consumo": 2,
+    "material": 1,
+    "cantidad": "12.00"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 3,
+  "fields": {
+    "consumo": 2,
+    "material": 5,
+    "cantidad": "23.00"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 4,
+  "fields": {
+    "consumo": 3,
+    "material": 11,
+    "cantidad": "9.00"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 5,
+  "fields": {
+    "consumo": 3,
+    "material": 23,
+    "cantidad": "15.00"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 6,
+  "fields": {
+    "consumo": 3,
+    "material": 37,
+    "cantidad": "15.00"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 7,
+  "fields": {
+    "consumo": 4,
+    "material": 11,
+    "cantidad": "7.00"
+  }
+},
+{
+  "model": "core.detalleconsumomaterial",
+  "pk": 8,
+  "fields": {
+    "consumo": 5,
+    "material": 11,
+    "cantidad": "5.00"
+  }
+},
+{
+  "model": "core.materialrequeridoproyecto",
+  "pk": 7,
+  "fields": {
+    "proyecto": 4,
+    "material": 1,
     "cantidad_requerida": "60.00"
   }
 },
 {
   "model": "core.materialrequeridoproyecto",
-  "pk": 22,
+  "pk": 8,
   "fields": {
-    "proyecto": 8,
-    "material": 156,
+    "proyecto": 4,
+    "material": 2,
     "cantidad_requerida": "30.00"
   }
 },
 {
-  "model": "admin.logentry",
-  "pk": 1,
-  "fields": {
-    "action_time": "2026-04-20T18:26:49.544Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "core",
-      "cajamenor"
-    ],
-    "object_id": "1",
-    "object_repr": "CajaMenor object (1)",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 2,
-  "fields": {
-    "action_time": "2026-04-20T18:39:32.560Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "core",
-      "movimientocajamenor"
-    ],
-    "object_id": "1",
-    "object_repr": "A001 - 100000",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 3,
-  "fields": {
-    "action_time": "2026-04-20T20:05:26.506Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "core",
-      "movimientocajamenor"
-    ],
-    "object_id": "2",
-    "object_repr": "A002 - 50000",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 4,
-  "fields": {
-    "action_time": "2026-04-20T20:06:43.700Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "core",
-      "movimientocajamenor"
-    ],
-    "object_id": "3",
-    "object_repr": "A003 - 70000",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 5,
-  "fields": {
-    "action_time": "2026-04-20T20:13:01.445Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "core",
-      "movimientocajamenor"
-    ],
-    "object_id": "4",
-    "object_repr": "A004 - 120000",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 6,
-  "fields": {
-    "action_time": "2026-07-07T17:31:21.745Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "group"
-    ],
-    "object_id": "1",
-    "object_repr": "Gerencia",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 7,
-  "fields": {
-    "action_time": "2026-07-07T17:31:58.513Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "group"
-    ],
-    "object_id": "2",
-    "object_repr": "RRHH",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 8,
-  "fields": {
-    "action_time": "2026-07-07T17:32:16.657Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "group"
-    ],
-    "object_id": "3",
-    "object_repr": "Logistica",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
+  "model": "core.materialrequeridoproyecto",
   "pk": 9,
   "fields": {
-    "action_time": "2026-07-07T17:34:04.514Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "group"
-    ],
-    "object_id": "4",
-    "object_repr": "Contabilidad",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
+    "proyecto": 4,
+    "material": 156,
+    "cantidad_requerida": "40.00"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.materialrequeridoproyecto",
   "pk": 10,
   "fields": {
-    "action_time": "2026-07-07T17:39:04.013Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "2",
-    "object_repr": "gerente",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
+    "proyecto": 4,
+    "material": 3,
+    "cantidad_requerida": "50.00"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.materialrequeridoproyecto",
   "pk": 11,
   "fields": {
-    "action_time": "2026-07-07T18:30:31.031Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "2",
-    "object_repr": "gerente",
-    "action_flag": 2,
-    "change_message": "[{\"changed\": {\"fields\": [\"Superuser status\", \"Groups\"]}}]"
+    "proyecto": 5,
+    "material": 1,
+    "cantidad_requerida": "20.00"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.materialrequeridoproyecto",
   "pk": 12,
   "fields": {
-    "action_time": "2026-07-07T18:32:54.924Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "1",
-    "object_repr": "admin",
-    "action_flag": 2,
-    "change_message": "[]"
+    "proyecto": 5,
+    "material": 2,
+    "cantidad_requerida": "15.00"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.materialrequeridoproyecto",
   "pk": 13,
   "fields": {
-    "action_time": "2026-07-07T18:35:16.459Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "3",
-    "object_repr": "rrhh",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
+    "proyecto": 5,
+    "material": 3,
+    "cantidad_requerida": "10.00"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.movimientoinventario",
+  "pk": 1,
+  "fields": {
+    "material": 360,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "1.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "1.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #30)",
+    "fecha": "2026-10-14T15:21:23.624Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 2,
+  "fields": {
+    "material": 361,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "75.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "75.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #33)",
+    "fecha": "2026-10-14T15:21:23.658Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 3,
+  "fields": {
+    "material": 363,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "685.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "685.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #35)",
+    "fecha": "2026-10-14T15:21:23.677Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 4,
+  "fields": {
+    "material": 366,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "9.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "9.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #44)",
+    "fecha": "2026-10-14T15:21:23.704Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 5,
+  "fields": {
+    "material": 367,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "44.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "44.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #48)",
+    "fecha": "2026-10-14T15:21:23.711Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 6,
+  "fields": {
+    "material": 368,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "27.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "27.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #49)",
+    "fecha": "2026-10-14T15:21:23.720Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 7,
+  "fields": {
+    "material": 369,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "4.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "4.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #53)",
+    "fecha": "2026-10-14T15:21:23.728Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 8,
+  "fields": {
+    "material": 372,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "3.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "3.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #67)",
+    "fecha": "2026-10-14T15:21:23.751Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 9,
+  "fields": {
+    "material": 373,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "16.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "16.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #68)",
+    "fecha": "2026-10-14T15:21:23.759Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 10,
+  "fields": {
+    "material": 376,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "27.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "27.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #83)",
+    "fecha": "2026-10-14T15:21:23.780Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 11,
+  "fields": {
+    "material": 378,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "15.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "15.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #86)",
+    "fecha": "2026-10-14T15:21:23.795Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 12,
+  "fields": {
+    "material": 385,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "15.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "15.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #117)",
+    "fecha": "2026-10-14T15:21:23.841Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 13,
+  "fields": {
+    "material": 386,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "10.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "10.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #118)",
+    "fecha": "2026-10-14T15:21:23.848Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
   "pk": 14,
   "fields": {
-    "action_time": "2026-07-07T18:40:19.568Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "3",
-    "object_repr": "rrhh",
-    "action_flag": 2,
-    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+    "material": 391,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "4.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "4.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #124)",
+    "fecha": "2026-10-14T15:21:23.883Z"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.movimientoinventario",
   "pk": 15,
   "fields": {
-    "action_time": "2026-07-08T12:41:55.851Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "4",
-    "object_repr": "contabilidad",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
+    "material": 392,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "5.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "5.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #125)",
+    "fecha": "2026-10-14T15:21:23.891Z"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.movimientoinventario",
   "pk": 16,
   "fields": {
-    "action_time": "2026-07-08T12:42:20.310Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "4",
-    "object_repr": "contabilidad",
-    "action_flag": 2,
-    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+    "material": 394,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "16.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "16.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #127)",
+    "fecha": "2026-10-14T15:21:23.906Z"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.movimientoinventario",
   "pk": 17,
   "fields": {
-    "action_time": "2026-07-08T12:44:25.375Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "5",
-    "object_repr": "logistica",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}]"
+    "material": 395,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "1.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "1.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #128)",
+    "fecha": "2026-10-14T15:21:23.913Z"
   }
 },
 {
-  "model": "admin.logentry",
+  "model": "core.movimientoinventario",
   "pk": 18,
   "fields": {
-    "action_time": "2026-07-08T12:44:58.739Z",
-    "user": [
-      "admin"
-    ],
-    "content_type": [
-      "auth",
-      "user"
-    ],
-    "object_id": "5",
-    "object_repr": "logistica",
-    "action_flag": 2,
-    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+    "material": 396,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "6.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "6.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #129)",
+    "fecha": "2026-10-14T15:21:23.922Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 19,
+  "fields": {
+    "material": 397,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "3.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "3.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #130)",
+    "fecha": "2026-10-14T15:21:23.929Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 20,
+  "fields": {
+    "material": 398,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "6.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "6.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #131)",
+    "fecha": "2026-10-14T15:21:23.940Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 21,
+  "fields": {
+    "material": 399,
+    "tipo_movimiento": "ENTRADA",
+    "cantidad": "9.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "9.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Creación de material e ingreso inicial de bodega desde Excel (Ítem Excel #132)",
+    "fecha": "2026-10-14T15:21:23.947Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 22,
+  "fields": {
+    "material": 21,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "29.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "29.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #16 (29.0))",
+    "fecha": "2026-10-14T15:21:23.960Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 23,
+  "fields": {
+    "material": 23,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "24.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "24.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #17 (24.0))",
+    "fecha": "2026-10-14T15:21:23.963Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 24,
+  "fields": {
+    "material": 22,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "8.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "8.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #18 (8.0))",
+    "fecha": "2026-10-14T15:21:23.968Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 25,
+  "fields": {
+    "material": 25,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "20.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "20.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #21 (20.0))",
+    "fecha": "2026-10-14T15:21:23.971Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 26,
+  "fields": {
+    "material": 28,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "20.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "20.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #23 (20.0))",
+    "fecha": "2026-10-14T15:21:23.975Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 27,
+  "fields": {
+    "material": 30,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "5.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "5.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #24 (5.0))",
+    "fecha": "2026-10-14T15:21:23.978Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 28,
+  "fields": {
+    "material": 31,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "24.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "24.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #25 (24.0))",
+    "fecha": "2026-10-14T15:21:23.982Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 29,
+  "fields": {
+    "material": 43,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "200.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "200.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #37 (200.0))",
+    "fecha": "2026-10-14T15:21:23.988Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 30,
+  "fields": {
+    "material": 46,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "50.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "50.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #42 (50.0))",
+    "fecha": "2026-10-14T15:21:23.991Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 31,
+  "fields": {
+    "material": 68,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "12.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "12.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #43 (12.0))",
+    "fecha": "2026-10-14T15:21:23.998Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 32,
+  "fields": {
+    "material": 66,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "61.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "61.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #45 (61.0))",
+    "fecha": "2026-10-14T15:21:24.004Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 33,
+  "fields": {
+    "material": 73,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "6.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "6.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #47 (6.0))",
+    "fecha": "2026-10-14T15:21:24.007Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 34,
+  "fields": {
+    "material": 55,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "44.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "44.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #58 (44.0))",
+    "fecha": "2026-10-14T15:21:24.011Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 35,
+  "fields": {
+    "material": 58,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "72.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "72.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #59 (6.0), #61 (66.0))",
+    "fecha": "2026-10-14T15:21:24.015Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 36,
+  "fields": {
+    "material": 57,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "11.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "11.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #60 (9.0), #62 (2.0))",
+    "fecha": "2026-10-14T15:21:24.020Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 37,
+  "fields": {
+    "material": 64,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "24.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "24.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #63 (24.0))",
+    "fecha": "2026-10-14T15:21:24.024Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 38,
+  "fields": {
+    "material": 127,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "9.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "9.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #65 (9.0))",
+    "fecha": "2026-10-14T15:21:24.028Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 39,
+  "fields": {
+    "material": 47,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "15.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "15.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #69 (15.0))",
+    "fecha": "2026-10-14T15:21:24.032Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 40,
+  "fields": {
+    "material": 76,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "82.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "82.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #70 (82.0))",
+    "fecha": "2026-10-14T15:21:24.036Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 41,
+  "fields": {
+    "material": 78,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "14.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "14.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #72 (5.0), #73 (9.0))",
+    "fecha": "2026-10-14T15:21:24.042Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 42,
+  "fields": {
+    "material": 77,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "40.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "40.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #74 (40.0))",
+    "fecha": "2026-10-14T15:21:24.046Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 43,
+  "fields": {
+    "material": 88,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "14.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "14.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #78 (14.0))",
+    "fecha": "2026-10-14T15:21:24.051Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 44,
+  "fields": {
+    "material": 90,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "34.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "34.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #79 (34.0))",
+    "fecha": "2026-10-14T15:21:24.055Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 45,
+  "fields": {
+    "material": 92,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "61.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "61.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #81 (61.0))",
+    "fecha": "2026-10-14T15:21:24.058Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 46,
+  "fields": {
+    "material": 102,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "5.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "5.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #90 (5.0))",
+    "fecha": "2026-10-14T15:21:24.062Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 47,
+  "fields": {
+    "material": 355,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "1.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "1.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #100 (1.0))",
+    "fecha": "2026-10-14T15:21:24.068Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 48,
+  "fields": {
+    "material": 158,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "16.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "16.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #104 (16.0))",
+    "fecha": "2026-10-14T15:21:24.073Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 49,
+  "fields": {
+    "material": 123,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "19.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "19.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #106 (19.0))",
+    "fecha": "2026-10-14T15:21:24.077Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 50,
+  "fields": {
+    "material": 124,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "9.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "9.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #107 (9.0))",
+    "fecha": "2026-10-14T15:21:24.080Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 51,
+  "fields": {
+    "material": 125,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "10.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "10.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #108 (10.0))",
+    "fecha": "2026-10-14T15:21:24.086Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 52,
+  "fields": {
+    "material": 126,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "3.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "3.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #109 (2.0), #110 (1.0))",
+    "fecha": "2026-10-14T15:21:24.089Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 53,
+  "fields": {
+    "material": 131,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "4.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "4.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #113 (4.0))",
+    "fecha": "2026-10-14T15:21:24.093Z"
+  }
+},
+{
+  "model": "core.movimientoinventario",
+  "pk": 54,
+  "fields": {
+    "material": 67,
+    "tipo_movimiento": "AJUSTE",
+    "cantidad": "6.00",
+    "stock_anterior": "0.00",
+    "stock_resultante": "6.00",
+    "usuario": 1,
+    "usuario_nombre": "admin",
+    "proyecto": null,
+    "apoyo": null,
+    "detalle_origen_destino": "Bodega Principal (Inventario Inicial Excel)",
+    "observacion": "Carga inicial de inventario físico desde Excel Hoja3 (Fuentes: #120 (6.0))",
+    "fecha": "2026-10-14T15:21:24.096Z"
   }
 }
 ]

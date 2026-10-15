@@ -1,6 +1,7 @@
 from collections import defaultdict
 from core.helpers.ingenieria_calculo import calcular_mano_obra_proyecto_completo, calcular_mano_obra_para_apoyo, actualizar_presupuesto_proyecto
 from core.helpers.inventario_historial import registrar_movimiento_inventario
+from core.helpers.simco_matriz import obtener_matriz_simco, obtener_materiales_proyecto_simco
 import io
 import json
 import os
@@ -232,6 +233,21 @@ def lista_proyectos(request, macroproyecto_id=None):
 
     total_proy = Proyecto.objects.filter(macroproyecto=macroproyecto).count() if macroproyecto else Proyecto.objects.count()
 
+    matriz_simco = obtener_matriz_simco()
+    catalogo_simco_json = json.dumps(matriz_simco)
+
+    proyectos_selector_data = [
+        {
+            "id": p.id,
+            "numero": p.numero_emcali,
+            "etiqueta": p.etiqueta,
+            "tipo": p.tipo,
+            "nombre": f"{p.etiqueta} {p.numero_emcali}"
+        }
+        for p in proyectos_imprimir
+    ]
+    proyectos_selector_json = json.dumps(proyectos_selector_data)
+
     return render(
         request,
         "ingenieria/proyecto/lista.html",
@@ -239,12 +255,14 @@ def lista_proyectos(request, macroproyecto_id=None):
             "macroproyecto": macroproyecto,
             "proyectos": proyectos,
             "proyectos_imprimir": proyectos_imprimir,
+            "proyectos_selector_json": proyectos_selector_json,
+            "catalogo_simco_json": catalogo_simco_json,
             "macroproyectos": todos_macroproyectos,
             "query": query,
             "total_proyectos": total_proy,
             "total_filtrados": proyectos.count(),
         }
-)
+    )
 
 @login_required
 def crear_proyecto(request, macroproyecto_id=None):
@@ -2295,6 +2313,217 @@ def exportar_liquidacion_macroproyecto_excel(request, macroproyecto_id):
     response = HttpResponse(
         output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+    )
     response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
     return response
+
+
+@login_required
+def api_materiales_proyecto_simco(request, proyecto_id):
+    """
+    Retorna la lista de materiales asociados a un proyecto (pedidos o en apoyos)
+    cruzados con la matriz de Mano de Obra de SIMCO.
+    """
+    data = obtener_materiales_proyecto_simco(proyecto_id)
+    return JsonResponse(data)
+
+
+@login_required
+def exportar_matriz_simco_excel(request):
+    """
+    Genera un archivo Excel profesional con los materiales y mano de obra vinculada de SIMCO,
+    idéntico al formato contractual, con subtotales y total general estimado.
+    """
+    proyecto_id = request.GET.get("proyecto_id") or request.POST.get("proyecto_id")
+    items_json = request.POST.get("items_json") or request.GET.get("items_json")
+
+    proyecto = None
+    if proyecto_id and str(proyecto_id).isdigit():
+        proyecto = Proyecto.objects.filter(id=int(proyecto_id)).first()
+
+    matriz = obtener_matriz_simco()
+    items_a_exportar = []
+
+    if items_json:
+        try:
+            items_parsed = json.loads(items_json)
+            for it in items_parsed:
+                code = str(it.get("item", "")).strip()
+                cant = float(it.get("cantidad", 0))
+                actividades_activas = it.get("actividades", None)
+                
+                simco_info = matriz.get(code)
+                if simco_info:
+                    acts = []
+                    val_sum = 0
+                    for a in simco_info["actividades"]:
+                        if actividades_activas is None or a["id_mo"] in actividades_activas:
+                            acts.append(a)
+                            val_sum += a["valor_unitario"]
+                    items_a_exportar.append({
+                        "item": code,
+                        "descripcion": simco_info["descripcion"],
+                        "unidad": simco_info["unidad"],
+                        "cantidad": cant,
+                        "valor_unitario_suma": val_sum,
+                        "subtotal": cant * val_sum,
+                        "actividades": acts
+                    })
+        except Exception:
+            pass
+
+    if not items_a_exportar and proyecto:
+        proy_data = obtener_materiales_proyecto_simco(proyecto.id)
+        for it in proy_data.get("materiales", []):
+            if it.get("tiene_simco"):
+                items_a_exportar.append({
+                    "item": it["item"],
+                    "descripcion": it["descripcion"],
+                    "unidad": it["unidad"],
+                    "cantidad": it["cantidad"],
+                    "valor_unitario_suma": it["valor_unitario_suma"],
+                    "subtotal": it["subtotal_estimado"],
+                    "actividades": it["actividades"]
+                })
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Matriz SIMCO"
+
+    fuente_titulo = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    fuente_sub = Font(name="Calibri", size=10, italic=True, color="475569")
+    fuente_encabezado = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    fuente_fila = Font(name="Calibri", size=9)
+    fuente_total = Font(name="Calibri", size=11, bold=True, color="064E3B")
+
+    fill_header = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
+    fill_total = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+
+    border_thin = Border(
+        left=Side(style='thin', color='CBD5E1'),
+        right=Side(style='thin', color='CBD5E1'),
+        top=Side(style='thin', color='CBD5E1'),
+        bottom=Side(style='thin', color='CBD5E1')
+    )
+    border_total = Border(
+        top=Side(style='thin', color='059669'),
+        bottom=Side(style='double', color='059669'),
+        left=Side(style='thin', color='CBD5E1'),
+        right=Side(style='thin', color='CBD5E1')
+    )
+
+    ws.merge_cells("A1:G1")
+    ws["A1"] = "COINTECA S.A.S. - MATRIZ DE CONEXIONES Y ESTIMACIÓN SIMCO"
+    ws["A1"].font = fuente_titulo
+
+    proy_lbl = f"{proyecto.etiqueta} {proyecto.numero_emcali}" if proyecto else "Cotización y Proyección Libre"
+    ws.merge_cells("A2:G2")
+    ws["A2"] = f"PROYECTO: {proy_lbl} | FECHA: {timezone.now().strftime('%d/%m/%Y %H:%M')}"
+    ws["A2"].font = fuente_sub
+
+    headers = [
+        "ID-MT",
+        "MATERIAL / SUMINISTRO",
+        "CANT.",
+        "ID-MO",
+        "ACTIVIDAD DE MANO DE OBRA VINCULADA",
+        "VALOR UND ($)",
+        "SUBTOTAL ($)"
+    ]
+
+    r_h = 4
+    for c_i, h in enumerate(headers, 1):
+        cell = ws.cell(row=r_h, column=c_i, value=h)
+        cell.font = fuente_encabezado
+        cell.fill = fill_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = border_thin
+    ws.row_dimensions[r_h].height = 24
+
+    current_r = 5
+    gran_total_mo = Decimal("0")
+
+    for item in items_a_exportar:
+        cant_m = Decimal(str(item["cantidad"]))
+        actividades = item.get("actividades", [])
+
+        if not actividades:
+            ws.cell(row=current_r, column=1, value=int(item["item"]) if item["item"].isdigit() else item["item"]).alignment = Alignment(horizontal="center")
+            ws.cell(row=current_r, column=2, value=item["descripcion"])
+            ws.cell(row=current_r, column=3, value=float(cant_m)).alignment = Alignment(horizontal="right")
+            ws.cell(row=current_r, column=4, value="-").alignment = Alignment(horizontal="center")
+            ws.cell(row=current_r, column=5, value="(Sin actividades asociadas)")
+            ws.cell(row=current_r, column=6, value=0).alignment = Alignment(horizontal="right")
+            ws.cell(row=current_r, column=7, value=0).alignment = Alignment(horizontal="right")
+            for c_i in range(1, 8):
+                ws.cell(row=current_r, column=c_i).border = border_thin
+                ws.cell(row=current_r, column=c_i).font = fuente_fila
+            current_r += 1
+            continue
+
+        for idx, act in enumerate(actividades):
+            val_u = Decimal(str(act["valor_unitario"]))
+            sub_act = cant_m * val_u
+            gran_total_mo += sub_act
+
+            cell_mat_id = ws.cell(row=current_r, column=1, value=int(item["item"]) if item["item"].isdigit() else item["item"])
+            cell_mat_desc = ws.cell(row=current_r, column=2, value=item["descripcion"])
+            cell_cant = ws.cell(row=current_r, column=3, value=float(cant_m))
+            cell_mo_id = ws.cell(row=current_r, column=4, value=act["id_mo"])
+            cell_mo_desc = ws.cell(row=current_r, column=5, value=act["descripcion"])
+            cell_val_u = ws.cell(row=current_r, column=6, value=float(val_u))
+            cell_sub = ws.cell(row=current_r, column=7, value=float(sub_act))
+
+            cell_mat_id.alignment = Alignment(horizontal="center")
+            cell_cant.alignment = Alignment(horizontal="right")
+            cell_cant.number_format = '#,##0.00'
+            cell_mo_id.alignment = Alignment(horizontal="center")
+            cell_val_u.alignment = Alignment(horizontal="right")
+            cell_val_u.number_format = '"$"#,##0'
+            cell_sub.alignment = Alignment(horizontal="right")
+            cell_sub.number_format = '"$"#,##0'
+
+            for c_i in range(1, 8):
+                cell_c = ws.cell(row=current_r, column=c_i)
+                cell_c.border = border_thin
+                cell_c.font = fuente_fila
+
+            current_r += 1
+
+    # Fila de Total General
+    ws.merge_cells(start_row=current_r, start_column=1, end_row=current_r, end_column=6)
+    cell_tot_lbl = ws.cell(row=current_r, column=1, value="TOTAL ESTIMADO DE MANO DE OBRA (SIMCO)")
+    cell_tot_lbl.font = fuente_total
+    cell_tot_lbl.alignment = Alignment(horizontal="right", vertical="center")
+    cell_tot_lbl.fill = fill_total
+    cell_tot_lbl.border = border_total
+
+    cell_tot_val = ws.cell(row=current_r, column=7, value=float(gran_total_mo))
+    cell_tot_val.font = fuente_total
+    cell_tot_val.alignment = Alignment(horizontal="right", vertical="center")
+    cell_tot_val.fill = fill_total
+    cell_tot_val.border = border_total
+    cell_tot_val.number_format = '"$"#,##0'
+
+    ws.row_dimensions[current_r].height = 25
+
+    ws.column_dimensions['A'].width = 10
+    ws.column_dimensions['B'].width = 45
+    ws.column_dimensions['C'].width = 10
+    ws.column_dimensions['D'].width = 10
+    ws.column_dimensions['E'].width = 45
+    ws.column_dimensions['F'].width = 16
+    ws.column_dimensions['G'].width = 18
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    nombre_sanitizado = f"Estimacion_SIMCO_{proy_lbl.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    response = HttpResponse(
+        output.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{nombre_sanitizado}"'
+    return response
+

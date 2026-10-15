@@ -492,10 +492,536 @@
     // Cerrar con Escape cualquier modal abierto
     document.addEventListener("keydown", function (evento) {
         if (evento.key === "Escape") {
-            if (modal &&!modal.classList.contains("hidden")) cerrar();
-            if (modalEditar &&!modalEditar.classList.contains("hidden")) cerrarEditar();
-            if (modalEliminar &&!modalEliminar.classList.contains("hidden")) cerrarEliminar();
-            if (modalImprimir &&!modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
+            if (modal && !modal.classList.contains("hidden")) cerrar();
+            if (modalEditar && !modalEditar.classList.contains("hidden")) cerrarEditar();
+            if (modalEliminar && !modalEliminar.classList.contains("hidden")) cerrarEliminar();
+            if (modalImprimir && !modalImprimir.classList.contains("hidden")) cerrarModalImprimir();
+            if (modalSimco && !modalSimco.classList.contains("hidden")) cerrarModalSimco();
         }
     });
+
+    // ==========================================
+    // MATRIZ CONTRACTUAL SIMCO (MATERIALES Y MANO DE OBRA)
+    // ==========================================
+    const modalSimco = document.getElementById("modalSimcoMatriz");
+    const btnAbrirModalSimco = document.getElementById("btnAbrirModalSimco");
+    const btnCerrarSimcoHeader = document.getElementById("btnCerrarModalSimcoHeader");
+    const btnCerrarSimcoFooter = document.getElementById("btnCerrarModalSimcoFooter");
+    const simcoSelectProyecto = document.getElementById("simcoSelectProyecto");
+    const btnCargarMaterialesProyecto = document.getElementById("btnCargarMaterialesProyecto");
+    const simcoInputBuscador = document.getElementById("simcoInputBuscador");
+    const btnLimpiarSimcoBuscador = document.getElementById("btnLimpiarSimcoBuscador");
+    const simcoContenedorLista = document.getElementById("simcoContenedorLista");
+    const btnSimcoMarcarVisibles = document.getElementById("btnSimcoMarcarVisibles");
+    const btnSimcoDesmarcarTodos = document.getElementById("btnSimcoDesmarcarTodos");
+    const btnSimcoVerSoloChuleados = document.getElementById("btnSimcoVerSoloChuleados");
+    const simcoTotalMatsCount = document.getElementById("simcoTotalMatsCount");
+    const simcoTotalActsCount = document.getElementById("simcoTotalActsCount");
+    const simcoGranTotal = document.getElementById("simcoGranTotal");
+    const btnSimcoExportarExcel = document.getElementById("btnSimcoExportarExcel");
+    const simcoInfoVisibles = document.getElementById("simcoInfoVisibles");
+
+    let catalogoSimco = {};
+    try {
+        const rawJson = document.getElementById("catalogo-simco-json")?.textContent || "{}";
+        catalogoSimco = JSON.parse(rawJson);
+    } catch (e) {
+        catalogoSimco = {};
+    }
+
+    // Estado en memoria de los 81 materiales: { code: { chuleado: bool, cantidad: num, expandido: bool, actividades: { id_mo: bool } } }
+    const estadoSimco = {};
+    Object.keys(catalogoSimco).forEach(code => {
+        const mat = catalogoSimco[code];
+        const actsState = {};
+        (mat.actividades || []).forEach(a => {
+            actsState[a.id_mo] = true;
+        });
+        estadoSimco[code] = {
+            chuleado: false,
+            cantidad: 1,
+            expandido: false,
+            actividades: actsState
+        };
+    });
+
+    let soloChuleadosActivo = false;
+
+    function formatearPesos(val) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            maximumFractionDigits: 0
+        }).format(val || 0);
+    }
+
+    function normalizarSimco(txt) {
+        return (txt || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+    }
+
+    function renderizarListaSimco() {
+        if (!simcoContenedorLista) return;
+
+        const query = normalizarSimco(simcoInputBuscador?.value || "");
+        const terminos = query.split(/\s+/).filter(t => t.length > 0);
+
+        const keys = Object.keys(catalogoSimco);
+        let itemsRender = [];
+
+        keys.forEach(code => {
+            const mat = catalogoSimco[code];
+            const state = estadoSimco[code];
+
+            if (soloChuleadosActivo && !state.chuleado) {
+                return;
+            }
+
+            const codeNorm = normalizarSimco(code);
+            const descNorm = normalizarSimco(mat.descripcion);
+            const fullNorm = `${codeNorm} ${descNorm}`;
+
+            let coincide = true;
+            if (terminos.length > 0) {
+                coincide = terminos.every(t => fullNorm.includes(t));
+            }
+
+            if (!coincide) return;
+
+            let score = 4;
+            if (descNorm.startsWith(query)) score = 1;
+            else if (descNorm.split(/\s+/).some(w => w.startsWith(query))) score = 2;
+            else if (codeNorm.startsWith(query)) score = 3;
+
+            itemsRender.push({
+                code: code,
+                score: score,
+                desc: descNorm,
+                mat: mat,
+                state: state
+            });
+        });
+
+        itemsRender.sort((a, b) => {
+            if (a.score !== b.score) return a.score - b.score;
+            return a.desc.localeCompare(b.desc);
+        });
+
+        if (simcoInfoVisibles) {
+            simcoInfoVisibles.textContent = `Mostrando ${itemsRender.length} de ${keys.length} materiales SIMCO`;
+        }
+
+        if (itemsRender.length === 0) {
+            simcoContenedorLista.innerHTML = `
+                <div class="p-8 text-center bg-card rounded-xl border border-dashed border-border text-muted-foreground">
+                    <p class="font-bold text-sm">No se encontraron materiales que coincidan con la búsqueda.</p>
+                    <p class="text-xs mt-1">Intenta con otro término o desmarca el filtro de "Solo Chuleados".</p>
+                </div>
+            `;
+            actualizarTotalesSimco();
+            return;
+        }
+
+        let html = "";
+        itemsRender.forEach(item => {
+            const code = item.code;
+            const mat = item.mat;
+            const st = item.state;
+            const isChecked = st.chuleado;
+            const cant = st.cantidad || 1;
+            const expandido = st.expandido;
+
+            let tarifaUnitActiva = 0;
+            (mat.actividades || []).forEach(act => {
+                if (st.actividades[act.id_mo] !== false) {
+                    tarifaUnitActiva += act.valor_unitario;
+                }
+            });
+            const subtotalMat = isChecked ? (cant * tarifaUnitActiva) : 0;
+
+            html += `
+                <div class="mat-card-simco bg-card rounded-xl border ${isChecked ? 'border-teal-500/80 shadow-xs ring-1 ring-teal-500/30' : 'border-border'} transition p-3 hover:border-teal-400" data-code="${code}">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex items-start sm:items-center gap-2.5 flex-1 min-w-0">
+                            <input type="checkbox"
+                                   class="chk-mat-simco size-4 mt-0.5 sm:mt-0 rounded border-border-strong text-teal-600 focus:ring-teal-500 cursor-pointer"
+                                   data-code="${code}"
+                                   ${isChecked ? 'checked' : ''}>
+
+                            <span class="font-mono text-xs font-black px-2 py-0.5 rounded bg-blue-100 text-blue-900 dark:bg-blue-900/40 dark:text-blue-200 border border-blue-200 dark:border-blue-700 shrink-0">
+                                [${code}]
+                            </span>
+
+                            <div class="flex-1 min-w-0">
+                                <span class="text-xs font-bold text-foreground block truncate" title="${mat.descripcion}">
+                                    ${mat.descripcion}
+                                </span>
+                                <div class="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                                    <span class="px-1.5 py-0.2 rounded bg-muted font-bold text-foreground">${mat.unidad || 'UN'}</span>
+                                    <span>•</span>
+                                    <span>Tarifa base MO: <strong class="text-teal-700 dark:text-teal-400">${formatearPesos(mat.valor_unitario_suma)}</strong> / ${mat.unidad || 'UN'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2.5 shrink-0 self-end sm:self-auto pl-7 sm:pl-0">
+                            <div class="flex items-center gap-1.5">
+                                <label class="text-[10px] uppercase font-bold text-muted-foreground">Cant:</label>
+                                <input type="number" step="any" min="0.01"
+                                       class="input-cant-simco w-20 px-2 py-1 border border-border-strong rounded-lg text-xs font-black text-center text-foreground bg-background focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                       value="${cant}"
+                                       data-code="${code}">
+                            </div>
+
+                            <div class="text-right min-w-[100px]">
+                                <span class="text-[10px] uppercase font-bold text-muted-foreground block">Subtotal</span>
+                                <span class="text-xs font-black ${isChecked ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'} font-mono">
+                                    ${formatearPesos(subtotalMat)}
+                                </span>
+                            </div>
+
+                            <button type="button"
+                                    class="btn-toggle-acts-simco px-2 py-1 rounded bg-muted hover:bg-gray-200 dark:hover:bg-slate-700 text-[10px] font-bold text-muted-foreground hover:text-foreground border border-border transition cursor-pointer"
+                                    data-code="${code}"
+                                    title="Ver actividades de mano de obra vinculadas">
+                                <span>${mat.actividades?.length || 0} MO</span>
+                                <span>${expandido ? '▲' : '▼'}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="seccion-acts-simco mt-2.5 pt-2 border-t border-border/70 ${expandido ? '' : 'hidden'}" id="acts-container-${code}">
+                        <div class="bg-muted/30 rounded-lg p-2.5 space-y-1.5 border border-border/50">
+                            <span class="text-[10px] font-black uppercase text-teal-800 dark:text-teal-300 block tracking-wider">
+                                Actividades de Mano de Obra Vinculadas (SIMCO / Contractual)
+                            </span>
+                            <div class="space-y-1">
+                                ${(mat.actividades || []).map(act => {
+                                    const actChecked = st.actividades[act.id_mo] !== false;
+                                    const subAct = isChecked && actChecked ? (cant * act.valor_unitario) : 0;
+                                    return `
+                                        <div class="flex items-center justify-between text-xs py-1 px-2 rounded hover:bg-background/80 transition">
+                                            <div class="flex items-center gap-2 flex-1 min-w-0 pr-2">
+                                                <input type="checkbox"
+                                                       class="chk-act-simco size-3.5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
+                                                       data-mat-code="${code}"
+                                                       data-mo-code="${act.id_mo}"
+                                                       ${actChecked ? 'checked' : ''}>
+                                                <span class="font-mono text-[10px] font-bold text-muted-foreground shrink-0">[${act.id_mo}]</span>
+                                                <span class="text-xs text-foreground truncate" title="${act.descripcion}">${act.descripcion}</span>
+                                            </div>
+                                            <div class="flex items-center gap-3 shrink-0 text-right">
+                                                <span class="text-[10px] font-semibold text-muted-foreground">${formatearPesos(act.valor_unitario)} / ${act.unidad}</span>
+                                                <span class="font-mono text-xs font-bold ${actChecked && isChecked ? 'text-foreground' : 'text-muted-foreground'} min-w-[75px]">
+                                                    ${formatearPesos(subAct)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        simcoContenedorLista.innerHTML = html;
+        actualizarTotalesSimco();
+    }
+
+    function actualizarTotalesSimco() {
+        let matsCount = 0;
+        let actsCount = 0;
+        let granTotal = 0;
+
+        Object.keys(catalogoSimco).forEach(code => {
+            const st = estadoSimco[code];
+            if (!st || !st.chuleado) return;
+
+            matsCount++;
+            const cant = st.cantidad || 0;
+            const mat = catalogoSimco[code];
+
+            (mat.actividades || []).forEach(act => {
+                if (st.actividades[act.id_mo] !== false) {
+                    actsCount++;
+                    granTotal += (cant * act.valor_unitario);
+                }
+            });
+        });
+
+        if (simcoTotalMatsCount) simcoTotalMatsCount.textContent = matsCount;
+        if (simcoTotalActsCount) simcoTotalActsCount.textContent = actsCount;
+        if (simcoGranTotal) simcoGranTotal.textContent = `${formatearPesos(granTotal)} COP`;
+    }
+
+    function abrirModalSimco() {
+        if (!modalSimco) return;
+        modalSimco.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        renderizarListaSimco();
+    }
+
+    function cerrarModalSimco() {
+        if (!modalSimco) return;
+        modalSimco.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
+
+    if (btnAbrirModalSimco) {
+        btnAbrirModalSimco.addEventListener("click", function () {
+            abrirModalSimco();
+        });
+    }
+
+    if (btnCerrarSimcoHeader) btnCerrarSimcoHeader.addEventListener("click", cerrarModalSimco);
+    if (btnCerrarSimcoFooter) btnCerrarSimcoFooter.addEventListener("click", cerrarModalSimco);
+
+    if (modalSimco) {
+        modalSimco.addEventListener("click", function (e) {
+            if (e.target === modalSimco) cerrarModalSimco();
+        });
+    }
+
+    document.querySelectorAll(".btnAbrirSimcoFila").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const proyId = this.getAttribute("data-id");
+            abrirModalSimco();
+            if (simcoSelectProyecto && proyId) {
+                simcoSelectProyecto.value = proyId;
+                cargarMaterialesDelProyecto(proyId);
+            }
+        });
+    });
+
+    if (btnCargarMaterialesProyecto) {
+        btnCargarMaterialesProyecto.addEventListener("click", function () {
+            const proyId = simcoSelectProyecto ? simcoSelectProyecto.value : "";
+            if (!proyId) {
+                alert("Por favor selecciona un proyecto de la lista para cargar sus materiales.");
+                return;
+            }
+            cargarMaterialesDelProyecto(proyId);
+        });
+    }
+
+    if (simcoSelectProyecto) {
+        simcoSelectProyecto.addEventListener("change", function () {
+            if (this.value) {
+                cargarMaterialesDelProyecto(this.value);
+            }
+        });
+    }
+
+    function cargarMaterialesDelProyecto(proyectoId) {
+        if (!proyectoId) return;
+
+        const simcoTextoCargar = document.getElementById("simcoTextoCargar");
+        if (simcoTextoCargar) simcoTextoCargar.textContent = "Cargando...";
+
+        fetch(`/ingenieria/api/proyecto/${proyectoId}/materiales-simco/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                Object.keys(estadoSimco).forEach(k => {
+                    estadoSimco[k].chuleado = false;
+                });
+
+                let cargados = 0;
+                (data.materiales || []).forEach(m => {
+                    const code = String(m.item);
+                    if (estadoSimco[code]) {
+                        estadoSimco[code].chuleado = true;
+                        estadoSimco[code].cantidad = m.cantidad > 0 ? m.cantidad : 1;
+                        estadoSimco[code].expandido = true;
+                        cargados++;
+                    }
+                });
+
+                if (cargados > 0) {
+                    soloChuleadosActivo = true;
+                    if (btnSimcoVerSoloChuleados) {
+                        btnSimcoVerSoloChuleados.classList.add("bg-teal-600", "text-white");
+                        btnSimcoVerSoloChuleados.classList.remove("bg-card", "text-foreground");
+                        btnSimcoVerSoloChuleados.setAttribute("data-activo", "1");
+                    }
+                } else {
+                    alert("Este proyecto aún no tiene materiales pedidos o instalados con conexiones SIMCO. Puedes chulearlos manualmente.");
+                }
+
+                renderizarListaSimco();
+            })
+            .catch(err => {
+                console.error("Error al cargar materiales del proyecto:", err);
+                alert("Ocurrió un error al consultar los materiales del proyecto.");
+            })
+            .finally(() => {
+                if (simcoTextoCargar) simcoTextoCargar.textContent = "Cargar Materiales";
+            });
+    }
+
+    if (simcoInputBuscador) {
+        simcoInputBuscador.addEventListener("input", function () {
+            if (btnLimpiarSimcoBuscador) {
+                if (this.value.trim().length > 0) {
+                    btnLimpiarSimcoBuscador.classList.remove("hidden");
+                } else {
+                    btnLimpiarSimcoBuscador.classList.add("hidden");
+                }
+            }
+            renderizarListaSimco();
+        });
+    }
+
+    if (btnLimpiarSimcoBuscador) {
+        btnLimpiarSimcoBuscador.addEventListener("click", function () {
+            if (simcoInputBuscador) {
+                simcoInputBuscador.value = "";
+                this.classList.add("hidden");
+                renderizarListaSimco();
+                simcoInputBuscador.focus();
+            }
+        });
+    }
+
+    if (btnSimcoMarcarVisibles) {
+        btnSimcoMarcarVisibles.addEventListener("click", function () {
+            document.querySelectorAll("#simcoContenedorLista .mat-card-simco").forEach(card => {
+                const code = card.getAttribute("data-code");
+                if (estadoSimco[code]) {
+                    estadoSimco[code].chuleado = true;
+                }
+            });
+            renderizarListaSimco();
+        });
+    }
+
+    if (btnSimcoDesmarcarTodos) {
+        btnSimcoDesmarcarTodos.addEventListener("click", function () {
+            Object.keys(estadoSimco).forEach(k => {
+                estadoSimco[k].chuleado = false;
+            });
+            renderizarListaSimco();
+        });
+    }
+
+    if (btnSimcoVerSoloChuleados) {
+        btnSimcoVerSoloChuleados.addEventListener("click", function () {
+            soloChuleadosActivo = !soloChuleadosActivo;
+            this.setAttribute("data-activo", soloChuleadosActivo ? "1" : "0");
+            if (soloChuleadosActivo) {
+                this.classList.add("bg-teal-600", "text-white");
+                this.classList.remove("bg-card", "text-foreground");
+            } else {
+                this.classList.remove("bg-teal-600", "text-white");
+                this.classList.add("bg-card", "text-foreground");
+            }
+            renderizarListaSimco();
+        });
+    }
+
+    if (simcoContenedorLista) {
+        simcoContenedorLista.addEventListener("change", function (e) {
+            if (e.target.matches(".chk-mat-simco")) {
+                const code = e.target.getAttribute("data-code");
+                if (estadoSimco[code]) {
+                    estadoSimco[code].chuleado = e.target.checked;
+                    renderizarListaSimco();
+                }
+            }
+
+            if (e.target.matches(".chk-act-simco")) {
+                const matCode = e.target.getAttribute("data-mat-code");
+                const moCode = e.target.getAttribute("data-mo-code");
+                if (estadoSimco[matCode] && estadoSimco[matCode].actividades) {
+                    estadoSimco[matCode].actividades[moCode] = e.target.checked;
+                    renderizarListaSimco();
+                }
+            }
+        });
+
+        simcoContenedorLista.addEventListener("input", function (e) {
+            if (e.target.matches(".input-cant-simco")) {
+                const code = e.target.getAttribute("data-code");
+                const val = parseFloat(e.target.value) || 0;
+                if (estadoSimco[code]) {
+                    estadoSimco[code].cantidad = val;
+                    actualizarTotalesSimco();
+
+                    const card = e.target.closest(".mat-card-simco");
+                    if (card) {
+                        const mat = catalogoSimco[code];
+                        let t = 0;
+                        (mat.actividades || []).forEach(a => {
+                            if (estadoSimco[code].actividades[a.id_mo] !== false) t += a.valor_unitario;
+                        });
+                        const stSpan = card.querySelector(".text-right .font-mono");
+                        if (stSpan && estadoSimco[code].chuleado) {
+                            stSpan.textContent = formatearPesos(val * t);
+                        }
+                    }
+                }
+            }
+        });
+
+        simcoContenedorLista.addEventListener("click", function (e) {
+            const btnToggle = e.target.closest(".btn-toggle-acts-simco");
+            if (btnToggle) {
+                const code = btnToggle.getAttribute("data-code");
+                if (estadoSimco[code]) {
+                    estadoSimco[code].expandido = !estadoSimco[code].expandido;
+                    const container = document.getElementById(`acts-container-${code}`);
+                    if (container) {
+                        container.classList.toggle("hidden", !estadoSimco[code].expandido);
+                    }
+                    const arrowSpan = btnToggle.querySelector("span:last-child");
+                    if (arrowSpan) {
+                        arrowSpan.textContent = estadoSimco[code].expandido ? "▲" : "▼";
+                    }
+                }
+            }
+        });
+    }
+
+    if (btnSimcoExportarExcel) {
+        btnSimcoExportarExcel.addEventListener("click", function () {
+            const itemsExportar = [];
+            Object.keys(catalogoSimco).forEach(code => {
+                const st = estadoSimco[code];
+                if (st && st.chuleado) {
+                    const actsActivas = [];
+                    Object.keys(st.actividades).forEach(moId => {
+                        if (st.actividades[moId]) actsActivas.push(moId);
+                    });
+                    itemsExportar.push({
+                        item: code,
+                        cantidad: st.cantidad || 1,
+                        actividades: actsActivas
+                    });
+                }
+            });
+
+            if (itemsExportar.length === 0) {
+                alert("Por favor selecciona o chulea al menos un material para exportar a Excel.");
+                return;
+            }
+
+            const inputProyId = document.getElementById("simcoExcelProyectoId");
+            const inputItemsJson = document.getElementById("simcoExcelItemsJson");
+            const formExportar = document.getElementById("formExportarSimcoExcel");
+
+            if (inputProyId) inputProyId.value = simcoSelectProyecto ? simcoSelectProyecto.value : "";
+            if (inputItemsJson) inputItemsJson.value = JSON.stringify(itemsExportar);
+            if (formExportar) formExportar.submit();
+        });
+    }
 })();
+

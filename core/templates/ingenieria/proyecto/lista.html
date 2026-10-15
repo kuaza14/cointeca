@@ -89,6 +89,16 @@
             <span style="color: #ffffff !important;">Imprimir Formato Poste a Poste</span>
         </button>
 
+        <button type="button" id="btnAbrirModalSimco"
+                class="btn font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
+                style="background-color: #0d9488 !important; color: #ffffff !important; border: 1px solid #0f766e !important;"
+                title="Relacionar materiales pedidos, actividades vinculadas de mano de obra y proyectar el costo total del proyecto (SIMCO)">
+            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="color: #ffffff !important;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+            </svg>
+            <span style="color: #ffffff !important;">Matriz SIMCO: Materiales & Mano de Obra</span>
+        </button>
+
         {% if macroproyecto %}
         <a href="{% url 'exportar_liquidacion_macroproyecto_excel' macroproyecto.id %}"
            class="btn btn-indigo font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
@@ -253,6 +263,15 @@
 
                     <td class="whitespace-nowrap text-right">
                         <div class="inline-flex items-center gap-1.5">
+                            <button type="button"
+                                    class="btnAbrirSimcoFila inline-flex items-center gap-1 px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold rounded-lg transition border border-teal-300 cursor-pointer shadow-2xs"
+                                    data-id="{{ proyecto.id }}"
+                                    data-numero="{{ proyecto.numero_emcali }}"
+                                    title="Calcular y cotizar mano de obra SIMCO para {{ proyecto.numero_emcali }}">
+                                <svg class="size-3.5 inline-block text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+                                <span>SIMCO</span>
+                            </button>
+
                             <a href="{% url 'detalle_proyecto' proyecto.id %}"
                                class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg shadow-sm transition"
                                title="Abrir matriz de postes">
@@ -738,9 +757,151 @@
             </button>
         </div>
     </div>
+<!-- ======================================================================= -->
+<!-- MODAL MATRIZ CONTRACTUAL SIMCO (MATERIALES Y MANO DE OBRA VINCULADA)    -->
+<!-- ======================================================================= -->
+<div id="modalSimcoMatriz" style="z-index: 99999 !important;" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 hidden">
+    <div class="bg-card text-foreground rounded-2xl shadow-2xl border border-border w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <!-- Encabezado del modal -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-border bg-slate-900 text-white shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center border border-teal-500/30 shrink-0">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-white flex items-center gap-2">
+                        Matriz Contractual SIMCO: Materiales & Mano de Obra Vinculada
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-500/30 text-teal-300 border border-teal-500/40">81 Ítems Oficiales</span>
+                    </h3>
+                    <p class="text-xs text-slate-300">
+                        Selecciona o "chulea" materiales para relacionar automáticamente sus actividades contractuales y proyectar cuánto se va a gastar en el proyecto.
+                    </p>
+                </div>
+            </div>
+            <button type="button" id="btnCerrarModalSimcoHeader" class="text-slate-400 hover:text-white text-2xl font-bold p-1 rounded-lg transition cursor-pointer">
+                &times;
+            </button>
+        </div>
+
+        <!-- Barra de Controles: Selector de Proyecto, Buscador y Botones Rápidos -->
+        <div class="p-4 bg-muted/40 border-b border-border space-y-3 shrink-0">
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+                <!-- Selector de Proyecto -->
+                <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <label class="text-xs font-bold uppercase text-muted-foreground whitespace-nowrap" for="simcoSelectProyecto">
+                        Proyecto / Maniobra:
+                    </label>
+                    <div class="flex items-center gap-2 flex-1">
+                        <select id="simcoSelectProyecto"
+                                class="flex-1 border border-border-strong rounded-lg px-3 py-2 text-xs bg-card text-foreground font-semibold focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                            <option value="">-- Proyección / Cotización Libre --</option>
+                            {% for p in proyectos_imprimir %}
+                                <option value="{{ p.id }}">
+                                    {{ p.etiqueta }} {{ p.numero_emcali }} ({% if p.tipo == 'AP_BARRIO' %}AP Barrio{% elif p.tipo == 'AP_PARQUE' %}AP Parque{% elif p.tipo == 'MT' %}MT{% elif p.tipo == 'BT' %}BT{% else %}{{ p.tipo }}{% endif %}) - {{ p.apoyos.count }} poste{{ p.apoyos.count|pluralize }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" id="btnCargarMaterialesProyecto"
+                                class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                                title="Cargar los materiales que ya tiene pedidos o asignados este proyecto">
+                            <span id="simcoIconoCargar"><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg></span>
+                            <span id="simcoTextoCargar">Cargar Materiales</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Buscador en Vivo -->
+                <div class="w-full lg:w-80 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607Z"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="simcoInputBuscador"
+                           placeholder="Filtrar por código (ej: 693, 701) o nombre..."
+                           autocomplete="off"
+                           class="w-full border border-border-strong rounded-lg pl-9 pr-8 py-2 text-xs bg-card text-foreground focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    <button type="button" id="btnLimpiarSimcoBuscador" class="absolute inset-y-0 right-0 pr-2.5 items-center text-muted-foreground hover:text-foreground hidden">
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fila de filtros rápidos -->
+            <div class="flex items-center justify-between gap-2 flex-wrap text-xs pt-1 border-t border-border/60">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-muted-foreground font-semibold text-[11px]">Acciones rápidas:</span>
+                    <button type="button" id="btnSimcoMarcarVisibles" class="px-2.5 py-1 bg-card hover:bg-muted border border-border rounded text-[11px] font-bold text-foreground transition cursor-pointer">
+                        ✓ Chulear Visibles
+                    </button>
+                    <button type="button" id="btnSimcoDesmarcarTodos" class="px-2.5 py-1 bg-card hover:bg-muted border border-border rounded text-[11px] font-bold text-foreground transition cursor-pointer">
+                        ✕ Desmarcar Todos
+                    </button>
+                    <button type="button" id="btnSimcoVerSoloChuleados" class="px-2.5 py-1 bg-card hover:bg-muted border border-border rounded text-[11px] font-bold text-foreground transition cursor-pointer" data-activo="0">
+                        👁 Ver Solo Chuleados
+                    </button>
+                </div>
+                <div id="simcoInfoVisibles" class="text-[11px] text-muted-foreground font-medium">
+                    Mostrando 81 materiales SIMCO
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista Interactiva de Materiales y Actividades (Estilo Excel con Chulear) -->
+        <div id="simcoContenedorLista" class="overflow-y-auto flex-1 p-3 sm:p-4 space-y-2.5 bg-slate-50/60 dark:bg-slate-900/40">
+            <!-- Inyectado dinámicamente con JavaScript -->
+        </div>
+
+        <!-- Pie Fijo con Resumen Financiero y Acciones -->
+        <div class="border-t border-border p-4 bg-card shrink-0 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+            <!-- Indicadores de Totales -->
+            <div class="flex items-center gap-4 sm:gap-6 flex-wrap">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-muted-foreground block">Materiales Chuleados</span>
+                    <span id="simcoTotalMatsCount" class="text-sm font-black text-foreground">0</span>
+                </div>
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-muted-foreground block">Actividades de Mano de Obra</span>
+                    <span id="simcoTotalActsCount" class="text-sm font-black text-foreground">0</span>
+                </div>
+                <div class="pl-3 sm:pl-5 border-l border-border">
+                    <span class="text-[10px] uppercase font-black text-teal-700 dark:text-teal-400 block tracking-wider">
+                        Presupuesto Estimado de Mano de Obra
+                    </span>
+                    <span id="simcoGranTotal" class="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
+                        $0 COP
+                    </span>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <button type="button" id="btnSimcoExportarExcel"
+                        class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-2 cursor-pointer">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    <span>Descargar Excel</span>
+                </button>
+                <button type="button" id="btnCerrarModalSimcoFooter"
+                        class="px-4 py-2.5 bg-muted hover:bg-gray-200 text-foreground text-xs font-semibold rounded-lg border border-border transition cursor-pointer">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Formulario Oculto para Descargar Excel de la Matriz SIMCO -->
+<form id="formExportarSimcoExcel" method="POST" action="{% url 'exportar_matriz_simco_excel' %}" target="_blank" class="hidden">
+    {% csrf_token %}
+    <input type="hidden" name="proyecto_id" id="simcoExcelProyectoId" value="">
+    <input type="hidden" name="items_json" id="simcoExcelItemsJson" value="">
+</form>
 
+<!-- Datos Embebidos en JSON para Carga Instantánea -->
+<script id="catalogo-simco-json" type="application/json">{{ catalogo_simco_json|default:'{}'|safe }}</script>
+<script id="proyectos-selector-json" type="application/json">{{ proyectos_selector_json|default:'[]'|safe }}</script>
 
 {% endblock %}
 

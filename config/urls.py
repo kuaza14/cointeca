@@ -238,6 +238,8 @@ from core.views.ingenieria import(
     agregar_material_apoyo_rapido,
     editar_material_apoyo_rapido,
     eliminar_material_apoyo_rapido,
+    api_materiales_proyecto_simco,
+    exportar_matriz_simco_excel,
 )
 
 
@@ -496,10 +498,8 @@ urlpatterns = [
     path("ingenieria/apoyos/<int:apoyo_id>/editar-material-rapido/", editar_material_apoyo_rapido, name="editar_material_apoyo_rapido"),
     path("ingenieria/apoyos-material/<int:apoyo_material_id>/eliminar/", eliminar_material_apoyo_rapido, name="eliminar_material_apoyo_rapido"),
     path("ingenieria/proyectos/<int:proyecto_id>/imprimir-formato-poste-a-poste/", imprimir_formato_poste_a_poste, name="imprimir_formato_poste_a_poste"),
-
-    
-
-
+    path("ingenieria/api/proyecto/<int:proyecto_id>/materiales-simco/", api_materiales_proyecto_simco, name="api_materiales_proyecto_simco"),
+    path("ingenieria/simco/exportar-excel/", exportar_matriz_simco_excel, name="exportar_matriz_simco_excel"),
 ]
 # =========================
 # 📁 MEDIA FILES

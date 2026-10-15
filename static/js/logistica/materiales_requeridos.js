@@ -224,6 +224,59 @@ function renderizarTablaModal() {
     }).join("");
 }
 
+function buscarMaterialesPriorizadosReq(query, catalogo) {
+    const qNorm = normalizarTextoReq(query);
+    if (!qNorm) return [];
+
+    const palabras = qNorm.split(/\s+/).filter(p => p.length > 0);
+    const resultadosScored = [];
+
+    for (let i = 0; i < catalogo.length; i++) {
+        const m = catalogo[i];
+        const itemNorm = normalizarTextoReq(m.item);
+        const descNorm = normalizarTextoReq(m.descripcion);
+        const fullTexto = `${itemNorm} ${descNorm}`;
+
+        // Debe contener todas las palabras de búsqueda
+        const contieneTodas = palabras.every(p => fullTexto.includes(p));
+        if (!contieneTodas) continue;
+
+        // Calcular puntaje de relevancia (1 es máxima prioridad)
+        let score = 4;
+        const palabrasDesc = descNorm.split(/\s+/);
+
+        if (descNorm.startsWith(qNorm)) {
+            // Empieza exactamente por la letra o término (ej: "s" -> "seccionador...", "b" -> "bisagra...", "abraza" -> "abrazadera...")
+            score = 1;
+        } else if (palabrasDesc.some(w => w.startsWith(qNorm))) {
+            // Alguna palabra interior empieza por el término (ej: "serv" -> "sum/inst serv...", "cobre" -> "cable cobre...")
+            score = 2;
+        } else if (itemNorm.startsWith(qNorm)) {
+            // El código empieza por el término
+            score = 3;
+        } else {
+            // Coincidencia dentro de la descripción o código
+            score = 4;
+        }
+
+        resultadosScored.push({
+            score: score,
+            desc: descNorm,
+            material: m
+        });
+    }
+
+    // Ordenar primero por prioridad (score 1 antes que 2, 3, 4) y luego alfabéticamente
+    resultadosScored.sort(function (a, b) {
+        if (a.score !== b.score) {
+            return a.score - b.score;
+        }
+        return a.desc.localeCompare(b.desc);
+    });
+
+    return resultadosScored.slice(0, 30).map(x => x.material);
+}
+
 // Inicialización de Event Listeners
 document.addEventListener("DOMContentLoaded", function () {
     cargarCatalogoMaterialesReq();
@@ -251,14 +304,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             cargarCatalogoMaterialesReq();
-            const palabras = query.split(" ").filter(p => p.length > 0);
-
-            const resultados = catalogoMaterialesReq.filter(function (m) {
-                const itemNorm = normalizarTextoReq(m.item);
-                const descNorm = normalizarTextoReq(m.descripcion);
-                const textoCompleto = `${itemNorm} ${descNorm}`;
-                return palabras.every(palabra => textoCompleto.includes(palabra));
-            }).slice(0, 25);
+            const resultados = buscarMaterialesPriorizadosReq(query, catalogoMaterialesReq);
 
             if (resultados.length === 0) {
                 dropdownReq.innerHTML = `

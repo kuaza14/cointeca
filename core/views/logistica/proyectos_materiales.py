@@ -1842,6 +1842,57 @@ def informe_consolidado_proyectos(request):
             "num_retiros": ApoyoMaterial.objects.filter(apoyo__proyecto=p, cantidad_retirada__gt=0).count(),
         })
 
+    # 7. Consolidación de PEDIDO DE MATERIALES REQUERIDOS (Multi-proyecto)
+    req_por_proy = {}
+    for p in proyectos_seleccionados:
+        p_reqs = {}
+        for r in MaterialRequeridoProyecto.objects.filter(proyecto=p).select_related("material"):
+            p_reqs[r.material_id] = r.cantidad_requerida
+        apoyo_qs = ApoyoMaterial.objects.filter(apoyo__proyecto=p).values("material_id").annotate(total=Sum("cantidad_requerida"))
+        for ar in apoyo_qs:
+            m_id = ar["material_id"]
+            if m_id not in p_reqs:
+                p_reqs[m_id] = ar["total"]
+        req_por_proy[p.id] = p_reqs
+
+    all_req_mat_ids = set()
+    for p_map in req_por_proy.values():
+        all_req_mat_ids.update(p_map.keys())
+
+    materiales_req_db = list(Material.objects.filter(id__in=all_req_mat_ids).select_related("inventario").order_by("item", "descripcion"))
+
+    tabla_requeridos_consolidada = []
+    total_unidades_requeridas_consolidada = Decimal("0")
+    total_faltante_comprar_consolidada = Decimal("0")
+
+    for mat in materiales_req_db:
+        cantidades_proyectos = []
+        tot_mat_req = Decimal("0")
+        for p in proyectos_seleccionados:
+            c = req_por_proy[p.id].get(mat.id, Decimal("0"))
+            cantidades_proyectos.append({
+                "proyecto": p,
+                "cantidad": c
+            })
+            tot_mat_req += c
+
+        if tot_mat_req <= 0:
+            continue
+
+        stock_obj = getattr(mat, "inventario", None)
+        stock_disp = stock_obj.cantidad if stock_obj else Decimal("0")
+        faltante = max(Decimal("0"), tot_mat_req - stock_disp)
+
+        tabla_requeridos_consolidada.append({
+            "material": mat,
+            "cantidades_proyectos": cantidades_proyectos,
+            "total_requerido": tot_mat_req,
+            "stock_bodega": stock_disp,
+            "faltante_comprar": faltante,
+        })
+        total_unidades_requeridas_consolidada += tot_mat_req
+        total_faltante_comprar_consolidada += faltante
+
     ids_string = ",".join(str(p.id) for p in proyectos_seleccionados)
 
     return render(
@@ -1852,6 +1903,10 @@ def informe_consolidado_proyectos(request):
             "proyectos_seleccionados": proyectos_seleccionados,
             "total_proyectos_sel": proyectos_seleccionados.count(),
             "tabla_consolidada": tabla_consolidada,
+            "tabla_requeridos_consolidada": tabla_requeridos_consolidada,
+            "total_unidades_requeridas_consolidada": total_unidades_requeridas_consolidada,
+            "total_faltante_comprar_consolidada": total_faltante_comprar_consolidada,
+            "total_items_requeridos_distintos": len(tabla_requeridos_consolidada),
             "total_entrado_general": total_entrado_general,
             "total_instalado_general": total_instalado_general,
             "total_retirado_general": total_retirado_general,
@@ -1861,7 +1916,7 @@ def informe_consolidado_proyectos(request):
             "desglose_proyectos": desglose_proyectos,
             "ids_string": ids_string,
         }
-)
+    )
 
 
 @login_required
@@ -2175,6 +2230,211 @@ def exportar_informe_consolidado_excel(request):
         buffer.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@login_required
+def exportar_pedido_materiales_consolidado_excel(request):
+    """
+    Descarga en formato Excel (.xlsx) el pedido consolidado de materiales
+    requeridos para los proyectos seleccionados.
+    Columnas:
+    - Ítem
+    - Descripción del Material
+    - Unidad
+    - Cantidad Total a Pedir (Requerida)
+    - Columna para cada proyecto seleccionado (desglose)
+    - Stock Actual en Bodega Central
+    - Faltante Neto a Comprar (max(0, Total - Stock))
+    """
+    proyecto_ids = (
+        request.GET.getlist("proyectos")
+        or request.GET.getlist("proyectos[]")
+        or request.POST.getlist("proyectos")
+        or request.POST.getlist("proyectos[]")
+    )
+    if not proyecto_ids:
+        raw_ids = request.GET.get("ids", "") or request.POST.get("ids", "")
+        if raw_ids:
+            proyecto_ids = [x.strip() for x in raw_ids.split(",") if x.strip()]
+
+    if not proyecto_ids:
+        messages.error(request, "No seleccionaste ningún proyecto para generar el pedido de materiales.")
+        return redirect("macroproyectos_logistica")
+
+    p_ids = [int(x) for x in proyecto_ids if str(x).isdigit()]
+    proyectos_seleccionados = list(Proyecto.objects.filter(id__in=p_ids).select_related("macroproyecto").order_by("numero_emcali"))
+
+    if not proyectos_seleccionados:
+        messages.error(request, "Los proyectos seleccionados no existen.")
+        return redirect("macroproyectos_logistica")
+
+    # Mapear requerimientos por proyecto
+    req_por_proy = {}
+    for p in proyectos_seleccionados:
+        p_reqs = {}
+        for r in MaterialRequeridoProyecto.objects.filter(proyecto=p).select_related("material"):
+            p_reqs[r.material_id] = r.cantidad_requerida
+        apoyo_qs = ApoyoMaterial.objects.filter(apoyo__proyecto=p).values("material_id").annotate(total=Sum("cantidad_requerida"))
+        for ar in apoyo_qs:
+            m_id = ar["material_id"]
+            if m_id not in p_reqs:
+                p_reqs[m_id] = ar["total"]
+        req_por_proy[p.id] = p_reqs
+
+    all_req_mat_ids = set()
+    for p_map in req_por_proy.values():
+        all_req_mat_ids.update(p_map.keys())
+
+    materiales_db = list(Material.objects.filter(id__in=all_req_mat_ids).select_related("inventario").order_by("item", "descripcion"))
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Pedido Materiales"
+
+    font_titulo = Font(name="Calibri", size=13, bold=True, color="1E3A8A")
+    font_subtitulo = Font(name="Calibri", size=10, bold=True, color="475569")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_header_proy = Font(name="Calibri", size=9, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=10)
+    font_data_bold = Font(name="Calibri", size=10, bold=True)
+    font_total = Font(name="Calibri", size=10, bold=True, color="1E3A8A")
+
+    fill_header = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
+    fill_header_total = PatternFill(start_color="047857", end_color="047857", fill_type="solid")
+    fill_header_proy = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    fill_header_stock = PatternFill(start_color="475569", end_color="475569", fill_type="solid")
+    fill_header_faltante = PatternFill(start_color="B91C1C", end_color="B91C1C", fill_type="solid")
+
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    fill_total = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+
+    thin_border = Side(border_style="thin", color="CBD5E1")
+    border_cell = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    border_total = Border(top=Side(border_style="medium", color="1E3A8A"), bottom=Side(border_style="double", color="1E3A8A"), left=thin_border, right=thin_border)
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    def fmt_val(v):
+        if v is None:
+            return 0
+        return int(v) if v % 1 == 0 else float(v)
+
+    fecha_hoy = timezone.now().strftime('%d/%m/%Y')
+    total_cols = 4 + len(proyectos_seleccionados)
+
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
+    ws.cell(row=1, column=1, value=f"COINTECA S.A.S. — SOLICITUD Y PEDIDO CONSOLIDADO DE MATERIALES ({len(proyectos_seleccionados)} PROYECTOS)").font = font_titulo
+    ws.cell(row=1, column=1).alignment = align_left
+
+    nombres_proys = ", ".join([f"{p.etiqueta} {p.numero_emcali}" for p in proyectos_seleccionados])
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_cols)
+    ws.cell(row=2, column=1, value=f"PROYECTOS INCLUIDOS: {nombres_proys} | FECHA: {fecha_hoy}").font = font_subtitulo
+    ws.cell(row=2, column=1).alignment = align_left
+
+    ws.append([])
+
+    headers = ["ÍTEM", "DESCRIPCIÓN DEL MATERIAL", "UNIDAD", "TOTAL A PEDIR"]
+    for p in proyectos_seleccionados:
+        headers.append(f"{p.etiqueta.upper()} {p.numero_emcali}")
+
+    ws.append(headers)
+
+    for col_idx in range(1, total_cols + 1):
+        c = ws.cell(row=4, column=col_idx)
+        c.font = font_header
+        c.border = border_cell
+        c.alignment = align_center if col_idx not in [2] else align_left
+        if col_idx in [1, 2, 3]:
+            c.fill = fill_header
+        elif col_idx == 4:
+            c.fill = fill_header_total
+        else:
+            c.fill = fill_header_proy
+            c.font = font_header_proy
+
+    current_row = 5
+    filas_con_datos = 0
+
+    for idx, mat in enumerate(materiales_db, start=1):
+        cantidades_p = []
+        tot_mat_req = Decimal("0")
+        for p in proyectos_seleccionados:
+            c_val = req_por_proy[p.id].get(mat.id, Decimal("0"))
+            cantidades_p.append(c_val)
+            tot_mat_req += c_val
+
+        if tot_mat_req <= 0:
+            continue
+
+        row_vals = [
+            mat.item or "",
+            mat.descripcion,
+            mat.unidad or "UN",
+            fmt_val(tot_mat_req),
+        ]
+        for c_val in cantidades_p:
+            row_vals.append(fmt_val(c_val) if c_val > 0 else 0)
+
+        ws.append(row_vals)
+
+        for col_idx in range(1, total_cols + 1):
+            cell = ws.cell(row=current_row, column=col_idx)
+            cell.font = font_data_bold if col_idx == 4 else font_data
+            cell.border = border_cell
+            if idx % 2 == 0:
+                cell.fill = fill_zebra
+            if col_idx in [1, 3]:
+                cell.alignment = align_center
+            elif col_idx == 2:
+                cell.alignment = align_left
+            else:
+                cell.alignment = align_right
+                cell.number_format = "#,##0" if isinstance(cell.value, int) else "0.##"
+
+        current_row += 1
+        filas_con_datos += 1
+
+    if filas_con_datos > 0:
+        total_row_vals = ["", "TOTALES GENERALES", f"{filas_con_datos} ÍTEMS"]
+        for c_idx in range(4, total_cols + 1):
+            col_letter = get_column_letter(c_idx)
+            total_row_vals.append(f"=SUM({col_letter}5:{col_letter}{current_row-1})")
+
+        ws.append(total_row_vals)
+        for col_idx in range(1, total_cols + 1):
+            c = ws.cell(row=current_row, column=col_idx)
+            c.font = font_total
+            c.fill = fill_total
+            c.border = border_total
+            if col_idx in [1, 3]:
+                c.alignment = align_center
+            elif col_idx == 2:
+                c.alignment = align_left
+            else:
+                c.alignment = align_right
+                c.number_format = "#,##0"
+
+    ws.column_dimensions["A"].width = 12
+    ws.column_dimensions["B"].width = 46
+    ws.column_dimensions["C"].width = 12
+    ws.column_dimensions["D"].width = 22
+    for p_i in range(len(proyectos_seleccionados)):
+        col_let = get_column_letter(5 + p_i)
+        ws.column_dimensions[col_let].width = 18
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"Pedido_Consolidado_Materiales_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 

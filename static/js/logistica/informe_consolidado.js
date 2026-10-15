@@ -5,20 +5,32 @@
 
 function cambiarPestanaInforme(tabName) {
     const pConsolidado = document.getElementById('panelInformeConsolidado');
+    const pRequeridos = document.getElementById('panelInformeRequeridos');
     const pDesglose = document.getElementById('panelInformeDesglose');
     const btnConsolidado = document.getElementById('tabBtnInformeConsolidado');
+    const btnRequeridos = document.getElementById('tabBtnInformeRequeridos');
     const btnDesglose = document.getElementById('tabBtnInformeDesglose');
 
-    if (tabName === 'consolidado') {
-        if (pConsolidado) { pConsolidado.classList.remove('hidden'); pConsolidado.style.display = ''; }
-        if (pDesglose) { pDesglose.classList.add('hidden'); pDesglose.style.display = 'none'; }
-        if (btnConsolidado) { btnConsolidado.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-blue-600 text-primary font-bold tab-btn-informe'; }
-        if (btnDesglose) { btnDesglose.className = 'py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe'; }
-    } else {
-        if (pConsolidado) { pConsolidado.classList.add('hidden'); pConsolidado.style.display = 'none'; }
+    // Ocultar todos
+    if (pConsolidado) { pConsolidado.classList.add('hidden'); pConsolidado.style.display = 'none'; }
+    if (pRequeridos) { pRequeridos.classList.add('hidden'); pRequeridos.style.display = 'none'; }
+    if (pDesglose) { pDesglose.classList.add('hidden'); pDesglose.style.display = 'none'; }
+
+    // Clases por defecto (inactivo)
+    const inactiveClass = 'py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe';
+    if (btnConsolidado) btnConsolidado.className = inactiveClass;
+    if (btnRequeridos) btnRequeridos.className = inactiveClass;
+    if (btnDesglose) btnDesglose.className = inactiveClass;
+
+    if (tabName === 'requeridos') {
+        if (pRequeridos) { pRequeridos.classList.remove('hidden'); pRequeridos.style.display = ''; }
+        if (btnRequeridos) { btnRequeridos.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-emerald-600 text-emerald-800 font-bold tab-btn-informe'; }
+    } else if (tabName === 'desglose') {
         if (pDesglose) { pDesglose.classList.remove('hidden'); pDesglose.style.display = ''; }
-        if (btnConsolidado) { btnConsolidado.className = 'py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe'; }
         if (btnDesglose) { btnDesglose.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-indigo-600 text-indigo-600 font-bold tab-btn-informe'; }
+    } else {
+        if (pConsolidado) { pConsolidado.classList.remove('hidden'); pConsolidado.style.display = ''; }
+        if (btnConsolidado) { btnConsolidado.className = 'py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-blue-600 text-primary font-bold tab-btn-informe'; }
     }
 
     filtrarInformeActivo();
@@ -43,9 +55,17 @@ function filtrarInformeActivo() {
     }
 
     const pConsolidado = document.getElementById('panelInformeConsolidado');
+    const pRequeridos = document.getElementById('panelInformeRequeridos');
     const esConsolidadoVisible = pConsolidado && !pConsolidado.classList.contains('hidden') && pConsolidado.style.display !== 'none';
+    const esRequeridosVisible = pRequeridos && !pRequeridos.classList.contains('hidden') && pRequeridos.style.display !== 'none';
 
-    let selector = esConsolidadoVisible ? '.fila-informe-consolidado' : '.fila-informe-desglose';
+    let selector = '.fila-informe-desglose';
+    if (esConsolidadoVisible) {
+        selector = '.fila-informe-consolidado';
+    } else if (esRequeridosVisible) {
+        selector = '.fila-informe-requeridos';
+    }
+
     const filas = document.querySelectorAll(selector);
     let visibles = 0;
 
@@ -87,5 +107,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 inputBuscador.focus();
             }
         });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam === 'requeridos') {
+        cambiarPestanaInforme('requeridos');
+    } else if (tabParam === 'desglose') {
+        cambiarPestanaInforme('desglose');
     }
 });

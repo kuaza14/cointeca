@@ -7,7 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const checkTodos = document.getElementById("checkTodosProyectos");
     const checksProyectos = document.querySelectorAll(".check-proyecto");
     const contador = document.getElementById("contadorSeleccionados");
+    const contadorExcel = document.getElementById("contadorSeleccionadosExcel");
     const btnInforme = document.getElementById("btnGenerarInforme");
+    const btnExcel = document.getElementById("btnExcelPedidoDirecto");
     const formInforme = document.getElementById("formInformeConsolidado");
 
     // Modal nuevo proyecto
@@ -114,12 +116,25 @@ document.addEventListener("DOMContentLoaded", function () {
     function actualizarContador() {
         const seleccionados = document.querySelectorAll(".check-proyecto:checked").length;
         if (contador) contador.textContent = seleccionados;
+        if (contadorExcel) contadorExcel.textContent = seleccionados;
 
         if (btnInforme) {
             if (seleccionados === 0) {
                 btnInforme.classList.add("opacity-50", "cursor-not-allowed");
+                btnInforme.disabled = true;
             } else {
                 btnInforme.classList.remove("opacity-50", "cursor-not-allowed");
+                btnInforme.disabled = false;
+            }
+        }
+
+        if (btnExcel) {
+            if (seleccionados === 0) {
+                btnExcel.classList.add("opacity-50", "cursor-not-allowed");
+                btnExcel.disabled = true;
+            } else {
+                btnExcel.classList.remove("opacity-50", "cursor-not-allowed");
+                btnExcel.disabled = false;
             }
         }
     }

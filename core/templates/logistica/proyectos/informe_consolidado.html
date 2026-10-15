@@ -47,11 +47,18 @@
                     <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg></span> <span>Imprimir Informe</span>
                 </button>
 
-                <a href="{% url 'exportar_informe_consolidado_excel' %}?ids={{ ids_string }}"
+                <a href="{% url 'exportar_pedido_materiales_consolidado_excel' %}?ids={{ ids_string }}"
                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
                    style="background-color: #047857 !important; color: #ffffff !important; border: 1px solid #065f46 !important;"
-                   title="Descargar este consolidado en Excel">
-                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span> <span>Descargar en Excel</span>
+                   title="Descargar Excel con el pedido consolidado de materiales requeridos">
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></span> <span>Excel Pedir Materiales</span>
+                </a>
+
+                <a href="{% url 'exportar_informe_consolidado_excel' %}?ids={{ ids_string }}"
+                   class="btn font-bold inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg shadow-sm transition hover:opacity-90 cursor-pointer"
+                   style="background-color: #1e40af !important; color: #ffffff !important; border: 1px solid #1e3a8a !important;"
+                   title="Descargar liquidación de entradas y retiros en Excel">
+                    <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span> <span>Excel Liquidación Obras</span>
                 </a>
             </div>
         </div>
@@ -112,6 +119,13 @@
                     class="py-3 px-5 text-sm transition flex items-center gap-2 border-b-2 border-blue-600 text-primary font-bold tab-btn-informe">
                 <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg> Matriz Consolidada General
                 <span class="text-xs px-2 py-0.5 rounded-full bg-primary-soft text-primary font-bold">{{ tabla_consolidada|length }} materiales</span>
+            </button>
+
+            <button type="button" onclick="cambiarPestanaInforme('requeridos')" id="tabBtnInformeRequeridos"
+                    class="py-3 px-5 text-sm transition flex items-center gap-2 text-muted-foreground hover:text-gray-700 tab-btn-informe">
+                <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                <span>Pedido Consolidado de Materiales</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">{{ tabla_requeridos_consolidada|length }} pedidos</span>
             </button>
 
             <button type="button" onclick="cambiarPestanaInforme('desglose')" id="tabBtnInformeDesglose"
@@ -263,7 +277,123 @@
             </div>
         </div>
 
-        <!-- TAB 2: DESGLOSE POR PROYECTO INDIVIDUAL -->
+        <!-- TAB 2: PEDIDO CONSOLIDADO DE MATERIALES REQUERIDOS (MULTI-PROYECTO) -->
+        <div id="panelInformeRequeridos" class="hidden bg-card rounded-b-xl rounded-t-none shadow-sm border border-border overflow-hidden print:border-black print:rounded-none">
+            <div class="p-4 bg-emerald-50 border-b border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="font-bold text-emerald-950 text-base flex items-center gap-2">
+                        <span><svg class="size-5 inline-block text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></span>
+                        <span>Pedido Consolidado de Materiales ({{ total_proyectos_sel }} Proyectos Seleccionados)</span>
+                    </h3>
+                    <p class="text-xs text-emerald-800 mt-0.5">
+                        Consolidado multi-proyecto de cantidades requeridas para compras y despacho de bodega.
+                    </p>
+                </div>
+
+                <a href="{% url 'exportar_pedido_materiales_consolidado_excel' %}?ids={{ ids_string }}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm transition shrink-0"
+                   title="Descargar este consolidado de requerimientos en Excel">
+                    <svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    <span>Descargar Excel Pedido</span>
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                    <thead class="bg-slate-900 text-white uppercase text-xs font-bold">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-20">Ítem</th>
+                            <th class="px-5 py-3">Descripción del Material</th>
+                            <th class="px-3 py-3 text-center w-16">Unidad</th>
+                            <th class="px-4 py-3 text-right bg-emerald-800 text-white font-black text-sm">Total a Pedir</th>
+                            {% for p in proyectos_seleccionados %}
+                                <th class="px-3 py-3 text-right bg-blue-900 text-blue-100 font-bold whitespace-nowrap">
+                                    {{ p.etiqueta.upper }} {{ p.numero_emcali }}
+                                </th>
+                            {% endfor %}
+                            <th class="px-4 py-3 text-right bg-slate-800 text-slate-200">Stock Bodega</th>
+                            <th class="px-4 py-3 text-right bg-rose-900 text-rose-100 font-black">Faltante Compra</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-card">
+                        {% for fila in tabla_requeridos_consolidada %}
+                        <tr class="hover:bg-emerald-50/40 transition fila-informe-requeridos {% if forloop.counter|divisibleby:2 %}bg-muted/20{% endif %}">
+                            <td class="px-4 py-3 text-center font-bold text-muted-foreground font-mono">
+                                {{ fila.material.item }}
+                            </td>
+                            <td class="px-5 py-3 font-semibold text-foreground text-sm">
+                                {{ fila.material.descripcion }}
+                            </td>
+                            <td class="px-3 py-3 text-center font-bold text-muted-foreground">
+                                <span class="px-1.5 py-0.5 rounded bg-muted border border-border text-[11px]">
+                                    {{ fila.material.unidad|default:"UN" }}
+                                </span>
+                            </td>
+                            <!-- Total requerido -->
+                            <td class="px-4 py-3 text-right font-black text-base text-emerald-700 bg-emerald-50/50">
+                                {{ fila.total_requerido|floatformat }}
+                            </td>
+                            <!-- Columnas por proyecto -->
+                            {% for cp in fila.cantidades_proyectos %}
+                                <td class="px-3 py-3 text-right font-mono font-bold text-slate-700 {% if cp.cantidad > 0 %}text-blue-900 bg-blue-50/30{% else %}text-slate-300{% endif %}">
+                                    {% if cp.cantidad > 0 %}{{ cp.cantidad|floatformat }}{% else %}—{% endif %}
+                                </td>
+                            {% endfor %}
+                            <!-- Stock en bodega -->
+                            <td class="px-4 py-3 text-right font-mono font-bold text-slate-700 bg-slate-50">
+                                {{ fila.stock_bodega|floatformat }}
+                            </td>
+                            <!-- Faltante para compra -->
+                            <td class="px-4 py-3 text-right font-black text-sm {% if fila.faltante_comprar > 0 %}text-rose-700 bg-rose-50/40 font-black{% else %}text-slate-400{% endif %}">
+                                {% if fila.faltante_comprar > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-100 text-rose-900 border border-rose-300 text-xs font-bold">
+                                        {{ fila.faltante_comprar|floatformat }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-emerald-700 font-bold text-xs">Cubierto</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ total_proyectos_sel|add:6 }}" class="px-6 py-12 text-center text-muted-foreground">
+                                <div class="max-w-md mx-auto space-y-2">
+                                    <div class="text-3xl text-slate-400">📋</div>
+                                    <p class="text-base font-bold text-slate-800">No hay materiales requeridos registrados en los proyectos seleccionados.</p>
+                                    <p class="text-xs text-slate-500">Ingresa al detalle de cada proyecto y utiliza la opción "Pedir / Agregar Materiales Requeridos" para registrar los insumos necesarios.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if tabla_requeridos_consolidada %}
+                    <tfoot class="bg-slate-100 border-t-2 border-slate-300 font-extrabold text-slate-900">
+                        <tr>
+                            <td colspan="3" class="px-5 py-3 text-right uppercase text-xs tracking-wider">
+                                TOTALES CONSOLIDADOS ({{ total_items_requeridos_distintos }} ÍTEMS):
+                            </td>
+                            <td class="px-4 py-3 text-right text-emerald-900 text-base font-black bg-emerald-100">
+                                {{ total_unidades_requeridas_consolidada|floatformat }}
+                            </td>
+                            {% for p in proyectos_seleccionados %}
+                                <td class="px-3 py-3 text-right text-xs text-slate-500 font-mono">
+                                    —
+                                </td>
+                            {% endfor %}
+                            <td class="px-4 py-3 text-right text-xs text-slate-500 font-mono">
+                                —
+                            </td>
+                            <td class="px-4 py-3 text-right text-rose-900 text-sm font-black bg-rose-100">
+                                {{ total_faltante_comprar_consolidada|floatformat }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: DESGLOSE POR PROYECTO INDIVIDUAL -->
         <div id="panelInformeDesglose" class="space-y-6 hidden print:block">
             {% for dp in desglose_proyectos %}
             <div class="bg-card rounded-xl shadow-sm border border-border overflow-hidden">

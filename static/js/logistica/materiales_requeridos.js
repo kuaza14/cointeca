@@ -1,54 +1,153 @@
 /**
  * COINTECA S.A.S. - Módulo de Logística
- * materiales_requeridos.js - Gestión dinámica de requisiciones de material, adición de filas y validaciones.
+ * materiales_requeridos.js - Gestión dinámica de requisiciones de material con buscador predictivo y adición rápida.
  */
 
+let catalogoMaterialesReq = [];
+let itemsAgregados = [];
+let indiceSugerenciaActivaReq = -1;
+
 function abrirModalAgregar() {
-        const modal = document.getElementById('modalAgregarRequerido');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+    cargarCatalogoMaterialesReq();
+    const modal = document.getElementById("modalAgregarRequerido");
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        setTimeout(function () {
+            const inp = document.getElementById("inputBuscadorMaterialModalReq");
+            if (inp) inp.focus();
+        }, 100);
     }
+}
 
-    function cerrarModalAgregar() {
-        const modal = document.getElementById('modalAgregarRequerido');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+function cerrarModalAgregar() {
+    const modal = document.getElementById("modalAgregarRequerido");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        cerrarDropdownSugerenciasReq();
     }
+}
 
-    document.getElementById('modalAgregarRequerido').addEventListener('click', function(event) {
-        if (event.target === this) {
-            cerrarModalAgregar();
+function cerrarDropdownSugerenciasReq() {
+    const dropdown = document.getElementById("dropdownSugerenciasMaterialReq");
+    if (dropdown) {
+        dropdown.classList.add("hidden");
+        dropdown.innerHTML = "";
+    }
+    indiceSugerenciaActivaReq = -1;
+}
+
+function normalizarTextoReq(txt) {
+    if (!txt) return "";
+    return txt.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+
+function cargarCatalogoMaterialesReq() {
+    const script = document.getElementById("catalogoMaterialesDataReq");
+    if (script && catalogoMaterialesReq.length === 0) {
+        try {
+            catalogoMaterialesReq = JSON.parse(script.textContent || "[]");
+        } catch (e) {
+            console.error("Error parseando catálogo de materiales:", e);
         }
+    }
+}
+
+function seleccionarMaterialModalReq(mat) {
+    const inputBuscador = document.getElementById("inputBuscadorMaterialModalReq");
+    const btnLimpiar = document.getElementById("btnLimpiarMaterialModalReq");
+    const hiddenId = document.getElementById("modalSelMaterialIdReq");
+    const hiddenItem = document.getElementById("modalSelMaterialItemReq");
+    const hiddenDesc = document.getElementById("modalSelMaterialDescReq");
+    const hiddenUnidad = document.getElementById("modalSelMaterialUnidadReq");
+    const badgeUnidad = document.getElementById("badgeUnidadModalReq");
+    const textoUnidad = document.getElementById("textoUnidadModalReq");
+    const inputCantidad = document.getElementById("inputCantidadModal");
+
+    if (hiddenId) hiddenId.value = mat.id;
+    if (hiddenItem) hiddenItem.value = mat.item || "";
+    if (hiddenDesc) hiddenDesc.value = mat.descripcion || "";
+    if (hiddenUnidad) hiddenUnidad.value = mat.unidad || "UN";
+
+    if (inputBuscador) {
+        inputBuscador.value = (mat.item ? `[${mat.item}] ` : "") + mat.descripcion;
+    }
+    if (btnLimpiar) btnLimpiar.classList.remove("hidden");
+
+    if (textoUnidad) textoUnidad.textContent = mat.unidad || "UN";
+    if (badgeUnidad) {
+        badgeUnidad.className = "h-[38px] flex items-center justify-center px-2 py-1.5 rounded-lg border-2 border-blue-400 bg-blue-100 text-blue-900 font-black text-xs text-center transition";
+    }
+
+    cerrarDropdownSugerenciasReq();
+
+    if (inputCantidad) {
+        inputCantidad.focus();
+        inputCantidad.select();
+    }
+}
+
+function limpiarSeleccionMaterialModalReq() {
+    const inputBuscador = document.getElementById("inputBuscadorMaterialModalReq");
+    const btnLimpiar = document.getElementById("btnLimpiarMaterialModalReq");
+    const hiddenId = document.getElementById("modalSelMaterialIdReq");
+    const hiddenItem = document.getElementById("modalSelMaterialItemReq");
+    const hiddenDesc = document.getElementById("modalSelMaterialDescReq");
+    const hiddenUnidad = document.getElementById("modalSelMaterialUnidadReq");
+    const badgeUnidad = document.getElementById("badgeUnidadModalReq");
+    const textoUnidad = document.getElementById("textoUnidadModalReq");
+    const inputCantidad = document.getElementById("inputCantidadModal");
+
+    if (inputBuscador) inputBuscador.value = "";
+    if (btnLimpiar) btnLimpiar.classList.add("hidden");
+    if (hiddenId) hiddenId.value = "";
+    if (hiddenItem) hiddenItem.value = "";
+    if (hiddenDesc) hiddenDesc.value = "";
+    if (hiddenUnidad) hiddenUnidad.value = "";
+    if (textoUnidad) textoUnidad.textContent = "—";
+    if (badgeUnidad) {
+        badgeUnidad.className = "h-[38px] flex items-center justify-center px-2 py-1.5 rounded-lg border-2 border-slate-300 bg-slate-100 text-slate-500 font-black text-xs text-center transition";
+    }
+    if (inputCantidad) inputCantidad.value = "";
+    cerrarDropdownSugerenciasReq();
+    if (inputBuscador) inputBuscador.focus();
+}
+
+function agregarMaterialALista() {
+    const hiddenId = document.getElementById("modalSelMaterialIdReq");
+    const hiddenItem = document.getElementById("modalSelMaterialItemReq");
+    const hiddenDesc = document.getElementById("modalSelMaterialDescReq");
+    const hiddenUnidad = document.getElementById("modalSelMaterialUnidadReq");
+    const inputCantidad = document.getElementById("inputCantidadModal");
+    const inputBuscador = document.getElementById("inputBuscadorMaterialModalReq");
+
+    const materialId = hiddenId ? hiddenId.value : "";
+    if (!materialId) {
+        alert("Por favor selecciona un material del catálogo.");
+        if (inputBuscador) inputBuscador.focus();
+        return;
+    }
+
+    const cantidadStr = inputCantidad ? inputCantidad.value.trim().replace(",", ".") : "";
+    const cantNum = parseFloat(cantidadStr);
+    if (isNaN(cantNum) || cantNum <= 0) {
+        alert("Por favor ingresa una cantidad válida mayor a 0.");
+        if (inputCantidad) inputCantidad.focus();
+        return;
+    }
+
+    const itemCode = hiddenItem ? hiddenItem.value : "";
+    const desc = hiddenDesc ? hiddenDesc.value : "";
+    const unidad = hiddenUnidad ? hiddenUnidad.value : "UN";
+
+    const existente = itemsAgregados.find(function (it) {
+        return String(it.material_id) === String(materialId);
     });
 
-    let itemsAgregados = [];
-
-    function agregarMaterialALista() {
-        const select = document.getElementById('selectMaterialModal');
-        const inputCant = document.getElementById('inputCantidadModal');
-
-        const materialId = select.value;
-        const cantidadStr = inputCant.value.trim();
-
-        if (!materialId) {
-            alert('Por favor selecciona un material del catálogo.');
-            select.focus();
-            return;
-        }
-
-        const cantNum = parseFloat(cantidadStr);
-        if (isNaN(cantNum) || cantNum <= 0) {
-            alert('Por favor ingresa una cantidad válida mayor a 0.');
-            inputCant.focus();
-            return;
-        }
-
-        const selectedOption = select.options[select.selectedIndex];
-        const itemCode = selectedOption.getAttribute('data-item') || '';
-        const desc = selectedOption.getAttribute('data-desc') || selectedOption.textContent;
-        const unidad = selectedOption.getAttribute('data-unidad') || 'U';
-
-        // Agregar a la lista
+    if (existente) {
+        existente.cantidad += cantNum;
+    } else {
         itemsAgregados.push({
             material_id: materialId,
             item: itemCode,
@@ -56,123 +155,265 @@ function abrirModalAgregar() {
             unidad: unidad,
             cantidad: cantNum
         });
-
-        // Limpiar inputs
-        select.selectedIndex = 0;
-        inputCant.value = '';
-        select.focus();
-
-        renderizarTablaModal();
     }
 
-    function eliminarItemModal(index) {
-        itemsAgregados.splice(index, 1);
-        renderizarTablaModal();
+    renderizarTablaModal();
+    limpiarSeleccionMaterialModalReq();
+}
+
+function eliminarItemModal(index) {
+    itemsAgregados.splice(index, 1);
+    renderizarTablaModal();
+}
+
+function renderizarTablaModal() {
+    const tbody = document.getElementById("cuerpoTablaModal");
+    const contador = document.getElementById("contadorItemsLista");
+    const btnGuardar = document.getElementById("btnGuardarModal");
+    if (!tbody) return;
+
+    if (contador) {
+        const n = itemsAgregados.length;
+        contador.textContent = n + (n === 1 ? " material" : " materiales");
     }
 
-    function renderizarTablaModal() {
-        const tbody = document.getElementById('cuerpoTablaModal');
-        const contador = document.getElementById('contadorItemsLista');
-        const btnGuardar = document.getElementById('btnGuardarModal');
+    if (itemsAgregados.length === 0) {
+        tbody.innerHTML = `
+            <tr id="filaVaciaModal">
+                <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-xs">
+                    <div class="space-y-1">
+                        <p class="font-bold text-gray-600 text-sm">Aún no has agregado materiales a la lista.</p>
+                        <p class="text-gray-400">Busca el material arriba, digita la cantidad y haz clic en <strong>"+ Agregar"</strong>.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        if (btnGuardar) btnGuardar.disabled = true;
+        return;
+    }
 
-        tbody.innerHTML = '';
-        contador.textContent = itemsAgregados.length + (itemsAgregados.length === 1? ' material': ' materiales');
+    if (btnGuardar) btnGuardar.disabled = false;
 
-        if (itemsAgregados.length === 0) {
-            tbody.innerHTML = `
-                <tr id="filaVaciaModal">
-                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-xs">
-                        Aún no has agregado materiales a la lista.<br>
-                        <span class="text-gray-500 font-medium">Elige arriba y presiona " Agregar a la Lista".</span>
-                    </td>
-                </tr>
-            `;
-            btnGuardar.disabled = true;
-            return;
-        }
-
-        btnGuardar.disabled = false;
-
-        itemsAgregados.forEach((it, idx) => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-blue-50/50 transition';
-            tr.innerHTML = `
-                <td class="px-3 py-2 font-mono text-xs font-bold text-gray-600">
-                    ${it.item}
+    tbody.innerHTML = itemsAgregados.map(function (it, idx) {
+        const cantFormatted = it.cantidad % 1 === 0 ? it.cantidad : it.cantidad.toFixed(2);
+        return `
+            <tr class="hover:bg-blue-50/50 transition">
+                <td class="px-3 py-2.5 text-center font-mono text-xs font-bold text-gray-600">
+                    ${it.item || "—"}
                     <input type="hidden" name="material_id[]" value="${it.material_id}">
                 </td>
-                <td class="px-3 py-2 font-semibold text-gray-900 text-xs">
+                <td class="px-4 py-2.5 font-semibold text-gray-900 text-xs">
                     ${it.descripcion}
                 </td>
-                <td class="px-2 py-2 text-center text-xs font-bold text-gray-600">
-                    <span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200">${it.unidad}</span>
+                <td class="px-3 py-2.5 text-center text-xs font-bold text-gray-600">
+                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">${it.unidad}</span>
                 </td>
-                <td class="px-3 py-2 text-right font-black text-blue-900 text-sm">
-                    ${it.cantidad}
+                <td class="px-4 py-2.5 text-right font-black text-blue-900 text-sm">
+                    ${cantFormatted}
                     <input type="hidden" name="cantidad[]" value="${it.cantidad}">
                 </td>
-                <td class="px-2 py-2 text-center">
+                <td class="px-3 py-2.5 text-center">
                     <button type="button" onclick="eliminarItemModal(${idx})"
-                            class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition"
+                            class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition text-base font-black cursor-pointer leading-none"
                             title="Quitar de la lista">
-                        
+                        &times;
                     </button>
                 </td>
-            `;
-            tbody.appendChild(tr);
+            </tr>
+        `;
+    }).join("");
+}
+
+// Inicialización de Event Listeners
+document.addEventListener("DOMContentLoaded", function () {
+    cargarCatalogoMaterialesReq();
+
+    const inputBuscadorReq = document.getElementById("inputBuscadorMaterialModalReq");
+    const dropdownReq = document.getElementById("dropdownSugerenciasMaterialReq");
+    const btnLimpiarReq = document.getElementById("btnLimpiarMaterialModalReq");
+    const inputCantidadReq = document.getElementById("inputCantidadModal");
+    const modalReq = document.getElementById("modalAgregarRequerido");
+
+    if (inputBuscadorReq && dropdownReq) {
+        inputBuscadorReq.addEventListener("input", function () {
+            const query = normalizarTextoReq(inputBuscadorReq.value);
+            if (btnLimpiarReq) {
+                if (inputBuscadorReq.value.trim().length > 0) {
+                    btnLimpiarReq.classList.remove("hidden");
+                } else {
+                    btnLimpiarReq.classList.add("hidden");
+                }
+            }
+
+            if (query.length < 1) {
+                cerrarDropdownSugerenciasReq();
+                return;
+            }
+
+            cargarCatalogoMaterialesReq();
+            const palabras = query.split(" ").filter(p => p.length > 0);
+
+            const resultados = catalogoMaterialesReq.filter(function (m) {
+                const itemNorm = normalizarTextoReq(m.item);
+                const descNorm = normalizarTextoReq(m.descripcion);
+                const textoCompleto = `${itemNorm} ${descNorm}`;
+                return palabras.every(palabra => textoCompleto.includes(palabra));
+            }).slice(0, 25);
+
+            if (resultados.length === 0) {
+                dropdownReq.innerHTML = `
+                    <div class="px-4 py-3 text-xs text-slate-400 text-center">
+                        No se encontraron materiales que coincidan con "<strong>${inputBuscadorReq.value}</strong>"
+                    </div>
+                `;
+                dropdownReq.classList.remove("hidden");
+                return;
+            }
+
+            dropdownReq.innerHTML = resultados.map(function (m, idx) {
+                return `
+                    <div class="px-3.5 py-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between gap-2 item-sugerencia-material-req transition"
+                         data-idx="${idx}">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="font-mono font-bold text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0">${m.item || "S/C"}</span>
+                            <span class="font-semibold text-xs text-slate-900 truncate">${m.descripcion}</span>
+                        </div>
+                        <span class="text-[11px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-900 shrink-0 border border-blue-200">
+                            ${m.unidad || "UN"}
+                        </span>
+                    </div>
+                `;
+            }).join("");
+
+            dropdownReq.querySelectorAll(".item-sugerencia-material-req").forEach(function (el, idx) {
+                el.addEventListener("click", function () {
+                    seleccionarMaterialModalReq(resultados[idx]);
+                });
+            });
+
+            indiceSugerenciaActivaReq = -1;
+            dropdownReq.classList.remove("hidden");
+        });
+
+        inputBuscadorReq.addEventListener("keydown", function (e) {
+            const items = dropdownReq.querySelectorAll(".item-sugerencia-material-req");
+            if (!dropdownReq.classList.contains("hidden") && items.length > 0) {
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    indiceSugerenciaActivaReq = (indiceSugerenciaActivaReq + 1) % items.length;
+                    actualizarResaltadoReq(items);
+                    return;
+                }
+                if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    indiceSugerenciaActivaReq = (indiceSugerenciaActivaReq - 1 + items.length) % items.length;
+                    actualizarResaltadoReq(items);
+                    return;
+                }
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (indiceSugerenciaActivaReq >= 0 && indiceSugerenciaActivaReq < items.length) {
+                        items[indiceSugerenciaActivaReq].click();
+                    } else if (items.length > 0) {
+                        items[0].click();
+                    }
+                    return;
+                }
+                if (e.key === "Escape") {
+                    cerrarDropdownSugerenciasReq();
+                    return;
+                }
+            }
         });
     }
 
-    // Buscador en vivo de materiales requeridos
-    document.addEventListener("DOMContentLoaded", function () {
-        const inputBuscador = document.getElementById("buscadorRequeridos");
-        const btnLimpiar = document.getElementById("btnLimpiarRequeridos");
-        const contador = document.getElementById("contadorRequeridosVisible");
-        const filas = document.querySelectorAll(".fila-requerido-tabla");
-
-        function filtrarRequeridos() {
-            const q = inputBuscador? inputBuscador.value.toLowerCase().trim(): "";
-
-            if (btnLimpiar) {
-                if (q.length > 0) {
-                    btnLimpiar.classList.remove("hidden");
-                    btnLimpiar.classList.add("flex");
-                } else {
-                    btnLimpiar.classList.add("hidden");
-                    btnLimpiar.classList.remove("flex");
-                }
+    function actualizarResaltadoReq(items) {
+        items.forEach((it, idx) => {
+            if (idx === indiceSugerenciaActivaReq) {
+                it.classList.add("bg-blue-100");
+                it.scrollIntoView({ block: "nearest" });
+            } else {
+                it.classList.remove("bg-blue-100");
             }
+        });
+    }
 
-            let visibles = 0;
-            filas.forEach(function (fila) {
-                const texto = fila.textContent.toLowerCase();
-                const match = (q === "" || texto.includes(q));
-                fila.style.display = match? "": "none";
-                if (match) visibles++;
-            });
+    if (btnLimpiarReq) {
+        btnLimpiarReq.addEventListener("click", limpiarSeleccionMaterialModalReq);
+    }
 
-            if (contador) {
-                contador.textContent = visibles;
+    if (inputCantidadReq) {
+        inputCantidadReq.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                agregarMaterialALista();
             }
-        }
+        });
+    }
 
-        if (inputBuscador) {
-            inputBuscador.addEventListener("input", filtrarRequeridos);
-            inputBuscador.addEventListener("keydown", function (e) {
-                if (e.key === "Escape") {
-                    inputBuscador.value = "";
-                    filtrarRequeridos();
-                }
-            });
-        }
+    if (modalReq) {
+        modalReq.addEventListener("click", function (event) {
+            if (event.target === modalReq) {
+                cerrarModalAgregar();
+            }
+        });
+    }
 
-        if (btnLimpiar) {
-            btnLimpiar.addEventListener("click", function () {
-                if (inputBuscador) {
-                    inputBuscador.value = "";
-                    filtrarRequeridos();
-                    inputBuscador.focus();
-                }
-            });
+    document.addEventListener("click", function (e) {
+        if (dropdownReq && !dropdownReq.contains(e.target) && e.target !== inputBuscadorReq) {
+            cerrarDropdownSugerenciasReq();
         }
     });
+
+    // Buscador en vivo de la tabla principal de materiales requeridos
+    const inputBuscadorPrincipal = document.getElementById("buscadorRequeridos");
+    const btnLimpiarPrincipal = document.getElementById("btnLimpiarRequeridos");
+    const contadorPrincipal = document.getElementById("contadorRequeridosVisible");
+    const filasPrincipal = document.querySelectorAll(".fila-requerido-tabla");
+
+    function filtrarRequeridosPrincipal() {
+        const q = inputBuscadorPrincipal ? inputBuscadorPrincipal.value.toLowerCase().trim() : "";
+
+        if (btnLimpiarPrincipal) {
+            if (q.length > 0) {
+                btnLimpiarPrincipal.classList.remove("hidden");
+                btnLimpiarPrincipal.classList.add("flex");
+            } else {
+                btnLimpiarPrincipal.classList.add("hidden");
+                btnLimpiarPrincipal.classList.remove("flex");
+            }
+        }
+
+        let visibles = 0;
+        filasPrincipal.forEach(function (fila) {
+            const texto = fila.textContent.toLowerCase();
+            const match = (q === "" || texto.includes(q));
+            fila.style.display = match ? "" : "none";
+            if (match) visibles++;
+        });
+
+        if (contadorPrincipal) {
+            contadorPrincipal.textContent = visibles;
+        }
+    }
+
+    if (inputBuscadorPrincipal) {
+        inputBuscadorPrincipal.addEventListener("input", filtrarRequeridosPrincipal);
+        inputBuscadorPrincipal.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                inputBuscadorPrincipal.value = "";
+                filtrarRequeridosPrincipal();
+            }
+        });
+    }
+
+    if (btnLimpiarPrincipal) {
+        btnLimpiarPrincipal.addEventListener("click", function () {
+            if (inputBuscadorPrincipal) {
+                inputBuscadorPrincipal.value = "";
+                filtrarRequeridosPrincipal();
+                inputBuscadorPrincipal.focus();
+            }
+        });
+    }
+});

@@ -2541,7 +2541,10 @@ def proyeccion_presupuesto_proyecto(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto.objects.select_related("macroproyecto"), id=proyecto_id)
     catalogo_simco = obtener_matriz_simco()
 
-    proyeccion_guardada = ProyeccionPresupuesto.objects.filter(proyecto=proyecto).first()
+    try:
+        proyeccion_guardada = ProyeccionPresupuesto.objects.filter(proyecto=proyecto).first()
+    except Exception:
+        proyeccion_guardada = None
     
     items_iniciales = []
     if proyeccion_guardada and proyeccion_guardada.datos_json and "items" in proyeccion_guardada.datos_json:

@@ -92,90 +92,6 @@
                 </select>
             </div>
         </div>
-
-        <!-- AVISO CLAVE DE PROYECCIÓN (SOLO PARA PROYECCIÓN) -->
-        <div class="flex items-start gap-3 p-4 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-blue-900 dark:text-blue-200 text-xs sm:text-sm leading-relaxed">
-            <svg class="size-5 shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
-            </svg>
-            <div>
-                <strong class="font-bold">Modo Exclusivo de Proyección Financiera:</strong>
-                Esta tabla está diseñada para planificar y proyectar el presupuesto estimado que se irá en este proyecto. <strong>No modifica el inventario físico de bodega, ni despacha materiales reales.</strong> Puedes simular con total libertad las cantidades que se van a usar, verificar subtotales de mano de obra y exportar o guardar el resultado.
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================================
-         2. TARJETAS DE MÉTRICAS (KPIs EN TIEMPO REAL)
-         ====================================================================== -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- KPI 1: GRAN TOTAL ESTIMADO COP -->
-        <div class="bg-gradient-to-br from-teal-900 via-teal-800 to-emerald-900 text-white rounded-2xl p-5 shadow-sm border border-teal-700/50 flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-teal-200 uppercase tracking-wider">Presupuesto Proyectado MO</span>
-                <span class="p-2 rounded-xl bg-white/10 text-teal-100">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </span>
-            </div>
-            <div class="mt-4">
-                <div class="text-2xl sm:text-3xl font-black font-mono tracking-tight" id="kpiGranTotal">
-                    $ 0 COP
-                </div>
-                <p class="text-[11px] text-teal-200/80 mt-1">Cálculo contractual basado en tarifas SIMCO</p>
-            </div>
-        </div>
-
-        <!-- KPI 2: MATERIALES PROYECTADOS -->
-        <div class="bg-card rounded-2xl p-5 shadow-xs border border-border flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Materiales a Usar</span>
-                <span class="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
-                </span>
-            </div>
-            <div class="mt-4">
-                <div class="text-2xl sm:text-3xl font-extrabold text-foreground" id="kpiTotalMats">
-                    0
-                </div>
-                <p class="text-[11px] text-muted-foreground mt-1">Ítems de materiales configurados</p>
-            </div>
-        </div>
-
-        <!-- KPI 3: ACTIVIDADES MO ASOCIADAS -->
-        <div class="bg-card rounded-2xl p-5 shadow-xs border border-border flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Actividades Vinculadas</span>
-                <span class="p-2 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
-                </span>
-            </div>
-            <div class="mt-4">
-                <div class="text-2xl sm:text-3xl font-extrabold text-foreground" id="kpiTotalActs">
-                    0
-                </div>
-                <p class="text-[11px] text-muted-foreground mt-1">Actividades de mano de obra activas</p>
-            </div>
-        </div>
-
-        <!-- KPI 4: DESGLOSE TRANSPORTE & INSTALACIÓN -->
-        <div class="bg-card rounded-2xl p-5 shadow-xs border border-border flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Subtotales Clave</span>
-                <span class="p-2 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-300">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.948c0-.621-.504-1.125-1.125-1.125H5.25A2.25 2.25 0 003 7.725v6.525"/></svg>
-                </span>
-            </div>
-            <div class="mt-2 space-y-1">
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-muted-foreground">🚚 Transporte:</span>
-                    <strong class="font-mono text-foreground" id="kpiSubtotalTransporte">$ 0</strong>
-                </div>
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-muted-foreground">🛠️ Instalación / Otros:</span>
-                    <strong class="font-mono text-foreground" id="kpiSubtotalInstalacion">$ 0</strong>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- ======================================================================
@@ -287,10 +203,10 @@
             <p class="font-bold text-base text-foreground">Aún no has agregado materiales a la proyección</p>
             <p class="text-xs mt-1">Usa los botones superiores para agregar materiales del catálogo o cargar los que ya se pidieron para este proyecto.</p>
             <div class="mt-4 flex items-center justify-center gap-3">
-                <button type="button" onclick="document.getElementById('btnAbrirModalAgregar').click()" class="btn btn-primario text-xs px-3.5 py-2">
+                <button type="button" id="btnAbrirModalAgregarVacio" class="btn btn-primario text-xs px-3.5 py-2 cursor-pointer">
                     ➕ Agregar Material
                 </button>
-                <button type="button" onclick="document.getElementById('btnCargarMaterialesPedidos').click()" class="btn btn-secundario text-xs px-3.5 py-2">
+                <button type="button" onclick="document.getElementById('btnCargarMaterialesPedidos').click()" class="btn btn-secundario text-xs px-3.5 py-2 cursor-pointer">
                     📥 Cargar Materiales Pedidos
                 </button>
             </div>
@@ -397,8 +313,8 @@
 </form>
 
 <!-- DATOS JSON EMBEBIDOS SEGUROS -->
-{{ catalogo_simco_json|json_script:"catalogo-simco-json" }}
-{{ items_iniciales_json|json_script:"items-iniciales-json" }}
+<script id="catalogo-simco-json" type="application/json">{{ catalogo_simco_json|safe }}</script>
+<script id="items-iniciales-json" type="application/json">{{ items_iniciales_json|safe }}</script>
 
 {% endblock %}
 
@@ -406,8 +322,26 @@
 <script>
 (function() {
     const PROYECTO_ID = {{ proyecto.id }};
-    const catalogoSimco = JSON.parse(document.getElementById("catalogo-simco-json")?.textContent || "{}");
-    const itemsInicialesRaw = JSON.parse(document.getElementById("items-iniciales-json")?.textContent || "[]");
+
+    let catalogoSimco = {};
+    try {
+        let raw = JSON.parse(document.getElementById("catalogo-simco-json")?.textContent || "{}");
+        if (typeof raw === "string") raw = JSON.parse(raw);
+        catalogoSimco = (raw && typeof raw === "object") ? raw : {};
+    } catch (e) {
+        console.error("Error al parsear catalogoSimco:", e);
+        catalogoSimco = {};
+    }
+
+    let itemsInicialesRaw = [];
+    try {
+        let raw = JSON.parse(document.getElementById("items-iniciales-json")?.textContent || "[]");
+        if (typeof raw === "string") raw = JSON.parse(raw);
+        itemsInicialesRaw = Array.isArray(raw) ? raw : [];
+    } catch (e) {
+        console.error("Error al parsear itemsInicialesRaw:", e);
+        itemsInicialesRaw = [];
+    }
 
     // Estado local de la proyección: Map de itemCode -> { cantidad, actividades: { moId: boolean } }
     const estadoProyeccion = {};
@@ -984,10 +918,13 @@
     // ==========================================
     // CONTROL DEL MODAL: AGREGAR MATERIAL
     // ==========================================
+    const btnAbrirModalAgregarVacio = document.getElementById("btnAbrirModalAgregarVacio");
+
     function abrirModal() {
         if (!modalAgregarMaterial) return;
         modalAgregarMaterial.classList.remove("hidden");
         modalAgregarMaterial.classList.add("flex");
+        modalAgregarMaterial.style.display = "flex";
         document.body.style.overflow = "hidden";
         renderizarCatalogoModal();
         if (buscadorModalMateriales) {
@@ -1000,10 +937,12 @@
         if (!modalAgregarMaterial) return;
         modalAgregarMaterial.classList.add("hidden");
         modalAgregarMaterial.classList.remove("flex");
+        modalAgregarMaterial.style.display = "none";
         document.body.style.overflow = "";
     }
 
     if (btnAbrirModalAgregar) btnAbrirModalAgregar.addEventListener("click", abrirModal);
+    if (btnAbrirModalAgregarVacio) btnAbrirModalAgregarVacio.addEventListener("click", abrirModal);
     if (btnCerrarModalAgregar) btnCerrarModalAgregar.addEventListener("click", cerrarModal);
     if (btnCerrarModalAgregarAbajo) btnCerrarModalAgregarAbajo.addEventListener("click", cerrarModal);
 

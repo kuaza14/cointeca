@@ -200,8 +200,106 @@ def detalle_proyecto_logistica(request, proyecto_id):
 
         elif accion == "eliminar_requerido":
             req_id = request.POST.get("req_id")
+            material_id = request.POST.get("material_id")
             if req_id:
                 MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).delete()
+                messages.success(request, "Material requerido eliminado del proyecto.")
+            elif material_id:
+                MaterialRequeridoProyecto.objects.filter(material_id=material_id, proyecto=proyecto).delete()
+                messages.success(request, "Material requerido eliminado del proyecto.")
+            return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
+
+        elif accion == "editar_requerido":
+            req_id = request.POST.get("req_id")
+            material_id = request.POST.get("material_id")
+            nuevo_material_id = request.POST.get("nuevo_material_id")
+            nueva_cant_str = request.POST.get("cantidad_requerida")
+
+            req_obj = None
+            if req_id:
+                req_obj = MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).first()
+            elif material_id:
+                req_obj = MaterialRequeridoProyecto.objects.filter(material_id=material_id, proyecto=proyecto).first()
+
+            if req_obj:
+                try:
+                    nueva_cant = Decimal(str(nueva_cant_str).strip().replace(',', '.'))
+                except (ValueError, TypeError, InvalidOperation):
+                    nueva_cant = req_obj.cantidad_requerida
+
+                if nueva_cant <= 0:
+                    nombre_mat = req_obj.material.descripcion
+                    req_obj.delete()
+                    messages.success(request, f"Se eliminó '{nombre_mat}' de los materiales requeridos.")
+                else:
+                    if nuevo_material_id and str(nuevo_material_id) != str(req_obj.material_id):
+                        nuevo_mat = Material.objects.filter(id=nuevo_material_id).first()
+                        if nuevo_mat:
+                            existente = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto, material=nuevo_mat).exclude(id=req_obj.id).first()
+                            if existente:
+                                existente.cantidad_requerida += nueva_cant
+                                existente.save()
+                                req_obj.delete()
+                                messages.success(request, f"Se actualizó y unificó a '{nuevo_mat.descripcion}' (Total: {existente.cantidad_requerida}).")
+                            else:
+                                req_obj.material = nuevo_mat
+                                req_obj.cantidad_requerida = nueva_cant
+                                req_obj.save()
+                                messages.success(request, f"Se cambió el material a '{nuevo_mat.descripcion}' con cantidad {nueva_cant}.")
+                        else:
+                            req_obj.cantidad_requerida = nueva_cant
+                            req_obj.save()
+                            messages.success(request, f"Cantidad requerida actualizada a {nueva_cant}.")
+                    else:
+                        req_obj.cantidad_requerida = nueva_cant
+                        req_obj.save()
+                        messages.success(request, f"Cantidad requerida de '{req_obj.material.descripcion}' actualizada a {nueva_cant}.")
+            else:
+                if material_id and nueva_cant_str:
+                    try:
+                        nueva_cant = Decimal(str(nueva_cant_str).strip().replace(',', '.'))
+                        if nueva_cant > 0:
+                            MaterialRequeridoProyecto.objects.create(
+                                proyecto=proyecto,
+                                material_id=int(material_id),
+                                cantidad_requerida=nueva_cant
+                            )
+                            messages.success(request, "Se estableció la cantidad requerida con éxito.")
+                    except Exception:
+                        pass
+            return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
+
+        elif accion == "editar_instalado_apoyo":
+            apoyo_material_id = request.POST.get("apoyo_material_id")
+            nueva_cant_str = request.POST.get("cantidad_instalada") or request.POST.get("cantidad_requerida") or request.POST.get("cantidad")
+            if apoyo_material_id and nueva_cant_str is not None:
+                try:
+                    nueva_cant = Decimal(str(nueva_cant_str).strip().replace(',', '.'))
+                    am = ApoyoMaterial.objects.filter(id=apoyo_material_id, apoyo__proyecto=proyecto).first()
+                    if am:
+                        if nueva_cant <= 0 and (am.cantidad_retirada or 0) <= 0:
+                            am.delete()
+                            messages.success(request, "Se retiró el material del apoyo.")
+                        else:
+                            am.cantidad_requerida = max(Decimal("0"), nueva_cant)
+                            am.save()
+                            messages.success(request, f"Cantidad instalada en el apoyo/nodo {am.apoyo.nodo or am.apoyo.numero_apoyo} actualizada a {am.cantidad_requerida}.")
+                except Exception as e:
+                    messages.error(request, f"Error al actualizar cantidad instalada: {e}")
+            return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
+
+        elif accion == "eliminar_instalado_apoyo":
+            apoyo_material_id = request.POST.get("apoyo_material_id")
+            if apoyo_material_id:
+                am = ApoyoMaterial.objects.filter(id=apoyo_material_id, apoyo__proyecto=proyecto).first()
+                if am:
+                    nodo_lbl = am.apoyo.nodo or am.apoyo.numero_apoyo
+                    if (am.cantidad_retirada or 0) > 0:
+                        am.cantidad_requerida = Decimal("0")
+                        am.save()
+                    else:
+                        am.delete()
+                    messages.success(request, f"Se eliminó el material instalado del apoyo {nodo_lbl}.")
             return redirect("detalle_proyecto_logistica", proyecto_id=proyecto.id)
 
         elif accion == "registrar_devolucion":
@@ -355,6 +453,29 @@ def detalle_proyecto_logistica(request, proyecto_id):
     total_items_retirados = Decimal("0")
     total_devolucion = Decimal("0")
 
+    req_objs_dict = {
+        r.material_id: r
+        for r in MaterialRequeridoProyecto.objects.filter(proyecto=proyecto).select_related("material")
+    }
+
+    apoyo_mats_qs = (
+        ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto)
+        .select_related("apoyo")
+        .order_by("apoyo__nodo", "apoyo__numero_apoyo")
+    )
+    apoyo_mats_by_mat = {}
+    for am in apoyo_mats_qs:
+        apoyo_mats_by_mat.setdefault(am.material_id, []).append(am)
+
+    ent_detalles_qs = (
+        DetalleEntradaMaterial.objects.filter(entrada__proyecto=proyecto)
+        .select_related("entrada")
+        .order_by("-entrada__fecha", "-id")
+    )
+    entradas_by_mat = {}
+    for de in ent_detalles_qs:
+        entradas_by_mat.setdefault(de.material_id, []).append(de)
+
     potencias_por_mat = {}
     potencias_retiro_por_mat = {}
     for am in ApoyoMaterial.objects.filter(apoyo__proyecto=proyecto).select_related("material"):
@@ -373,6 +494,10 @@ def detalle_proyecto_logistica(request, proyecto_id):
         sum_ret = ret_map.get(mat.id, Decimal("0"))
         sum_dev_hecha = dev_map.get(mat.id, Decimal("0"))
 
+        req_obj = req_objs_dict.get(mat.id)
+        inst_list = apoyo_mats_by_mat.get(mat.id, [])
+        ent_list = entradas_by_mat.get(mat.id, [])
+
         pots = potencias_retiro_por_mat.get(mat.id) or potencias_por_mat.get(mat.id)
         potencia_str = ", ".join(sorted(pots)) if pots else (extraer_potencia_luminaria(mat.descripcion) if es_material_luminaria(mat) else "")
 
@@ -389,6 +514,8 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "material": mat,
             "potencia": potencia_str,
             "requerido": sum_req,
+            "req_id": req_obj.id if req_obj else None,
+            "tiene_requerido": bool(req_obj),
             "instalado": sum_inst,
             "stock_bodega": stock_disponible,
             "entrada": sum_ent,
@@ -400,6 +527,26 @@ def detalle_proyecto_logistica(request, proyecto_id):
             "devolucion_str": str(devolucion_pendiente),
             "devolucion_realizada": sum_dev_hecha,
             "devolucion_teorica": total_a_devolver_teorico,
+            "instalados_detalles": [
+                {
+                    "id": am.id,
+                    "apoyo_id": am.apoyo.id,
+                    "nodo": am.apoyo.nodo or (f"Apoyo #{am.apoyo.numero_apoyo}" if am.apoyo.numero_apoyo else f"ID {am.apoyo.id}"),
+                    "cantidad_instalada": float(am.cantidad_requerida or 0),
+                    "cantidad_retirada": float(am.cantidad_retirada or 0),
+                }
+                for am in inst_list if (am.cantidad_requerida or 0) > 0 or (am.cantidad_retirada or 0) > 0
+            ],
+            "entradas_detalles": [
+                {
+                    "id": de.id,
+                    "entrada_id": de.entrada.id,
+                    "remision": de.entrada.numero_remision or f"Entrada #{de.entrada.id}",
+                    "fecha": de.entrada.fecha.strftime("%d/%m/%Y") if de.entrada.fecha else "",
+                    "cantidad": float(de.cantidad or 0),
+                }
+                for de in ent_list
+            ],
         })
 
         total_items_requeridos += sum_req
@@ -445,12 +592,32 @@ def detalle_proyecto_logistica(request, proyecto_id):
 
     materiales_catalogo = Material.objects.all().order_by("descripcion")
 
+    balance_modal_data = {}
+    for b in balance_materiales:
+        m = b["material"]
+        balance_modal_data[m.id] = {
+            "id": m.id,
+            "item": m.item,
+            "descripcion": m.descripcion,
+            "unidad": m.unidad or "UN",
+            "requerido": float(b["requerido"]),
+            "req_id": b["req_id"],
+            "tiene_requerido": b["tiene_requerido"],
+            "instalado": float(b["instalado"]),
+            "instalados_detalles": b["instalados_detalles"],
+            "entrada": float(b["entrada"]),
+            "entradas_detalles": b["entradas_detalles"],
+            "stock_bodega": float(b["stock_bodega"]),
+        }
+    balance_materiales_modal_json = json.dumps(balance_modal_data)
+
     return render(
         request,
         "logistica/proyectos/detalle_proyecto.html",
         {
             "proyecto": proyecto,
             "balance_materiales": balance_materiales,
+            "balance_materiales_modal_json": balance_materiales_modal_json,
             "materiales_devolucion": materiales_devolucion,
             "devoluciones": devoluciones,
             "entradas": entradas,
@@ -969,6 +1136,42 @@ def materiales_requeridos_proyecto(request, proyecto_id):
             req_id = request.POST.get("req_id") or request.POST.get("requerido_id")
             if req_id:
                 MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).delete()
+            return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
+
+        elif accion in ["editar_requerido", "editar"]:
+            req_id = request.POST.get("req_id") or request.POST.get("requerido_id")
+            nuevo_material_id = request.POST.get("nuevo_material_id")
+            nueva_cant_str = request.POST.get("cantidad") or request.POST.get("cantidad_requerida")
+
+            if req_id:
+                req_obj = MaterialRequeridoProyecto.objects.filter(id=req_id, proyecto=proyecto).first()
+                if req_obj:
+                    try:
+                        nueva_cant = Decimal(str(nueva_cant_str).strip().replace(',', '.'))
+                    except (ValueError, TypeError, InvalidOperation):
+                        nueva_cant = req_obj.cantidad_requerida
+
+                    if nueva_cant <= 0:
+                        req_obj.delete()
+                    else:
+                        if nuevo_material_id and str(nuevo_material_id) != str(req_obj.material_id):
+                            nuevo_mat = Material.objects.filter(id=nuevo_material_id).first()
+                            if nuevo_mat:
+                                existente = MaterialRequeridoProyecto.objects.filter(proyecto=proyecto, material=nuevo_mat).exclude(id=req_obj.id).first()
+                                if existente:
+                                    existente.cantidad_requerida += nueva_cant
+                                    existente.save()
+                                    req_obj.delete()
+                                else:
+                                    req_obj.material = nuevo_mat
+                                    req_obj.cantidad_requerida = nueva_cant
+                                    req_obj.save()
+                            else:
+                                req_obj.cantidad_requerida = nueva_cant
+                                req_obj.save()
+                        else:
+                            req_obj.cantidad_requerida = nueva_cant
+                            req_obj.save()
 
             return redirect("materiales_requeridos_proyecto", proyecto_id=proyecto.id)
 

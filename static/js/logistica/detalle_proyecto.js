@@ -920,9 +920,387 @@ function ejecutarFiltradoTabla(tablaId) {
 // Clic fuera del popover para cerrarlo
 document.addEventListener("click", function (e) {
     const popover = document.getElementById("excelFilterPopover");
-    if (popover &&!popover.classList.contains("hidden")) {
-        if (!popover.contains(e.target) &&!e.target.closest(".btn-filter-trigger")) {
+    if (popover && !popover.classList.contains("hidden")) {
+        if (!popover.contains(e.target) && !e.target.closest(".btn-filter-trigger")) {
             cerrarFiltroExcel();
         }
+    }
+
+    const dropdownReemplazo = document.getElementById("dropdownReemplazoMaterial");
+    const inputReemplazo = document.getElementById("inputBuscarReemplazoMaterial");
+    if (dropdownReemplazo && !dropdownReemplazo.classList.contains("hidden")) {
+        if (!dropdownReemplazo.contains(e.target) && e.target !== inputReemplazo) {
+            cerrarDropdownReemplazo();
+        }
+    }
+});
+
+// =========================================================================
+// MODAL: EDITAR / CORREGIR MATERIAL DEL PROYECTO (BALANCE Y ACCIONES DIRECTAS)
+// =========================================================================
+let balanceMaterialesData = [];
+
+function cargarBalanceMaterialesData() {
+    const script = document.getElementById("balanceMaterialesModalJson");
+    if (script && balanceMaterialesData.length === 0) {
+        try {
+            balanceMaterialesData = JSON.parse(script.textContent || "[]");
+        } catch (e) {
+            console.error("Error parseando balanceMaterialesModalJson:", e);
+        }
+    }
+}
+
+function abrirModalEditarMaterialBalance(materialId) {
+    cargarCatalogoMateriales();
+    cargarBalanceMaterialesData();
+
+    const m = document.getElementById("modalEditarMaterialBalance");
+    if (!m) return;
+
+    // Buscar el material en balanceMaterialesData
+    let item = balanceMaterialesData.find(function (b) {
+        return String(b.id) === String(materialId);
+    });
+
+    // Si no está en balanceMaterialesData, buscarlo en catalogoMateriales
+    if (!item) {
+        const cat = catalogoMateriales.find(function (c) {
+            return String(c.id) === String(materialId);
+        });
+        if (cat) {
+            item = {
+                id: cat.id,
+                item: cat.item,
+                descripcion: cat.descripcion,
+                unidad: cat.unidad,
+                cantidad_requerida: 0,
+                cantidad_instalada: 0,
+                cantidad_retirada: 0,
+                cantidad_entrada: 0,
+                tiene_requerido: false,
+                req_id: null,
+                instalados_detalles: [],
+                entradas_detalles: []
+            };
+        }
+    }
+
+    if (!item) {
+        alert("No se encontró la información del material seleccionado.");
+        return;
+    }
+
+    // Cabecera
+    const lblTitulo = document.getElementById("lblEditarMatTitulo");
+    if (lblTitulo) {
+        const cod = item.item ? `[${item.item}] ` : "";
+        lblTitulo.textContent = `${cod}${item.descripcion} — Unidad: ${item.unidad || "UN"}`;
+    }
+
+    // CSRF token de la página
+    const csrfTokenEl = document.querySelector("#formEditarRequeridoBalance [name=csrfmiddlewaretoken]");
+    const csrfToken = csrfTokenEl ? csrfTokenEl.value : "";
+
+    // SECCIÓN 1: REQUERIDO GENERAL
+    const inputReqId = document.getElementById("inputEditReqId");
+    const inputReqMatId = document.getElementById("inputEditReqMaterialId");
+    const inputNuevoMatId = document.getElementById("inputEditNuevoMaterialId");
+    const inputCant = document.getElementById("inputEditReqCantidad");
+    const lblUnidad = document.getElementById("lblEditReqUnidad");
+    const badgeReq = document.getElementById("badgeEstadoRequerido");
+    const btnEliminar = document.getElementById("btnEliminarReqDirecto");
+    const sinReqInfo = document.getElementById("sinRequeridoInfo");
+    const inputElimReqId = document.getElementById("inputEliminarReqId");
+    const inputElimMatId = document.getElementById("inputEliminarMaterialId");
+
+    if (inputReqMatId) inputReqMatId.value = item.id;
+    if (inputElimMatId) inputElimMatId.value = item.id;
+    if (lblUnidad) lblUnidad.textContent = item.unidad || "UN";
+
+    cancelarReemplazoMaterial();
+
+    if (item.tiene_requerido && item.req_id) {
+        if (inputReqId) inputReqId.value = item.req_id;
+        if (inputElimReqId) inputElimReqId.value = item.req_id;
+        if (inputCant) inputCant.value = item.cantidad_requerida;
+        if (badgeReq) {
+            badgeReq.textContent = `Registrado (${item.cantidad_requerida} ${item.unidad || "UN"})`;
+            badgeReq.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200";
+        }
+        if (btnEliminar) btnEliminar.classList.remove("hidden");
+        if (sinReqInfo) sinReqInfo.classList.add("hidden");
+    } else {
+        if (inputReqId) inputReqId.value = "";
+        if (inputElimReqId) inputElimReqId.value = "";
+        if (inputCant) inputCant.value = "0";
+        if (badgeReq) {
+            badgeReq.textContent = "No registrado como Requerido directo";
+            badgeReq.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200";
+        }
+        if (btnEliminar) btnEliminar.classList.add("hidden");
+        if (sinReqInfo) sinReqInfo.classList.remove("hidden");
+    }
+
+    // SECCIÓN 2: INSTALADO EN APOYOS (INGENIERÍA)
+    const listaApoyos = document.getElementById("listaApoyosInstalados");
+    const sinApoyos = document.getElementById("sinApoyosInfo");
+    const contApoyos = document.getElementById("contadorApoyosInstalados");
+
+    const instList = item.instalados_detalles || [];
+    if (contApoyos) {
+        contApoyos.textContent = `${instList.length} apoyo(s)`;
+    }
+
+    if (instList.length > 0) {
+        if (sinApoyos) sinApoyos.classList.add("hidden");
+        if (listaApoyos) {
+            listaApoyos.innerHTML = instList.map(function (ap) {
+                const urlIng = `/ingenieria/proyectos/${item.proyecto_id || window.location.pathname.split("/")[3]}/?tab=materiales&editar_apoyo=${ap.apoyo_id}`;
+                return `
+                    <div class="p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="space-y-0.5">
+                            <p class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                <span class="size-2 rounded-full bg-indigo-500"></span>
+                                Apoyo / Poste: <span class="font-black text-indigo-900 text-sm">${ap.nodo || ("ID " + ap.apoyo_id)}</span>
+                            </p>
+                            <p class="text-[11px] text-slate-500">
+                                Instalado actual: <strong class="text-slate-700">${ap.cantidad_instalada}</strong> ${item.unidad || "UN"}
+                                ${ap.cantidad_retirada > 0 ? `· Retirado: <strong class="text-amber-700">${ap.cantidad_retirada}</strong>` : ""}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <!-- Formulario inline para cambiar cantidad instalada en este apoyo -->
+                            <form method="POST" action="" class="flex items-center gap-1.5">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                                <input type="hidden" name="accion" value="editar_instalado_apoyo">
+                                <input type="hidden" name="apoyo_material_id" value="${ap.id}">
+                                <input type="number" step="any" min="0" name="cantidad_requerida" value="${ap.cantidad_instalada}"
+                                       class="w-20 border border-indigo-200 rounded px-2 py-1 text-xs font-black text-slate-900 bg-white text-right focus:border-indigo-600 focus:outline-none"
+                                       title="Editar cantidad instalada en este apoyo">
+                                <button type="submit"
+                                        class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-xs transition cursor-pointer"
+                                        title="Guardar nueva cantidad instalada">
+                                    Guardar
+                                </button>
+                            </form>
+
+                            <!-- Formulario para quitar este material del apoyo -->
+                            <form method="POST" action="" onsubmit="return confirm('¿Quitar este material de este apoyo?')" class="inline">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                                <input type="hidden" name="accion" value="eliminar_instalado_apoyo">
+                                <input type="hidden" name="apoyo_material_id" value="${ap.id}">
+                                <button type="submit"
+                                        class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-xs font-bold transition cursor-pointer"
+                                        title="Retirar material de este apoyo">
+                                    ✕ Quitar
+                                </button>
+                            </form>
+
+                            <!-- Enlace a la vista técnica en Ingeniería -->
+                            <a href="${urlIng}" target="_blank"
+                               class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-bold transition inline-flex items-center gap-1"
+                               title="Abrir este apoyo en el módulo de Ingeniería">
+                                <span>Abrir Apoyo</span>
+                                <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+    } else {
+        if (listaApoyos) listaApoyos.innerHTML = "";
+        if (sinApoyos) sinApoyos.classList.remove("hidden");
+    }
+
+    // SECCIÓN 3: ENTRADAS / REMISIONES
+    const listaEntradas = document.getElementById("listaEntradasRemisiones");
+    const sinEntradas = document.getElementById("sinEntradasInfo");
+    const contEntradas = document.getElementById("contadorEntradasRemisiones");
+
+    const entList = item.entradas_detalles || [];
+    if (contEntradas) {
+        contEntradas.textContent = `${entList.length} remisión(es)`;
+    }
+
+    if (entList.length > 0) {
+        if (sinEntradas) sinEntradas.classList.add("hidden");
+        if (listaEntradas) {
+            listaEntradas.innerHTML = entList.map(function (ent) {
+                const urlEditarEntrada = `/logistica/entradas/${ent.entrada_id}/editar/`;
+                return `
+                    <div class="p-3 bg-emerald-50/50 border border-emerald-100 rounded-lg flex items-center justify-between gap-3">
+                        <div class="space-y-0.5">
+                            <p class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                <span class="size-2 rounded-full bg-emerald-500"></span>
+                                Remisión: <span class="font-black text-emerald-900 text-sm font-mono">${ent.remision || "S/R"}</span>
+                                ${ent.fecha ? `<span class="text-slate-400 font-normal">(${ent.fecha})</span>` : ""}
+                            </p>
+                            <p class="text-[11px] text-slate-500">
+                                Cantidad recibida en remisión: <strong class="text-slate-800">${ent.cantidad}</strong> ${item.unidad || "UN"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <a href="${urlEditarEntrada}"
+                               class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition inline-flex items-center gap-1 cursor-pointer"
+                               title="Editar cantidades o materiales registrados en esta remisión">
+                                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                                <span>Ver / Editar Remisión</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+    } else {
+        if (listaEntradas) listaEntradas.innerHTML = "";
+        if (sinEntradas) sinEntradas.classList.remove("hidden");
+    }
+
+    m.classList.remove("hidden");
+    m.classList.add("flex");
+}
+
+function cerrarModalEditarMaterialBalance() {
+    const m = document.getElementById("modalEditarMaterialBalance");
+    if (m) {
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+    }
+    cerrarDropdownReemplazo();
+}
+
+function cerrarDropdownReemplazo() {
+    const dropdown = document.getElementById("dropdownReemplazoMaterial");
+    if (dropdown) {
+        dropdown.classList.add("hidden");
+        dropdown.innerHTML = "";
+    }
+}
+
+function seleccionarMaterialReemplazo(mat) {
+    const inputBuscar = document.getElementById("inputBuscarReemplazoMaterial");
+    const hiddenNuevoId = document.getElementById("inputEditNuevoMaterialId");
+    const alerta = document.getElementById("alertaReemplazoActivo");
+    const textoAlerta = document.getElementById("textoReemplazoActivo");
+    const btnCancelar = document.getElementById("btnCancelarReemplazo");
+
+    if (hiddenNuevoId) hiddenNuevoId.value = mat.id;
+    if (inputBuscar) inputBuscar.value = (mat.item ? `[${mat.item}] ` : "") + mat.descripcion;
+    if (textoAlerta) {
+        textoAlerta.innerHTML = `Cambiar por: <strong>${(mat.item ? `[${mat.item}] ` : '') + mat.descripcion}</strong> (${mat.unidad || 'UN'})`;
+    }
+    if (alerta) alerta.classList.remove("hidden");
+    if (btnCancelar) btnCancelar.classList.remove("hidden");
+
+    cerrarDropdownReemplazo();
+}
+
+function cancelarReemplazoMaterial() {
+    const inputBuscar = document.getElementById("inputBuscarReemplazoMaterial");
+    const hiddenNuevoId = document.getElementById("inputEditNuevoMaterialId");
+    const alerta = document.getElementById("alertaReemplazoActivo");
+    const btnCancelar = document.getElementById("btnCancelarReemplazo");
+
+    if (hiddenNuevoId) hiddenNuevoId.value = "";
+    if (inputBuscar) inputBuscar.value = "";
+    if (alerta) alerta.classList.add("hidden");
+    if (btnCancelar) btnCancelar.classList.add("hidden");
+    cerrarDropdownReemplazo();
+}
+
+function confirmarEliminarRequerido() {
+    if (!confirm("¿Estás seguro de que deseas eliminar este material de los requeridos del proyecto?")) {
+        return;
+    }
+    const form = document.getElementById("formEliminarRequeridoBalance");
+    if (form) form.submit();
+}
+
+// Modal de edición rápida de apoyo instalado (Tab 3)
+function abrirModalEditarInstaladoRapido(id, nodo, desc, cant) {
+    const m = document.getElementById("modalEditarInstaladoRapido");
+    const inputId = document.getElementById("rapidoApoyoMaterialId");
+    const lblNodo = document.getElementById("rapidoApoyoNodo");
+    const lblDesc = document.getElementById("rapidoApoyoMaterialDesc");
+    const inputCant = document.getElementById("rapidoApoyoCantidad");
+
+    if (inputId) inputId.value = id;
+    if (lblNodo) lblNodo.textContent = `Apoyo: ${nodo || '—'}`;
+    if (lblDesc) lblDesc.textContent = `Material: ${desc || '—'}`;
+    if (inputCant) inputCant.value = cant;
+
+    if (m) {
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+        if (inputCant) {
+            setTimeout(function () {
+                inputCant.focus();
+                inputCant.select();
+            }, 100);
+        }
+    }
+}
+
+function cerrarModalEditarInstaladoRapido() {
+    const m = document.getElementById("modalEditarInstaladoRapido");
+    if (m) {
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+    }
+}
+
+// Autocomplete para el campo de búsqueda de reemplazo
+document.addEventListener("DOMContentLoaded", function () {
+    const inputReemplazo = document.getElementById("inputBuscarReemplazoMaterial");
+    const dropdownReemplazo = document.getElementById("dropdownReemplazoMaterial");
+
+    if (inputReemplazo && dropdownReemplazo) {
+        inputReemplazo.addEventListener("input", function () {
+            const query = normalizarTexto(inputReemplazo.value);
+            if (query.length < 1) {
+                cerrarDropdownReemplazo();
+                return;
+            }
+
+            cargarCatalogoMateriales();
+            const resultados = buscarMaterialesPriorizados(query, catalogoMateriales);
+
+            if (resultados.length === 0) {
+                dropdownReemplazo.innerHTML = `
+                    <div class="px-4 py-3 text-xs text-slate-400 text-center">
+                        No se encontraron materiales que coincidan con "<strong>${inputReemplazo.value}</strong>"
+                    </div>
+                `;
+                dropdownReemplazo.classList.remove("hidden");
+                return;
+            }
+
+            dropdownReemplazo.innerHTML = resultados.map(function (m, idx) {
+                return `
+                    <div class="px-3.5 py-2 hover:bg-amber-50 cursor-pointer flex items-center justify-between gap-2 item-sugerencia-reemplazo transition"
+                         data-idx="${idx}">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="font-mono font-bold text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0">${m.item || "S/C"}</span>
+                            <span class="font-semibold text-xs text-slate-900 truncate">${m.descripcion}</span>
+                        </div>
+                        <span class="text-[11px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-900 shrink-0 border border-amber-200">
+                            ${m.unidad || "UN"}
+                        </span>
+                    </div>
+                `;
+            }).join("");
+
+            dropdownReemplazo.querySelectorAll(".item-sugerencia-reemplazo").forEach(function (el, idx) {
+                el.addEventListener("click", function () {
+                    seleccionarMaterialReemplazo(resultados[idx]);
+                });
+            });
+
+            dropdownReemplazo.classList.remove("hidden");
+        });
     }
 });

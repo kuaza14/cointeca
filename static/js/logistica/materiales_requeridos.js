@@ -462,4 +462,142 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Buscador interactivo de reemplazo de material
+    const inputReemplazoDir = document.getElementById("editDirInputBuscarReemplazo");
+    const dropdownReemplazoDir = document.getElementById("editDirDropdownReemplazo");
+
+    if (inputReemplazoDir && dropdownReemplazoDir) {
+        inputReemplazoDir.addEventListener("input", function () {
+            const query = normalizarTextoReq(inputReemplazoDir.value);
+            if (query.length < 1) {
+                cerrarDropdownReemplazoDirecto();
+                return;
+            }
+
+            cargarCatalogoMaterialesReq();
+            const resultados = buscarMaterialesPriorizadosReq(query, catalogoMaterialesReq);
+
+            if (resultados.length === 0) {
+                dropdownReemplazoDir.innerHTML = `
+                    <div class="px-4 py-3 text-xs text-slate-400 text-center">
+                        No se encontraron materiales que coincidan con "<strong>${inputReemplazoDir.value}</strong>"
+                    </div>
+                `;
+                dropdownReemplazoDir.classList.remove("hidden");
+                return;
+            }
+
+            dropdownReemplazoDir.innerHTML = resultados.map(function (m, idx) {
+                return `
+                    <div class="px-3.5 py-2 hover:bg-amber-50 cursor-pointer flex items-center justify-between gap-2 item-sugerencia-reemplazo-dir transition"
+                         data-idx="${idx}">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="font-mono font-bold text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0">${m.item || "S/C"}</span>
+                            <span class="font-semibold text-xs text-slate-900 truncate">${m.descripcion}</span>
+                        </div>
+                        <span class="text-[11px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-900 shrink-0 border border-amber-200">
+                            ${m.unidad || "UN"}
+                        </span>
+                    </div>
+                `;
+            }).join("");
+
+            dropdownReemplazoDir.querySelectorAll(".item-sugerencia-reemplazo-dir").forEach(function (el, idx) {
+                el.addEventListener("click", function () {
+                    seleccionarMaterialReemplazoDirecto(resultados[idx]);
+                });
+            });
+
+            dropdownReemplazoDir.classList.remove("hidden");
+        });
+    }
+
+    document.addEventListener("click", function (e) {
+        if (dropdownReemplazoDir && !dropdownReemplazoDir.classList.contains("hidden")) {
+            if (!dropdownReemplazoDir.contains(e.target) && e.target !== inputReemplazoDir) {
+                cerrarDropdownReemplazoDirecto();
+            }
+        }
+    });
 });
+
+// =========================================================================
+// MODAL: EDITAR / CAMBIAR MATERIAL REQUERIDO DIRECTO
+// =========================================================================
+function abrirModalEditarRequeridoDirecto(reqId, matId, item, desc, unidad, cant) {
+    cargarCatalogoMaterialesReq();
+    const modal = document.getElementById("modalEditarRequeridoDirecto");
+    const inputReqId = document.getElementById("editDirReqId");
+    const lblDesc = document.getElementById("editDirMaterialActualDesc");
+    const lblInfo = document.getElementById("editDirMaterialActualInfo");
+    const inputCant = document.getElementById("editDirCantidad");
+    const lblUnidad = document.getElementById("editDirUnidad");
+
+    if (inputReqId) inputReqId.value = reqId;
+    if (lblDesc) lblDesc.textContent = (item ? `[${item}] ` : "") + desc;
+    if (lblInfo) lblInfo.textContent = `Código: ${item || 'S/C'} · Unidad: ${unidad || 'UN'}`;
+    if (inputCant) inputCant.value = cant;
+    if (lblUnidad) lblUnidad.textContent = unidad || "UN";
+
+    cancelarReemplazoMaterialDirecto();
+
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        if (inputCant) {
+            setTimeout(function () {
+                inputCant.focus();
+                inputCant.select();
+            }, 100);
+        }
+    }
+}
+
+function cerrarModalEditarRequeridoDirecto() {
+    const modal = document.getElementById("modalEditarRequeridoDirecto");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+    cerrarDropdownReemplazoDirecto();
+}
+
+function cerrarDropdownReemplazoDirecto() {
+    const dropdown = document.getElementById("editDirDropdownReemplazo");
+    if (dropdown) {
+        dropdown.classList.add("hidden");
+        dropdown.innerHTML = "";
+    }
+}
+
+function seleccionarMaterialReemplazoDirecto(mat) {
+    const inputBuscar = document.getElementById("editDirInputBuscarReemplazo");
+    const hiddenNuevoId = document.getElementById("editDirNuevoMaterialId");
+    const alerta = document.getElementById("editDirAlertaReemplazo");
+    const textoAlerta = document.getElementById("editDirTextoReemplazo");
+    const btnCancelar = document.getElementById("editDirBtnCancelarReemplazo");
+
+    if (hiddenNuevoId) hiddenNuevoId.value = mat.id;
+    if (inputBuscar) inputBuscar.value = (mat.item ? `[${mat.item}] ` : "") + mat.descripcion;
+    if (textoAlerta) {
+        textoAlerta.innerHTML = `Cambiar por: <strong>${(mat.item ? `[${mat.item}] ` : '') + mat.descripcion}</strong> (${mat.unidad || 'UN'})`;
+    }
+    if (alerta) alerta.classList.remove("hidden");
+    if (btnCancelar) btnCancelar.classList.remove("hidden");
+
+    cerrarDropdownReemplazoDirecto();
+}
+
+function cancelarReemplazoMaterialDirecto() {
+    const inputBuscar = document.getElementById("editDirInputBuscarReemplazo");
+    const hiddenNuevoId = document.getElementById("editDirNuevoMaterialId");
+    const alerta = document.getElementById("editDirAlertaReemplazo");
+    const btnCancelar = document.getElementById("editDirBtnCancelarReemplazo");
+
+    if (hiddenNuevoId) hiddenNuevoId.value = "";
+    if (inputBuscar) inputBuscar.value = "";
+    if (alerta) alerta.classList.add("hidden");
+    if (btnCancelar) btnCancelar.classList.add("hidden");
+    cerrarDropdownReemplazoDirecto();
+}

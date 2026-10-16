@@ -1259,6 +1259,44 @@ class Presupuesto(models.Model):
         return f"Presupuesto {self.proyecto.numero_emcali}"
 
 
+class ProyeccionPresupuesto(models.Model):
+    proyecto = models.OneToOneField(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name="proyeccion_presupuesto"
+    )
+    datos_json = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Datos Proyección JSON"
+    )
+    total_mano_obra = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0,
+        verbose_name="Total Mano de Obra ($)"
+    )
+    total_materiales_count = models.IntegerField(
+        default=0,
+        verbose_name="Cantidad Materiales"
+    )
+    total_actividades_count = models.IntegerField(
+        default=0,
+        verbose_name="Cantidad Actividades"
+    )
+    actualizado_el = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Última Actualización"
+    )
+
+    class Meta:
+        verbose_name = "Proyección de Presupuesto"
+        verbose_name_plural = "Proyecciones de Presupuesto"
+
+    def __str__(self):
+        return f"Proyección {self.proyecto.numero_emcali} (${self.total_mano_obra:,.0f})"
+
+
 class ItemManoObra(models.Model):
     class Categorias(models.TextChoices):
         HINCADA_APLOMADA = "Hincada y Aplomada", "Hincada y Aplomada"

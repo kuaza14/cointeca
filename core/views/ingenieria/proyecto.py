@@ -47,10 +47,12 @@ from core.models import (
     ItemManoObra,
     ApoyoManoObra,
     Presupuesto,
+    ProyeccionPresupuesto,
     MovimientoInventario,
 )
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 
 @login_required
@@ -2526,4 +2528,94 @@ def exportar_matriz_simco_excel(request):
     )
     response["Content-Disposition"] = f'attachment; filename="{nombre_sanitizado}"'
     return response
+
+
+@login_required
+def proyeccion_presupuesto_proyecto(request, proyecto_id):
+    """
+    Vista principal de la Tabla de Proyección de Presupuesto (SIMCO).
+    Permite proyectar materiales, cantidades y actividades vinculadas de mano de obra para saber
+    cuánto presupuesto se va a ir en el proyecto, sirviendo exclusivamente como simulación/proyección
+    financiera sin alterar inventarios reales ni despachos de bodega.
+    """
+    proyecto = get_object_or_404(Proyecto.objects.select_related("macroproyecto"), id=proyecto_id)
+    catalogo_simco = obtener_matriz_simco()
+
+    proyeccion_guardada = ProyeccionPresupuesto.objects.filter(proyecto=proyecto).first()
+    
+    items_iniciales = []
+    if proyeccion_guardada and proyeccion_guardada.datos_json and "items" in proyeccion_guardada.datos_json:
+        items_iniciales = proyeccion_guardada.datos_json.get("items", [])
+    else:
+        # Si no hay proyección guardada previa, pre-cargamos con los materiales requeridos/pedidos del proyecto si existen
+        proy_mats = obtener_materiales_proyecto_simco(proyecto.id)
+        for m in proy_mats.get("materiales", []):
+            code = str(m["item"])
+            if code in catalogo_simco and m.get("cantidad", 0) > 0:
+                acts_activas = [a["id_mo"] for a in m.get("actividades", [])]
+                items_iniciales.append({
+                    "item": code,
+                    "cantidad": float(m["cantidad"]),
+                    "actividades": acts_activas
+                })
+
+    proyectos_selector = list(
+        Proyecto.objects.all().order_by("-id").values("id", "numero_emcali", "numero_cointeca", "tipo", "estado")[:150]
+    )
+
+    context = {
+        "proyecto": proyecto,
+        "catalogo_simco_json": json.dumps(catalogo_simco),
+        "proyeccion_guardada": proyeccion_guardada,
+        "items_iniciales_json": json.dumps(items_iniciales),
+        "proyectos_selector": proyectos_selector,
+    }
+    return render(request, "ingenieria/proyecto/proyeccion.html", context)
+
+
+@login_required
+def proyeccion_presupuesto_general(request):
+    """
+    Acceso general a la proyección: redirige al primer proyecto disponible.
+    """
+    proy = Proyecto.objects.order_by("-id").first()
+    if proy:
+        return redirect("proyeccion_presupuesto_proyecto", proyecto_id=proy.id)
+    messages.warning(request, "No hay proyectos registrados para proyectar presupuesto.")
+    return redirect("lista_proyectos")
+
+
+@login_required
+@require_POST
+def api_guardar_proyeccion(request, proyecto_id):
+    """
+    Guarda en base de datos la proyección configurada para el proyecto.
+    """
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        items = data.get("items", [])
+        total_mo = Decimal(str(data.get("total_mano_obra", 0)))
+        total_mats = int(data.get("total_materiales_count", len(items)))
+        total_acts = int(data.get("total_actividades_count", 0))
+
+        proy_pres, _ = ProyeccionPresupuesto.objects.update_or_create(
+            proyecto=proyecto,
+            defaults={
+                "datos_json": {"items": items},
+                "total_mano_obra": total_mo,
+                "total_materiales_count": total_mats,
+                "total_actividades_count": total_acts,
+            }
+        )
+
+        return JsonResponse({
+            "success": True,
+            "mensaje": f"Proyección guardada correctamente para {proyecto.numero_emcali}.",
+            "actualizado_el": proy_pres.actualizado_el.strftime("%d/%m/%Y %H:%M"),
+            "total_mano_obra": float(total_mo)
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
 

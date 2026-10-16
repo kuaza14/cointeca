@@ -1,0 +1,1168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Proyección Presupuesto: {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }} | Cointeca S.A.S{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transicion-suave {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .badge-simco {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-12" id="contenedorProyeccion">
+
+    <!-- ======================================================================
+         1. ENCABEZADO, BREADCRUMB Y ACCIONES SUPERIORES
+         ====================================================================== -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                <a href="/dashboard/" class="hover:underline">Inicio</a>
+                <span>/</span>
+                <a href="{% url 'ingenieria_inicio' %}" class="hover:underline">Ingeniería</a>
+                <span>/</span>
+                <a href="{% url 'lista_proyectos' %}" class="hover:underline">Proyectos</a>
+                <span>/</span>
+                <span class="text-foreground font-semibold">{{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}</span>
+                <span>/</span>
+                <span class="text-teal-700 dark:text-teal-400 font-bold">Proyección de Presupuesto (SIMCO)</span>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <a href="{% url 'detalle_proyecto' proyecto.id %}" class="btn-volver">
+                    <span class="chev-volver">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+                    </span>
+                    <span>Ir a Postes</span>
+                </a>
+                <a href="{% url 'lista_proyectos' %}" class="btn-volver">
+                    <span class="chev-volver">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+                    </span>
+                    <span>Volver a Lista de Proyectos</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- TÍTULO Y SELECTOR DE PROYECTO RÁPIDO -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-card p-5 rounded-2xl border border-border shadow-xs">
+            <div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
+                        SIMULADOR & PROYECCIÓN FINANCIERA
+                    </span>
+                    {% if proyecto.macroproyecto %}
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-muted text-muted-foreground border border-border">
+                            {{ proyecto.macroproyecto.etiqueta }}: {{ proyecto.macroproyecto.nombre }}
+                        </span>
+                    {% endif %}
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground mt-2 tracking-tight flex items-center gap-3 flex-wrap">
+                    <span>Proyección de Presupuesto: {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}</span>
+                    {% if proyecto.numero_cointeca %}
+                        <span class="text-sm font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-300 font-mono">
+                            Cointeca: {{ proyecto.numero_cointeca }}
+                        </span>
+                    {% endif %}
+                </h1>
+                <p class="text-sm text-muted-foreground mt-1">
+                    Tabla interactiva de presupuestación para proyectar qué materiales se usarán y calcular automáticamente el costo de Mano de Obra vinculada (SIMCO).
+                </p>
+            </div>
+
+            <!-- SELECTOR PARA CAMBIAR DE PROYECTO DIRECTAMENTE -->
+            <div class="flex items-center gap-2 shrink-0 bg-muted/40 p-2.5 rounded-xl border border-border">
+                <label for="selectCambiarProyecto" class="text-xs font-bold text-muted-foreground whitespace-nowrap">
+                    Cambiar Proyecto:
+                </label>
+                <select id="selectCambiarProyecto" class="border border-border-strong rounded-lg px-3 py-1.5 text-xs font-semibold bg-card text-foreground focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    {% for p in proyectos_selector %}
+                        <option value="{{ p.id }}" {% if p.id == proyecto.id %}selected{% endif %}>
+                            {{ p.numero_emcali }} {% if p.numero_cointeca %}({{ p.numero_cointeca }}){% endif %} - {{ p.tipo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- AVISO CLAVE DE PROYECCIÓN (SOLO PARA PROYECCIÓN) -->
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-blue-900 dark:text-blue-200 text-xs sm:text-sm leading-relaxed">
+            <svg class="size-5 shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
+            </svg>
+            <div>
+                <strong class="font-bold">Modo Exclusivo de Proyección Financiera:</strong>
+                Esta tabla está diseñada para planificar y proyectar el presupuesto estimado que se irá en este proyecto. <strong>No modifica el inventario físico de bodega, ni despacha materiales reales.</strong> Puedes simular con total libertad las cantidades que se van a usar, verificar subtotales de mano de obra y exportar o guardar el resultado.
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         2. TARJETAS DE MÉTRICAS (KPIs EN TIEMPO REAL)
+         ====================================================================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: GRAN TOTAL ESTIMADO COP -->
+        <div class="bg-gradient-to-br from-teal-900 via-teal-800 to-emerald-900 text-white rounded-2xl p-5 shadow-sm border border-teal-700/50 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-teal-200 uppercase tracking-wider">Presupuesto Proyectado MO</span>
+                <span class="p-2 rounded-xl bg-white/10 text-teal-100">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+            </div>
+            <div class="mt-4">
+                <div class="text-2xl sm:text-3xl font-black font-mono tracking-tight" id="kpiGranTotal">
+                    $ 0 COP
+                </div>
+                <p class="text-[11px] text-teal-200/80 mt-1">Cálculo contractual basado en tarifas SIMCO</p>
+            </div>
+        </div>
+
+        <!-- KPI 2: MATERIALES PROYECTADOS -->
+        <div class="bg-card rounded-2xl p-5 shadow-xs border border-border flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Materiales a Usar</span>
+                <span class="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                </span>
+            </div>
+            <div class="mt-4">
+                <div class="text-2xl sm:text-3xl font-extrabold text-foreground" id="kpiTotalMats">
+                    0
+                </div>
+                <p class="text-[11px] text-muted-foreground mt-1">Ítems de materiales configurados</p>
+            </div>
+        </div>
+
+        <!-- KPI 3: ACTIVIDADES MO ASOCIADAS -->
+        <div class="bg-card rounded-2xl p-5 shadow-xs border border-border flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Actividades Vinculadas</span>
+                <span class="p-2 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
+                </span>
+            </div>
+            <div class="mt-4">
+                <div class="text-2xl sm:text-3xl font-extrabold text-foreground" id="kpiTotalActs">
+                    0
+                </div>
+                <p class="text-[11px] text-muted-foreground mt-1">Actividades de mano de obra activas</p>
+            </div>
+        </div>
+
+        <!-- KPI 4: DESGLOSE TRANSPORTE & INSTALACIÓN -->
+        <div class="bg-card rounded-2xl p-5 shadow-xs border border-border flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Subtotales Clave</span>
+                <span class="p-2 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-300">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.948c0-.621-.504-1.125-1.125-1.125H5.25A2.25 2.25 0 003 7.725v6.525"/></svg>
+                </span>
+            </div>
+            <div class="mt-2 space-y-1">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-muted-foreground">🚚 Transporte:</span>
+                    <strong class="font-mono text-foreground" id="kpiSubtotalTransporte">$ 0</strong>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-muted-foreground">🛠️ Instalación / Otros:</span>
+                    <strong class="font-mono text-foreground" id="kpiSubtotalInstalacion">$ 0</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         3. BARRA DE ACCIONES Y BOTONES
+         ====================================================================== -->
+    <div class="bg-card p-4 rounded-2xl border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- BOTONES A LA IZQUIERDA -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <button type="button" id="btnAbrirModalAgregar"
+                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm rounded-xl text-white shadow-sm transition cursor-pointer"
+                    style="background-color: #0d9488 !important; border: 1px solid #0f766e !important;">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>Agregar Material a Proyectar</span>
+            </button>
+
+            <button type="button" id="btnCargarMaterialesPedidos"
+                    class="btn font-bold inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition cursor-pointer shadow-2xs"
+                    title="Pre-llenar la proyección con los materiales que ya se pidieron para este proyecto">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                <span id="txtBtnCargar">Cargar Materiales Pedidos</span>
+            </button>
+
+            <button type="button" id="btnLimpiarTabla"
+                    class="btn font-bold inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl bg-muted hover:bg-gray-200 text-muted-foreground hover:text-foreground border border-border transition cursor-pointer"
+                    title="Vaciar la tabla de proyección para empezar de nuevo">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                <span>Limpiar</span>
+            </button>
+        </div>
+
+        <!-- BOTONES A LA DERECHA: GUARDAR Y EXCEL -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <button type="button" id="btnGuardarProyeccion"
+                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-700 transition cursor-pointer shadow-sm">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/></svg>
+                <span id="txtBtnGuardar">Guardar Proyección</span>
+            </button>
+
+            <button type="button" id="btnExportarExcel"
+                    class="btn font-bold inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm rounded-xl bg-slate-900 hover:bg-black text-white border border-slate-800 transition cursor-pointer shadow-sm"
+                    title="Descargar libro Excel con matriz de materiales, códigos SIMCO, tarifas y desglose">
+                <svg class="size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                <span>Descargar Excel</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         4. "ESA TABLA": LA TABLA MAESTRA INTERACTIVA DE PROYECCIÓN
+         ====================================================================== -->
+    <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20">
+            <div>
+                <h2 class="text-base font-extrabold text-foreground flex items-center gap-2">
+                    <span>Tabla de Proyección: Materiales y Mano de Obra Contractual</span>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300" id="badgeTotalItemsTabla">
+                        0 materiales
+                    </span>
+                </h2>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Modifica la columna <strong>"Cantidad a Usar"</strong> o activa/desactiva actividades para recalcular en vivo el presupuesto.
+                </p>
+            </div>
+
+            <!-- FILTRO / BUSCADOR RÁPIDO DENTRO DE LA TABLA -->
+            <div class="w-full sm:w-72 relative">
+                <input type="text" id="filtroTabla" placeholder="Filtrar materiales en tabla..."
+                       class="w-full border border-border-strong rounded-xl pl-9 pr-3 py-1.5 text-xs bg-background text-foreground focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                <svg class="size-4 absolute left-3 top-2 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            </div>
+        </div>
+
+        <!-- CONTENEDOR TABLA CON SCROLL HORIZONTAL -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-900 text-white uppercase text-[11px] font-extrabold tracking-wider">
+                        <th class="px-3.5 py-3 w-12 text-center">#</th>
+                        <th class="px-3 py-3 w-24 text-center">Ítem SIMCO</th>
+                        <th class="px-4 py-3 min-w-[280px]">Material / Suministro</th>
+                        <th class="px-3 py-3 w-20 text-center">Unidad</th>
+                        <th class="px-4 py-3 w-36 text-center bg-slate-800">Cantidad a Usar</th>
+                        <th class="px-4 py-3 min-w-[340px]">Actividades de Mano de Obra Vinculadas</th>
+                        <th class="px-3.5 py-3 w-32 text-right">Tarifa Base MO</th>
+                        <th class="px-4 py-3 w-36 text-right bg-slate-800">Subtotal Proyectado</th>
+                        <th class="px-3 py-3 w-16 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTablaProyeccion" class="divide-y divide-border">
+                    <!-- Se llena dinámicamente con JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr class="bg-teal-950 text-white font-extrabold text-sm border-t-2 border-teal-600">
+                        <td colspan="7" class="px-5 py-4 text-right tracking-wider uppercase text-xs text-teal-200">
+                            TOTAL PRESUPUESTO ESTIMADO DE MANO DE OBRA (SIMCO):
+                        </td>
+                        <td class="px-4 py-4 text-right font-mono text-base font-black text-emerald-300" id="pieGranTotal">
+                            $ 0 COP
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- ESTADO VACÍO CUANDO NO HAY ITEMS -->
+        <div id="estadoVacioTabla" class="py-16 text-center text-muted-foreground hidden">
+            <svg class="size-12 mx-auto text-muted-foreground/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="font-bold text-base text-foreground">Aún no has agregado materiales a la proyección</p>
+            <p class="text-xs mt-1">Usa los botones superiores para agregar materiales del catálogo o cargar los que ya se pidieron para este proyecto.</p>
+            <div class="mt-4 flex items-center justify-center gap-3">
+                <button type="button" onclick="document.getElementById('btnAbrirModalAgregar').click()" class="btn btn-primario text-xs px-3.5 py-2">
+                    ➕ Agregar Material
+                </button>
+                <button type="button" onclick="document.getElementById('btnCargarMaterialesPedidos').click()" class="btn btn-secundario text-xs px-3.5 py-2">
+                    📥 Cargar Materiales Pedidos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         5. RESUMEN CONSOLIDADO POR ACTIVIDAD DE MANO DE OBRA (TIPO EDSON)
+         ====================================================================== -->
+    <div class="bg-card rounded-2xl border border-border shadow-xs p-5 space-y-4">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+                <h3 class="text-base font-extrabold text-foreground flex items-center gap-2">
+                    <span>Resumen Consolidado de Mano de Obra (Tarifas SIMCO)</span>
+                    <span class="text-xs px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 font-bold" id="badgeTotalActsResumen">
+                        0 actividades
+                    </span>
+                </h3>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Consolidado idéntico a la hoja RESUMEN de Edson agrupando las cantidades totales por código de actividad contractual.
+                </p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-muted text-muted-foreground uppercase text-[10px] font-extrabold border-b border-border">
+                        <th class="px-3.5 py-2.5 w-20 text-center">Código MO</th>
+                        <th class="px-4 py-2.5">Descripción de la Actividad</th>
+                        <th class="px-3 py-2.5 w-20 text-center">Unidad</th>
+                        <th class="px-3.5 py-2.5 w-28 text-right">Cantidad Total</th>
+                        <th class="px-3.5 py-2.5 w-32 text-right">Tarifa Contractual ($)</th>
+                        <th class="px-4 py-2.5 w-36 text-right">Total Liquidado ($)</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTablaResumenMO" class="divide-y divide-border/60">
+                    <!-- Se llena con JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================================
+     6. MODAL: AGREGAR MATERIAL DESDE EL CATÁLOGO SIMCO
+     ====================================================================== -->
+<div id="modalAgregarMaterial" class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
+     style="background-color: rgba(2, 6, 23, 0.75) !important;">
+    <div class="bg-card w-full max-w-3xl rounded-2xl border border-border shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <!-- MODAL HEADER -->
+        <div class="p-4 border-b border-border flex items-center justify-between bg-muted/40">
+            <div>
+                <h3 class="text-base font-extrabold text-foreground flex items-center gap-2">
+                    <span>Agregar Material al Presupuesto</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 font-bold">
+                        Catálogo Contractual SIMCO (81 Reglas)
+                    </span>
+                </h3>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Busca por nombre o código de ítem. Los resultados priorizan los que empiezan por la letra ingresada.
+                </p>
+            </div>
+            <button type="button" id="btnCerrarModalAgregar" class="p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- BUSCADOR CON PRIORIZACIÓN POR LETRA INICIAL -->
+        <div class="p-4 border-b border-border bg-background">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-muted-foreground">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                </span>
+                <input type="text" id="buscadorModalMateriales" placeholder="Buscar material o código (ej: S, 693, LUMINARIA, ABRAZADERA, CABLE)..."
+                       autocomplete="off"
+                       class="w-full border border-border-strong rounded-xl pl-10 pr-9 py-2 text-sm bg-background text-foreground focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                <button type="button" id="btnLimpiarBuscadorModal" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground hidden cursor-pointer">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- LISTA SCROLLEABLE DE MATERIALES SIMCO -->
+        <div class="p-4 overflow-y-auto space-y-2 flex-1" id="listaCatalogoModal">
+            <!-- Items del catálogo inyectados por JS -->
+        </div>
+
+        <!-- MODAL FOOTER -->
+        <div class="p-3.5 border-t border-border bg-muted/30 flex items-center justify-between text-xs text-muted-foreground">
+            <span id="contadorResultadosModal">0 materiales encontrados</span>
+            <button type="button" id="btnCerrarModalAgregarAbajo" class="btn btn-secundario text-xs px-4 py-1.5">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- FORMULARIO OCULTO PARA EXPORTAR A EXCEL -->
+<form id="formExportarProyeccionExcel" method="POST" action="{% url 'exportar_matriz_simco_excel' %}" class="hidden">
+    {% csrf_token %}
+    <input type="hidden" name="proyecto_id" value="{{ proyecto.id }}">
+    <input type="hidden" name="items_json" id="inputExportarItemsJson">
+</form>
+
+<!-- DATOS JSON EMBEBIDOS SEGUROS -->
+{{ catalogo_simco_json|json_script:"catalogo-simco-json" }}
+{{ items_iniciales_json|json_script:"items-iniciales-json" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const PROYECTO_ID = {{ proyecto.id }};
+    const catalogoSimco = JSON.parse(document.getElementById("catalogo-simco-json")?.textContent || "{}");
+    const itemsInicialesRaw = JSON.parse(document.getElementById("items-iniciales-json")?.textContent || "[]");
+
+    // Estado local de la proyección: Map de itemCode -> { cantidad, actividades: { moId: boolean } }
+    const estadoProyeccion = {};
+
+    // Elementos del DOM
+    const selectCambiarProyecto = document.getElementById("selectCambiarProyecto");
+    const cuerpoTablaProyeccion = document.getElementById("cuerpoTablaProyeccion");
+    const cuerpoTablaResumenMO = document.getElementById("cuerpoTablaResumenMO");
+    const estadoVacioTabla = document.getElementById("estadoVacioTabla");
+    const filtroTabla = document.getElementById("filtroTabla");
+    const badgeTotalItemsTabla = document.getElementById("badgeTotalItemsTabla");
+    const badgeTotalActsResumen = document.getElementById("badgeTotalActsResumen");
+
+    // KPIs
+    const kpiGranTotal = document.getElementById("kpiGranTotal");
+    const pieGranTotal = document.getElementById("pieGranTotal");
+    const kpiTotalMats = document.getElementById("kpiTotalMats");
+    const kpiTotalActs = document.getElementById("kpiTotalActs");
+    const kpiSubtotalTransporte = document.getElementById("kpiSubtotalTransporte");
+    const kpiSubtotalInstalacion = document.getElementById("kpiSubtotalInstalacion");
+
+    // Botones de acción
+    const btnAbrirModalAgregar = document.getElementById("btnAbrirModalAgregar");
+    const btnCargarMaterialesPedidos = document.getElementById("btnCargarMaterialesPedidos");
+    const btnGuardarProyeccion = document.getElementById("btnGuardarProyeccion");
+    const btnExportarExcel = document.getElementById("btnExportarExcel");
+    const btnLimpiarTabla = document.getElementById("btnLimpiarTabla");
+    const txtBtnGuardar = document.getElementById("txtBtnGuardar");
+    const txtBtnCargar = document.getElementById("txtBtnCargar");
+
+    // Modal
+    const modalAgregarMaterial = document.getElementById("modalAgregarMaterial");
+    const btnCerrarModalAgregar = document.getElementById("btnCerrarModalAgregar");
+    const btnCerrarModalAgregarAbajo = document.getElementById("btnCerrarModalAgregarAbajo");
+    const buscadorModalMateriales = document.getElementById("buscadorModalMateriales");
+    const btnLimpiarBuscadorModal = document.getElementById("btnLimpiarBuscadorModal");
+    const listaCatalogoModal = document.getElementById("listaCatalogoModal");
+    const contadorResultadosModal = document.getElementById("contadorResultadosModal");
+
+    // Formulario Excel
+    const formExportar = document.getElementById("formExportarProyeccionExcel");
+    const inputExportarItemsJson = document.getElementById("inputExportarItemsJson");
+
+    function formatearPesos(val) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            maximumFractionDigits: 0
+        }).format(val || 0);
+    }
+
+    // Inicializar estado con los items iniciales
+    itemsInicialesRaw.forEach(it => {
+        const code = String(it.item);
+        if (catalogoSimco[code]) {
+            const actsMap = {};
+            (catalogoSimco[code].actividades || []).forEach(a => {
+                actsMap[a.id_mo] = it.actividades ? it.actividades.includes(a.id_mo) : true;
+            });
+            estadoProyeccion[code] = {
+                cantidad: it.cantidad > 0 ? it.cantidad : 1,
+                actividades: actsMap,
+                expandido: false
+            };
+        }
+    });
+
+    // Cambio de proyecto en el desplegable
+    if (selectCambiarProyecto) {
+        selectCambiarProyecto.addEventListener("change", function() {
+            if (this.value) {
+                window.location.href = `/ingenieria/proyectos/${this.value}/proyeccion/`;
+            }
+        });
+    }
+
+    // RENDERIZADO DE "ESA TABLA"
+    function renderizarTabla() {
+        const query = (filtroTabla ? filtroTabla.value : "").trim().toLowerCase();
+        const codigos = Object.keys(estadoProyeccion);
+
+        if (codigos.length === 0) {
+            cuerpoTablaProyeccion.innerHTML = "";
+            if (estadoVacioTabla) estadoVacioTabla.classList.remove("hidden");
+            if (badgeTotalItemsTabla) badgeTotalItemsTabla.textContent = "0 materiales";
+            actualizarTotalesYResumen();
+            return;
+        }
+
+        if (estadoVacioTabla) estadoVacioTabla.classList.add("hidden");
+
+        let html = "";
+        let indiceVisible = 1;
+
+        codigos.forEach(code => {
+            const mat = catalogoSimco[code];
+            if (!mat) return;
+
+            const st = estadoProyeccion[code];
+            const cant = st.cantidad || 0;
+            const desc = mat.descripcion || `Material ${code}`;
+
+            if (query.length > 0) {
+                const matchCode = code.includes(query);
+                const matchDesc = desc.toLowerCase().includes(query);
+                if (!matchCode && !matchDesc) return;
+            }
+
+            // Calcular tarifa base sumando solo actividades activas
+            let tarifaBaseMO = 0;
+            let actividadesActivasCount = 0;
+            (mat.actividades || []).forEach(act => {
+                if (st.actividades[act.id_mo] !== false) {
+                    tarifaBaseMO += act.valor_unitario;
+                    actividadesActivasCount++;
+                }
+            });
+            const subtotalMat = cant * tarifaBaseMO;
+
+            html += `
+                <tr class="hover:bg-muted/40 transition border-b border-border group" data-code="${code}">
+                    <td class="px-3.5 py-3 text-center text-muted-foreground font-mono text-[11px]">
+                        ${indiceVisible++}
+                    </td>
+
+                    <td class="px-3 py-3 text-center">
+                        <span class="badge-simco text-xs px-2.5 py-1 rounded-md bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-200 border border-blue-200 dark:border-blue-800 shrink-0">
+                            [${code}]
+                        </span>
+                    </td>
+
+                    <td class="px-4 py-3">
+                        <span class="font-bold text-foreground text-xs block leading-tight">
+                            ${desc}
+                        </span>
+                    </td>
+
+                    <td class="px-3 py-3 text-center">
+                        <span class="px-2 py-0.5 rounded bg-muted text-foreground font-bold text-[10px]">
+                            ${mat.unidad || 'UN'}
+                        </span>
+                    </td>
+
+                    <!-- CANTIDAD A USAR -->
+                    <td class="px-4 py-3 text-center bg-muted/10">
+                        <div class="inline-flex items-center gap-1.5">
+                            <input type="number" step="any" min="0"
+                                   class="input-cant-tabla w-24 px-2.5 py-1.5 border border-border-strong rounded-lg text-xs font-black text-center text-foreground bg-background focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                   value="${cant}"
+                                   data-code="${code}">
+                        </div>
+                    </td>
+
+                    <!-- ACTIVIDADES VINCULADAS -->
+                    <td class="px-4 py-3">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="font-bold text-teal-800 dark:text-teal-300">
+                                    ${actividadesActivasCount} de ${(mat.actividades || []).length} actividades activas
+                                </span>
+                                <button type="button" class="btn-toggle-detalle-acts text-[10px] text-teal-700 dark:text-teal-400 hover:underline font-bold" data-code="${code}">
+                                    ${st.expandido ? 'Ocultar desglose ▲' : 'Ver desglose ▼'}
+                                </button>
+                            </div>
+
+                            <div class="acts-contenedor ${st.expandido ? '' : 'hidden'} bg-muted/30 p-2 rounded-lg border border-border/60 space-y-1" id="acts-box-${code}">
+                                ${(mat.actividades || []).map(act => {
+                                    const isActChecked = st.actividades[act.id_mo] !== false;
+                                    const subAct = isActChecked ? (cant * act.valor_unitario) : 0;
+                                    return `
+                                        <div class="flex items-center justify-between gap-2 py-0.5 px-1 rounded hover:bg-background/80 transition">
+                                            <div class="flex items-center gap-2 flex-1 min-w-0 pr-1">
+                                                <input type="checkbox"
+                                                       class="chk-act-tabla size-3.5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer shrink-0"
+                                                       data-mat-code="${code}"
+                                                       data-mo-code="${act.id_mo}"
+                                                       ${isActChecked ? 'checked' : ''}>
+                                                <span class="font-mono text-[10px] text-muted-foreground font-bold shrink-0">[${act.id_mo}]</span>
+                                                <span class="text-xs text-foreground truncate" title="${act.descripcion}">${act.descripcion}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 shrink-0 text-right">
+                                                <span class="text-[10px] text-muted-foreground">${formatearPesos(act.valor_unitario)}</span>
+                                                <span class="font-mono text-xs font-bold ${isActChecked ? 'text-foreground' : 'text-muted-foreground line-through opacity-50'} min-w-[70px]">
+                                                    ${formatearPesos(subAct)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- TARIFA BASE MO -->
+                    <td class="px-3.5 py-3 text-right font-mono font-bold text-xs text-foreground">
+                        ${formatearPesos(tarifaBaseMO)}
+                    </td>
+
+                    <!-- SUBTOTAL PROYECTADO -->
+                    <td class="px-4 py-3 text-right font-mono font-black text-xs text-emerald-700 dark:text-emerald-400 bg-muted/10">
+                        ${formatearPesos(subtotalMat)}
+                    </td>
+
+                    <!-- BOTÓN ELIMINAR -->
+                    <td class="px-3 py-3 text-center">
+                        <button type="button" class="btn-eliminar-fila p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer"
+                                data-code="${code}" title="Quitar este material de la proyección">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        cuerpoTablaProyeccion.innerHTML = html;
+        if (badgeTotalItemsTabla) badgeTotalItemsTabla.textContent = `${codigos.length} materiales`;
+
+        actualizarTotalesYResumen();
+    }
+
+    // ACTUALIZACIÓN DE TOTALES, KPIS Y RESUMEN AGRUPADO POR ACTIVIDAD
+    function actualizarTotalesYResumen() {
+        let granTotal = 0;
+        let totalMats = 0;
+        let totalActs = 0;
+        let subtotalTransporte = 0;
+        let subtotalInstalacion = 0;
+
+        // Acumulador de actividades: moId -> { id_mo, descripcion, unidad, cantidad_total, valor_unitario, subtotal }
+        const acumuladoActs = {};
+
+        Object.keys(estadoProyeccion).forEach(code => {
+            const mat = catalogoSimco[code];
+            if (!mat) return;
+
+            const st = estadoProyeccion[code];
+            const cant = parseFloat(st.cantidad) || 0;
+            if (cant > 0) totalMats++;
+
+            (mat.actividades || []).forEach(act => {
+                if (st.actividades[act.id_mo] !== false) {
+                    totalActs++;
+                    const subAct = cant * act.valor_unitario;
+                    granTotal += subAct;
+
+                    // Desglose para KPIs
+                    const descUpper = (act.descripcion || "").toUpperCase();
+                    if (descUpper.includes("TRANSP")) {
+                        subtotalTransporte += subAct;
+                    } else {
+                        subtotalInstalacion += subAct;
+                    }
+
+                    // Acumulador tabla resumen
+                    if (!acumuladoActs[act.id_mo]) {
+                        acumuladoActs[act.id_mo] = {
+                            id_mo: act.id_mo,
+                            descripcion: act.descripcion,
+                            unidad: act.unidad || "UN",
+                            cantidad_total: 0,
+                            valor_unitario: act.valor_unitario,
+                            subtotal: 0
+                        };
+                    }
+                    acumuladoActs[act.id_mo].cantidad_total += cant;
+                    acumuladoActs[act.id_mo].subtotal += subAct;
+                }
+            });
+        });
+
+        // Actualizar KPIs
+        const strTotal = `${formatearPesos(granTotal)} COP`;
+        if (kpiGranTotal) kpiGranTotal.textContent = strTotal;
+        if (pieGranTotal) pieGranTotal.textContent = strTotal;
+        if (kpiTotalMats) kpiTotalMats.textContent = totalMats;
+        if (kpiTotalActs) kpiTotalActs.textContent = totalActs;
+        if (kpiSubtotalTransporte) kpiSubtotalTransporte.textContent = formatearPesos(subtotalTransporte);
+        if (kpiSubtotalInstalacion) kpiSubtotalInstalacion.textContent = formatearPesos(subtotalInstalacion);
+
+        // Renderizar tabla Resumen agrupado
+        const keysActs = Object.keys(acumuladoActs).sort((a, b) => {
+            const numA = parseInt(a, 10) || 9999;
+            const numB = parseInt(b, 10) || 9999;
+            return numA - numB;
+        });
+
+        if (badgeTotalActsResumen) badgeTotalActsResumen.textContent = `${keysActs.length} actividades`;
+
+        if (keysActs.length === 0) {
+            cuerpoTablaResumenMO.innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-6 text-center text-muted-foreground text-xs">
+                        No hay actividades seleccionadas en la proyección.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let resHtml = "";
+        keysActs.forEach(k => {
+            const a = acumuladoActs[k];
+            resHtml += `
+                <tr class="hover:bg-muted/40 transition">
+                    <td class="px-3.5 py-2 text-center font-mono font-bold text-muted-foreground">[${a.id_mo}]</td>
+                    <td class="px-4 py-2 font-semibold text-foreground">${a.descripcion}</td>
+                    <td class="px-3 py-2 text-center font-bold text-muted-foreground">${a.unidad}</td>
+                    <td class="px-3.5 py-2 text-right font-mono font-bold text-foreground">${a.cantidad_total.toLocaleString('es-CO')}</td>
+                    <td class="px-3.5 py-2 text-right font-mono text-muted-foreground">${formatearPesos(a.valor_unitario)}</td>
+                    <td class="px-4 py-2 text-right font-mono font-black text-emerald-700 dark:text-emerald-400">${formatearPesos(a.subtotal)}</td>
+                </tr>
+            `;
+        });
+
+        cuerpoTablaResumenMO.innerHTML = resHtml;
+    }
+
+    // EVENTOS EN LA TABLA
+    if (cuerpoTablaProyeccion) {
+        // Cambio de cantidad
+        cuerpoTablaProyeccion.addEventListener("input", function(e) {
+            if (e.target.matches(".input-cant-tabla")) {
+                const code = e.target.getAttribute("data-code");
+                const val = parseFloat(e.target.value) || 0;
+                if (estadoProyeccion[code]) {
+                    estadoProyeccion[code].cantidad = val;
+                    actualizarFila(code);
+                    actualizarTotalesYResumen();
+                }
+            }
+        });
+
+        // Checkbox de actividad
+        cuerpoTablaProyeccion.addEventListener("change", function(e) {
+            if (e.target.matches(".chk-act-tabla")) {
+                const matCode = e.target.getAttribute("data-mat-code");
+                const moCode = e.target.getAttribute("data-mo-code");
+                if (estadoProyeccion[matCode] && estadoProyeccion[matCode].actividades) {
+                    estadoProyeccion[matCode].actividades[moCode] = e.target.checked;
+                    actualizarFila(matCode);
+                    actualizarTotalesYResumen();
+                }
+            }
+        });
+
+        // Botón toggle desglose
+        cuerpoTablaProyeccion.addEventListener("click", function(e) {
+            const btnToggle = e.target.closest(".btn-toggle-detalle-acts");
+            if (btnToggle) {
+                const code = btnToggle.getAttribute("data-code");
+                if (estadoProyeccion[code]) {
+                    estadoProyeccion[code].expandido = !estadoProyeccion[code].expandido;
+                    const box = document.getElementById(`acts-box-${code}`);
+                    if (box) box.classList.toggle("hidden", !estadoProyeccion[code].expandido);
+                    btnToggle.textContent = estadoProyeccion[code].expandido ? 'Ocultar desglose ▲' : 'Ver desglose ▼';
+                }
+                return;
+            }
+
+            // Botón eliminar fila
+            const btnEliminar = e.target.closest(".btn-eliminar-fila");
+            if (btnEliminar) {
+                const code = btnEliminar.getAttribute("data-code");
+                if (estadoProyeccion[code]) {
+                    delete estadoProyeccion[code];
+                    renderizarTabla();
+                }
+            }
+        });
+    }
+
+    function actualizarFila(code) {
+        const mat = catalogoSimco[code];
+        const st = estadoProyeccion[code];
+        if (!mat || !st) return;
+
+        const row = cuerpoTablaProyeccion.querySelector(`tr[data-code="${code}"]`);
+        if (!row) return;
+
+        let tarifaBaseMO = 0;
+        let actsActivas = 0;
+        (mat.actividades || []).forEach(act => {
+            if (st.actividades[act.id_mo] !== false) {
+                tarifaBaseMO += act.valor_unitario;
+                actsActivas++;
+            }
+        });
+        const subtotalMat = (st.cantidad || 0) * tarifaBaseMO;
+
+        // Actualizar textos en la fila
+        const spanActsHeader = row.querySelector(".text-teal-800, .text-teal-300");
+        if (spanActsHeader) {
+            spanActsHeader.textContent = `${actsActivas} de ${(mat.actividades || []).length} actividades activas`;
+        }
+
+        const tds = row.querySelectorAll("td");
+        if (tds[6]) tds[6].textContent = formatearPesos(tarifaBaseMO);
+        if (tds[7]) tds[7].textContent = formatearPesos(subtotalMat);
+
+        // Actualizar subtotales individuales de actividades
+        (mat.actividades || []).forEach(act => {
+            const chk = row.querySelector(`.chk-act-tabla[data-mo-code="${act.id_mo}"]`);
+            if (chk) {
+                const isChecked = chk.checked;
+                const actRow = chk.closest("div.flex");
+                if (actRow) {
+                    const subSpan = actRow.querySelector(".font-mono.text-xs");
+                    if (subSpan) {
+                        subSpan.textContent = formatearPesos(isChecked ? (st.cantidad || 0) * act.valor_unitario : 0);
+                        subSpan.className = `font-mono text-xs font-bold ${isChecked ? 'text-foreground' : 'text-muted-foreground line-through opacity-50'} min-w-[70px]`;
+                    }
+                }
+            }
+        });
+    }
+
+    if (filtroTabla) {
+        filtroTabla.addEventListener("input", function() {
+            renderizarTabla();
+        });
+    }
+
+    // BOTÓN LIMPIAR TABLA
+    if (btnLimpiarTabla) {
+        btnLimpiarTabla.addEventListener("click", function() {
+            if (confirm("¿Estás seguro de que deseas limpiar la tabla de proyección?")) {
+                Object.keys(estadoProyeccion).forEach(k => delete estadoProyeccion[k]);
+                renderizarTabla();
+            }
+        });
+    }
+
+    // BOTÓN CARGAR MATERIALES PEDIDOS DEL PROYECTO
+    if (btnCargarMaterialesPedidos) {
+        btnCargarMaterialesPedidos.addEventListener("click", function() {
+            if (txtBtnCargar) txtBtnCargar.textContent = "Cargando...";
+
+            fetch(`/ingenieria/api/proyecto/${PROYECTO_ID}/materiales-simco/`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    let agregados = 0;
+                    (data.materiales || []).forEach(m => {
+                        const code = String(m.item);
+                        if (catalogoSimco[code]) {
+                            const actsMap = {};
+                            (catalogoSimco[code].actividades || []).forEach(a => {
+                                actsMap[a.id_mo] = true;
+                            });
+                            estadoProyeccion[code] = {
+                                cantidad: m.cantidad > 0 ? m.cantidad : 1,
+                                actividades: actsMap,
+                                expandido: false
+                            };
+                            agregados++;
+                        }
+                    });
+
+                    renderizarTabla();
+                    alert(`Se cargaron ${agregados} materiales pedidos con conexiones SIMCO a la tabla de proyección.`);
+                })
+                .catch(err => {
+                    console.error("Error al cargar materiales pedidos:", err);
+                    alert("Error al consultar materiales pedidos.");
+                })
+                .finally(() => {
+                    if (txtBtnCargar) txtBtnCargar.textContent = "Cargar Materiales Pedidos";
+                });
+        });
+    }
+
+    // BOTÓN GUARDAR PROYECCIÓN (PERSISTENCIA)
+    if (btnGuardarProyeccion) {
+        btnGuardarProyeccion.addEventListener("click", function() {
+            const items = [];
+            let totalMO = 0;
+            let totalActsCount = 0;
+
+            Object.keys(estadoProyeccion).forEach(code => {
+                const st = estadoProyeccion[code];
+                const mat = catalogoSimco[code];
+                if (!mat) return;
+
+                const actsActivas = [];
+                (mat.actividades || []).forEach(act => {
+                    if (st.actividades[act.id_mo] !== false) {
+                        actsActivas.push(act.id_mo);
+                        totalActsCount++;
+                        totalMO += (st.cantidad || 0) * act.valor_unitario;
+                    }
+                });
+
+                items.push({
+                    item: code,
+                    cantidad: st.cantidad || 0,
+                    actividades: actsActivas
+                });
+            });
+
+            if (txtBtnGuardar) txtBtnGuardar.textContent = "Guardando...";
+
+            // Obtener CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || "";
+
+            fetch(`/ingenieria/api/proyecto/${PROYECTO_ID}/guardar-proyeccion/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({
+                    items: items,
+                    total_mano_obra: totalMO,
+                    total_materiales_count: items.length,
+                    total_actividades_count: totalActsCount
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`✅ ${data.mensaje}`);
+                } else {
+                    alert(`❌ Error al guardar: ${data.error || 'Ocurrió un problema.'}`);
+                }
+            })
+            .catch(err => {
+                console.error("Error al guardar proyección:", err);
+                alert("Error de conexión al guardar la proyección.");
+            })
+            .finally(() => {
+                if (txtBtnGuardar) txtBtnGuardar.textContent = "Guardar Proyección";
+            });
+        });
+    }
+
+    // BOTÓN DESCARGAR EXCEL
+    if (btnExportarExcel) {
+        btnExportarExcel.addEventListener("click", function() {
+            const itemsExportar = [];
+            Object.keys(estadoProyeccion).forEach(code => {
+                const st = estadoProyeccion[code];
+                const mat = catalogoSimco[code];
+                if (!mat) return;
+
+                const actsActivas = [];
+                (mat.actividades || []).forEach(act => {
+                    if (st.actividades[act.id_mo] !== false) {
+                        actsActivas.push(act.id_mo);
+                    }
+                });
+
+                itemsExportar.push({
+                    item: code,
+                    cantidad: st.cantidad || 1,
+                    actividades: actsActivas
+                });
+            });
+
+            if (itemsExportar.length === 0) {
+                alert("Por favor agrega al menos un material a la tabla de proyección para exportar.");
+                return;
+            }
+
+            if (inputExportarItemsJson && formExportar) {
+                inputExportarItemsJson.value = JSON.stringify(itemsExportar);
+                formExportar.submit();
+            }
+        });
+    }
+
+    // ==========================================
+    // CONTROL DEL MODAL: AGREGAR MATERIAL
+    // ==========================================
+    function abrirModal() {
+        if (!modalAgregarMaterial) return;
+        modalAgregarMaterial.classList.remove("hidden");
+        modalAgregarMaterial.classList.add("flex");
+        document.body.style.overflow = "hidden";
+        renderizarCatalogoModal();
+        if (buscadorModalMateriales) {
+            buscadorModalMateriales.value = "";
+            buscadorModalMateriales.focus();
+        }
+    }
+
+    function cerrarModal() {
+        if (!modalAgregarMaterial) return;
+        modalAgregarMaterial.classList.add("hidden");
+        modalAgregarMaterial.classList.remove("flex");
+        document.body.style.overflow = "";
+    }
+
+    if (btnAbrirModalAgregar) btnAbrirModalAgregar.addEventListener("click", abrirModal);
+    if (btnCerrarModalAgregar) btnCerrarModalAgregar.addEventListener("click", cerrarModal);
+    if (btnCerrarModalAgregarAbajo) btnCerrarModalAgregarAbajo.addEventListener("click", cerrarModal);
+
+    if (modalAgregarMaterial) {
+        modalAgregarMaterial.addEventListener("click", function(e) {
+            if (e.target === modalAgregarMaterial) cerrarModal();
+        });
+    }
+
+    // Renderizar lista en el modal con priorización por prefijo de letra
+    function renderizarCatalogoModal() {
+        if (!listaCatalogoModal) return;
+
+        const query = (buscadorModalMateriales ? buscadorModalMateriales.value : "").trim().toLowerCase();
+        const codigos = Object.keys(catalogoSimco);
+
+        let filtrados = [];
+        codigos.forEach(code => {
+            const mat = catalogoSimco[code];
+            const desc = (mat.descripcion || "").toLowerCase();
+            const yaEstaEnTabla = !!estadoProyeccion[code];
+
+            if (query.length === 0) {
+                filtrados.push({ code, mat, yaEstaEnTabla, score: 0 });
+            } else {
+                let score = 999;
+                if (code === query) {
+                    score = 0;
+                } else if (code.startsWith(query)) {
+                    score = 1;
+                } else if (desc.startsWith(query)) {
+                    score = 2;
+                } else {
+                    const palabras = desc.split(/\s+/);
+                    const matchInicioPalabra = palabras.some(p => p.startsWith(query));
+                    if (matchInicioPalabra) {
+                        score = 3;
+                    } else if (desc.includes(query) || code.includes(query)) {
+                        score = 4;
+                    }
+                }
+
+                if (score < 999) {
+                    filtrados.push({ code, mat, yaEstaEnTabla, score });
+                }
+            }
+        });
+
+        // Ordenar por score de coincidencia y luego numéricamente
+        filtrados.sort((a, b) => {
+            if (a.score !== b.score) return a.score - b.score;
+            const numA = parseInt(a.code, 10) || 9999;
+            const numB = parseInt(b.code, 10) || 9999;
+            return numA - numB;
+        });
+
+        if (contadorResultadosModal) {
+            contadorResultadosModal.textContent = `${filtrados.length} materiales disponibles`;
+        }
+
+        if (filtrados.length === 0) {
+            listaCatalogoModal.innerHTML = `
+                <div class="py-8 text-center text-muted-foreground">
+                    <p class="font-bold text-sm">No se encontraron materiales que coincidan con «${query}»</p>
+                    <p class="text-xs mt-1">Prueba con otro código o palabra clave.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = "";
+        filtrados.forEach(f => {
+            const code = f.code;
+            const mat = f.mat;
+            const enTabla = f.yaEstaEnTabla;
+
+            html += `
+                <div class="p-3 rounded-xl border ${enTabla ? 'border-teal-500/50 bg-teal-50/30 dark:bg-teal-950/20' : 'border-border bg-card'} hover:border-teal-400 transition flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <span class="badge-simco text-xs px-2.5 py-1 rounded-md bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-200 border border-blue-200 shrink-0">
+                            [${code}]
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-xs font-bold text-foreground block truncate" title="${mat.descripcion}">
+                                ${mat.descripcion}
+                            </span>
+                            <div class="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                                <span class="font-bold px-1.5 py-0.2 rounded bg-muted">${mat.unidad || 'UN'}</span>
+                                <span>•</span>
+                                <span>Tarifa base MO: <strong class="text-teal-700 dark:text-teal-400">${formatearPesos(mat.valor_unitario_suma)}</strong></span>
+                                <span>•</span>
+                                <span>${(mat.actividades || []).length} actividades vinculadas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="shrink-0">
+                        ${enTabla ? `
+                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300 border border-teal-300 dark:border-teal-700">
+                                ✓ En Proyección
+                            </span>
+                        ` : `
+                            <button type="button" class="btn-agregar-al-presupuesto px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white transition cursor-pointer shadow-2xs"
+                                    data-code="${code}">
+                                ➕ Agregar
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        });
+
+        listaCatalogoModal.innerHTML = html;
+    }
+
+    if (buscadorModalMateriales) {
+        buscadorModalMateriales.addEventListener("input", function() {
+            if (btnLimpiarBuscadorModal) {
+                btnLimpiarBuscadorModal.classList.toggle("hidden", this.value.trim().length === 0);
+            }
+            renderizarCatalogoModal();
+        });
+    }
+
+    if (btnLimpiarBuscadorModal) {
+        btnLimpiarBuscadorModal.addEventListener("click", function() {
+            if (buscadorModalMateriales) {
+                buscadorModalMateriales.value = "";
+                this.classList.add("hidden");
+                renderizarCatalogoModal();
+                buscadorModalMateriales.focus();
+            }
+        });
+    }
+
+    if (listaCatalogoModal) {
+        listaCatalogoModal.addEventListener("click", function(e) {
+            const btn = e.target.closest(".btn-agregar-al-presupuesto");
+            if (btn) {
+                const code = btn.getAttribute("data-code");
+                if (code && catalogoSimco[code]) {
+                    const actsMap = {};
+                    (catalogoSimco[code].actividades || []).forEach(a => {
+                        actsMap[a.id_mo] = true;
+                    });
+                    estadoProyeccion[code] = {
+                        cantidad: 1,
+                        actividades: actsMap,
+                        expandido: false
+                    };
+                    renderizarCatalogoModal();
+                    renderizarTabla();
+                }
+            }
+        });
+    }
+
+    // Render inicial
+    renderizarTabla();
+})();
+</script>
+{% endblock %}

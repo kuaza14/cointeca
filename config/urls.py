@@ -240,6 +240,9 @@ from core.views.ingenieria import(
     eliminar_material_apoyo_rapido,
     api_materiales_proyecto_simco,
     exportar_matriz_simco_excel,
+    proyeccion_presupuesto_proyecto,
+    proyeccion_presupuesto_general,
+    api_guardar_proyeccion,
 )
 
 
@@ -500,6 +503,9 @@ urlpatterns = [
     path("ingenieria/proyectos/<int:proyecto_id>/imprimir-formato-poste-a-poste/", imprimir_formato_poste_a_poste, name="imprimir_formato_poste_a_poste"),
     path("ingenieria/api/proyecto/<int:proyecto_id>/materiales-simco/", api_materiales_proyecto_simco, name="api_materiales_proyecto_simco"),
     path("ingenieria/simco/exportar-excel/", exportar_matriz_simco_excel, name="exportar_matriz_simco_excel"),
+    path("ingenieria/proyeccion/", proyeccion_presupuesto_general, name="proyeccion_presupuesto_general"),
+    path("ingenieria/proyectos/<int:proyecto_id>/proyeccion/", proyeccion_presupuesto_proyecto, name="proyeccion_presupuesto_proyecto"),
+    path("ingenieria/api/proyecto/<int:proyecto_id>/guardar-proyeccion/", api_guardar_proyeccion, name="api_guardar_proyeccion"),
 ]
 # =========================
 # 📁 MEDIA FILES

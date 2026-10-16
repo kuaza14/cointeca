@@ -525,7 +525,18 @@ document.addEventListener("DOMContentLoaded", function () {
 // =========================================================================
 // MODAL: EDITAR / CAMBIAR MATERIAL REQUERIDO DIRECTO
 // =========================================================================
-function abrirModalEditarRequeridoDirecto(reqId, matId, item, desc, unidad, cant) {
+function abrirModalEditarRequeridoDirecto(targetOrReqId, matId, item, desc, unidad, cant) {
+    let reqId = targetOrReqId;
+    if (targetOrReqId && targetOrReqId.dataset) {
+        const ds = targetOrReqId.dataset;
+        reqId = ds.reqId;
+        matId = ds.matId;
+        item = ds.item || "";
+        desc = ds.desc || "";
+        unidad = ds.unidad || "UN";
+        cant = ds.cantidad || "";
+    }
+
     cargarCatalogoMaterialesReq();
     const modal = document.getElementById("modalEditarRequeridoDirecto");
     const inputReqId = document.getElementById("editDirReqId");

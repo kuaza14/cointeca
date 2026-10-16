@@ -944,9 +944,17 @@ function cargarBalanceMaterialesData() {
     const script = document.getElementById("balanceMaterialesModalJson");
     if (script && balanceMaterialesData.length === 0) {
         try {
-            balanceMaterialesData = JSON.parse(script.textContent || "[]");
+            const raw = JSON.parse(script.textContent || "[]");
+            if (Array.isArray(raw)) {
+                balanceMaterialesData = raw;
+            } else if (raw && typeof raw === "object") {
+                balanceMaterialesData = Object.values(raw);
+            } else {
+                balanceMaterialesData = [];
+            }
         } catch (e) {
             console.error("Error parseando balanceMaterialesModalJson:", e);
+            balanceMaterialesData = [];
         }
     }
 }
@@ -958,10 +966,15 @@ function abrirModalEditarMaterialBalance(materialId) {
     const m = document.getElementById("modalEditarMaterialBalance");
     if (!m) return;
 
-    // Buscar el material en balanceMaterialesData
-    let item = balanceMaterialesData.find(function (b) {
-        return String(b.id) === String(materialId);
-    });
+    // Buscar el material en balanceMaterialesData (soporta array u objeto)
+    let item = null;
+    if (Array.isArray(balanceMaterialesData)) {
+        item = balanceMaterialesData.find(function (b) {
+            return String(b.id) === String(materialId);
+        });
+    } else if (balanceMaterialesData && typeof balanceMaterialesData === "object") {
+        item = balanceMaterialesData[materialId] || balanceMaterialesData[String(materialId)];
+    }
 
     // Si no está en balanceMaterialesData, buscarlo en catalogoMateriales
     if (!item) {
@@ -975,9 +988,12 @@ function abrirModalEditarMaterialBalance(materialId) {
                 descripcion: cat.descripcion,
                 unidad: cat.unidad,
                 cantidad_requerida: 0,
+                requerido: 0,
                 cantidad_instalada: 0,
+                instalado: 0,
                 cantidad_retirada: 0,
                 cantidad_entrada: 0,
+                entrada: 0,
                 tiene_requerido: false,
                 req_id: null,
                 instalados_detalles: [],
@@ -1020,12 +1036,16 @@ function abrirModalEditarMaterialBalance(materialId) {
 
     cancelarReemplazoMaterial();
 
+    const cantReqVal = (item.cantidad_requerida !== undefined && item.cantidad_requerida !== null)
+        ? item.cantidad_requerida
+        : (item.requerido !== undefined && item.requerido !== null ? item.requerido : 0);
+
     if (item.tiene_requerido && item.req_id) {
         if (inputReqId) inputReqId.value = item.req_id;
         if (inputElimReqId) inputElimReqId.value = item.req_id;
-        if (inputCant) inputCant.value = item.cantidad_requerida;
+        if (inputCant) inputCant.value = cantReqVal;
         if (badgeReq) {
-            badgeReq.textContent = `Registrado (${item.cantidad_requerida} ${item.unidad || "UN"})`;
+            badgeReq.textContent = `Registrado (${cantReqVal} ${item.unidad || "UN"})`;
             badgeReq.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200";
         }
         if (btnEliminar) btnEliminar.classList.remove("hidden");

@@ -592,23 +592,27 @@ def detalle_proyecto_logistica(request, proyecto_id):
 
     materiales_catalogo = Material.objects.all().order_by("descripcion")
 
-    balance_modal_data = {}
+    balance_modal_data = []
     for b in balance_materiales:
         m = b["material"]
-        balance_modal_data[m.id] = {
+        balance_modal_data.append({
             "id": m.id,
             "item": m.item,
             "descripcion": m.descripcion,
             "unidad": m.unidad or "UN",
             "requerido": float(b["requerido"]),
+            "cantidad_requerida": float(b["requerido"]),
             "req_id": b["req_id"],
             "tiene_requerido": b["tiene_requerido"],
             "instalado": float(b["instalado"]),
+            "cantidad_instalada": float(b["instalado"]),
             "instalados_detalles": b["instalados_detalles"],
             "entrada": float(b["entrada"]),
+            "cantidad_entrada": float(b["entrada"]),
             "entradas_detalles": b["entradas_detalles"],
             "stock_bodega": float(b["stock_bodega"]),
-        }
+            "proyecto_id": proyecto.id,
+        })
     balance_materiales_modal_json = json.dumps(balance_modal_data)
 
     return render(

@@ -180,7 +180,13 @@
                             {% if item.id %}
                             <div class="inline-flex items-center gap-1.5 justify-center">
                                 <button type="button"
-                                        onclick="abrirModalEditarRequeridoDirecto({{ item.id }}, {{ item.material.id }}, '{{ item.material.item|default:''|escapejs }}', '{{ item.material.descripcion|escapejs }}', '{{ item.material.unidad|default:'UN'|escapejs }}', {{ item.cantidad }})"
+                                        onclick="abrirModalEditarRequeridoDirecto(this)"
+                                        data-req-id="{{ item.id }}"
+                                        data-mat-id="{{ item.material.id }}"
+                                        data-item="{{ item.material.item|default:'' }}"
+                                        data-desc="{{ item.material.descripcion }}"
+                                        data-unidad="{{ item.material.unidad|default:'UN' }}"
+                                        data-cantidad="{{ item.cantidad|stringformat:'s' }}"
                                         class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded text-xs font-bold transition cursor-pointer"
                                         title="Editar cantidad o cambiar este material">
                                     <svg class="size-3.5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>

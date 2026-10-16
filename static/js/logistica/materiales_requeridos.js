@@ -13,6 +13,7 @@ function abrirModalAgregar() {
     if (modal) {
         modal.classList.remove("hidden");
         modal.classList.add("flex");
+        modal.style.display = "flex";
         setTimeout(function () {
             const inp = document.getElementById("inputBuscadorMaterialModalReq");
             if (inp) inp.focus();
@@ -25,6 +26,7 @@ function cerrarModalAgregar() {
     if (modal) {
         modal.classList.add("hidden");
         modal.classList.remove("flex");
+        modal.style.display = "none";
         cerrarDropdownSugerenciasReq();
     }
 }
@@ -556,6 +558,7 @@ function abrirModalEditarRequeridoDirecto(targetOrReqId, matId, item, desc, unid
     if (modal) {
         modal.classList.remove("hidden");
         modal.classList.add("flex");
+        modal.style.display = "flex";
         if (inputCant) {
             setTimeout(function () {
                 inputCant.focus();
@@ -570,6 +573,7 @@ function cerrarModalEditarRequeridoDirecto() {
     if (modal) {
         modal.classList.add("hidden");
         modal.classList.remove("flex");
+        modal.style.display = "none";
     }
     cerrarDropdownReemplazoDirecto();
 }

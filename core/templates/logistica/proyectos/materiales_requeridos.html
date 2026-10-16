@@ -243,14 +243,15 @@
 
 <!-- MODAL PARA PEDIR / AGREGAR MATERIALES REQUERIDOS (SELECTOR + TABLA ACUMULATIVA) -->
 <div id="modalAgregarRequerido"
-     class="hidden fixed inset-0 z-50 items-center justify-center p-4 overflow-y-auto bg-slate-950/70 backdrop-blur-xs"
+     class="modal-overlay-cointeca fixed inset-0 z-50 hidden items-start justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/80 backdrop-blur-xs"
+     style="z-index: 9999; display: none;"
      role="dialog"
      aria-modal="true">
 
-    <div class="relative w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-300 bg-white my-4 overflow-hidden max-h-[88vh] flex flex-col">
+    <div class="modal-card-cointeca relative w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-300 bg-white overflow-hidden flex flex-col m-auto" style="max-height: calc(100vh - 2.5rem); height: auto; margin: auto; display: flex; flex-direction: column;">
 
         <!-- Cabecera del Modal -->
-        <div class="flex justify-between items-center border-b border-blue-950 px-6 py-4 bg-blue-900 text-white flex-shrink-0">
+        <div class="flex justify-between items-center border-b border-blue-950 px-5 sm:px-6 py-3.5 bg-blue-900 text-white shrink-0" style="flex-shrink: 0;">
             <div>
                 <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
                     <span><svg class="size-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></span>
@@ -265,12 +266,12 @@
         </div>
 
         <!-- Formulario que envuelve cuerpo y pie fijo -->
-        <form method="POST" id="formAgregarMateriales" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <form method="POST" id="formAgregarMateriales" class="flex flex-col flex-1 min-h-0 overflow-hidden" style="display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden;">
             {% csrf_token %}
             <input type="hidden" name="accion" value="agregar_requerido">
 
             <!-- Contenedor Principal Scrollable con min-h-0 -->
-            <div class="flex-1 min-h-0 overflow-y-auto space-y-4 p-4 sm:p-6 bg-slate-50">
+            <div class="modal-body-scroll flex-1 min-h-0 overflow-y-auto space-y-4 p-4 sm:p-5 bg-slate-50" style="overflow-y: auto; flex: 1 1 auto; min-height: 0;">
                 <!-- BARRA COMPACTA EN UNA SOLA FILA: BUSCADOR + UNIDAD + CANTIDAD + AGREGAR -->
                 <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
                     <div class="flex flex-col sm:flex-row items-center gap-2">
@@ -341,7 +342,7 @@
 
                     <!-- Tabla visual con scroll interno -->
                     <div class="border-2 border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs flex flex-col">
-                        <div class="overflow-x-auto overflow-y-auto max-h-[38vh] sm:max-h-64">
+                        <div class="modal-table-scroll overflow-x-auto overflow-y-auto" style="max-height: 250px; min-height: 80px; overflow-y: auto;">
                             <table class="min-w-full divide-y divide-gray-200 text-sm">
                                 <thead class="sticky top-0 bg-slate-800 text-white uppercase text-xs font-bold z-10 shadow-xs">
                                     <tr>
@@ -367,7 +368,7 @@
             </div>
 
             <!-- Botones del Modal SIEMPRE VISIBLES EN EL PIE -->
-            <div class="flex items-center justify-between gap-3 px-6 py-3.5 bg-white border-t border-slate-200 flex-shrink-0 shadow-lg z-20">
+            <div class="modal-footer-sticky flex items-center justify-between gap-3 px-5 sm:px-6 py-3 bg-white border-t border-slate-200 shrink-0 shadow-lg z-20" style="flex-shrink: 0;">
                 <div class="text-xs text-slate-500 font-medium">
                     <span class="font-bold text-slate-700">Verifica la lista</span> antes de guardar.
                 </div>
@@ -388,9 +389,9 @@
 </div>
 
 <!-- MODAL: EDITAR / CAMBIAR MATERIAL REQUERIDO DIRECTO -->
-<div id="modalEditarRequeridoDirecto" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
-    <div class="w-full max-w-lg rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden flex flex-col">
-        <div class="flex items-center justify-between px-6 py-4 bg-slate-900 text-white">
+<div id="modalEditarRequeridoDirecto" class="modal-overlay-cointeca fixed inset-0 z-50 hidden items-start justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/80 backdrop-blur-xs" style="z-index: 9999; display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card-cointeca w-full max-w-lg rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden flex flex-col m-auto" style="max-height: calc(100vh - 2.5rem); height: auto; margin: auto; display: flex; flex-direction: column;">
+        <div class="flex items-center justify-between px-5 sm:px-6 py-3.5 bg-slate-900 text-white shrink-0" style="flex-shrink: 0;">
             <h3 class="text-base font-bold flex items-center gap-2">
                 <svg class="size-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
                 <span>Editar Material Requerido</span>
@@ -398,48 +399,50 @@
             <button type="button" onclick="cerrarModalEditarRequeridoDirecto()" class="text-slate-400 hover:text-white text-xl font-bold cursor-pointer">✕</button>
         </div>
 
-        <form method="POST" action="{% url 'materiales_requeridos_proyecto' proyecto.id %}" class="p-6 space-y-4 text-xs">
+        <form method="POST" action="{% url 'materiales_requeridos_proyecto' proyecto.id %}" class="flex flex-col flex-1 min-h-0 overflow-hidden" style="display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0;">
             {% csrf_token %}
             <input type="hidden" name="accion" value="editar_requerido">
             <input type="hidden" name="req_id" id="editDirReqId" value="">
             <input type="hidden" name="nuevo_material_id" id="editDirNuevoMaterialId" value="">
 
-            <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
-                <span class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Material Actual</span>
-                <p class="text-sm font-bold text-slate-900" id="editDirMaterialActualDesc">—</p>
-                <p class="text-[11px] text-slate-500" id="editDirMaterialActualInfo">—</p>
+            <div class="modal-body-scroll p-5 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0" style="overflow-y: auto; flex: 1 1 auto; min-height: 0;">
+                <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
+                    <span class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Material Actual</span>
+                    <p class="text-sm font-bold text-slate-900" id="editDirMaterialActualDesc">—</p>
+                    <p class="text-[11px] text-slate-500" id="editDirMaterialActualInfo">—</p>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Cantidad Requerida:</label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" step="any" min="0" name="cantidad_requerida" id="editDirCantidad" required
+                               class="w-full border border-slate-300 rounded-lg px-3 py-2 font-black text-sm text-slate-900 focus:border-blue-600 focus:outline-none text-right">
+                        <span id="editDirUnidad" class="px-3 py-2 rounded-lg bg-slate-100 border border-slate-300 font-bold text-slate-600 shrink-0">UN</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Si colocas 0, se eliminará el requerimiento.</p>
+                </div>
+
+                <!-- Opción para reemplazar por otro material si se equivocó -->
+                <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                    <label class="block font-bold text-amber-900 mb-1">
+                        ¿Te equivocaste de material? Cambiar por otro del catálogo:
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="editDirInputBuscarReemplazo" placeholder="Escribe código o descripción..." autocomplete="off"
+                               class="w-full border border-amber-300 rounded-lg pl-3 pr-8 py-2 text-xs font-semibold text-slate-900 bg-amber-50/50 focus:bg-white focus:border-amber-600 focus:outline-none">
+                        <button type="button" id="editDirBtnCancelarReemplazo" onclick="cancelarReemplazoMaterialDirecto()" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-slate-700 hidden cursor-pointer">
+                            ✕
+                        </button>
+                        <div id="editDirDropdownReemplazo" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-white border-2 border-amber-400 rounded-xl shadow-2xl z-50 divide-y divide-slate-100"></div>
+                    </div>
+                    <div id="editDirAlertaReemplazo" class="hidden p-2 bg-amber-100 border border-amber-300 rounded-lg text-amber-900 text-[11px] font-semibold flex items-center justify-between">
+                        <span id="editDirTextoReemplazo">Se reemplazará el material por el nuevo seleccionado.</span>
+                        <button type="button" onclick="cancelarReemplazoMaterialDirecto()" class="text-amber-800 hover:underline font-bold ml-2">Deshacer</button>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <label class="block font-bold text-slate-700 mb-1">Cantidad Requerida:</label>
-                <div class="flex items-center gap-2">
-                    <input type="number" step="any" min="0" name="cantidad_requerida" id="editDirCantidad" required
-                           class="w-full border border-slate-300 rounded-lg px-3 py-2 font-black text-sm text-slate-900 focus:border-blue-600 focus:outline-none text-right">
-                    <span id="editDirUnidad" class="px-3 py-2 rounded-lg bg-slate-100 border border-slate-300 font-bold text-slate-600 shrink-0">UN</span>
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">Si colocas 0, se eliminará el requerimiento.</p>
-            </div>
-
-            <!-- Opción para reemplazar por otro material si se equivocó -->
-            <div class="space-y-1.5 pt-2 border-t border-slate-100">
-                <label class="block font-bold text-amber-900 mb-1">
-                    ¿Te equivocaste de material? Cambiar por otro del catálogo:
-                </label>
-                <div class="relative">
-                    <input type="text" id="editDirInputBuscarReemplazo" placeholder="Escribe código o descripción..." autocomplete="off"
-                           class="w-full border border-amber-300 rounded-lg pl-3 pr-8 py-2 text-xs font-semibold text-slate-900 bg-amber-50/50 focus:bg-white focus:border-amber-600 focus:outline-none">
-                    <button type="button" id="editDirBtnCancelarReemplazo" onclick="cancelarReemplazoMaterialDirecto()" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-slate-700 hidden cursor-pointer">
-                        ✕
-                    </button>
-                    <div id="editDirDropdownReemplazo" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-white border-2 border-amber-400 rounded-xl shadow-2xl z-50 divide-y divide-slate-100"></div>
-                </div>
-                <div id="editDirAlertaReemplazo" class="hidden p-2 bg-amber-100 border border-amber-300 rounded-lg text-amber-900 text-[11px] font-semibold flex items-center justify-between">
-                    <span id="editDirTextoReemplazo">Se reemplazará el material por el nuevo seleccionado.</span>
-                    <button type="button" onclick="cancelarReemplazoMaterialDirecto()" class="text-amber-800 hover:underline font-bold ml-2">Deshacer</button>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+            <div class="modal-footer-sticky flex items-center justify-end gap-2 p-3.5 bg-slate-50 border-t border-slate-200 shrink-0" style="flex-shrink: 0;">
                 <button type="button" onclick="cerrarModalEditarRequeridoDirecto()"
                         class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition cursor-pointer">
                     Cancelar

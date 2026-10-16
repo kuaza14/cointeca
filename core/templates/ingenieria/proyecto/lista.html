@@ -93,11 +93,11 @@
            id="btnAbrirModalSimco"
            class="btn font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer"
            style="background-color: #0d9488 !important; color: #ffffff !important; border: 1px solid #0f766e !important;"
-           title="Proyección de Presupuesto: simular y calcular costo de mano de obra y materiales (SIMCO)">
+           title="Proyecciones: simular y calcular costo de mano de obra y materiales">
             <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="color: #ffffff !important;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
             </svg>
-            <span style="color: #ffffff !important;">Matriz SIMCO: Materiales & Mano de Obra</span>
+            <span style="color: #ffffff !important;">Proyecciones</span>
         </a>
 
         {% if macroproyecto %}
@@ -268,9 +268,9 @@
                                class="btnAbrirSimcoFila inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold rounded-lg transition border border-teal-300 cursor-pointer shadow-2xs"
                                data-id="{{ proyecto.id }}"
                                data-numero="{{ proyecto.numero_emcali }}"
-                               title="Proyección de Presupuesto y Mano de Obra SIMCO para {{ proyecto.numero_emcali }}">
+                               title="Proyecciones para {{ proyecto.numero_emcali }}">
                                 <svg class="size-3.5 inline-block text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
-                                <span>SIMCO</span>
+                                <span>Proyecciones</span>
                             </a>
 
                             <a href="{% url 'detalle_proyecto' proyecto.id %}"
@@ -773,7 +773,7 @@
                 </div>
                 <div>
                     <h3 class="text-base font-black text-white flex items-center gap-2">
-                        Matriz Contractual SIMCO: Materiales & Mano de Obra Vinculada
+                        Proyecciones: Presupuesto y Mano de Obra Vinculada
                         <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-500/30 text-teal-300 border border-teal-500/40">81 Ítems Oficiales</span>
                     </h3>
                     <p class="text-xs text-slate-300">
@@ -845,7 +845,7 @@
                     </button>
                 </div>
                 <div id="simcoInfoVisibles" class="text-[11px] text-muted-foreground font-medium">
-                    Mostrando 81 materiales SIMCO
+                    Mostrando 81 materiales
                 </div>
             </div>
         </div>

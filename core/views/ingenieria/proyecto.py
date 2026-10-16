@@ -2390,7 +2390,7 @@ def exportar_matriz_simco_excel(request):
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Matriz SIMCO"
+    ws.title = "Proyecciones"
 
     fuente_titulo = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
     fuente_sub = Font(name="Calibri", size=10, italic=True, color="475569")
@@ -2415,7 +2415,7 @@ def exportar_matriz_simco_excel(request):
     )
 
     ws.merge_cells("A1:G1")
-    ws["A1"] = "COINTECA S.A.S. - MATRIZ DE CONEXIONES Y ESTIMACIÓN SIMCO"
+    ws["A1"] = "COINTECA S.A.S. - PROYECCIÓN DE PRESUPUESTO Y MANO DE OBRA"
     ws["A1"].font = fuente_titulo
 
     proy_lbl = f"{proyecto.etiqueta} {proyecto.numero_emcali}" if proyecto else "Cotización y Proyección Libre"
@@ -2494,7 +2494,7 @@ def exportar_matriz_simco_excel(request):
 
     # Fila de Total General
     ws.merge_cells(start_row=current_r, start_column=1, end_row=current_r, end_column=6)
-    cell_tot_lbl = ws.cell(row=current_r, column=1, value="TOTAL ESTIMADO DE MANO DE OBRA (SIMCO)")
+    cell_tot_lbl = ws.cell(row=current_r, column=1, value="TOTAL ESTIMADO DE MANO DE OBRA")
     cell_tot_lbl.font = fuente_total
     cell_tot_lbl.alignment = Alignment(horizontal="right", vertical="center")
     cell_tot_lbl.fill = fill_total
@@ -2521,7 +2521,7 @@ def exportar_matriz_simco_excel(request):
     wb.save(output)
     output.seek(0)
 
-    nombre_sanitizado = f"Estimacion_SIMCO_{proy_lbl.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    nombre_sanitizado = f"Proyeccion_{proy_lbl.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
     response = HttpResponse(
         output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

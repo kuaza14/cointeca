@@ -33,7 +33,7 @@
                 <span>/</span>
                 <span class="text-foreground font-semibold">{{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}</span>
                 <span>/</span>
-                <span class="text-teal-700 dark:text-teal-400 font-bold">Proyección de Presupuesto (SIMCO)</span>
+                <span class="text-teal-700 dark:text-teal-400 font-bold">Proyecciones</span>
             </div>
 
             <div class="flex items-center gap-2 shrink-0 flex-wrap">
@@ -66,7 +66,7 @@
                     {% endif %}
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-foreground mt-2 tracking-tight flex items-center gap-3 flex-wrap">
-                    <span>Proyección de Presupuesto: {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}</span>
+                    <span>Proyecciones: {{ proyecto.etiqueta }} {{ proyecto.numero_emcali }}</span>
                     {% if proyecto.numero_cointeca %}
                         <span class="text-sm font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-300 font-mono">
                             Cointeca: {{ proyecto.numero_cointeca }}
@@ -74,7 +74,7 @@
                     {% endif %}
                 </h1>
                 <p class="text-sm text-muted-foreground mt-1">
-                    Tabla interactiva de presupuestación para proyectar qué materiales se usarán y calcular automáticamente el costo de Mano de Obra vinculada (SIMCO).
+                    Tabla interactiva para proyectar qué materiales se usarán y calcular automáticamente el presupuesto de Mano de Obra vinculada.
                 </p>
             </div>
 
@@ -132,7 +132,7 @@
 
             <button type="button" id="btnExportarExcel"
                     class="btn font-bold inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm rounded-xl bg-slate-900 hover:bg-black text-white border border-slate-800 transition cursor-pointer shadow-sm"
-                    title="Descargar libro Excel con matriz de materiales, códigos SIMCO, tarifas y desglose">
+                    title="Descargar libro Excel con matriz de materiales, tarifas y desglose de proyección">
                 <svg class="size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
                 <span>Descargar Excel</span>
             </button>
@@ -170,7 +170,7 @@
                 <thead>
                     <tr class="bg-slate-900 text-white uppercase text-[11px] font-extrabold tracking-wider">
                         <th class="px-3.5 py-3 w-12 text-center">#</th>
-                        <th class="px-3 py-3 w-24 text-center">Ítem SIMCO</th>
+                        <th class="px-3 py-3 w-24 text-center">Ítem</th>
                         <th class="px-4 py-3 min-w-[280px]">Material / Suministro</th>
                         <th class="px-3 py-3 w-20 text-center">Unidad</th>
                         <th class="px-4 py-3 w-36 text-center bg-slate-800">Cantidad a Usar</th>
@@ -186,7 +186,7 @@
                 <tfoot>
                     <tr class="bg-teal-950 text-white font-extrabold text-sm border-t-2 border-teal-600">
                         <td colspan="7" class="px-5 py-4 text-right tracking-wider uppercase text-xs text-teal-200">
-                            TOTAL PRESUPUESTO ESTIMADO DE MANO DE OBRA (SIMCO):
+                            TOTAL PRESUPUESTO ESTIMADO DE MANO DE OBRA:
                         </td>
                         <td class="px-4 py-4 text-right font-mono text-base font-black text-emerald-300" id="pieGranTotal">
                             $ 0 COP
@@ -220,13 +220,13 @@
         <div class="flex items-center justify-between gap-3 flex-wrap">
             <div>
                 <h3 class="text-base font-extrabold text-foreground flex items-center gap-2">
-                    <span>Resumen Consolidado de Mano de Obra (Tarifas SIMCO)</span>
+                    <span>Resumen Consolidado de Mano de Obra</span>
                     <span class="text-xs px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 font-bold" id="badgeTotalActsResumen">
                         0 actividades
                     </span>
                 </h3>
                 <p class="text-xs text-muted-foreground mt-0.5">
-                    Consolidado idéntico a la hoja RESUMEN de Edson agrupando las cantidades totales por código de actividad contractual.
+                    Consolidado agrupando las cantidades totales por código de actividad contractual.
                 </p>
             </div>
         </div>
@@ -252,7 +252,7 @@
 </div>
 
 <!-- ======================================================================
-     6. MODAL: AGREGAR MATERIAL DESDE EL CATÁLOGO SIMCO
+     6. MODAL: AGREGAR MATERIAL DESDE EL CATÁLOGO
      ====================================================================== -->
 <div id="modalAgregarMaterial" class="fixed inset-0 z-50 hidden items-center justify-center p-4 backdrop-blur-xs"
      style="background-color: rgba(2, 6, 23, 0.75) !important;">
@@ -263,7 +263,7 @@
                 <h3 class="text-base font-extrabold text-foreground flex items-center gap-2">
                     <span>Agregar Material al Presupuesto</span>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 font-bold">
-                        Catálogo Contractual SIMCO (81 Reglas)
+                        Catálogo de Materiales (81 Ítems)
                     </span>
                 </h3>
                 <p class="text-xs text-muted-foreground mt-0.5">
@@ -804,7 +804,7 @@
                     });
 
                     renderizarTabla();
-                    alert(`Se cargaron ${agregados} materiales pedidos con conexiones SIMCO a la tabla de proyección.`);
+                    alert(`Se cargaron ${agregados} materiales pedidos a la tabla de proyección.`);
                 })
                 .catch(err => {
                     console.error("Error al cargar materiales pedidos:", err);

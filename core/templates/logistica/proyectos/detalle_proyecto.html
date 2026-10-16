@@ -907,12 +907,11 @@
             {% endfor %}
         </div>
     </div>
-
 </div>
 
 <!-- MODAL: PEDIR / AGREGAR MATERIALES REQUERIDOS (BUSCADOR INTELIGENTE + ADICIÓN DIRECTA) -->
 <div id="modalPedirRequerido" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
-    <div class="w-full max-w-3xl rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+    <div class="w-full max-w-3xl rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden max-h-[88vh] flex flex-col">
         <!-- Cabecera Institucional Azul Oscuro -->
         <div class="flex items-center justify-between border-b border-blue-950 px-6 py-4 bg-blue-900 text-white flex-shrink-0">
             <div>
@@ -930,116 +929,126 @@
             </button>
         </div>
 
-        <!-- Contenedor Principal Scrollable -->
-        <div class="p-6 overflow-y-auto space-y-5 flex-1 bg-slate-50">
-            <!-- BARRA COMPACTA EN UNA SOLA FILA: BUSCADOR + UNIDAD + CANTIDAD + AGREGAR -->
-            <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
-                <div class="flex flex-col sm:flex-row items-center gap-2">
-                    <!-- Buscador Autocomplete (ocupa todo el ancho disponible) -->
-                    <div class="relative flex-1 w-full">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
-                        </span>
-                        <input type="text"
-                               id="inputBuscadorMaterialModal"
-                               placeholder="Escribe código o descripción del material..."
-                               autocomplete="off"
-                               class="w-full h-10 border border-slate-300 rounded-lg pl-9 pr-8 py-2 text-xs font-semibold text-slate-900 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none placeholder:font-normal placeholder:text-slate-400">
-                        <button type="button" id="btnLimpiarMaterialModal" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-slate-700 hidden cursor-pointer" title="Limpiar selección">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+        <!-- Formulario que envuelve cuerpo y pie fijo -->
+        <form method="POST" action="{% url 'detalle_proyecto_logistica' proyecto.id %}" id="formGuardarMaterialesRequeridos" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="agregar_requerido">
 
-                        <!-- Dropdown flotante de sugerencias -->
-                        <div id="dropdownSugerenciasMaterial"
-                             class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-white border-2 border-blue-400 rounded-xl shadow-2xl z-50 divide-y divide-slate-100">
+            <!-- Contenedor Principal Scrollable con min-h-0 -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 min-h-0 bg-slate-50">
+                <!-- BARRA COMPACTA EN UNA SOLA FILA: BUSCADOR + UNIDAD + CANTIDAD + AGREGAR -->
+                <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <!-- Buscador Autocomplete (ocupa todo el ancho disponible) -->
+                        <div class="relative flex-1 w-full">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                            </span>
+                            <input type="text"
+                                   id="inputBuscadorMaterialModal"
+                                   placeholder="Escribe código o descripción del material..."
+                                   autocomplete="off"
+                                   class="w-full h-10 border border-slate-300 rounded-lg pl-9 pr-8 py-2 text-xs font-semibold text-slate-900 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none placeholder:font-normal placeholder:text-slate-400">
+                            <button type="button" id="btnLimpiarMaterialModal" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-slate-700 hidden cursor-pointer" title="Limpiar selección">
+                                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+
+                            <!-- Dropdown flotante de sugerencias -->
+                            <div id="dropdownSugerenciasMaterial"
+                                 class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-white border-2 border-blue-400 rounded-xl shadow-2xl z-50 divide-y divide-slate-100">
+                            </div>
+
+                            <!-- Valores ocultos del ítem seleccionado -->
+                            <input type="hidden" id="modalSelMaterialId" value="">
+                            <input type="hidden" id="modalSelMaterialItem" value="">
+                            <input type="hidden" id="modalSelMaterialDesc" value="">
+                            <input type="hidden" id="modalSelMaterialUnidad" value="">
                         </div>
 
-                        <!-- Valores ocultos del ítem seleccionado -->
-                        <input type="hidden" id="modalSelMaterialId" value="">
-                        <input type="hidden" id="modalSelMaterialItem" value="">
-                        <input type="hidden" id="modalSelMaterialDesc" value="">
-                        <input type="hidden" id="modalSelMaterialUnidad" value="">
+                        <!-- Indicador Visual de Unidad al lado -->
+                        <div id="badgeUnidadModal" class="h-10 px-3 flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 text-slate-600 font-bold text-xs shrink-0 whitespace-nowrap min-w-[52px]" title="Unidad de medida">
+                            <span id="textoUnidadModal">—</span>
+                        </div>
+
+                        <!-- Input Cantidad -->
+                        <div class="w-full sm:w-28 shrink-0">
+                            <input type="number"
+                                   id="inputCantidadMaterialModal"
+                                   step="any"
+                                   min="0.01"
+                                   placeholder="Cant."
+                                   class="w-full h-10 border border-slate-300 rounded-lg px-3 py-2 text-xs font-black text-slate-900 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none text-right placeholder:font-normal placeholder:text-slate-400">
+                        </div>
+
+                        <!-- Botón Agregar Material -->
+                        <button type="button"
+                                id="btnAgregarAListaModal"
+                                class="w-full sm:w-auto h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap"
+                                title="Agregar este material a la lista inferior">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            <span>Agregar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: TABLA ACUMULATIVA DE LO QUE SE VA A PEDIR -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                            2. Lista de Materiales a Guardar
+                        </span>
+                        <span id="contadorItemsListaModal" class="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                            0 materiales
+                        </span>
                     </div>
 
-                    <!-- Indicador Visual de Unidad al lado -->
-                    <div id="badgeUnidadModal" class="h-10 px-3 flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 text-slate-600 font-bold text-xs shrink-0 whitespace-nowrap min-w-[52px]" title="Unidad de medida">
-                        <span id="textoUnidadModal">—</span>
+                    <div class="border-2 border-slate-200 rounded-xl bg-white shadow-xs overflow-hidden flex flex-col">
+                        <div class="overflow-x-auto overflow-y-auto max-h-[38vh] sm:max-h-64">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="sticky top-0 bg-slate-800 text-white uppercase text-xs font-bold z-10 shadow-xs">
+                                    <tr>
+                                        <th class="px-3 py-2.5 text-center w-20">Cód / Ítem</th>
+                                        <th class="px-4 py-2.5 text-left">Material</th>
+                                        <th class="px-3 py-2.5 text-center w-20">Unidad</th>
+                                        <th class="px-4 py-2.5 text-right w-32">Cantidad</th>
+                                        <th class="px-3 py-2.5 text-center w-16">Quitar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpoTablaRequeridosModal" class="divide-y divide-slate-100 bg-white">
+                                    <tr id="filaVaciaRequeridosModal">
+                                        <td colspan="5" class="px-4 py-8 text-center text-slate-400 text-xs">
+                                            <div class="space-y-1">
+                                                <p class="font-bold text-slate-600 text-sm">Aún no has agregado materiales a la lista.</p>
+                                                <p class="text-slate-400">Busca el material arriba, digita la cantidad y haz clic en <strong>"+ Agregar"</strong>.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-
-                    <!-- Input Cantidad -->
-                    <div class="w-full sm:w-28 shrink-0">
-                        <input type="number"
-                               id="inputCantidadMaterialModal"
-                               step="any"
-                               min="0.01"
-                               placeholder="Cant."
-                               class="w-full h-10 border border-slate-300 rounded-lg px-3 py-2 text-xs font-black text-slate-900 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none text-right placeholder:font-normal placeholder:text-slate-400">
-                    </div>
-
-                    <!-- Botón Agregar Material -->
-                    <button type="button"
-                            id="btnAgregarAListaModal"
-                            class="w-full sm:w-auto h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap"
-                            title="Agregar este material a la lista inferior">
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        <span>Agregar</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- PANEL 2: TABLA ACUMULATIVA DE LO QUE SE VA A PEDIR -->
-            <form method="POST" action="{% url 'detalle_proyecto_logistica' proyecto.id %}" id="formGuardarMaterialesRequeridos" class="space-y-3">
-                {% csrf_token %}
-                <input type="hidden" name="accion" value="agregar_requerido">
-
-                <div class="flex items-center justify-between pt-1">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                        <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-                        2. Lista de Materiales a Guardar
-                    </span>
-                    <span id="contadorItemsListaModal" class="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-full">
-                        0 materiales
-                    </span>
+            <!-- Botones de Acción del Modal: SIEMPRE VISIBLES EN EL PIE -->
+            <div class="flex items-center justify-between gap-3 px-6 py-3.5 bg-white border-t border-slate-200 flex-shrink-0 shadow-lg z-20">
+                <div class="text-xs text-slate-500 font-medium">
+                    <span class="font-bold text-slate-700">Verifica la lista</span> antes de guardar.
                 </div>
-
-                <div class="overflow-x-auto border-2 border-slate-200 rounded-xl bg-white shadow-xs">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-slate-800 text-white uppercase text-xs font-bold">
-                            <tr>
-                                <th class="px-3 py-2.5 text-center w-20">Cód / Ítem</th>
-                                <th class="px-4 py-2.5 text-left">Material</th>
-                                <th class="px-3 py-2.5 text-center w-20">Unidad</th>
-                                <th class="px-4 py-2.5 text-right w-32">Cantidad</th>
-                                <th class="px-3 py-2.5 text-center w-16">Quitar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cuerpoTablaRequeridosModal" class="divide-y divide-slate-100 bg-white">
-                            <tr id="filaVaciaRequeridosModal">
-                                <td colspan="5" class="px-4 py-8 text-center text-slate-400 text-xs">
-                                    <div class="space-y-1">
-                                        <p class="font-bold text-slate-600 text-sm">Aún no has agregado materiales a la lista.</p>
-                                        <p class="text-slate-400">Busca el material arriba, digita la cantidad y haz clic en <strong>"+ Agregar"</strong>.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Botones de Acción del Modal -->
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+                <div class="flex items-center gap-3">
                     <button type="button" onclick="cerrarModalPedirRequerido()"
-                            class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-lg border border-slate-300 transition cursor-pointer">
+                            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg border border-slate-300 transition cursor-pointer">
                         Cancelar
                     </button>
                     <button type="submit" id="btnGuardarRequeridosModal" disabled
-                            class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                         <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></span>
                         <span>Guardar Requerimientos</span>
                     </button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -1059,9 +1068,9 @@
 
 <!-- MODAL: EDITAR / CORREGIR MATERIAL DEL PROYECTO (BALANCE) -->
 <div id="modalEditarMaterialBalance" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
-    <div class="w-full max-w-4xl rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+    <div class="w-full max-w-4xl rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden max-h-[88vh] flex flex-col">
         <!-- Cabecera Azul Oscuro -->
-        <div class="flex items-center justify-between border-b border-blue-950 px-6 py-4 bg-slate-900 text-white">
+        <div class="flex items-center justify-between border-b border-blue-950 px-6 py-4 bg-slate-900 text-white flex-shrink-0">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-xl bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-300">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
@@ -1081,8 +1090,8 @@
             </button>
         </div>
 
-        <!-- Cuerpo del Modal con Scroll -->
-        <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50 text-slate-800 text-xs">
+        <!-- Cuerpo del Modal con Scroll y min-h-0 -->
+        <div class="p-6 overflow-y-auto space-y-6 flex-1 min-h-0 bg-slate-50 text-slate-800 text-xs">
 
             <!-- SECCIÓN 1: REQUERIDO GENERAL -->
             <div class="bg-white p-4 rounded-xl border border-blue-200 shadow-xs space-y-3">
@@ -1206,7 +1215,7 @@
         </div>
 
         <!-- Footer del Modal -->
-        <div class="flex items-center justify-end px-6 py-3 bg-slate-100 border-t border-slate-200">
+        <div class="flex items-center justify-end px-6 py-3 bg-slate-100 border-t border-slate-200 flex-shrink-0">
             <button type="button" onclick="cerrarModalEditarMaterialBalance()"
                     class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer">
                 Cerrar

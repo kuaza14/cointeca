@@ -161,8 +161,228 @@ function esLuminariaTexto(texto) {
     return (t.includes('LUM') || t.includes('SODIO') || t.includes('NA ') || t.includes('LED') || t.includes('PROY') || t.includes('FAROL')) && Boolean(extraerPotenciaDeTexto(t));
 }
 
+function normalizarTextoMatNodo(txt) {
+    if (!txt) return "";
+    return txt.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+
+function obtenerCatalogoMaterialesNodo() {
+    const templateSelect = document.querySelector('#templateSelectMaterial select');
+    if (!templateSelect) return [];
+    const lista = [];
+    Array.from(templateSelect.options).forEach(opt => {
+        if (!opt.value) return;
+        const rawText = (opt.text || '').trim();
+        let item = opt.dataset.item || '';
+        let descripcion = opt.dataset.descripcion || '';
+        let unidad = opt.dataset.unidad || 'UN';
+        let stock = opt.dataset.stock !== undefined ? parseFloat(opt.dataset.stock) : 0;
+
+        if (!item && !descripcion) {
+            const matchItem = rawText.match(/^\[([^\]]*)\]\s*(.*)$/);
+            let rest = rawText;
+            if (matchItem) {
+                item = matchItem[1].trim();
+                rest = matchItem[2].trim();
+            }
+            const matchStock = rest.match(/^(.*?)\s*\[(?:Stock|Déficit|Sin stock):?\s*([^\]]*)\]$/i);
+            if (matchStock) {
+                descripcion = matchStock[1].trim();
+            } else {
+                descripcion = rest;
+            }
+        }
+
+        const esLum = opt.dataset.esLuminaria === '1' || esLuminariaTexto(rawText);
+        const pot = opt.dataset.potencia || extraerPotenciaDeTexto(rawText);
+
+        lista.push({
+            id: String(opt.value),
+            item: item,
+            descripcion: descripcion,
+            unidad: unidad,
+            stock: isNaN(stock) ? 0 : stock,
+            esLuminaria: esLum,
+            potencia: pot,
+            textoCompleto: rawText
+        });
+    });
+    return lista;
+}
+
+function buscarMaterialesPriorizadosNodo(query, catalogo) {
+    const qNorm = normalizarTextoMatNodo(query);
+    if (!qNorm) return catalogo.slice(0, 30);
+
+    const palabras = qNorm.split(/\s+/).filter(p => p.length > 0);
+    const resultadosScored = [];
+
+    for (let i = 0; i < catalogo.length; i++) {
+        const m = catalogo[i];
+        const itemNorm = normalizarTextoMatNodo(m.item);
+        const descNorm = normalizarTextoMatNodo(m.descripcion);
+        const fullTexto = `${itemNorm} ${descNorm}`;
+
+        const contieneTodas = palabras.every(p => fullTexto.includes(p));
+        if (!contieneTodas) continue;
+
+        let score = 4;
+        const palabrasDesc = descNorm.split(/\s+/);
+
+        if (descNorm.startsWith(qNorm)) {
+            score = 1;
+        } else if (palabrasDesc.some(w => w.startsWith(qNorm))) {
+            score = 2;
+        } else if (itemNorm.startsWith(qNorm)) {
+            score = 3;
+        } else {
+            score = 4;
+        }
+
+        resultadosScored.push({
+            score: score,
+            desc: descNorm,
+            material: m
+        });
+    }
+
+    resultadosScored.sort(function (a, b) {
+        if (a.score !== b.score) {
+            return a.score - b.score;
+        }
+        return a.desc.localeCompare(b.desc);
+    });
+
+    return resultadosScored.slice(0, 30).map(x => x.material);
+}
+
+function cerrarDropdownSugerenciasNodoTop() {
+    const dropdown = document.getElementById('dropdownSugerenciasMaterialNodoTop');
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        dropdown.dataset.activeIndex = '-1';
+    }
+}
+
+function posicionarDropdownMatNodo(inputEl, dropdownEl) {
+    if (!inputEl || !dropdownEl) return;
+    const rect = inputEl.getBoundingClientRect();
+    const espacioAbajo = window.innerHeight - rect.bottom - 12;
+    const espacioArriba = rect.top - 12;
+
+    dropdownEl.style.position = 'fixed';
+    dropdownEl.style.left = rect.left + 'px';
+    dropdownEl.style.width = Math.max(rect.width, 320) + 'px';
+    dropdownEl.style.zIndex = '10020';
+
+    if (espacioAbajo >= 200 || espacioAbajo >= espacioArriba) {
+        dropdownEl.style.top = (rect.bottom + 4) + 'px';
+        dropdownEl.style.bottom = 'auto';
+        dropdownEl.style.maxHeight = Math.min(240, Math.max(120, espacioAbajo)) + 'px';
+    } else {
+        dropdownEl.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+        dropdownEl.style.top = 'auto';
+        dropdownEl.style.maxHeight = Math.min(240, Math.max(120, espacioArriba)) + 'px';
+    }
+}
+
+function limpiarSeleccionMaterialNodoTop(darFoco = true) {
+    const inputBuscador = document.getElementById('inputBuscadorMaterialNodoTop');
+    const btnLimpiar = document.getElementById('btnLimpiarMaterialNodoTop');
+    const hiddenId = document.getElementById('nodoTopSelMaterialId');
+    const badgeUnidad = document.getElementById('badgeUnidadNodoTop');
+    const textoUnidad = document.getElementById('textoUnidadNodoTop');
+    const inputCantInst = document.getElementById('inputCantInstNodoTop');
+    const inputCantRet = document.getElementById('inputCantRetNodoTop');
+
+    if (inputBuscador) inputBuscador.value = '';
+    if (btnLimpiar) {
+        btnLimpiar.classList.add('hidden');
+        btnLimpiar.classList.remove('flex');
+    }
+    if (hiddenId) hiddenId.value = '';
+    if (textoUnidad) textoUnidad.textContent = '—';
+    if (badgeUnidad) {
+        badgeUnidad.className = 'h-10 px-3 flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 text-slate-600 font-bold text-xs shrink-0 whitespace-nowrap min-w-[52px] transition';
+    }
+    if (inputCantInst) inputCantInst.value = '';
+    if (inputCantRet) inputCantRet.value = '';
+    cerrarDropdownSugerenciasNodoTop();
+    if (darFoco && inputBuscador) inputBuscador.focus();
+}
+
+function seleccionarMaterialNodoTop(mat) {
+    if (!mat) return;
+    const inputBuscador = document.getElementById('inputBuscadorMaterialNodoTop');
+    const btnLimpiar = document.getElementById('btnLimpiarMaterialNodoTop');
+    const hiddenId = document.getElementById('nodoTopSelMaterialId');
+    const badgeUnidad = document.getElementById('badgeUnidadNodoTop');
+    const textoUnidad = document.getElementById('textoUnidadNodoTop');
+    const inputCantInst = document.getElementById('inputCantInstNodoTop');
+
+    if (hiddenId) hiddenId.value = String(mat.id);
+    if (inputBuscador) {
+        inputBuscador.value = (mat.item ? `[${mat.item}] ` : '') + mat.descripcion;
+    }
+    if (btnLimpiar) {
+        btnLimpiar.classList.remove('hidden');
+        btnLimpiar.classList.add('flex');
+    }
+    if (textoUnidad) textoUnidad.textContent = mat.unidad || 'UN';
+    if (badgeUnidad) {
+        badgeUnidad.className = 'h-10 px-3 flex items-center justify-center rounded-lg border-2 border-blue-400 bg-blue-100 text-blue-900 font-black text-xs shrink-0 whitespace-nowrap min-w-[52px] transition';
+    }
+
+    cerrarDropdownSugerenciasNodoTop();
+
+    if (inputCantInst) {
+        inputCantInst.focus();
+        inputCantInst.select();
+    }
+}
+
+function actualizarEstadoTablaMaterialesNodo() {
+    const tbody = document.getElementById('filasMaterialesNodo');
+    const contador = document.getElementById('contadorMaterialesNodo');
+    if (!tbody) return;
+
+    const filasReales = Array.from(tbody.querySelectorAll('.fila-material-nodo')).filter(tr => {
+        const sel = tr.querySelector('select[name="material_id[]"]');
+        return sel && sel.value;
+    });
+
+    if (contador) {
+        const n = filasReales.length;
+        contador.textContent = n + (n === 1 ? ' material' : ' materiales');
+    }
+
+    const filaVaciaExistente = document.getElementById('filaVaciaMaterialesNodo');
+    if (filasReales.length === 0) {
+        // Limpiar cualquier fila vacía sin material_id
+        tbody.querySelectorAll('.fila-material-nodo').forEach(tr => tr.remove());
+        if (!filaVaciaExistente) {
+            const trVacia = document.createElement('tr');
+            trVacia.id = 'filaVaciaMaterialesNodo';
+            trVacia.innerHTML = `
+                <td colspan="6" class="px-4 py-8 text-center text-slate-400 text-xs">
+                    <div class="space-y-1">
+                        <p class="font-bold text-slate-600 text-sm">Aún no has agregado materiales a la lista.</p>
+                        <p class="text-slate-400">Busca el material arriba, digita la cantidad y haz clic en <strong>"+ Agregar"</strong>.</p>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(trVacia);
+        }
+    } else if (filaVaciaExistente) {
+        filaVaciaExistente.remove();
+    }
+}
+
 function onSelectMaterialNodo(selectEl) {
-    const td = selectEl.closest('td');
+    const tr = selectEl.closest('tr');
+    if (!tr) return;
+    const td = tr.querySelector('.celda-material-nodo') || selectEl.closest('td');
     if (!td) return;
     const opt = selectEl.options[selectEl.selectedIndex];
     const contenedor = td.querySelector('.contenedor-potencia-mat');
@@ -180,7 +400,8 @@ function onSelectMaterialNodo(selectEl) {
                 contSub.appendChild(crearSubFilaLuminaria(potenciaSugerida, ''));
             } else if (subFilas.length === 1) {
                 const inPot = subFilas[0].querySelector('.input-sub-potencia');
-                if (inPot &&!inPot.value && potenciaSugerida) {
+                const inCod = subFilas[0].querySelector('.input-sub-codigo');
+                if (inPot && potenciaSugerida && (!inPot.value || (!inCod || !inCod.value.trim()))) {
                     inPot.value = potenciaSugerida;
                 }
             }
@@ -199,13 +420,17 @@ function onSelectMaterialNodo(selectEl) {
 
 function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potencia = '', codigo = '', subLuminariasList = null) {
     const tr = document.createElement('tr');
-    tr.className = 'fila-material-nodo';
+    tr.className = 'fila-material-nodo hover:bg-blue-50/40 transition';
 
     const templateSelect = document.querySelector('#templateSelectMaterial select');
     let optionsHtml = '';
     let selectedPotencia = potencia || '';
     let selectedCodigo = codigo || '';
     let selectedEsLuminaria = false;
+    let selectedItem = '—';
+    let selectedDescripcion = 'Material no seleccionado';
+    let selectedUnidad = 'UN';
+    let selectedStock = 0;
 
     if (templateSelect) {
         Array.from(templateSelect.options).forEach(opt => {
@@ -213,26 +438,64 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
             const selected = isSel? 'selected': '';
             const esLumOpt = opt.dataset.esLuminaria === '1' || esLuminariaTexto(opt.text);
             const potOpt = opt.dataset.potencia || extraerPotenciaDeTexto(opt.text);
-            if (isSel) {
+            if (isSel && opt.value) {
                 selectedEsLuminaria = esLumOpt;
                 if (!selectedPotencia && potOpt) {
                     selectedPotencia = potOpt;
                 }
+                const rawText = (opt.text || '').trim();
+                selectedItem = opt.dataset.item || '';
+                selectedDescripcion = opt.dataset.descripcion || '';
+                selectedUnidad = opt.dataset.unidad || 'UN';
+                selectedStock = opt.dataset.stock !== undefined ? parseFloat(opt.dataset.stock) : 0;
+
+                if (!selectedItem && !selectedDescripcion) {
+                    const matchItem = rawText.match(/^\[([^\]]*)\]\s*(.*)$/);
+                    let rest = rawText;
+                    if (matchItem) {
+                        selectedItem = matchItem[1].trim();
+                        rest = matchItem[2].trim();
+                    }
+                    const matchStock = rest.match(/^(.*?)\s*\[(?:Stock|Déficit|Sin stock):?\s*([^\]]*)\]$/i);
+                    selectedDescripcion = matchStock ? matchStock[1].trim() : rest;
+                }
             }
-            optionsHtml += `<option value="${opt.value}" data-es-luminaria="${esLumOpt? '1': '0'}" data-potencia="${potOpt}" ${selected}>${opt.text}</option>`;
+            const itemAttr = (opt.dataset.item || '').replace(/"/g, '&quot;');
+            const descAttr = (opt.dataset.descripcion || '').replace(/"/g, '&quot;');
+            const undAttr = (opt.dataset.unidad || 'UN').replace(/"/g, '&quot;');
+            const stkAttr = (opt.dataset.stock || '0').replace(/"/g, '&quot;');
+            optionsHtml += `<option value="${opt.value}" data-item="${itemAttr}" data-descripcion="${descAttr}" data-unidad="${undAttr}" data-stock="${stkAttr}" data-es-luminaria="${esLumOpt? '1': '0'}" data-potencia="${potOpt}" ${selected}>${opt.text}</option>`;
         });
     }
 
     const esLuminariaReal = selectedEsLuminaria || Boolean(selectedPotencia) || Boolean(selectedCodigo);
     const mostrarPotencia = esLuminariaReal;
 
+    let stockBadgeHtml = '';
+    if (!isNaN(selectedStock)) {
+        if (selectedStock > 0) {
+            stockBadgeHtml = `<span class="lbl-stock-fila-nodo ml-1.5 inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Stock: ${selectedStock} ${selectedUnidad}</span>`;
+        } else if (selectedStock < 0) {
+            stockBadgeHtml = `<span class="lbl-stock-fila-nodo ml-1.5 inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">Déficit: ${selectedStock} ${selectedUnidad}</span>`;
+        } else {
+            stockBadgeHtml = `<span class="lbl-stock-fila-nodo ml-1.5 inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Sin stock: 0 ${selectedUnidad}</span>`;
+        }
+    }
+
     tr.innerHTML = `
-        <td class="px-3 py-2">
+        <td class="px-3 py-2.5 text-center font-mono text-xs font-bold text-slate-600 align-top">
+            <span class="lbl-item-fila-nodo">${selectedItem || '—'}</span>
+        </td>
+        <td class="px-4 py-2.5 align-top celda-material-nodo">
             <select name="material_id[]" onchange="onSelectMaterialNodo(this)"
-                    class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none select-material-nodo">
+                    class="hidden select-material-nodo">
                 ${optionsHtml}
             </select>
-            <div class="contenedor-potencia-mat mt-1.5 ${mostrarPotencia? '': 'hidden'}">
+            <div class="font-semibold text-slate-900 text-xs leading-snug">
+                <span class="lbl-desc-fila-nodo">${selectedDescripcion}</span>
+                ${stockBadgeHtml}
+            </div>
+            <div class="contenedor-potencia-mat mt-2 ${mostrarPotencia? '': 'hidden'}">
                 <div class="bg-amber-50/90 border border-amber-300 rounded-lg p-2.5 shadow-2xs space-y-2">
                     <div class="flex items-center justify-between border-b border-amber-200/80 pb-1.5">
                         <span class="text-[10px] font-black text-amber-900 uppercase flex items-center gap-1">
@@ -253,16 +516,19 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
                 </div>
             </div>
         </td>
-        <td class="px-3 py-2">
+        <td class="px-3 py-2.5 text-center text-xs font-bold align-top">
+            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200 lbl-unidad-fila-nodo">${selectedUnidad || 'UN'}</span>
+        </td>
+        <td class="px-3 py-2.5 align-top">
             <input type="number" step="any" min="0" name="cantidad_instalada[]" value="${cantInst}" placeholder="0.00"
-                   class="w-full border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 focus:ring-2 focus:ring-blue-500 bg-blue-50/40">
+                   class="w-full border border-blue-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 text-right focus:ring-2 focus:ring-blue-500 bg-blue-50/40">
         </td>
-        <td class="px-3 py-2">
+        <td class="px-3 py-2.5 align-top">
             <input type="number" step="any" min="0" name="cantidad_retirada[]" value="${cantRet}" placeholder="0.00"
-                   class="w-full border border-amber-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 bg-amber-50/40">
+                   class="w-full border border-amber-400 rounded-lg px-2.5 py-1.5 text-xs font-black text-amber-900 text-right focus:ring-2 focus:ring-amber-500 bg-amber-50/40">
         </td>
-        <td class="px-2 py-2 text-center">
-            <button type="button" class="btnEliminarMaterialNodo text-destructive hover:text-red-800 font-bold text-lg p-1 rounded">
+        <td class="px-3 py-2.5 text-center align-top">
+            <button type="button" class="btnEliminarMaterialNodo text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-1 rounded transition text-base font-black cursor-pointer leading-none" title="Quitar este material de la lista">
                 &times;
             </button>
         </td>
@@ -270,7 +536,7 @@ function crearFilaMaterial(materialId = '', cantInst = '', cantRet = '', potenci
 
     // Población de las sub-filas de luminaria
     const contSub = tr.querySelector('.contenedor-sub-lums');
-    const td = tr.querySelector('td');
+    const td = tr.querySelector('.celda-material-nodo');
     if (contSub && esLuminariaReal) {
         let items = [];
         if (selectedCodigo || selectedPotencia) {
@@ -324,11 +590,21 @@ function actualizarStockEnTodosLosSelects(materialId, stockRestante, item, descr
     const optTemplate = document.querySelector(`#templateSelectMaterial select option[value="${materialId}"]`);
     if (optTemplate) {
         optTemplate.textContent = nuevoTexto;
+        optTemplate.dataset.stock = String(stockLimpio);
     }
 
     // 3. Actualizar en todos los selects existentes en la tabla de materiales
     document.querySelectorAll(`#filasMaterialesNodo select[name="material_id[]"] option[value="${materialId}"]`).forEach(opt => {
         opt.textContent = nuevoTexto;
+        opt.dataset.stock = String(stockLimpio);
+        const sel = opt.closest('select');
+        if (sel && String(sel.value) === String(materialId)) {
+            const tr = sel.closest('tr');
+            const badge = tr ? tr.querySelector('.lbl-stock-fila-nodo') : null;
+            if (badge) {
+                badge.textContent = stockLabel.replace(/^\[|\]$/g, '').trim();
+            }
+        }
     });
 }
 
@@ -379,9 +655,12 @@ function abrirModalNuevoApoyo() {
     const infoRetNew = document.getElementById('modalApoyo_retenida_info');
     if (infoRetNew) infoRetNew.innerHTML = 'Cable EAR 3/8" (Ítem 43)';
 
+    limpiarSeleccionMaterialNodoTop(false);
     const tbodyMat = document.getElementById('filasMaterialesNodo');
-    tbodyMat.innerHTML = '';
-    tbodyMat.appendChild(crearFilaMaterial());
+    if (tbodyMat) {
+        tbodyMat.innerHTML = '';
+        actualizarEstadoTablaMaterialesNodo();
+    }
 
     modal.classList.remove('hidden');
 }
@@ -500,10 +779,10 @@ function abrirModalEditarApoyo(apoyoId) {
     }
     recalcularMetrosRetenidaModal();
 
+    limpiarSeleccionMaterialNodoTop(false);
     const tbodyMat = document.getElementById('filasMaterialesNodo');
     tbodyMat.innerHTML = '';
     if (data.materiales && data.materiales.length > 0) {
-        let matsAgregados = 0;
         data.materiales.forEach(m => {
             // El cable de retenida se gestiona automáticamente por la sección de Retenidas
             if (MAT_CABLE_ID && String(m.material_id) === String(MAT_CABLE_ID)) {
@@ -514,19 +793,15 @@ function abrirModalEditarApoyo(apoyoId) {
                 subLums = data.luminarias;
             }
             tbodyMat.appendChild(crearFilaMaterial(m.material_id, m.cant_inst, m.cant_ret, m.potencia, m.codigo, subLums));
-            matsAgregados++;
         });
-        if (matsAgregados === 0) {
-            tbodyMat.appendChild(crearFilaMaterial());
-        }
-    } else {
-        tbodyMat.appendChild(crearFilaMaterial());
     }
+    actualizarEstadoTablaMaterialesNodo();
 
     modal.classList.remove('hidden');
 }
 
 function cerrarModalApoyo() {
+    cerrarDropdownSugerenciasNodoTop();
     const modal = document.getElementById('modalNuevoApoyo');
     if (modal) modal.classList.add('hidden');
     const form = document.getElementById('formModalApoyo');
@@ -683,13 +958,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     data.material_item,
                     data.material_descripcion,
                     data.unidad
-);
+                );
 
                 // 2. Actualizar o insertar fila en la tabla de materiales del nodo
                 const tbodyMat = document.getElementById('filasMaterialesNodo');
                 let filaEncontrada = null;
 
                 if (tbodyMat) {
+                    const filaVaciaPlaceholder = document.getElementById('filaVaciaMaterialesNodo');
+                    if (filaVaciaPlaceholder) filaVaciaPlaceholder.remove();
+
                     const filas = tbodyMat.querySelectorAll('.fila-material-nodo');
                     filas.forEach(f => {
                         const sel = f.querySelector('select[name="material_id[]"]');
@@ -706,31 +984,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         filaEncontrada.classList.add('bg-emerald-100');
                         setTimeout(() => filaEncontrada.classList.remove('bg-emerald-100'), 2500);
                     } else {
-                        // Verificar si hay una fila vacía para reutilizar
-                        let filaVacia = null;
-                        if (filas.length === 1) {
-                            const sel = filas[0].querySelector('select[name="material_id[]"]');
-                            const inpInst = filas[0].querySelector('input[name="cantidad_instalada[]"]');
-                            const inpRet = filas[0].querySelector('input[name="cantidad_retirada[]"]');
-                            if (sel && (!sel.value || sel.value === '') && (!inpInst ||!inpInst.value) && (!inpRet ||!inpRet.value)) {
-                                filaVacia = filas[0];
-                            }
-                        }
-
-                        if (filaVacia) {
-                            const sel = filaVacia.querySelector('select[name="material_id[]"]');
-                            const inpInst = filaVacia.querySelector('input[name="cantidad_instalada[]"]');
-                            if (sel) sel.value = data.material_id;
-                            if (inpInst) inpInst.value = data.cantidad_despachada;
-                            filaVacia.classList.add('bg-emerald-100');
-                            setTimeout(() => filaVacia.classList.remove('bg-emerald-100'), 2500);
-                        } else {
-                            const nuevaFila = crearFilaMaterial(data.material_id, data.cantidad_despachada, 0);
-                            tbodyMat.appendChild(nuevaFila);
-                            nuevaFila.classList.add('bg-emerald-100');
-                            setTimeout(() => nuevaFila.classList.remove('bg-emerald-100'), 2500);
-                        }
+                        const nuevaFila = crearFilaMaterial(data.material_id, data.cantidad_despachada, 0);
+                        tbodyMat.appendChild(nuevaFila);
+                        nuevaFila.classList.add('bg-emerald-100');
+                        setTimeout(() => nuevaFila.classList.remove('bg-emerald-100'), 2500);
                     }
+                    actualizarEstadoTablaMaterialesNodo();
                 }
 
                 // 3. Actualizar datos en memoria apoyosData
@@ -809,14 +1068,251 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Materiales dinámicos (Botón agregar y sub-luminarias)
+    // Buscador superior de materiales tipo "Materiales Requeridos" (Logística) + Lista del Nodo + Sub-luminarias
+    const inputBuscadorTop = document.getElementById("inputBuscadorMaterialNodoTop");
+    const dropdownTop = document.getElementById("dropdownSugerenciasMaterialNodoTop");
+    const btnLimpiarTop = document.getElementById("btnLimpiarMaterialNodoTop");
+    const inputCantInstTop = document.getElementById("inputCantInstNodoTop");
+    const inputCantRetTop = document.getElementById("inputCantRetNodoTop");
     const btnAgregarMaterialNodo = document.getElementById("btnAgregarMaterialNodo");
     const filasMaterialesNodo = document.getElementById("filasMaterialesNodo");
-    if (btnAgregarMaterialNodo && filasMaterialesNodo) {
-        btnAgregarMaterialNodo.addEventListener("click", function () {
-            filasMaterialesNodo.appendChild(crearFilaMaterial());
+    const formModalApoyoEl = document.getElementById("formModalApoyo");
+
+    function agregarMaterialDesdeBarraNodo(silencioso = false) {
+        const hiddenId = document.getElementById("nodoTopSelMaterialId");
+        const matId = hiddenId ? hiddenId.value.trim() : "";
+
+        if (!matId) {
+            if (!silencioso) {
+                alert("Por favor selecciona un material del catálogo.");
+                if (inputBuscadorTop) inputBuscadorTop.focus();
+            }
+            return false;
+        }
+
+        const rawInst = inputCantInstTop ? inputCantInstTop.value.trim().replace(",", ".") : "";
+        const rawRet = inputCantRetTop ? inputCantRetTop.value.trim().replace(",", ".") : "";
+        const numInst = rawInst ? parseFloat(rawInst) : 0;
+        const numRet = rawRet ? parseFloat(rawRet) : 0;
+
+        const cantInstValida = !isNaN(numInst) && numInst > 0;
+        const cantRetValida = !isNaN(numRet) && numRet > 0;
+
+        if (!cantInstValida && !cantRetValida) {
+            if (!silencioso) {
+                alert("Por favor ingresa una Cantidad Instalada o Cantidad Retirada mayor a 0.");
+                if (inputCantInstTop) inputCantInstTop.focus();
+            }
+            return false;
+        }
+
+        if (!filasMaterialesNodo) return false;
+
+        const filaVacia = document.getElementById("filaVaciaMaterialesNodo");
+        if (filaVacia) filaVacia.remove();
+
+        // Verificar si el material ya está en la lista para acumular o agregar
+        let filaExistente = null;
+        filasMaterialesNodo.querySelectorAll(".fila-material-nodo").forEach(tr => {
+            const sel = tr.querySelector('select[name="material_id[]"]');
+            if (sel && String(sel.value) === String(matId)) {
+                filaExistente = tr;
+            }
         });
 
+        if (filaExistente) {
+            const inInst = filaExistente.querySelector('input[name="cantidad_instalada[]"]');
+            const inRet = filaExistente.querySelector('input[name="cantidad_retirada[]"]');
+            if (inInst && cantInstValida) {
+                const actualInst = parseFloat(inInst.value) || 0;
+                const sumaInst = actualInst + numInst;
+                inInst.value = sumaInst % 1 === 0 ? sumaInst : parseFloat(sumaInst.toFixed(2));
+            }
+            if (inRet && cantRetValida) {
+                const actualRet = parseFloat(inRet.value) || 0;
+                const sumaRet = actualRet + numRet;
+                inRet.value = sumaRet % 1 === 0 ? sumaRet : parseFloat(sumaRet.toFixed(2));
+            }
+        } else {
+            const valInstStr = cantInstValida ? String(numInst) : "";
+            const valRetStr = cantRetValida ? String(numRet) : "";
+            const nuevaFila = crearFilaMaterial(matId, valInstStr, valRetStr);
+            filasMaterialesNodo.appendChild(nuevaFila);
+        }
+
+        actualizarEstadoTablaMaterialesNodo();
+        limpiarSeleccionMaterialNodoTop(!silencioso);
+        return true;
+    }
+
+    function actualizarResaltadoSugerenciaTop(items, nuevoIdx) {
+        if (!dropdownTop) return;
+        dropdownTop.dataset.activeIndex = String(nuevoIdx);
+        items.forEach((it, idx) => {
+            if (idx === nuevoIdx) {
+                it.classList.add("bg-blue-100");
+                it.scrollIntoView({ block: "nearest" });
+            } else {
+                it.classList.remove("bg-blue-100");
+            }
+        });
+    }
+
+    if (inputBuscadorTop && dropdownTop) {
+        inputBuscadorTop.addEventListener("input", function () {
+            const rawVal = inputBuscadorTop.value || "";
+            const query = normalizarTextoMatNodo(rawVal);
+
+            // Si el usuario modifica el texto manualmente, limpiar el ID oculto hasta que seleccione de la lista
+            const hiddenId = document.getElementById("nodoTopSelMaterialId");
+            if (hiddenId && hiddenId.value) {
+                hiddenId.value = "";
+                const textoUnidad = document.getElementById("textoUnidadNodoTop");
+                const badgeUnidad = document.getElementById("badgeUnidadNodoTop");
+                if (textoUnidad) textoUnidad.textContent = "—";
+                if (badgeUnidad) {
+                    badgeUnidad.className = "h-10 px-3 flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 text-slate-600 font-bold text-xs shrink-0 whitespace-nowrap min-w-[52px] transition";
+                }
+            }
+
+            if (btnLimpiarTop) {
+                if (rawVal.trim().length > 0) {
+                    btnLimpiarTop.classList.remove("hidden");
+                    btnLimpiarTop.classList.add("flex");
+                } else {
+                    btnLimpiarTop.classList.add("hidden");
+                    btnLimpiarTop.classList.remove("flex");
+                }
+            }
+
+            if (query.length < 1) {
+                cerrarDropdownSugerenciasNodoTop();
+                return;
+            }
+
+            const catalogo = obtenerCatalogoMaterialesNodo();
+            const resultados = buscarMaterialesPriorizadosNodo(query, catalogo);
+
+            if (resultados.length === 0) {
+                dropdownTop.innerHTML = `
+                    <div class="px-4 py-3 text-xs text-slate-400 text-center">
+                        No se encontraron materiales que coincidan con "<strong>${rawVal.replace(/</g, "&lt;")}</strong>"
+                    </div>
+                `;
+                dropdownTop.dataset.activeIndex = "-1";
+                posicionarDropdownMatNodo(inputBuscadorTop, dropdownTop);
+                dropdownTop.classList.remove("hidden");
+                return;
+            }
+
+            dropdownTop.innerHTML = resultados.map(function (m, idx) {
+                let stockBadgeClass = "bg-slate-100 text-slate-600 border-slate-200";
+                let stockLabel = "Sin stock: 0";
+                if (m.stock > 0) {
+                    stockBadgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+                    stockLabel = `Stock: ${m.stock}`;
+                } else if (m.stock < 0) {
+                    stockBadgeClass = "bg-amber-50 text-amber-800 border-amber-200";
+                    stockLabel = `Déficit: ${m.stock}`;
+                }
+                return `
+                    <div class="px-3.5 py-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between gap-2 item-sugerencia-material-nodo transition"
+                         data-idx="${idx}">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="font-mono font-bold text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0">${m.item || "S/C"}</span>
+                            <span class="font-semibold text-xs text-slate-900 truncate">${m.descripcion}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${stockBadgeClass}">
+                                ${stockLabel}
+                            </span>
+                            <span class="text-[11px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-900 shrink-0 border border-blue-200">
+                                ${m.unidad || "UN"}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            dropdownTop.querySelectorAll(".item-sugerencia-material-nodo").forEach(function (el, idx) {
+                el.addEventListener("click", function () {
+                    seleccionarMaterialNodoTop(resultados[idx]);
+                });
+            });
+
+            dropdownTop.dataset.activeIndex = "-1";
+            posicionarDropdownMatNodo(inputBuscadorTop, dropdownTop);
+            dropdownTop.classList.remove("hidden");
+        });
+
+        inputBuscadorTop.addEventListener("keydown", function (e) {
+            const items = dropdownTop.querySelectorAll(".item-sugerencia-material-nodo");
+            if (!dropdownTop.classList.contains("hidden") && items.length > 0) {
+                let activeIdx = parseInt(dropdownTop.dataset.activeIndex || "-1", 10);
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    activeIdx = (activeIdx + 1) % items.length;
+                    actualizarResaltadoSugerenciaTop(items, activeIdx);
+                    return;
+                }
+                if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    activeIdx = (activeIdx - 1 + items.length) % items.length;
+                    actualizarResaltadoSugerenciaTop(items, activeIdx);
+                    return;
+                }
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (activeIdx >= 0 && activeIdx < items.length) {
+                        items[activeIdx].click();
+                    } else if (items.length > 0) {
+                        items[0].click();
+                    }
+                    return;
+                }
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    cerrarDropdownSugerenciasNodoTop();
+                    return;
+                }
+            }
+        });
+    }
+
+    if (btnLimpiarTop) {
+        btnLimpiarTop.addEventListener("click", function () {
+            limpiarSeleccionMaterialNodoTop(true);
+        });
+    }
+
+    if (btnAgregarMaterialNodo) {
+        btnAgregarMaterialNodo.addEventListener("click", function () {
+            agregarMaterialDesdeBarraNodo(false);
+        });
+    }
+
+    [inputCantInstTop, inputCantRetTop].forEach(function (inp) {
+        if (inp) {
+            inp.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    agregarMaterialDesdeBarraNodo(false);
+                }
+            });
+        }
+    });
+
+    if (formModalApoyoEl) {
+        formModalApoyoEl.addEventListener("submit", function () {
+            // Si el usuario seleccionó un material arriba y puso cantidad pero olvidó dar clic en "+ Agregar", agregarlo antes de enviar
+            const hiddenId = document.getElementById("nodoTopSelMaterialId");
+            if (hiddenId && hiddenId.value) {
+                agregarMaterialDesdeBarraNodo(true);
+            }
+        });
+    }
+
+    if (filasMaterialesNodo) {
         // Eventos delegados de eliminación de material y sub-luminarias
         filasMaterialesNodo.addEventListener("click", function (e) {
             // 1. Agregar otra potencia y código a este material de luminaria
@@ -825,7 +1321,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const td = btnAddSub.closest("td");
                 const contSub = td? td.querySelector(".contenedor-sub-lums"): null;
                 if (contSub) {
-                    const ultPot = contSub.querySelector(".fila-sub-lum:last-child.input-sub-potencia");
+                    const ultPot = contSub.querySelector(".fila-sub-lum:last-child .input-sub-potencia") || contSub.querySelector(".fila-sub-lum:last-child.input-sub-potencia");
                     const potSug = ultPot? ultPot.value: "";
                     const nuevaSub = crearSubFilaLuminaria(potSug, "");
                     contSub.appendChild(nuevaSub);
@@ -849,27 +1345,13 @@ document.addEventListener("DOMContentLoaded", function () {
             // 3. Eliminar fila completa de material
             const btnEliminar = e.target.closest(".btnEliminarMaterialNodo");
             if (btnEliminar) {
-                const filas = filasMaterialesNodo.querySelectorAll(".fila-material-nodo");
-                if (filas.length > 1) {
-                    btnEliminar.closest(".fila-material-nodo").remove();
-                } else {
-                    const fila = btnEliminar.closest(".fila-material-nodo");
-                    if (fila) {
-                        const sel = fila.querySelector('select[name="material_id[]"]');
-                        if (sel) {
-                            sel.selectedIndex = 0;
-                            onSelectMaterialNodo(sel);
-                        }
-                        const inInst = fila.querySelector('input[name="cantidad_instalada[]"]');
-                        if (inInst) inInst.value = '';
-                        const inRet = fila.querySelector('input[name="cantidad_retirada[]"]');
-                        if (inRet) inRet.value = '';
-                    }
-                }
+                const fila = btnEliminar.closest(".fila-material-nodo");
+                if (fila) fila.remove();
+                actualizarEstadoTablaMaterialesNodo();
             }
         });
 
-        // Sincronización en tiempo real al escribir potencia o código
+        // Sincronización en tiempo real al escribir en potencia o código
         filasMaterialesNodo.addEventListener("input", function (e) {
             if (e.target.matches(".input-sub-potencia,.input-sub-codigo")) {
                 const td = e.target.closest("td");
@@ -877,6 +1359,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    document.addEventListener("click", function (e) {
+        const contTop = document.getElementById("contenedorBuscadorTopNodo");
+        if (dropdownTop && contTop && !contTop.contains(e.target) && !dropdownTop.contains(e.target)) {
+            cerrarDropdownSugerenciasNodoTop();
+        }
+    });
 
     // Actividades y Servicios de Mano de Obra Múltiple (Botón agregar fila)
     const btnAgregarFilaMO = document.getElementById("btnAgregarFilaMO");

@@ -963,33 +963,110 @@
                     </div>
 
                     <!-- MATERIALES -->
-                    <div class="border-t border-border pt-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
-                                    Materiales y Herramientas del Nodo (Instalación y Retiro)
-                                </label>
-                                <p class="text-[11px] text-muted-foreground">Listado de materiales instalados y retirados en este poste.</p>
-                            </div>
-                            <button type="button" id="btnAgregarMaterialNodo"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition self-start sm:self-auto">
-                                <span><svg class="size-4 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></span> Agregar material
-                            </button>
+                    <div class="border-t border-border pt-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-foreground">
+                                Materiales y Herramientas del Nodo (Instalación y Retiro)
+                            </label>
+                            <p class="text-[11px] text-muted-foreground">Busca materiales del catálogo, especifica la cantidad instalada o retirada y agrégalos a la lista de este poste.</p>
                         </div>
-                        <div class="overflow-x-auto border border-border rounded-lg">
-                            <table class="min-w-full divide-y divide-border text-xs">
-                                <thead class="bg-neutral text-xs font-bold text-white uppercase">
-                                    <tr>
-                                        <th class="px-3 py-2 text-left w-1/2">Material / Herramienta (Stock Bodega)</th>
-                                        <th class="px-3 py-2 text-left w-1/4 bg-blue-900 text-white">Cant. Instalada (Nuevo)</th>
-                                        <th class="px-3 py-2 text-left w-1/4 bg-amber-900 text-white">Cant. Retirada (Desmonte)</th>
-                                        <th class="px-2 py-2 text-center w-12">Quitar</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="filasMaterialesNodo" class="divide-y divide-border bg-card">
-                                    <!-- Inyectado dinámicamente -->
-                                </tbody>
-                            </table>
+
+                        <!-- BARRA COMPACTA EN UNA SOLA FILA (IGUAL A MATERIALES REQUERIDOS EN LOGÍSTICA): BUSCADOR + UNIDAD + CANTIDADES + AGREGAR -->
+                        <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
+                            <div class="flex flex-col sm:flex-row items-center gap-2">
+                                <!-- Buscador Autocomplete (ocupa todo el ancho disponible) -->
+                                <div class="relative flex-1 w-full" id="contenedorBuscadorTopNodo">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                                    </span>
+                                    <input type="text"
+                                           id="inputBuscadorMaterialNodoTop"
+                                           placeholder="Escribe código o descripción del material..."
+                                           autocomplete="off"
+                                           class="w-full h-10 border border-slate-300 rounded-lg pl-9 pr-8 py-2 text-xs font-semibold text-slate-900 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none placeholder:font-normal placeholder:text-slate-400">
+                                    <button type="button" id="btnLimpiarMaterialNodoTop" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-slate-700 hidden cursor-pointer" title="Limpiar selección">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+
+                                    <!-- Dropdown flotante de sugerencias -->
+                                    <div id="dropdownSugerenciasMaterialNodoTop"
+                                         class="hidden absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-white border-2 border-blue-400 rounded-xl shadow-2xl z-50 divide-y divide-slate-100"
+                                         data-active-index="-1">
+                                    </div>
+
+                                    <!-- Valores ocultos del ítem seleccionado -->
+                                    <input type="hidden" id="nodoTopSelMaterialId" value="">
+                                </div>
+
+                                <!-- Indicador Visual de Unidad al lado -->
+                                <div id="badgeUnidadNodoTop" class="h-10 px-3 flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 text-slate-600 font-bold text-xs shrink-0 whitespace-nowrap min-w-[52px]" title="Unidad de medida">
+                                    <span id="textoUnidadNodoTop">—</span>
+                                </div>
+
+                                <!-- Input Cantidad Instalada -->
+                                <div class="w-full sm:w-28 shrink-0">
+                                    <input type="number"
+                                           id="inputCantInstNodoTop"
+                                           step="any"
+                                           min="0"
+                                           placeholder="Cant. Inst."
+                                           title="Cantidad Instalada (Nuevo)"
+                                           class="w-full h-10 border border-slate-300 rounded-lg px-3 py-2 text-xs font-black text-slate-900 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none text-right placeholder:font-normal placeholder:text-slate-400">
+                                </div>
+
+                                <!-- Input Cantidad Retirada -->
+                                <div class="w-full sm:w-28 shrink-0">
+                                    <input type="number"
+                                           id="inputCantRetNodoTop"
+                                           step="any"
+                                           min="0"
+                                           placeholder="Cant. Ret."
+                                           title="Cantidad Retirada (Desmonte)"
+                                           class="w-full h-10 border border-amber-300 rounded-lg px-3 py-2 text-xs font-black text-amber-900 bg-amber-50/40 focus:border-amber-600 focus:ring-2 focus:ring-amber-100 focus:outline-none text-right placeholder:font-normal placeholder:text-slate-400">
+                                </div>
+
+                                <!-- Botón Agregar Material -->
+                                <button type="button"
+                                        id="btnAgregarMaterialNodo"
+                                        class="w-full sm:w-auto h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap"
+                                        title="Agregar este material a la lista inferior">
+                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    <span>Agregar</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- TABLA ACUMULATIVA DE MATERIALES DEL NODO (IGUAL A MATERIALES REQUERIDOS + SOPORTE DE LUMINARIA) -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                                    Lista de Materiales a Guardar
+                                </span>
+                                <span id="contadorMaterialesNodo" class="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                                    0 materiales
+                                </span>
+                            </div>
+
+                            <div class="border-2 border-slate-200 rounded-xl bg-white shadow-xs overflow-hidden flex flex-col">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200 text-xs">
+                                        <thead class="bg-slate-800 text-white uppercase text-xs font-bold">
+                                            <tr>
+                                                <th class="px-3 py-2.5 text-center w-20">Cód / Ítem</th>
+                                                <th class="px-4 py-2.5 text-left">Material</th>
+                                                <th class="px-3 py-2.5 text-center w-20">Unidad</th>
+                                                <th class="px-3 py-2.5 text-right w-32 bg-blue-900 text-white">Cant. Instalada</th>
+                                                <th class="px-3 py-2.5 text-right w-32 bg-amber-900 text-white">Cant. Retirada</th>
+                                                <th class="px-3 py-2.5 text-center w-16">Quitar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="filasMaterialesNodo" class="divide-y divide-slate-100 bg-white">
+                                            <!-- Inyectado dinámicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1011,7 +1088,7 @@
         <select class="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground bg-background font-medium focus:ring-2 focus:ring-primary focus:outline-none">
             <option value="">-- Seleccionar material de bodega --</option>
             {% for mat in materiales_catalogo %}
-                <option value="{{ mat.id }}" data-es-luminaria="{% if mat.es_luminaria %}1{% else %}0{% endif %}" data-potencia="{{ mat.potencia_sugerida|default:'' }}">
+                <option value="{{ mat.id }}" data-item="{{ mat.item|default:'' }}" data-descripcion="{{ mat.descripcion }}" data-unidad="{{ mat.unidad|default:'UN' }}" data-stock="{{ mat.inventario.cantidad|floatformat|default:'0' }}" data-es-luminaria="{% if mat.es_luminaria %}1{% else %}0{% endif %}" data-potencia="{{ mat.potencia_sugerida|default:'' }}">
                     [{{ mat.item }}] {{ mat.descripcion }} {% if mat.inventario.cantidad > 0 %}[Stock: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% elif mat.inventario.cantidad < 0 %}[ Déficit: {{ mat.inventario.cantidad|floatformat }} {{ mat.unidad|default:'UN' }}]{% else %}[ Sin stock: 0 {{ mat.unidad|default:'UN' }}]{% endif %}
                 </option>
             {% endfor %}

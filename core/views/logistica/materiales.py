@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Max
 from core.models import Material, Inventario, DevolucionMaterialProyecto, ApoyoMaterial, MovimientoInventario
 from core.helpers.inventario_historial import registrar_movimiento_inventario
@@ -14,6 +14,7 @@ def _parse_decimal(valor):
 
 
 @login_required
+@transaction.atomic
 def materiales_home(request):
     """
     Catálogo e Inventario General de Bodega Central.
@@ -40,9 +41,12 @@ def materiales_home(request):
                         material.unidad = nueva_unidad
                         material.save()
 
-                    inventario, _ = Inventario.objects.get_or_create(material=material)
+                    inventario, _ = Inventario.objects.get_or_create(
+                        material=material,
+                        defaults={"cantidad": Decimal("0")}
+                    )
                     inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
-                    stock_anterior = inventario.cantidad or Decimal("0")
+                    stock_anterior = inventario.cantidad if inventario.cantidad is not None else Decimal("0")
                     inventario.cantidad = nueva_cantidad
                     inventario.save()
 
@@ -56,9 +60,15 @@ def materiales_home(request):
                         usuario=request.user,
                         detalle_origen_destino="Bodega Central (Ajuste Físico)",
                         observacion=observacion or "Ajuste manual de existencias físicas en Bodega"
-)
+                    )
+                    messages.success(
+                        request,
+                        f"Existencia de '{material.descripcion}' actualizada correctamente a {nueva_cantidad} {material.unidad}."
+                    )
                 except (ValueError, TypeError, InvalidOperation):
-                    messages.error(request, " La cantidad ingresada no es un número válido.")
+                    messages.error(request, "La cantidad ingresada no es un número válido.")
+                except Exception as e:
+                    messages.error(request, f"Error al actualizar la existencia: {e}")
 
             return redirect("materiales_home")
 
@@ -86,11 +96,13 @@ def materiales_home(request):
                         unidad=unidad or "UN"
 )
                     cant_inicial = _parse_decimal(cantidad_str)
-                    Inventario.objects.create(
+                    inv_obj, _ = Inventario.objects.get_or_create(
                         material=material,
-                        cantidad=cant_inicial
-)
-                    if cant_inicial!= 0:
+                        defaults={"cantidad": cant_inicial}
+                    )
+                    inv_obj.cantidad = cant_inicial
+                    inv_obj.save()
+                    if cant_inicial != 0:
                         registrar_movimiento_inventario(
                             material=material,
                             tipo_movimiento=MovimientoInventario.Tipos.ENTRADA,
@@ -100,14 +112,14 @@ def materiales_home(request):
                             usuario=request.user,
                             detalle_origen_destino="Bodega Central (Creación de Material)",
                             observacion="Carga de saldo inicial de material nuevo"
-)
-                    messages.success(request, f" Material #{item_num} creado correctamente.")
+                        )
+                    messages.success(request, f"Material #{item_num} creado correctamente.")
                 except InvalidOperation:
-                    messages.error(request, " La cantidad inicial no es un número válido.")
+                    messages.error(request, "La cantidad inicial no es un número válido.")
                 except IntegrityError:
-                    messages.error(request, f" Ya existe un material con el ítem {item_str}.")
-                except Exception:
-                    messages.error(request, " No se pudo crear el material.")
+                    messages.error(request, f"Ya existe un material con el ítem {item_str}.")
+                except Exception as e:
+                    messages.error(request, f"No se pudo crear el material: {e}")
             else:
                 messages.warning(request, " Debes indicar la descripción del material.")
 

@@ -345,6 +345,29 @@
         }
     }
 
+    // Funciones para eliminar material con confirmación
+    function confirmarEliminarMaterial(id, item, descripcion) {
+        if (!id) return;
+        const msg = `¿Estás seguro de que deseas eliminar permanentemente el material #${item || ''} "${descripcion}" del catálogo?\n\nEsta acción no se puede deshacer.`;
+        if (confirm(msg)) {
+            const form = document.getElementById('formEliminarMaterial');
+            const inputId = document.getElementById('eliminarMaterialId');
+            if (form && inputId) {
+                inputId.value = id;
+                form.submit();
+            }
+        }
+    }
+
+    function confirmarEliminarMaterialModal() {
+        if (!materialIdActual) return;
+        const nombreEl = document.getElementById('modalMaterialNombre');
+        const itemEl = document.getElementById('modalMaterialItem');
+        const desc = nombreEl ? nombreEl.value : 'Material';
+        const item = itemEl ? itemEl.value : '';
+        confirmarEliminarMaterial(materialIdActual, item, desc);
+    }
+
     // Cerrar modales con tecla Escape o clic en el fondo oscuro
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {

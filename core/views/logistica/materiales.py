@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
-from django.db.models import Max
+from django.db.models import Max, ProtectedError
 from core.models import Material, Inventario, DevolucionMaterialProyecto, ApoyoMaterial, MovimientoInventario
 from core.helpers.inventario_historial import registrar_movimiento_inventario
 
@@ -155,6 +155,33 @@ def materiales_home(request):
                     messages.error(request, f"No se pudo crear el material: {e}")
             else:
                 messages.warning(request, " Debes indicar la descripción del material.")
+
+            return redirect("materiales_home")
+
+        # 3. Eliminar un material del catálogo
+        elif accion == "eliminar_material":
+            material_id = request.POST.get("material_id")
+            if material_id:
+                try:
+                    material = get_object_or_404(Material, id=material_id)
+                    item_num = material.item
+                    desc_mat = material.descripcion
+
+                    if hasattr(material, "apoyos") and material.apoyos.filter(cantidad_requerida__gt=0).exists():
+                        messages.warning(
+                            request,
+                            f"⚠️ No se puede eliminar el material #{item_num} '{desc_mat}' porque ya está asignado a postes o nodos en proyectos."
+                        )
+                    else:
+                        material.delete()
+                        messages.success(request, f"🗑️ Material #{item_num} '{desc_mat}' eliminado correctamente del catálogo.")
+                except ProtectedError:
+                    messages.warning(
+                        request,
+                        f"⚠️ No se puede eliminar el material #{material.item} '{material.descripcion}' porque tiene registros históricos o actas vinculadas."
+                    )
+                except Exception as e:
+                    messages.error(request, f"Error al eliminar material: {e}")
 
             return redirect("materiales_home")
 

@@ -23,11 +23,13 @@ def materiales_home(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
 
-        # 1. Ajustar o cargar stock a un material existente
+        # 1. Ajustar o cargar stock a un material existente (y editar descripción / ítem)
         if accion == "actualizar_stock":
             material_id = request.POST.get("material_id")
             nueva_cantidad_str = request.POST.get("cantidad", "0")
             nueva_unidad = request.POST.get("unidad", "").strip()
+            nueva_descripcion = request.POST.get("descripcion", "").strip()
+            nuevo_item_str = request.POST.get("item", "").strip()
             observacion = request.POST.get("observacion", "").strip()
 
             if material_id:
@@ -35,11 +37,32 @@ def materiales_home(request):
                     material = get_object_or_404(Material, id=material_id)
                     nueva_cantidad = _parse_decimal(nueva_cantidad_str)
 
+                    # 1.1 Modificar descripción si se envió
+                    if nueva_descripcion:
+                        material.descripcion = nueva_descripcion
+
+                    # 1.2 Modificar ítem si se envió y verificar duplicados
+                    if nuevo_item_str:
+                        if not nuevo_item_str.isdigit():
+                            messages.error(request, "⚠️ El número de ítem debe ser un número entero.")
+                            return redirect("materiales_home")
+                        nuevo_item = int(nuevo_item_str)
+                        if nuevo_item != material.item:
+                            duplicado = Material.objects.filter(item=nuevo_item).exclude(id=material.id).first()
+                            if duplicado:
+                                messages.error(
+                                    request,
+                                    f"⚠️ Aviso: El ítem #{nuevo_item} ya está registrado para '{duplicado.descripcion}'. Elige otro número de ítem."
+                                )
+                                return redirect("materiales_home")
+                            material.item = nuevo_item
+
                     if nueva_unidad:
                         if nueva_unidad.upper() == "U":
                             nueva_unidad = "UN"
                         material.unidad = nueva_unidad
-                        material.save()
+
+                    material.save()
 
                     inventario, _ = Inventario.objects.get_or_create(
                         material=material,
@@ -63,7 +86,7 @@ def materiales_home(request):
                     )
                     messages.success(
                         request,
-                        f"Existencia de '{material.descripcion}' actualizada correctamente a {nueva_cantidad} {material.unidad}."
+                        f"Material #{material.item} '{material.descripcion}' actualizado correctamente. Existencia: {nueva_cantidad} {material.unidad}."
                     )
                 except (ValueError, TypeError, InvalidOperation):
                     messages.error(request, "La cantidad ingresada no es un número válido.")
@@ -83,18 +106,28 @@ def materiales_home(request):
 
             if descripcion:
                 try:
-                    if item_str.isdigit():
+                    if item_str:
+                        if not item_str.isdigit():
+                            messages.error(request, "⚠️ El número de ítem debe ser un número entero.")
+                            return redirect("materiales_home")
                         item_num = int(item_str)
+                        duplicado = Material.objects.filter(item=item_num).first()
+                        if duplicado:
+                            messages.error(
+                                request,
+                                f"⚠️ Aviso: El ítem #{item_num} ya existe en el catálogo ('{duplicado.descripcion}'). No se puede duplicar."
+                            )
+                            return redirect("materiales_home")
                     else:
                         item_num = (Material.objects.aggregate(
                             max_item=Max("item")
-)["max_item"] or 0) + 1
+                        )["max_item"] or 0) + 1
 
                     material = Material.objects.create(
                         item=item_num,
                         descripcion=descripcion,
                         unidad=unidad or "UN"
-)
+                    )
                     cant_inicial = _parse_decimal(cantidad_str)
                     inv_obj, _ = Inventario.objects.get_or_create(
                         material=material,
@@ -113,11 +146,11 @@ def materiales_home(request):
                             detalle_origen_destino="Bodega Central (Creación de Material)",
                             observacion="Carga de saldo inicial de material nuevo"
                         )
-                    messages.success(request, f"Material #{item_num} creado correctamente.")
+                    messages.success(request, f"Material #{item_num} '{descripcion}' creado correctamente.")
                 except InvalidOperation:
                     messages.error(request, "La cantidad inicial no es un número válido.")
                 except IntegrityError:
-                    messages.error(request, f"Ya existe un material con el ítem {item_str}.")
+                    messages.error(request, f"Ya existe un material con el ítem #{item_str}.")
                 except Exception as e:
                     messages.error(request, f"No se pudo crear el material: {e}")
             else:

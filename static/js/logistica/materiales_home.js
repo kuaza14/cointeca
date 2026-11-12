@@ -155,41 +155,194 @@
         if (tabParam && ['stock', 'historial', 'devoluciones'].includes(tabParam)) {
             cambiarPestanaBodega(tabParam);
         }
+
+        // Listeners para validación en tiempo real de ítems duplicados
+        const inputItemAjuste = document.getElementById('modalMaterialItem');
+        if (inputItemAjuste) {
+            inputItemAjuste.addEventListener('input', validarItemAjuste);
+        }
+
+        const inputItemNuevo = document.getElementById('campo-item');
+        if (inputItemNuevo) {
+            inputItemNuevo.addEventListener('input', validarItemNuevo);
+        }
+
+        const formAjuste = document.getElementById('formAjusteStock');
+        if (formAjuste) {
+            formAjuste.addEventListener('submit', function (e) {
+                if (!validarItemAjuste()) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        const formNuevo = document.getElementById('formNuevoMaterial');
+        if (formNuevo) {
+            formNuevo.addEventListener('submit', function (e) {
+                if (!validarItemNuevo()) {
+                    e.preventDefault();
+                }
+            });
+        }
     });
 
+    let materialIdActual = null;
+
+    // Obtener catálogo actual de ítems para validación instantánea
+    function obtenerCatalogoItems() {
+        const mapa = {};
+        document.querySelectorAll('.fila-inventario').forEach(function (fila) {
+            const id = fila.getAttribute('data-material-id');
+            const item = fila.getAttribute('data-material-item');
+            const desc = fila.getAttribute('data-material-descripcion') || '';
+            if (item) {
+                mapa[String(item).trim()] = { id: id, descripcion: desc };
+            }
+        });
+        return mapa;
+    }
+
+    function validarItemAjuste() {
+        const input = document.getElementById('modalMaterialItem');
+        const aviso = document.getElementById('avisoItemDuplicadoAjuste');
+        const textoAviso = document.getElementById('textoAvisoItemDuplicadoAjuste');
+        const btnGuardar = document.getElementById('btnGuardarAjuste');
+        if (!input) return true;
+
+        const val = input.value.trim();
+        if (!val) {
+            if (aviso) aviso.classList.add('hidden');
+            input.classList.remove('border-red-500', 'focus:border-red-500');
+            input.classList.add('border-gray-300');
+            if (btnGuardar) btnGuardar.disabled = false;
+            return true;
+        }
+
+        const catalogo = obtenerCatalogoItems();
+        const existe = catalogo[val];
+
+        if (existe && String(existe.id) !== String(materialIdActual)) {
+            if (aviso) aviso.classList.remove('hidden');
+            if (textoAviso) {
+                textoAviso.textContent = `El número de ítem #${val} ya pertenece a "${existe.descripcion}". Elige otro número para evitar duplicados.`;
+            }
+            input.classList.add('border-red-500', 'focus:border-red-500');
+            input.classList.remove('border-gray-300');
+            if (btnGuardar) btnGuardar.disabled = true;
+            return false;
+        } else {
+            if (aviso) aviso.classList.add('hidden');
+            input.classList.remove('border-red-500', 'focus:border-red-500');
+            input.classList.add('border-gray-300');
+            if (btnGuardar) btnGuardar.disabled = false;
+            return true;
+        }
+    }
+
+    function validarItemNuevo() {
+        const input = document.getElementById('campo-item');
+        const aviso = document.getElementById('avisoItemDuplicadoNuevo');
+        const textoAviso = document.getElementById('textoAvisoItemDuplicadoNuevo');
+        const btnCrear = document.getElementById('btnCrearMaterial');
+        if (!input) return true;
+
+        const val = input.value.trim();
+        if (!val) {
+            if (aviso) aviso.classList.add('hidden');
+            input.classList.remove('border-red-500', 'focus:border-red-500');
+            input.classList.add('border-gray-300');
+            if (btnCrear) btnCrear.disabled = false;
+            return true;
+        }
+
+        const catalogo = obtenerCatalogoItems();
+        const existe = catalogo[val];
+
+        if (existe) {
+            if (aviso) aviso.classList.remove('hidden');
+            if (textoAviso) {
+                textoAviso.textContent = `El número de ítem #${val} ya está registrado para "${existe.descripcion}". No se pueden duplicar números de ítem.`;
+            }
+            input.classList.add('border-red-500', 'focus:border-red-500');
+            input.classList.remove('border-gray-300');
+            if (btnCrear) btnCrear.disabled = true;
+            return false;
+        } else {
+            if (aviso) aviso.classList.add('hidden');
+            input.classList.remove('border-red-500', 'focus:border-red-500');
+            input.classList.add('border-gray-300');
+            if (btnCrear) btnCrear.disabled = false;
+            return true;
+        }
+    }
+
     // Modales
-    function abrirModalAjuste(id, nombre, cantidad, unidad) {
-        document.getElementById('modalMaterialId').value = id;
-        document.getElementById('modalMaterialNombre').value = nombre;
-        document.getElementById('modalMaterialCantidad').value = cantidad;
+    function abrirModalAjuste(id, item, nombre, cantidad, unidad) {
+        materialIdActual = id;
+
+        const idEl = document.getElementById('modalMaterialId');
+        if (idEl) idEl.value = id;
+
+        const itemEl = document.getElementById('modalMaterialItem');
+        if (itemEl) itemEl.value = item || '';
+
+        const nombreEl = document.getElementById('modalMaterialNombre');
+        if (nombreEl) nombreEl.value = nombre || '';
+
+        const cantEl = document.getElementById('modalMaterialCantidad');
+        if (cantEl) cantEl.value = cantidad || '';
+
         const obsEl = document.getElementById('modalMaterialObservacion');
         if (obsEl) obsEl.value = '';
+
         let uVal = (unidad || '').toUpperCase();
         if (uVal === 'U') uVal = 'UN';
-        document.getElementById('modalMaterialUnidad').value = (['M', 'MT', 'UN', 'KG', 'JGO'].includes(uVal)) ? uVal : 'UN';
+        const unidadEl = document.getElementById('modalMaterialUnidad');
+        if (unidadEl) {
+            unidadEl.value = (['M', 'MT', 'UN', 'KG', 'JGO'].includes(uVal)) ? uVal : 'UN';
+        }
+
+        validarItemAjuste();
 
         const modal = document.getElementById('modalAjusteStock');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
 
     function cerrarModalAjuste() {
         const modal = document.getElementById('modalAjusteStock');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        materialIdActual = null;
     }
 
     function abrirModalNuevoMaterial() {
+        const itemInput = document.getElementById('campo-item');
+        if (itemInput) itemInput.value = '';
+        const descInput = document.getElementById('campo-descripcion');
+        if (descInput) descInput.value = '';
+        const cantInput = document.getElementById('campo-cantidad_inicial');
+        if (cantInput) cantInput.value = '0';
+
+        validarItemNuevo();
+
         const modal = document.getElementById('modalNuevoMaterial');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
 
     function cerrarModalNuevoMaterial() {
         const modal = document.getElementById('modalNuevoMaterial');
-        if (!modal) return;
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
 
     // Cerrar modales con tecla Escape o clic en el fondo oscuro

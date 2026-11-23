@@ -4,9 +4,12 @@ from core.helpers.inventario_historial import registrar_movimiento_inventario
 from core.helpers.simco_matriz import obtener_matriz_simco, obtener_materiales_proyecto_simco
 import io
 import json
+import logging
 import os
 import re
 import openpyxl
+
+logger = logging.getLogger(__name__)
 
 def extraer_potencia_luminaria(texto):
     if not texto:
@@ -460,7 +463,15 @@ def detalle_proyecto(request, id):
         if am.material_id not in materiales_dict:
             materiales_dict[am.material_id] = am.material
 
-    materiales_columnas = sorted(materiales_dict.values(), key=lambda m: (m.item or "", m.descripcion or ""))
+    def _mat_sort_key(m):
+        item_val = m.item if m.item is not None else 999999
+        try:
+            item_int = int(item_val)
+        except (ValueError, TypeError):
+            item_int = 999999
+        return (item_int, str(m.descripcion or ""))
+
+    materiales_columnas = sorted(materiales_dict.values(), key=_mat_sort_key)
 
     filas_matriz = []
     totales_inst_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
@@ -592,9 +603,11 @@ def detalle_proyecto(request, id):
             })
 
     presupuesto, _ = Presupuesto.objects.get_or_create(proyecto=proyecto)
-    if presupuesto.valor_mano_obra!= gran_total_mo_pesos:
+    if (presupuesto.valor_mano_obra or Decimal("0")) != gran_total_mo_pesos:
         presupuesto.valor_mano_obra = gran_total_mo_pesos
-        presupuesto.valor_total = presupuesto.valor_materiales + presupuesto.valor_mano_obra + presupuesto.otros_costos
+        val_mat = presupuesto.valor_materiales or Decimal("0")
+        otros = presupuesto.otros_costos or Decimal("0")
+        presupuesto.valor_total = val_mat + gran_total_mo_pesos + otros
         presupuesto.save(update_fields=['valor_mano_obra', 'valor_total'])
 
     materiales_catalogo = list(Material.objects.select_related('inventario').all().order_by("descripcion"))
@@ -714,9 +727,10 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
     inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
 
     if ap_mat:
-        diferencia = metros - ap_mat.cantidad_requerida
-        if diferencia!= 0:
-            inventario.cantidad -= diferencia
+        cant_ant = ap_mat.cantidad_requerida or Decimal("0")
+        diferencia = metros - cant_ant
+        if diferencia != 0:
+            inventario.cantidad = (inventario.cantidad or Decimal("0")) - diferencia
         inventario.save()
 
         if metros > 0:
@@ -725,15 +739,17 @@ def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
         else:
             ap_mat.delete()
     elif metros > 0:
-        inventario.cantidad -= metros
+        inventario.cantidad = (inventario.cantidad or Decimal("0")) - metros
         inventario.save()
 
-        ApoyoMaterial.objects.create(
+        ApoyoMaterial.objects.update_or_create(
             apoyo=apoyo,
             material=mat_cable,
-            cantidad_requerida=metros,
-            cantidad_retirada=Decimal("0"),
-)
+            defaults={
+                "cantidad_requerida": metros,
+                "cantidad_retirada": Decimal("0"),
+            }
+        )
 
 def sincronizar_luminarias_desde_post(apoyo, request, materiales_ids=None, potencias_mat=None, codigos_mat=None):
     """
@@ -788,30 +804,33 @@ def sincronizar_luminarias_desde_post(apoyo, request, materiales_ids=None, poten
             if p or c:
                 sub_luminarias_a_crear.append((p, c))
 
-    # Guardar en base de datos (borra las previas del apoyo y crea las nuevas)
-    apoyo.luminarias.all().delete()
-    for p, c in sub_luminarias_a_crear:
-        ApoyoLuminaria.objects.create(
-            apoyo=apoyo,
-            potencia=p,
-            codigo=c
-)
+    try:
+        # Guardar en base de datos (borra las previas del apoyo y crea las nuevas)
+        apoyo.luminarias.all().delete()
+        for p, c in sub_luminarias_a_crear:
+            ApoyoLuminaria.objects.create(
+                apoyo=apoyo,
+                potencia=p,
+                codigo=c
+            )
 
-    # 4. Fallback final: Si no vino ningún input pero hay materiales instalados de tipo luminaria
-    if not sub_luminarias_a_crear:
-        for am in apoyo.materiales.select_related("material").all():
-            if am.cantidad_requerida > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
-                cods = [x.strip() for x in am.codigo_luminaria.split(",")] if am.codigo_luminaria else []
-                pots = [x.strip() for x in am.potencia.split(",")] if am.potencia else []
-                default_pot = am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else "")
-                if not cods and not pots and default_pot:
-                    ApoyoLuminaria.objects.create(apoyo=apoyo, potencia=default_pot, codigo="")
-                else:
-                    for idx in range(max(len(cods), len(pots), 1)):
-                        p_val = pots[idx] if idx < len(pots) else (pots[0] if pots else default_pot)
-                        c_val = cods[idx] if idx < len(cods) else ""
-                        if p_val or c_val:
-                            ApoyoLuminaria.objects.create(apoyo=apoyo, potencia=p_val, codigo=c_val)
+        # 4. Fallback final: Si no vino ningún input pero hay materiales instalados de tipo luminaria
+        if not sub_luminarias_a_crear:
+            for am in apoyo.materiales.select_related("material").all():
+                if (am.cantidad_requerida or Decimal("0")) > 0 and (am.codigo_luminaria or am.potencia or es_material_luminaria(am.material)):
+                    cods = [x.strip() for x in am.codigo_luminaria.split(",")] if am.codigo_luminaria else []
+                    pots = [x.strip() for x in am.potencia.split(",")] if am.potencia else []
+                    default_pot = am.potencia or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else "")
+                    if not cods and not pots and default_pot:
+                        ApoyoLuminaria.objects.create(apoyo=apoyo, potencia=default_pot, codigo="")
+                    else:
+                        for idx in range(max(len(cods), len(pots), 1)):
+                            p_val = pots[idx] if idx < len(pots) else (pots[0] if pots else default_pot)
+                            c_val = cods[idx] if idx < len(cods) else ""
+                            if p_val or c_val:
+                                ApoyoLuminaria.objects.create(apoyo=apoyo, potencia=p_val, codigo=c_val)
+    except Exception as e:
+        logger.warning(f"Error al sincronizar luminarias del apoyo {apoyo.id}: {e}")
 
 @login_required
 @transaction.atomic
@@ -828,142 +847,151 @@ def crear_apoyo(request, proyecto_id):
         numero_apoyo_val = request.POST.get("numero_apoyo")
         numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
 
-        # 1. Protección contra doble clic / doble envío rápido (Idempotencia)
-        post_sig = f"{proyecto.id}_{nodo_val}_{numero_apoyo_val or ''}"
-        last_sig = request.session.get("_last_apoyo_sig")
-        last_time = request.session.get("_last_apoyo_time", 0)
-        now = time.time()
-        if last_sig == post_sig and (now - last_time) < 4:
-            messages.info(request, "El poste ya fue registrado exitosamente.")
-            return redirect("detalle_proyecto", id=proyecto.id)
-
-        # 2. Validación de nodo duplicado en el mismo proyecto
-        if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exists():
-            messages.warning(request, f"Ya existe un nodo con la identificación '{nodo_val}' en este proyecto.")
-            return redirect("detalle_proyecto", id=proyecto.id)
-
-        request.session["_last_apoyo_sig"] = post_sig
-        request.session["_last_apoyo_time"] = now
-
-        fecha_val = request.POST.get("fecha")
-        fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
-
-        tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
-        direccion = request.POST.get("direccion", "").strip()
-        tipo_estructura = request.POST.get("tipo_estructura", "").strip()
-        observacion = request.POST.get("observacion", "").strip()
-        quien_ejecuta_id = request.POST.get("quien_ejecuta")
-        quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
-
-        cant_ret_val = request.POST.get("cantidad_retenida")
         try:
-            cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
-        except (ValueError, TypeError, ArithmeticError):
-            cantidad_retenida = Decimal("0")
+            # 1. Protección contra doble clic / doble envío rápido (Idempotencia)
+            post_sig = f"{proyecto.id}_{nodo_val}_{numero_apoyo_val or ''}"
+            last_sig = request.session.get("_last_apoyo_sig")
+            last_time = request.session.get("_last_apoyo_time", 0)
+            now = time.time()
+            if last_sig == post_sig and (now - last_time) < 4:
+                messages.info(request, "El poste ya fue registrado exitosamente.")
+                return redirect("detalle_proyecto", id=proyecto.id)
 
-        m_ret_val = request.POST.get("metros_retenido")
-        try:
-            metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
-        except (ValueError, TypeError, ArithmeticError):
-            metros_retenido = Decimal("0")
+            # 2. Validación de nodo duplicado en el mismo proyecto
+            if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exists():
+                messages.warning(request, f"Ya existe un nodo con la identificación '{nodo_val}' en este proyecto.")
+                return redirect("detalle_proyecto", id=proyecto.id)
 
-        estado_val = request.POST.get("estado", "Pendiente").strip()
-        estado = estado_val if estado_val else "Pendiente"
+            request.session["_last_apoyo_sig"] = post_sig
+            request.session["_last_apoyo_time"] = now
 
-        brazo_val = request.POST.get("brazo", "2").strip()
-        brazo = brazo_val if brazo_val else "2"
+            fecha_val = request.POST.get("fecha")
+            fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
 
-        apoyo = Apoyo.objects.create(
-            proyecto=proyecto,
-            quien_ejecuta_id=quien_ejecuta_id,
-            numero_apoyo=numero_apoyo,
-            nodo=nodo_val,
-            fecha=fecha,
-            tipo_instalacion=tipo_instalacion,
-            direccion=direccion,
-            tipo_estructura=tipo_estructura,
-            cantidad_retenida=cantidad_retenida,
-            metros_retenido=metros_retenido,
-            brazo=brazo,
-            observacion=observacion,
-            estado=estado
-)
+            tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
+            direccion = request.POST.get("direccion", "").strip()
+            tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+            observacion = request.POST.get("observacion", "").strip()
+            quien_ejecuta_id = request.POST.get("quien_ejecuta")
+            quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
 
-        # Material cable retenida para no duplicarlo si se ingresa manualmente
-        mat_cable_obj = (
-            Material.objects.filter(item="43").first()
-            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-)
-        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
-
-        # Guardar materiales asignados (múltiples)
-        materiales_ids = request.POST.getlist("material_id[]")
-        cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
-        cantidades_ret = request.POST.getlist("cantidad_retirada[]")
-        potencias_mat = request.POST.getlist("potencia_material[]")
-        codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
-
-        materiales_creados = 0
-        for i, mat_id in enumerate(materiales_ids):
-            if not mat_id:
-                continue
-
-            # El cable de retenida se gestiona automáticamente por los metros_retenido
-            if mat_cable_id and str(mat_id) == str(mat_cable_id):
-                continue
-
+            cant_ret_val = request.POST.get("cantidad_retenida")
             try:
-                c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
-                c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
+                cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
+            except (ValueError, TypeError, ArithmeticError):
+                cantidad_retenida = Decimal("0")
 
-                c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
-                c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
+            m_ret_val = request.POST.get("metros_retenido")
+            try:
+                metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
+            except (ValueError, TypeError, ArithmeticError):
+                metros_retenido = Decimal("0")
 
-                c_inst = Decimal(c_inst_str) if c_inst_str!= "" else Decimal("0")
-                c_ret = Decimal(c_ret_str) if c_ret_str!= "" else Decimal("0")
+            estado_val = request.POST.get("estado", "Pendiente").strip()
+            estado = estado_val if estado_val else "Pendiente"
 
-                if c_inst <= 0 and c_ret <= 0:
+            brazo_val = request.POST.get("brazo", "2").strip()
+            brazo = brazo_val if brazo_val else "2"
+
+            apoyo = Apoyo.objects.create(
+                proyecto=proyecto,
+                quien_ejecuta_id=quien_ejecuta_id,
+                numero_apoyo=numero_apoyo,
+                nodo=nodo_val,
+                fecha=fecha,
+                tipo_instalacion=tipo_instalacion,
+                direccion=direccion,
+                tipo_estructura=tipo_estructura,
+                cantidad_retenida=cantidad_retenida,
+                metros_retenido=metros_retenido,
+                brazo=brazo,
+                observacion=observacion,
+                estado=estado
+            )
+
+            # Material cable retenida para no duplicarlo si se ingresa manualmente
+            mat_cable_obj = (
+                Material.objects.filter(item="43").first()
+                or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+            )
+            mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
+            # Guardar materiales asignados (múltiples)
+            materiales_ids = request.POST.getlist("material_id[]")
+            cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
+            cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+            potencias_mat = request.POST.getlist("potencia_material[]")
+            codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
+
+            materiales_creados = 0
+            for i, mat_id in enumerate(materiales_ids):
+                if not mat_id:
                     continue
 
-                pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
-                cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
+                # El cable de retenida se gestiona automáticamente por los metros_retenido
+                if mat_cable_id and str(mat_id) == str(mat_cable_id):
+                    continue
 
-                inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
-                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
-                if c_inst > 0:
-                    inventario.cantidad -= c_inst
+                try:
+                    c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
+                    c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
 
-                if c_ret > 0:
-                    inventario.cantidad += c_ret
+                    c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
+                    c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
 
-                inventario.save()
+                    c_inst = Decimal(c_inst_str) if c_inst_str!= "" else Decimal("0")
+                    c_ret = Decimal(c_ret_str) if c_ret_str!= "" else Decimal("0")
 
-                ApoyoMaterial.objects.create(
-                    apoyo=apoyo,
-                    material_id=mat_id,
-                    cantidad_requerida=max(Decimal("0"), c_inst),
-                    cantidad_retirada=max(Decimal("0"), c_ret),
-                    potencia=pot_val,
-                    codigo_luminaria=cod_val,
-)
-                materiales_creados += 1
-            except (ValueError, TypeError, ArithmeticError):
-                continue
+                    if c_inst <= 0 and c_ret <= 0:
+                        continue
 
-        # Guardar y sincronizar luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
-        sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
+                    pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
+                    cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
 
-        # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
-        sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
+                    inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
+                    inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+                    if c_inst > 0:
+                        inventario.cantidad = (inventario.cantidad or Decimal("0")) - c_inst
 
-        # Recalcular Mano de Obra y Presupuesto
-        calcular_mano_obra_para_apoyo(apoyo)
-        actualizar_presupuesto_proyecto(proyecto)
+                    if c_ret > 0:
+                        inventario.cantidad = (inventario.cantidad or Decimal("0")) + c_ret
 
-        messages.success(
-            request,
-            f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' creado correctamente con {materiales_creados} material(es) asignado(s)."
-)
+                    inventario.save()
+
+                    ApoyoMaterial.objects.update_or_create(
+                        apoyo=apoyo,
+                        material_id=mat_id,
+                        defaults={
+                            "cantidad_requerida": max(Decimal("0"), c_inst),
+                            "cantidad_retirada": max(Decimal("0"), c_ret),
+                            "potencia": pot_val,
+                            "codigo_luminaria": cod_val,
+                        }
+                    )
+                    materiales_creados += 1
+                except (ValueError, TypeError, ArithmeticError):
+                    continue
+
+            # Guardar y sincronizar luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
+            sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
+
+            # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+            sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
+
+            # Recalcular Mano de Obra y Presupuesto
+            try:
+                calcular_mano_obra_para_apoyo(apoyo)
+                actualizar_presupuesto_proyecto(proyecto)
+            except Exception as calc_err:
+                logger.warning(f"Aviso recalculando mano de obra/presupuesto en nuevo apoyo: {calc_err}")
+
+            messages.success(
+                request,
+                f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' creado correctamente con {materiales_creados} material(es) asignado(s)."
+            )
+        except Exception as e:
+            logger.exception(f"Error al crear apoyo en proyecto {proyecto_id}: {e}")
+            messages.error(request, f"Error al registrar el poste: {e}")
 
         tab = request.POST.get("tab", "materiales").strip()
         url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})
@@ -983,159 +1011,174 @@ def editar_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(
         Apoyo.objects.select_related("proyecto"),
         id=apoyo_id
-)
+    )
     proyecto = apoyo.proyecto
 
     if request.method == "POST":
-        numero_apoyo_val = request.POST.get("numero_apoyo")
-        apoyo.numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
-
-        fecha_val = request.POST.get("fecha")
-        apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
-
-        nodo_val = request.POST.get("nodo", "").strip()
-        if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exclude(id=apoyo.id).exists():
-            messages.warning(request, f"Ya existe otro nodo con la identificación '{nodo_val}' en este proyecto.")
-            return redirect("detalle_proyecto", id=proyecto.id)
-        apoyo.nodo = nodo_val
-        apoyo.brazo = request.POST.get("brazo", "2").strip() or "2"
-        apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
-        apoyo.direccion = request.POST.get("direccion", "").strip()
-        apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
-        apoyo.observacion = request.POST.get("observacion", "").strip()
-        
-        estado_val = request.POST.get("estado", apoyo.estado or "Pendiente").strip()
-        apoyo.estado = estado_val if estado_val else "Pendiente"
-
-        quien_ejecuta_id = request.POST.get("quien_ejecuta")
-        apoyo.quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
-
-        cant_ret_val = request.POST.get("cantidad_retenida")
         try:
-            apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
-        except (ValueError, TypeError, ArithmeticError):
-            apoyo.cantidad_retenida = Decimal("0")
+            numero_apoyo_val = request.POST.get("numero_apoyo")
+            apoyo.numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
 
-        m_ret_val = request.POST.get("metros_retenido")
-        try:
-            apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
-        except (ValueError, TypeError, ArithmeticError):
-            apoyo.metros_retenido = Decimal("0")
+            fecha_val = request.POST.get("fecha")
+            apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
 
-        apoyo.save()
+            nodo_val = request.POST.get("nodo", "").strip()
+            if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exclude(id=apoyo.id).exists():
+                messages.warning(request, f"Ya existe otro nodo con la identificación '{nodo_val}' en este proyecto.")
+                return redirect("detalle_proyecto", id=proyecto.id)
+            apoyo.nodo = nodo_val
+            apoyo.brazo = request.POST.get("brazo", "2").strip() or "2"
+            apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
+            apoyo.direccion = request.POST.get("direccion", "").strip()
+            apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+            apoyo.observacion = request.POST.get("observacion", "").strip()
+            
+            estado_val = request.POST.get("estado", apoyo.estado or "Pendiente").strip()
+            apoyo.estado = estado_val if estado_val else "Pendiente"
 
-        # Material cable retenida para no duplicarlo si se ingresa manualmente
-        mat_cable_obj = (
-            Material.objects.filter(item="43").first()
-            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-)
-        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+            quien_ejecuta_id = request.POST.get("quien_ejecuta")
+            apoyo.quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
 
-        # Sincronizar Materiales
-        materiales_ids = request.POST.getlist("material_id[]")
-        cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
-        cantidades_ret = request.POST.getlist("cantidad_retirada[]")
-        potencias_mat = request.POST.getlist("potencia_material[]")
-        codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
-
-        materiales_actuales = {am.material_id: am for am in apoyo.materiales.all()}
-        materiales_nuevos_procesados = set()
-
-        for i, mat_id in enumerate(materiales_ids):
-            if not mat_id or not str(mat_id).isdigit():
-                continue
-            mat_id_int = int(mat_id)
-
-            # El cable de retenida se gestiona automáticamente por los metros_retenido
-            if mat_cable_id and mat_id_int == mat_cable_id:
-                continue
-
+            cant_ret_val = request.POST.get("cantidad_retenida")
             try:
-                c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
-                c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
+                apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
+            except (ValueError, TypeError, ArithmeticError):
+                apoyo.cantidad_retenida = Decimal("0")
 
-                c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
-                c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
+            m_ret_val = request.POST.get("metros_retenido")
+            try:
+                apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
+            except (ValueError, TypeError, ArithmeticError):
+                apoyo.metros_retenido = Decimal("0")
 
-                c_inst = Decimal(c_inst_str) if c_inst_str!= "" else Decimal("0")
-                c_ret = Decimal(c_ret_str) if c_ret_str!= "" else Decimal("0")
+            apoyo.save()
 
-                if c_inst <= 0 and c_ret <= 0:
+            # Material cable retenida para no duplicarlo si se ingresa manualmente
+            mat_cable_obj = (
+                Material.objects.filter(item="43").first()
+                or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+            )
+            mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
+            # Sincronizar Materiales
+            materiales_ids = request.POST.getlist("material_id[]")
+            cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
+            cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+            potencias_mat = request.POST.getlist("potencia_material[]")
+            codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
+
+            materiales_actuales = {am.material_id: am for am in apoyo.materiales.all()}
+            materiales_nuevos_procesados = set()
+
+            for i, mat_id in enumerate(materiales_ids):
+                if not mat_id or not str(mat_id).isdigit():
+                    continue
+                mat_id_int = int(mat_id)
+
+                # El cable de retenida se gestiona automáticamente por los metros_retenido
+                if mat_cable_id and mat_id_int == mat_cable_id:
                     continue
 
-                pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
-                cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
+                try:
+                    c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
+                    c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
 
-                inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
-                inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+                    c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
+                    c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
 
-                if mat_id_int in materiales_actuales:
-                    am = materiales_actuales[mat_id_int]
-                    diferencia = c_inst - am.cantidad_requerida
-                    if diferencia!= 0:
-                        inventario.cantidad -= diferencia
+                    c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
+                    c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
 
-                    diferencia_ret = c_ret - am.cantidad_retirada
-                    if diferencia_ret!= 0:
-                        inventario.cantidad += diferencia_ret
+                    if c_inst <= 0 and c_ret <= 0:
+                        continue
 
-                    inventario.save()
+                    pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
+                    cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
 
-                    am.cantidad_requerida = max(Decimal("0"), c_inst)
-                    am.cantidad_retirada = max(Decimal("0"), c_ret)
-                    am.potencia = pot_val
-                    am.codigo_luminaria = cod_val
-                    am.save()
-                else:
-                    if c_inst > 0:
-                        inventario.cantidad -= c_inst
+                    inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
+                    inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
 
-                    if c_ret > 0:
-                        inventario.cantidad += c_ret
+                    if mat_id_int in materiales_actuales:
+                        am = materiales_actuales[mat_id_int]
+                        cant_req_ant = am.cantidad_requerida or Decimal("0")
+                        diferencia = c_inst - cant_req_ant
+                        if diferencia != 0:
+                            inventario.cantidad = (inventario.cantidad or Decimal("0")) - diferencia
 
-                    inventario.save()
+                        cant_ret_ant = am.cantidad_retirada or Decimal("0")
+                        diferencia_ret = c_ret - cant_ret_ant
+                        if diferencia_ret != 0:
+                            inventario.cantidad = (inventario.cantidad or Decimal("0")) + diferencia_ret
 
-                    ApoyoMaterial.objects.create(
-                        apoyo=apoyo,
-                        material_id=mat_id_int,
-                        cantidad_requerida=max(Decimal("0"), c_inst),
-                        cantidad_retirada=max(Decimal("0"), c_ret),
-                        potencia=pot_val,
-                        codigo_luminaria=cod_val,
-)
+                        inventario.save()
 
-                materiales_nuevos_procesados.add(mat_id_int)
-            except (ValueError, TypeError, ArithmeticError):
-                continue
+                        am.cantidad_requerida = max(Decimal("0"), c_inst)
+                        am.cantidad_retirada = max(Decimal("0"), c_ret)
+                        am.potencia = pot_val
+                        am.codigo_luminaria = cod_val
+                        am.save()
+                    else:
+                        if c_inst > 0:
+                            inventario.cantidad = (inventario.cantidad or Decimal("0")) - c_inst
 
-        # Eliminar materiales que se hayan removido (excepto el cable de retenida que se sincroniza aparte)
-        for mat_id_antiguo, am in materiales_actuales.items():
-            if mat_cable_id and mat_id_antiguo == mat_cable_id:
-                continue
-            if mat_id_antiguo not in materiales_nuevos_procesados:
-                inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
-                inv_del = Inventario.objects.select_for_update().get(pk=inv_del.pk)
-                if am.cantidad_requerida > 0:
-                    inv_del.cantidad += am.cantidad_requerida
-                if am.cantidad_retirada > 0:
-                    inv_del.cantidad -= am.cantidad_retirada
-                inv_del.save()
-                am.delete()
+                        if c_ret > 0:
+                            inventario.cantidad = (inventario.cantidad or Decimal("0")) + c_ret
 
-        # Actualizar Luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
-        sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
+                        inventario.save()
 
-        # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
-        sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
+                        am_nuevo, _ = ApoyoMaterial.objects.update_or_create(
+                            apoyo=apoyo,
+                            material_id=mat_id_int,
+                            defaults={
+                                "cantidad_requerida": max(Decimal("0"), c_inst),
+                                "cantidad_retirada": max(Decimal("0"), c_ret),
+                                "potencia": pot_val,
+                                "codigo_luminaria": cod_val,
+                            }
+                        )
+                        materiales_actuales[mat_id_int] = am_nuevo
 
-        # Recalcular Mano de Obra y Presupuesto
-        calcular_mano_obra_para_apoyo(apoyo)
-        actualizar_presupuesto_proyecto(proyecto)
+                    materiales_nuevos_procesados.add(mat_id_int)
+                except (ValueError, TypeError, ArithmeticError) as num_err:
+                    logger.warning(f"Error numérico en material {mat_id} apoyo {apoyo.id}: {num_err}")
+                    continue
 
-        messages.success(
-            request,
-            f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' actualizado correctamente."
-)
+            # Eliminar materiales que se hayan removido (excepto el cable de retenida que se sincroniza aparte)
+            for mat_id_antiguo, am in list(materiales_actuales.items()):
+                if mat_cable_id and mat_id_antiguo == mat_cable_id:
+                    continue
+                if mat_id_antiguo not in materiales_nuevos_procesados:
+                    inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
+                    inv_del = Inventario.objects.select_for_update().get(pk=inv_del.pk)
+                    cant_req_del = am.cantidad_requerida or Decimal("0")
+                    cant_ret_del = am.cantidad_retirada or Decimal("0")
+                    if cant_req_del > 0:
+                        inv_del.cantidad = (inv_del.cantidad or Decimal("0")) + cant_req_del
+                    if cant_ret_del > 0:
+                        inv_del.cantidad = (inv_del.cantidad or Decimal("0")) - cant_ret_del
+                    inv_del.save()
+                    am.delete()
+
+            # Actualizar Luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
+            sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
+
+            # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+            sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
+
+            # Recalcular Mano de Obra y Presupuesto
+            try:
+                calcular_mano_obra_para_apoyo(apoyo)
+                actualizar_presupuesto_proyecto(proyecto)
+            except Exception as calc_err:
+                logger.warning(f"Aviso recalculando mano de obra/presupuesto en apoyo {apoyo.id}: {calc_err}")
+
+            messages.success(
+                request,
+                f"Nodo / Apoyo '{apoyo.nodo or apoyo.numero_apoyo}' actualizado correctamente."
+            )
+        except Exception as e:
+            logger.exception(f"Error al editar apoyo {apoyo_id}: {e}")
+            messages.error(request, f"Error al actualizar el poste: {e}")
 
         tab = request.POST.get("tab", "materiales").strip()
         url = reverse("detalle_proyecto", kwargs={"id": proyecto.id})

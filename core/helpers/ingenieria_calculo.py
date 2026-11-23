@@ -221,12 +221,14 @@ def calcular_mano_obra_para_apoyo(apoyo, preservar_manuales=True):
             amo.origen = ApoyoManoObra.Origen.CALCULADO
             amo.save()
         else:
-            ApoyoManoObra.objects.create(
+            ApoyoManoObra.objects.update_or_create(
                 apoyo=apoyo,
                 item_mano_obra=item_obj,
-                cantidad=cant,
-                origen=ApoyoManoObra.Origen.CALCULADO
-)
+                defaults={
+                    "cantidad": cant,
+                    "origen": ApoyoManoObra.Origen.CALCULADO,
+                }
+            )
         guardados += 1
 
     return guardados
@@ -258,11 +260,16 @@ def actualizar_presupuesto_proyecto(proyecto):
 
     total_mo = Decimal("0")
     for mo in manos_obra:
-        total_mo += mo.cantidad * mo.item_mano_obra.valor_unitario
+        if mo.item_mano_obra:
+            val_u = mo.item_mano_obra.valor_unitario or Decimal("0")
+            c_mo = mo.cantidad or Decimal("0")
+            total_mo += c_mo * val_u
 
     presupuesto, _ = Presupuesto.objects.get_or_create(proyecto=proyecto)
     presupuesto.valor_mano_obra = total_mo
-    presupuesto.valor_total = presupuesto.valor_materiales + presupuesto.valor_mano_obra + presupuesto.otros_costos
+    val_mat = presupuesto.valor_materiales or Decimal("0")
+    otros = presupuesto.otros_costos or Decimal("0")
+    presupuesto.valor_total = val_mat + total_mo + otros
     presupuesto.save()
 
     return presupuesto

@@ -1308,6 +1308,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const hiddenId = document.getElementById("nodoTopSelMaterialId");
             if (hiddenId && hiddenId.value) {
                 agregarMaterialDesdeBarraNodo(true);
+                hiddenId.value = "";
             }
         });
     }
@@ -1400,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formModalApoyo = document.getElementById("formModalApoyo");
     if (formModalApoyo) {
         formModalApoyo.addEventListener("submit", function () {
-            document.querySelectorAll("#filasMaterialesNodo.fila-material-nodo td:first-child").forEach(td => {
+            document.querySelectorAll("#filasMaterialesNodo .fila-material-nodo .celda-material-nodo").forEach(td => {
                 actualizarSerializacionLuminarias(td);
             });
         });

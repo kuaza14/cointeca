@@ -10,10 +10,18 @@ from core.models import Apoyo, ApoyoMaterial, ItemManoObra, ApoyoManoObra, Proye
 # Los items corresponden a los números de item en el catálogo oficial de Materiales.
 
 def _sum_mats(cantidades_map, item_codes):
-    """Suma las cantidades instaladas para una lista de códigos de material."""
+    """Suma las cantidades instaladas para una lista de códigos de material protegiendo tipos nulos y llaves str/int."""
     total = Decimal("0")
     for code in item_codes:
-        total += cantidades_map.get(int(code) if str(code).isdigit() else code, Decimal("0"))
+        for k in (code, str(code), int(code) if str(code).isdigit() else None):
+            if k is not None and k in cantidades_map:
+                val = cantidades_map[k]
+                if val is not None:
+                    try:
+                        total += Decimal(str(val))
+                    except (ValueError, TypeError, ArithmeticError):
+                        pass
+                break
     return total
 
 def calcular_mano_obra_para_apoyo(apoyo, preservar_manuales=True):
@@ -23,8 +31,14 @@ def calcular_mano_obra_para_apoyo(apoyo, preservar_manuales=True):
     """
     # 1. Obtener materiales instalados en este apoyo
     apoyo_mats = ApoyoMaterial.objects.filter(apoyo=apoyo).select_related('material')
-    cantidades_map = {am.material.item: am.cantidad_requerida for am in apoyo_mats}
-    cantidades_ret_map = {am.material.item: am.cantidad_retirada for am in apoyo_mats}
+    cantidades_map = {
+        am.material.item: (am.cantidad_requerida or Decimal("0"))
+        for am in apoyo_mats if am.material and am.material.item is not None
+    }
+    cantidades_ret_map = {
+        am.material.item: (am.cantidad_retirada or Decimal("0"))
+        for am in apoyo_mats if am.material and am.material.item is not None
+    }
 
     # Detectar si el apoyo es Modernización o Expansión
     # (Por defecto, si tipo_instalacion dice Modernización o hay retiros de luminarias)

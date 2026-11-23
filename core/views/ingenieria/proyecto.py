@@ -431,277 +431,290 @@ def eliminar_proyecto(request, id):
 
 @login_required
 def detalle_proyecto(request, id):
-    proyecto = get_object_or_404(Proyecto, id=id)
+    try:
+        proyecto = get_object_or_404(Proyecto, id=id)
 
-    # 1. Cargar apoyos con sus relaciones principales en 1 sola consulta
-    apoyos = list(
-        Apoyo.objects
-.filter(proyecto=proyecto)
-.select_related("quien_ejecuta")
-.prefetch_related("luminarias")
-.order_by("numero_apoyo", "id")
-)
+        # 1. Cargar apoyos con sus relaciones principales en 1 sola consulta
+        apoyos = list(
+            Apoyo.objects
+            .filter(proyecto=proyecto)
+            .select_related("quien_ejecuta")
+            .prefetch_related("luminarias")
+            .order_by("numero_apoyo", "id")
+        )
 
-    tab_activa = request.GET.get("tab", "materiales").strip().lower()
+        tab_activa = request.GET.get("tab", "materiales").strip().lower()
 
-    # 2. Cargar TODOS los materiales de los apoyos del proyecto en 1 sola consulta (sin N+1)
-    apoyo_materiales = list(
-        ApoyoMaterial.objects.filter(
-            apoyo__proyecto=proyecto
-).select_related("material", "material__inventario").order_by("material__descripcion")
-)
+        # 2. Cargar TODOS los materiales de los apoyos del proyecto en 1 sola consulta (sin N+1)
+        apoyo_materiales = list(
+            ApoyoMaterial.objects.filter(
+                apoyo__proyecto=proyecto
+            ).select_related("material", "material__inventario").order_by("material__descripcion")
+        )
 
-    materiales_dict = {}
-    cantidades_inst_map = {}
-    cantidades_ret_map = {}
-    apoyo_materiales_map = defaultdict(list)
+        materiales_dict = {}
+        cantidades_inst_map = {}
+        cantidades_ret_map = {}
+        apoyo_materiales_map = defaultdict(list)
 
-    for am in apoyo_materiales:
-        cantidades_inst_map[(am.apoyo_id, am.material_id)] = am.cantidad_requerida
-        cantidades_ret_map[(am.apoyo_id, am.material_id)] = am.cantidad_retirada
-        apoyo_materiales_map[am.apoyo_id].append(am)
-        if am.material_id not in materiales_dict:
-            materiales_dict[am.material_id] = am.material
+        for am in apoyo_materiales:
+            cantidades_inst_map[(am.apoyo_id, am.material_id)] = am.cantidad_requerida or Decimal("0")
+            cantidades_ret_map[(am.apoyo_id, am.material_id)] = am.cantidad_retirada or Decimal("0")
+            apoyo_materiales_map[am.apoyo_id].append(am)
+            if am.material_id not in materiales_dict:
+                materiales_dict[am.material_id] = am.material
 
-    def _mat_sort_key(m):
-        item_val = m.item if m.item is not None else 999999
-        try:
-            item_int = int(item_val)
-        except (ValueError, TypeError):
-            item_int = 999999
-        return (item_int, str(m.descripcion or ""))
+        def _mat_sort_key(m):
+            item_val = m.item if m.item is not None else 999999
+            try:
+                item_int = int(item_val)
+            except (ValueError, TypeError):
+                item_int = 999999
+            return (item_int, str(m.descripcion or ""))
 
-    materiales_columnas = sorted(materiales_dict.values(), key=_mat_sort_key)
+        materiales_columnas = sorted(materiales_dict.values(), key=_mat_sort_key)
 
-    filas_matriz = []
-    totales_inst_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
-    totales_ret_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
+        filas_matriz = []
+        totales_inst_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
+        totales_ret_columna = {mat.id: Decimal("0") for mat in materiales_columnas}
 
-    for ap in apoyos:
-        celdas = []
+        for ap in apoyos:
+            celdas = []
+            for mat in materiales_columnas:
+                cant_inst = cantidades_inst_map.get((ap.id, mat.id)) or Decimal("0")
+                cant_ret = cantidades_ret_map.get((ap.id, mat.id)) or Decimal("0")
+                celdas.append({
+                    "material": mat,
+                    "cantidad": cant_inst,
+                    "cantidad_retirada": cant_ret,
+                })
+                totales_inst_columna[mat.id] = (totales_inst_columna.get(mat.id) or Decimal("0")) + cant_inst
+                totales_ret_columna[mat.id] = (totales_ret_columna.get(mat.id) or Decimal("0")) + cant_ret
+
+            # Obtener potencias de luminarias/proyectores retirados
+            mats_asoc = apoyo_materiales_map.get(ap.id, [])
+            potencias_retiradas = []
+            for am in mats_asoc:
+                if (am.cantidad_retirada or Decimal("0")) > 0:
+                    pot = (am.potencia or "").strip() or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else "")
+                    if pot and pot not in potencias_retiradas:
+                        potencias_retiradas.append(pot)
+
+            filas_matriz.append({
+                "apoyo": ap,
+                "celdas": celdas,
+                "materiales_asociados": mats_asoc,
+                "potencias_retiradas": potencias_retiradas,
+            })
+
+        fila_totales = []
         for mat in materiales_columnas:
-            cant_inst = cantidades_inst_map.get((ap.id, mat.id), Decimal("0"))
-            cant_ret = cantidades_ret_map.get((ap.id, mat.id), Decimal("0"))
-            celdas.append({
+            fila_totales.append({
                 "material": mat,
-                "cantidad": cant_inst,
-                "cantidad_retirada": cant_ret,
-            })
-            totales_inst_columna[mat.id] += cant_inst
-            totales_ret_columna[mat.id] += cant_ret
-
-        # Obtener potencias de luminarias/proyectores retirados
-        mats_asoc = apoyo_materiales_map.get(ap.id, [])
-        potencias_retiradas = []
-        for am in mats_asoc:
-            if am.cantidad_retirada > 0:
-                pot = (am.potencia or "").strip() or (extraer_potencia_luminaria(am.material.descripcion) if es_material_luminaria(am.material) else "")
-                if pot and pot not in potencias_retiradas:
-                    potencias_retiradas.append(pot)
-
-        filas_matriz.append({
-            "apoyo": ap,
-            "celdas": celdas,
-            "materiales_asociados": mats_asoc,
-            "potencias_retiradas": potencias_retiradas,
-        })
-
-    fila_totales = []
-    for mat in materiales_columnas:
-        fila_totales.append({
-            "material": mat,
-            "total": totales_inst_columna.get(mat.id, Decimal("0")),
-            "total_retirado": totales_ret_columna.get(mat.id, Decimal("0")),
-        })
-
-    tabla_resumen_retiros = []
-    for mat in materiales_columnas:
-        tot_ret = totales_ret_columna.get(mat.id, Decimal("0"))
-        if tot_ret > 0:
-            tabla_resumen_retiros.append({
-                "material": mat,
-                "cantidad_retirada": tot_ret,
+                "total": totales_inst_columna.get(mat.id, Decimal("0")),
+                "total_retirado": totales_ret_columna.get(mat.id, Decimal("0")),
             })
 
-    # 3. Cargar TODA la Mano de Obra del proyecto en 1 sola consulta (sin N+1)
-    apoyos_mo = list(
-        ApoyoManoObra.objects.filter(
-            apoyo__proyecto=proyecto
-).select_related("item_mano_obra")
-)
+        tabla_resumen_retiros = []
+        for mat in materiales_columnas:
+            tot_ret = totales_ret_columna.get(mat.id, Decimal("0"))
+            if tot_ret > 0:
+                tabla_resumen_retiros.append({
+                    "material": mat,
+                    "cantidad_retirada": tot_ret,
+                })
 
-    mo_dict = {}
-    mo_cant_map = {}
-    mo_origen_map = {}
-    mo_obs_map = {}
-    mo_id_map = {}
-    apoyo_mo_map = defaultdict(list)
+        # 3. Cargar TODA la Mano de Obra del proyecto en 1 sola consulta (sin N+1)
+        apoyos_mo = list(
+            ApoyoManoObra.objects.filter(
+                apoyo__proyecto=proyecto
+            ).select_related("item_mano_obra")
+        )
 
-    for amo in apoyos_mo:
-        mo_cant_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.cantidad
-        mo_origen_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.origen
-        mo_obs_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.observacion or ""
-        mo_id_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.id
-        apoyo_mo_map[amo.apoyo_id].append(amo)
-        if amo.item_mano_obra_id not in mo_dict:
-            mo_dict[amo.item_mano_obra_id] = amo.item_mano_obra
+        mo_dict = {}
+        mo_cant_map = {}
+        mo_origen_map = {}
+        mo_obs_map = {}
+        mo_id_map = {}
+        apoyo_mo_map = defaultdict(list)
 
-    mo_columnas = sorted(mo_dict.values(), key=lambda item: item.codigo or "")
+        for amo in apoyos_mo:
+            mo_cant_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.cantidad or Decimal("0")
+            mo_origen_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.origen or "CALCULADO"
+            mo_obs_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.observacion or ""
+            mo_id_map[(amo.apoyo_id, amo.item_mano_obra_id)] = amo.id
+            apoyo_mo_map[amo.apoyo_id].append(amo)
+            if amo.item_mano_obra_id not in mo_dict:
+                mo_dict[amo.item_mano_obra_id] = amo.item_mano_obra
 
-    mo_filas_matriz = []
-    mo_totales_columna = {item.id: Decimal("0") for item in mo_columnas}
+        def _mo_sort_key(item):
+            c = item.codigo if item.codigo is not None else 999999
+            try:
+                return (int(c), str(item.descripcion or ""))
+            except (ValueError, TypeError):
+                return (999999, str(c))
 
-    for ap in apoyos:
-        celdas_mo = []
+        mo_columnas = sorted(mo_dict.values(), key=_mo_sort_key)
+
+        mo_filas_matriz = []
+        mo_totales_columna = {item.id: Decimal("0") for item in mo_columnas}
+
+        for ap in apoyos:
+            celdas_mo = []
+            for item in mo_columnas:
+                cant_mo = mo_cant_map.get((ap.id, item.id)) or Decimal("0")
+                orig = mo_origen_map.get((ap.id, item.id), "CALCULADO")
+                obs = mo_obs_map.get((ap.id, item.id), "")
+                amo_id = mo_id_map.get((ap.id, item.id))
+                celdas_mo.append({
+                    "item": item,
+                    "cantidad": cant_mo,
+                    "origen": orig,
+                    "observacion": obs,
+                    "amo_id": amo_id,
+                })
+                mo_totales_columna[item.id] = (mo_totales_columna.get(item.id) or Decimal("0")) + cant_mo
+
+            # Obtener observaciones de mano de obra manual para este apoyo
+            obs_manuales = [
+                f"[{amo.item_mano_obra.codigo}] {amo.observacion}"
+                for amo in apoyo_mo_map.get(ap.id, [])
+                if amo.origen == ApoyoManoObra.Origen.MANUAL and amo.observacion and amo.item_mano_obra
+            ]
+
+            mo_filas_matriz.append({
+                "apoyo": ap,
+                "celdas": celdas_mo,
+                "manos_obra_list": apoyo_mo_map.get(ap.id, []),
+                "materiales_asociados": apoyo_materiales_map.get(ap.id, []),
+                "observaciones_mo_manuales": obs_manuales,
+            })
+
+        mo_fila_totales = []
+        gran_total_mo_pesos = Decimal("0")
+        resumen_economico_items = []
+
         for item in mo_columnas:
-            cant_mo = mo_cant_map.get((ap.id, item.id), Decimal("0"))
-            orig = mo_origen_map.get((ap.id, item.id), "CALCULADO")
-            obs = mo_obs_map.get((ap.id, item.id), "")
-            amo_id = mo_id_map.get((ap.id, item.id))
-            celdas_mo.append({
+            tot_c = mo_totales_columna.get(item.id) or Decimal("0")
+            val_u = item.valor_unitario or Decimal("0")
+            sub_pesos = tot_c * val_u
+            gran_total_mo_pesos += sub_pesos
+            mo_fila_totales.append({
                 "item": item,
-                "cantidad": cant_mo,
-                "origen": orig,
-                "observacion": obs,
-                "amo_id": amo_id,
+                "total": tot_c,
+                "total_pesos": sub_pesos,
             })
-            mo_totales_columna[item.id] += cant_mo
+            if tot_c > 0:
+                resumen_economico_items.append({
+                    "item": item,
+                    "cantidad": tot_c,
+                    "subtotal": sub_pesos,
+                })
 
-        # Obtener observaciones de mano de obra manual para este apoyo
-        obs_manuales = [
-            f"[{amo.item_mano_obra.codigo}] {amo.observacion}"
-            for amo in apoyo_mo_map.get(ap.id, [])
-            if amo.origen == ApoyoManoObra.Origen.MANUAL and amo.observacion
-        ]
+        presupuesto, _ = Presupuesto.objects.get_or_create(proyecto=proyecto)
+        if (presupuesto.valor_mano_obra or Decimal("0")) != gran_total_mo_pesos:
+            presupuesto.valor_mano_obra = gran_total_mo_pesos
+            val_mat = presupuesto.valor_materiales or Decimal("0")
+            otros = presupuesto.otros_costos or Decimal("0")
+            presupuesto.valor_total = val_mat + gran_total_mo_pesos + otros
+            presupuesto.save(update_fields=['valor_mano_obra', 'valor_total'])
 
-        mo_filas_matriz.append({
-            "apoyo": ap,
-            "celdas": celdas_mo,
-            "manos_obra_list": apoyo_mo_map.get(ap.id, []),
-            "materiales_asociados": apoyo_materiales_map.get(ap.id, []),
-            "observaciones_mo_manuales": obs_manuales,
-        })
+        materiales_catalogo = list(Material.objects.select_related('inventario').all().order_by("descripcion"))
+        for mat in materiales_catalogo:
+            mat.potencia_sugerida = extraer_potencia_luminaria(mat.descripcion)
+            mat.es_luminaria = es_material_luminaria(mat)
+        catalogo_mo_todos = list(ItemManoObra.objects.all().order_by("codigo"))
+        empleados = list(Empleado.objects.filter(estado="activo").order_by("nombre_completo"))
 
-    mo_fila_totales = []
-    gran_total_mo_pesos = Decimal("0")
-    resumen_economico_items = []
+        mat_cable_obj = (
+            Material.objects.filter(item="43").first()
+            or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+        )
+        mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
 
-    for item in mo_columnas:
-        tot_c = mo_totales_columna.get(item.id, Decimal("0"))
-        sub_pesos = tot_c * item.valor_unitario
-        gran_total_mo_pesos += sub_pesos
-        mo_fila_totales.append({
-            "item": item,
-            "total": tot_c,
-            "total_pesos": sub_pesos,
-        })
-        if tot_c > 0:
-            resumen_economico_items.append({
-                "item": item,
-                "cantidad": tot_c,
-                "subtotal": sub_pesos,
-            })
-
-    presupuesto, _ = Presupuesto.objects.get_or_create(proyecto=proyecto)
-    if (presupuesto.valor_mano_obra or Decimal("0")) != gran_total_mo_pesos:
-        presupuesto.valor_mano_obra = gran_total_mo_pesos
-        val_mat = presupuesto.valor_materiales or Decimal("0")
-        otros = presupuesto.otros_costos or Decimal("0")
-        presupuesto.valor_total = val_mat + gran_total_mo_pesos + otros
-        presupuesto.save(update_fields=['valor_mano_obra', 'valor_total'])
-
-    materiales_catalogo = list(Material.objects.select_related('inventario').all().order_by("descripcion"))
-    for mat in materiales_catalogo:
-        mat.potencia_sugerida = extraer_potencia_luminaria(mat.descripcion)
-        mat.es_luminaria = es_material_luminaria(mat)
-    catalogo_mo_todos = list(ItemManoObra.objects.all().order_by("codigo"))
-    empleados = list(Empleado.objects.filter(estado="activo").order_by("nombre_completo"))
-
-    mat_cable_obj = (
-        Material.objects.filter(item="43").first()
-        or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-)
-    mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
-
-    # Serializar apoyosData y apoyosMOData en JSON nativo y seguro
-    apoyos_data_dict = {}
-    for fila in filas_matriz:
-        ap = fila["apoyo"]
-        luminarias_list = [
-            {"potencia": lum.potencia or "", "codigo": lum.codigo or ""}
-            for lum in ap.luminarias.all()
-        ]
-        materiales_list = [
-            {
-                "material_id": str(m.material_id),
-                "cant_inst": str(m.cantidad_requerida) if m.cantidad_requerida is not None else "",
-                "cant_ret": str(m.cantidad_retirada) if m.cantidad_retirada is not None else "",
-                "potencia": m.potencia or "",
-                "codigo": m.codigo_luminaria or "",
+        # Serializar apoyosData y apoyosMOData en JSON nativo y seguro
+        apoyos_data_dict = {}
+        for fila in filas_matriz:
+            ap = fila["apoyo"]
+            luminarias_list = [
+                {"potencia": lum.potencia or "", "codigo": lum.codigo or ""}
+                for lum in ap.luminarias.all()
+            ]
+            materiales_list = [
+                {
+                    "material_id": str(m.material_id),
+                    "cant_inst": str(m.cantidad_requerida) if m.cantidad_requerida is not None else "",
+                    "cant_ret": str(m.cantidad_retirada) if m.cantidad_retirada is not None else "",
+                    "potencia": m.potencia or "",
+                    "codigo": m.codigo_luminaria or "",
+                }
+                for m in fila["materiales_asociados"]
+            ]
+            apoyos_data_dict[str(ap.id)] = {
+                "id": str(ap.id),
+                "nodo": ap.nodo or "",
+                "numero_apoyo": str(ap.numero_apoyo or ""),
+                "fecha": ap.fecha.strftime("%Y-%m-%d") if ap.fecha else "",
+                "tipo_instalacion": ap.tipo_instalacion or "",
+                "direccion": ap.direccion or "",
+                "tipo_estructura": ap.tipo_estructura or "",
+                "brazo": str(ap.brazo if ap.brazo is not None else "2"),
+                "cantidad_retenida": str(ap.cantidad_retenida) if ap.cantidad_retenida is not None else "",
+                "metros_retenido": str(ap.metros_retenido) if ap.metros_retenido is not None else "",
+                "estado": ap.estado or "Pendiente",
+                "quien_ejecuta_id": str(ap.quien_ejecuta_id or ""),
+                "observacion": ap.observacion or "",
+                "luminarias": luminarias_list,
+                "materiales": materiales_list,
             }
-            for m in fila["materiales_asociados"]
-        ]
-        apoyos_data_dict[str(ap.id)] = {
-            "id": str(ap.id),
-            "nodo": ap.nodo or "",
-            "numero_apoyo": str(ap.numero_apoyo or ""),
-            "fecha": ap.fecha.strftime("%Y-%m-%d") if ap.fecha else "",
-            "tipo_instalacion": ap.tipo_instalacion or "",
-            "direccion": ap.direccion or "",
-            "tipo_estructura": ap.tipo_estructura or "",
-            "brazo": str(ap.brazo if ap.brazo is not None else "2"),
-            "cantidad_retenida": str(ap.cantidad_retenida) if ap.cantidad_retenida is not None else "",
-            "metros_retenido": str(ap.metros_retenido) if ap.metros_retenido is not None else "",
-            "estado": ap.estado or "Pendiente",
-            "quien_ejecuta_id": str(ap.quien_ejecuta_id or ""),
-            "observacion": ap.observacion or "",
-            "luminarias": luminarias_list,
-            "materiales": materiales_list,
-        }
 
-    apoyos_mo_data_dict = {}
-    for fila in mo_filas_matriz:
-        ap = fila["apoyo"]
-        mo_list = [
+        apoyos_mo_data_dict = {}
+        for fila in mo_filas_matriz:
+            ap = fila["apoyo"]
+            mo_list = [
+                {
+                    "id": str(mo.id),
+                    "item_id": str(mo.item_mano_obra_id),
+                    "codigo": mo.item_mano_obra.codigo or "" if mo.item_mano_obra else "",
+                    "descripcion": mo.item_mano_obra.descripcion or "" if mo.item_mano_obra else "",
+                    "cantidad": str(mo.cantidad) if mo.cantidad is not None else "",
+                    "observacion": mo.observacion or "",
+                }
+                for mo in fila["manos_obra_list"]
+                if mo.origen == "MANUAL"
+            ]
+            apoyos_mo_data_dict[str(ap.id)] = mo_list
+
+        return render(
+            request,
+            "ingenieria/proyecto/detalle_proyecto.html",
             {
-                "id": str(mo.id),
-                "item_id": str(mo.item_mano_obra_id),
-                "codigo": mo.item_mano_obra.codigo or "",
-                "descripcion": mo.item_mano_obra.descripcion or "",
-                "cantidad": str(mo.cantidad) if mo.cantidad is not None else "",
-                "observacion": mo.observacion or "",
+                "proyecto": proyecto,
+                "apoyos": apoyos,
+                "tab_activa": tab_activa,
+                "materiales_columnas": materiales_columnas,
+                "filas_matriz": filas_matriz,
+                "fila_totales": fila_totales,
+                "tabla_resumen_retiros": tabla_resumen_retiros,
+                "materiales_catalogo": materiales_catalogo,
+                "empleados": empleados,
+                "mat_cable_id": mat_cable_id,
+                "apoyos_data_json": json.dumps(apoyos_data_dict),
+                "apoyos_mo_data_json": json.dumps(apoyos_mo_data_dict),
+                # Mano de Obra
+                "mo_columnas": mo_columnas,
+                "mo_filas_matriz": mo_filas_matriz,
+                "mo_fila_totales": mo_fila_totales,
+                "gran_total_mo_pesos": gran_total_mo_pesos,
+                "resumen_economico_items": resumen_economico_items,
+                "catalogo_mo_todos": catalogo_mo_todos,
+                "presupuesto": presupuesto,
             }
-            for mo in fila["manos_obra_list"]
-            if mo.origen == "MANUAL"
-        ]
-        apoyos_mo_data_dict[str(ap.id)] = mo_list
-
-    return render(
-        request,
-        "ingenieria/proyecto/detalle_proyecto.html",
-        {
-            "proyecto": proyecto,
-            "apoyos": apoyos,
-            "tab_activa": tab_activa,
-            "materiales_columnas": materiales_columnas,
-            "filas_matriz": filas_matriz,
-            "fila_totales": fila_totales,
-            "tabla_resumen_retiros": tabla_resumen_retiros,
-            "materiales_catalogo": materiales_catalogo,
-            "empleados": empleados,
-            "mat_cable_id": mat_cable_id,
-            "apoyos_data_json": json.dumps(apoyos_data_dict),
-            "apoyos_mo_data_json": json.dumps(apoyos_mo_data_dict),
-            # Mano de Obra
-            "mo_columnas": mo_columnas,
-            "mo_filas_matriz": mo_filas_matriz,
-            "mo_fila_totales": mo_fila_totales,
-            "gran_total_mo_pesos": gran_total_mo_pesos,
-            "resumen_economico_items": resumen_economico_items,
-            "catalogo_mo_todos": catalogo_mo_todos,
-            "presupuesto": presupuesto,
-        }
-)
+        )
+    except Exception as e:
+        logger.exception(f"Error cargando detalle_proyecto {id}: {e}")
+        messages.error(request, f"Error al cargar la vista del proyecto: {e}")
+        return redirect("lista_proyectos")
 
 
 def sincronizar_retenida_cable_inventario(apoyo, metros_nuevos):
@@ -833,12 +846,11 @@ def sincronizar_luminarias_desde_post(apoyo, request, materiales_ids=None, poten
         logger.warning(f"Error al sincronizar luminarias del apoyo {apoyo.id}: {e}")
 
 @login_required
-@transaction.atomic
 def crear_apoyo(request, proyecto_id):
     proyecto = get_object_or_404(
         Proyecto,
         id=proyecto_id
-)
+    )
 
     if request.method == "POST":
         import time
@@ -893,74 +905,102 @@ def crear_apoyo(request, proyecto_id):
             brazo_val = request.POST.get("brazo", "2").strip()
             brazo = brazo_val if brazo_val else "2"
 
-            apoyo = Apoyo.objects.create(
-                proyecto=proyecto,
-                quien_ejecuta_id=quien_ejecuta_id,
-                numero_apoyo=numero_apoyo,
-                nodo=nodo_val,
-                fecha=fecha,
-                tipo_instalacion=tipo_instalacion,
-                direccion=direccion,
-                tipo_estructura=tipo_estructura,
-                cantidad_retenida=cantidad_retenida,
-                metros_retenido=metros_retenido,
-                brazo=brazo,
-                observacion=observacion,
-                estado=estado
-            )
-
-            # Material cable retenida para no duplicarlo si se ingresa manualmente
-            mat_cable_obj = (
-                Material.objects.filter(item="43").first()
-                or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-            )
-            mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
-
-            # Guardar materiales asignados (múltiples)
-            materiales_ids = request.POST.getlist("material_id[]")
-            cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
-            cantidades_ret = request.POST.getlist("cantidad_retirada[]")
-            potencias_mat = request.POST.getlist("potencia_material[]")
-            codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
-
             materiales_creados = 0
-            for i, mat_id in enumerate(materiales_ids):
-                if not mat_id:
-                    continue
+            with transaction.atomic():
+                apoyo = Apoyo.objects.create(
+                    proyecto=proyecto,
+                    quien_ejecuta_id=quien_ejecuta_id,
+                    numero_apoyo=numero_apoyo,
+                    nodo=nodo_val,
+                    fecha=fecha,
+                    tipo_instalacion=tipo_instalacion,
+                    direccion=direccion,
+                    tipo_estructura=tipo_estructura,
+                    cantidad_retenida=cantidad_retenida,
+                    metros_retenido=metros_retenido,
+                    brazo=brazo,
+                    observacion=observacion,
+                    estado=estado
+                )
 
-                # El cable de retenida se gestiona automáticamente por los metros_retenido
-                if mat_cable_id and str(mat_id) == str(mat_cable_id):
-                    continue
+                # Material cable retenida para no duplicarlo si se ingresa manualmente
+                mat_cable_obj = (
+                    Material.objects.filter(item="43").first()
+                    or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+                )
+                mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
 
-                try:
+                # Guardar materiales asignados (múltiples)
+                materiales_ids = request.POST.getlist("material_id[]")
+                cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
+                cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+                potencias_mat = request.POST.getlist("potencia_material[]")
+                codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
+
+                # Consolidar materiales por ID para prevenir duplicados
+                mats_agrupados = {}
+                for i, mat_id in enumerate(materiales_ids):
+                    if not mat_id or not str(mat_id).isdigit():
+                        continue
+                    mat_id_int = int(mat_id)
+                    if mat_cable_id and mat_id_int == mat_cable_id:
+                        continue
+
                     c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
                     c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
 
                     c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
                     c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
 
-                    c_inst = Decimal(c_inst_str) if c_inst_str!= "" else Decimal("0")
-                    c_ret = Decimal(c_ret_str) if c_ret_str!= "" else Decimal("0")
+                    try:
+                        c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
+                    except (ValueError, TypeError, ArithmeticError):
+                        c_inst = Decimal("0")
+                    try:
+                        c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+                    except (ValueError, TypeError, ArithmeticError):
+                        c_ret = Decimal("0")
+
+                    pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else ""
+                    cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else ""
+
+                    if mat_id_int not in mats_agrupados:
+                        mats_agrupados[mat_id_int] = {
+                            "c_inst": c_inst,
+                            "c_ret": c_ret,
+                            "potencia": pot_val,
+                            "codigo_luminaria": cod_val,
+                        }
+                    else:
+                        mats_agrupados[mat_id_int]["c_inst"] += c_inst
+                        mats_agrupados[mat_id_int]["c_ret"] += c_ret
+                        if pot_val and not mats_agrupados[mat_id_int]["potencia"]:
+                            mats_agrupados[mat_id_int]["potencia"] = pot_val
+                        if cod_val and not mats_agrupados[mat_id_int]["codigo_luminaria"]:
+                            mats_agrupados[mat_id_int]["codigo_luminaria"] = cod_val
+
+                for mat_id_int, m_data in mats_agrupados.items():
+                    c_inst = m_data["c_inst"]
+                    c_ret = m_data["c_ret"]
+                    pot_val = m_data["potencia"] or None
+                    cod_val = m_data["codigo_luminaria"] or None
 
                     if c_inst <= 0 and c_ret <= 0:
                         continue
 
-                    pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
-                    cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
+                    inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
+                    if inventario.cantidad is None:
+                        inventario.cantidad = Decimal("0")
 
-                    inventario, _ = Inventario.objects.get_or_create(material_id=mat_id)
-                    inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
                     if c_inst > 0:
                         inventario.cantidad = (inventario.cantidad or Decimal("0")) - c_inst
-
                     if c_ret > 0:
                         inventario.cantidad = (inventario.cantidad or Decimal("0")) + c_ret
-
                     inventario.save()
 
                     ApoyoMaterial.objects.update_or_create(
                         apoyo=apoyo,
-                        material_id=mat_id,
+                        material_id=mat_id_int,
                         defaults={
                             "cantidad_requerida": max(Decimal("0"), c_inst),
                             "cantidad_retirada": max(Decimal("0"), c_ret),
@@ -969,21 +1009,19 @@ def crear_apoyo(request, proyecto_id):
                         }
                     )
                     materiales_creados += 1
-                except (ValueError, TypeError, ArithmeticError):
-                    continue
 
-            # Guardar y sincronizar luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
-            sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
+                # Guardar y sincronizar luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
+                sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
 
-            # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
-            sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
+                # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+                sincronizar_retenida_cable_inventario(apoyo, metros_retenido)
 
-            # Recalcular Mano de Obra y Presupuesto
-            try:
-                calcular_mano_obra_para_apoyo(apoyo)
-                actualizar_presupuesto_proyecto(proyecto)
-            except Exception as calc_err:
-                logger.warning(f"Aviso recalculando mano de obra/presupuesto en nuevo apoyo: {calc_err}")
+                # Recalcular Mano de Obra y Presupuesto
+                try:
+                    calcular_mano_obra_para_apoyo(apoyo)
+                    actualizar_presupuesto_proyecto(proyecto)
+                except Exception as calc_err:
+                    logger.warning(f"Aviso recalculando mano de obra/presupuesto en nuevo apoyo: {calc_err}")
 
             messages.success(
                 request,
@@ -999,14 +1037,10 @@ def crear_apoyo(request, proyecto_id):
             url += f"?tab={tab}"
         return redirect(url)
 
-    return redirect(
-        "detalle_proyecto",
-        id=proyecto.id        
-)
+    return redirect("detalle_proyecto", id=proyecto_id)
 
 
 @login_required
-@transaction.atomic
 def editar_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(
         Apoyo.objects.select_related("proyecto"),
@@ -1016,87 +1050,116 @@ def editar_apoyo(request, apoyo_id):
 
     if request.method == "POST":
         try:
-            numero_apoyo_val = request.POST.get("numero_apoyo")
-            apoyo.numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
+            with transaction.atomic():
+                numero_apoyo_val = request.POST.get("numero_apoyo")
+                apoyo.numero_apoyo = int(numero_apoyo_val) if numero_apoyo_val and numero_apoyo_val.isdigit() else None
 
-            fecha_val = request.POST.get("fecha")
-            apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
+                fecha_val = request.POST.get("fecha")
+                apoyo.fecha = fecha_val.strip() if fecha_val and fecha_val.strip() else None
 
-            nodo_val = request.POST.get("nodo", "").strip()
-            if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exclude(id=apoyo.id).exists():
-                messages.warning(request, f"Ya existe otro nodo con la identificación '{nodo_val}' en este proyecto.")
-                return redirect("detalle_proyecto", id=proyecto.id)
-            apoyo.nodo = nodo_val
-            apoyo.brazo = request.POST.get("brazo", "2").strip() or "2"
-            apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
-            apoyo.direccion = request.POST.get("direccion", "").strip()
-            apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
-            apoyo.observacion = request.POST.get("observacion", "").strip()
-            
-            estado_val = request.POST.get("estado", apoyo.estado or "Pendiente").strip()
-            apoyo.estado = estado_val if estado_val else "Pendiente"
+                nodo_val = request.POST.get("nodo", "").strip()
+                if nodo_val and Apoyo.objects.filter(proyecto=proyecto, nodo__iexact=nodo_val).exclude(id=apoyo.id).exists():
+                    messages.warning(request, f"Ya existe otro nodo con la identificación '{nodo_val}' en este proyecto.")
+                    return redirect("detalle_proyecto", id=proyecto.id)
+                apoyo.nodo = nodo_val
+                apoyo.brazo = request.POST.get("brazo", "2").strip() or "2"
+                apoyo.tipo_instalacion = request.POST.get("tipo_instalacion", "").strip()
+                apoyo.direccion = request.POST.get("direccion", "").strip()
+                apoyo.tipo_estructura = request.POST.get("tipo_estructura", "").strip()
+                apoyo.observacion = request.POST.get("observacion", "").strip()
+                
+                estado_val = request.POST.get("estado", apoyo.estado or "Pendiente").strip()
+                apoyo.estado = estado_val if estado_val else "Pendiente"
 
-            quien_ejecuta_id = request.POST.get("quien_ejecuta")
-            apoyo.quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
+                quien_ejecuta_id = request.POST.get("quien_ejecuta")
+                apoyo.quien_ejecuta_id = int(quien_ejecuta_id) if quien_ejecuta_id and str(quien_ejecuta_id).isdigit() else None
 
-            cant_ret_val = request.POST.get("cantidad_retenida")
-            try:
-                apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
-            except (ValueError, TypeError, ArithmeticError):
-                apoyo.cantidad_retenida = Decimal("0")
-
-            m_ret_val = request.POST.get("metros_retenido")
-            try:
-                apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
-            except (ValueError, TypeError, ArithmeticError):
-                apoyo.metros_retenido = Decimal("0")
-
-            apoyo.save()
-
-            # Material cable retenida para no duplicarlo si se ingresa manualmente
-            mat_cable_obj = (
-                Material.objects.filter(item="43").first()
-                or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
-            )
-            mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
-
-            # Sincronizar Materiales
-            materiales_ids = request.POST.getlist("material_id[]")
-            cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
-            cantidades_ret = request.POST.getlist("cantidad_retirada[]")
-            potencias_mat = request.POST.getlist("potencia_material[]")
-            codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
-
-            materiales_actuales = {am.material_id: am for am in apoyo.materiales.all()}
-            materiales_nuevos_procesados = set()
-
-            for i, mat_id in enumerate(materiales_ids):
-                if not mat_id or not str(mat_id).isdigit():
-                    continue
-                mat_id_int = int(mat_id)
-
-                # El cable de retenida se gestiona automáticamente por los metros_retenido
-                if mat_cable_id and mat_id_int == mat_cable_id:
-                    continue
-
+                cant_ret_val = request.POST.get("cantidad_retenida")
                 try:
+                    apoyo.cantidad_retenida = Decimal(str(cant_ret_val).strip().replace(',', '.')) if cant_ret_val and str(cant_ret_val).strip() else Decimal("0")
+                except (ValueError, TypeError, ArithmeticError):
+                    apoyo.cantidad_retenida = Decimal("0")
+
+                m_ret_val = request.POST.get("metros_retenido")
+                try:
+                    apoyo.metros_retenido = Decimal(str(m_ret_val).strip().replace(',', '.')) if m_ret_val and str(m_ret_val).strip() else Decimal("0")
+                except (ValueError, TypeError, ArithmeticError):
+                    apoyo.metros_retenido = Decimal("0")
+
+                apoyo.save()
+
+                # Material cable retenida para no duplicarlo si se ingresa manualmente
+                mat_cable_obj = (
+                    Material.objects.filter(item="43").first()
+                    or Material.objects.filter(descripcion__icontains="Cable para retenida EAR 3/8").first()
+                )
+                mat_cable_id = mat_cable_obj.id if mat_cable_obj else None
+
+                # Sincronizar Materiales
+                materiales_ids = request.POST.getlist("material_id[]")
+                cantidades_inst = request.POST.getlist("cantidad_instalada[]") or request.POST.getlist("cantidad[]")
+                cantidades_ret = request.POST.getlist("cantidad_retirada[]")
+                potencias_mat = request.POST.getlist("potencia_material[]")
+                codigos_mat = request.POST.getlist("codigo_luminaria_material[]")
+
+                # Consolidar materiales por ID para prevenir cualquier duplicación
+                mats_agrupados = {}
+                for i, mat_id in enumerate(materiales_ids):
+                    if not mat_id or not str(mat_id).isdigit():
+                        continue
+                    mat_id_int = int(mat_id)
+
+                    if mat_cable_id and mat_id_int == mat_cable_id:
+                        continue
+
                     c_inst_raw = cantidades_inst[i] if i < len(cantidades_inst) else None
                     c_ret_raw = cantidades_ret[i] if i < len(cantidades_ret) else None
 
                     c_inst_str = str(c_inst_raw).strip().replace(',', '.') if c_inst_raw is not None else ""
                     c_ret_str = str(c_ret_raw).strip().replace(',', '.') if c_ret_raw is not None else ""
 
-                    c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
-                    c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+                    try:
+                        c_inst = Decimal(c_inst_str) if c_inst_str != "" else Decimal("0")
+                    except (ValueError, TypeError, ArithmeticError):
+                        c_inst = Decimal("0")
+                    try:
+                        c_ret = Decimal(c_ret_str) if c_ret_str != "" else Decimal("0")
+                    except (ValueError, TypeError, ArithmeticError):
+                        c_ret = Decimal("0")
+
+                    pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else ""
+                    cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else ""
+
+                    if mat_id_int not in mats_agrupados:
+                        mats_agrupados[mat_id_int] = {
+                            "c_inst": c_inst,
+                            "c_ret": c_ret,
+                            "potencia": pot_val,
+                            "codigo_luminaria": cod_val,
+                        }
+                    else:
+                        mats_agrupados[mat_id_int]["c_inst"] += c_inst
+                        mats_agrupados[mat_id_int]["c_ret"] += c_ret
+                        if pot_val and not mats_agrupados[mat_id_int]["potencia"]:
+                            mats_agrupados[mat_id_int]["potencia"] = pot_val
+                        if cod_val and not mats_agrupados[mat_id_int]["codigo_luminaria"]:
+                            mats_agrupados[mat_id_int]["codigo_luminaria"] = cod_val
+
+                materiales_actuales = {am.material_id: am for am in apoyo.materiales.all()}
+                materiales_nuevos_procesados = set()
+
+                for mat_id_int, m_data in mats_agrupados.items():
+                    c_inst = m_data["c_inst"]
+                    c_ret = m_data["c_ret"]
+                    pot_val = m_data["potencia"] or None
+                    cod_val = m_data["codigo_luminaria"] or None
 
                     if c_inst <= 0 and c_ret <= 0:
                         continue
 
-                    pot_val = potencias_mat[i].strip() if i < len(potencias_mat) and potencias_mat[i] else None
-                    cod_val = codigos_mat[i].strip() if i < len(codigos_mat) and codigos_mat[i] else None
-
                     inventario, _ = Inventario.objects.get_or_create(material_id=mat_id_int)
-                    inventario = Inventario.objects.select_for_update().get(pk=inventario.pk)
+                    if inventario.cantidad is None:
+                        inventario.cantidad = Decimal("0")
 
                     if mat_id_int in materiales_actuales:
                         am = materiales_actuales[mat_id_int]
@@ -1120,10 +1183,8 @@ def editar_apoyo(request, apoyo_id):
                     else:
                         if c_inst > 0:
                             inventario.cantidad = (inventario.cantidad or Decimal("0")) - c_inst
-
                         if c_ret > 0:
                             inventario.cantidad = (inventario.cantidad or Decimal("0")) + c_ret
-
                         inventario.save()
 
                         am_nuevo, _ = ApoyoMaterial.objects.update_or_create(
@@ -1139,38 +1200,34 @@ def editar_apoyo(request, apoyo_id):
                         materiales_actuales[mat_id_int] = am_nuevo
 
                     materiales_nuevos_procesados.add(mat_id_int)
-                except (ValueError, TypeError, ArithmeticError) as num_err:
-                    logger.warning(f"Error numérico en material {mat_id} apoyo {apoyo.id}: {num_err}")
-                    continue
 
-            # Eliminar materiales que se hayan removido (excepto el cable de retenida que se sincroniza aparte)
-            for mat_id_antiguo, am in list(materiales_actuales.items()):
-                if mat_cable_id and mat_id_antiguo == mat_cable_id:
-                    continue
-                if mat_id_antiguo not in materiales_nuevos_procesados:
-                    inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
-                    inv_del = Inventario.objects.select_for_update().get(pk=inv_del.pk)
-                    cant_req_del = am.cantidad_requerida or Decimal("0")
-                    cant_ret_del = am.cantidad_retirada or Decimal("0")
-                    if cant_req_del > 0:
-                        inv_del.cantidad = (inv_del.cantidad or Decimal("0")) + cant_req_del
-                    if cant_ret_del > 0:
-                        inv_del.cantidad = (inv_del.cantidad or Decimal("0")) - cant_ret_del
-                    inv_del.save()
-                    am.delete()
+                # Eliminar materiales que se hayan removido (excepto el cable de retenida que se sincroniza aparte)
+                for mat_id_antiguo, am in list(materiales_actuales.items()):
+                    if mat_cable_id and mat_id_antiguo == mat_cable_id:
+                        continue
+                    if mat_id_antiguo not in materiales_nuevos_procesados:
+                        inv_del, _ = Inventario.objects.get_or_create(material_id=mat_id_antiguo)
+                        cant_req_del = am.cantidad_requerida or Decimal("0")
+                        cant_ret_del = am.cantidad_retirada or Decimal("0")
+                        if cant_req_del > 0:
+                            inv_del.cantidad = (inv_del.cantidad or Decimal("0")) + cant_req_del
+                        if cant_ret_del > 0:
+                            inv_del.cantidad = (inv_del.cantidad or Decimal("0")) - cant_ret_del
+                        inv_del.save()
+                        am.delete()
 
-            # Actualizar Luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
-            sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
+                # Actualizar Luminarias instaladas (soporta múltiples potencias y códigos por luminaria)
+                sincronizar_luminarias_desde_post(apoyo, request, materiales_ids, potencias_mat, codigos_mat)
 
-            # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
-            sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
+                # Sincronización automática de Retenidas con Cable EAR 3/8" (Ítem 43) en Bodega
+                sincronizar_retenida_cable_inventario(apoyo, apoyo.metros_retenido)
 
-            # Recalcular Mano de Obra y Presupuesto
-            try:
-                calcular_mano_obra_para_apoyo(apoyo)
-                actualizar_presupuesto_proyecto(proyecto)
-            except Exception as calc_err:
-                logger.warning(f"Aviso recalculando mano de obra/presupuesto en apoyo {apoyo.id}: {calc_err}")
+                # Recalcular Mano de Obra y Presupuesto
+                try:
+                    calcular_mano_obra_para_apoyo(apoyo)
+                    actualizar_presupuesto_proyecto(proyecto)
+                except Exception as calc_err:
+                    logger.warning(f"Aviso recalculando mano de obra/presupuesto en apoyo {apoyo.id}: {calc_err}")
 
             messages.success(
                 request,
@@ -1189,8 +1246,6 @@ def editar_apoyo(request, apoyo_id):
     return redirect("detalle_proyecto", id=proyecto.id)
 
 
-@login_required
-@transaction.atomic
 def despachar_bodega_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(
         Apoyo.objects.select_related("proyecto", "quien_ejecuta"),

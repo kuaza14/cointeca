@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.db.models import Sum
 from django.utils import timezone
@@ -1346,7 +1347,9 @@ class ApoyoManoObra(models.Model):
 
     @property
     def subtotal(self):
-        return self.cantidad * self.item_mano_obra.valor_unitario
+        c = self.cantidad if self.cantidad is not None else Decimal("0")
+        v = self.item_mano_obra.valor_unitario if (self.item_mano_obra and self.item_mano_obra.valor_unitario is not None) else Decimal("0")
+        return c * v
 
     def __str__(self):
         return f"{self.item_mano_obra.descripcion}: {self.cantidad} {self.item_mano_obra.unidad} en {self.apoyo}"
